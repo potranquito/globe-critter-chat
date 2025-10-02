@@ -4,7 +4,6 @@ import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import HabitatCarousel from '@/components/HabitatCarousel';
 import ChatWithMeCard from '@/components/ChatWithMeCard';
-import EcosystemCard from '@/components/EcosystemCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
@@ -13,6 +12,12 @@ import polarBearReal from '@/assets/polar-bear-real.jpg';
 import polarBearAvatar from '@/assets/polar-bear-avatar.png';
 import arcticHabitat1 from '@/assets/arctic-habitat-1.jpg';
 import arcticHabitat2 from '@/assets/arctic-habitat-2.jpg';
+import threatIceLoss from '@/assets/threat-ice-loss.jpg';
+import threatPollution from '@/assets/threat-pollution.jpg';
+import threatHumanActivity from '@/assets/threat-human-activity.jpg';
+import ecosystemSeal from '@/assets/ecosystem-seal.jpg';
+import ecosystemWalrus from '@/assets/ecosystem-walrus.jpg';
+import ecosystemFish from '@/assets/ecosystem-fish.jpg';
 
 // Sample habitat data with species info
 const speciesData = {
@@ -28,10 +33,12 @@ const speciesData = {
       scientificName: 'Ursus maritimus',
       population: '22,000 - 31,000',
       threats: 'Sea ice loss from climate change, pollution, and oil spills',
+      threatImages: [threatIceLoss, threatPollution, threatHumanActivity],
       imageUrl: polarBearReal,
       avatarUrl: polarBearAvatar,
       habitatImages: [arcticHabitat1, arcticHabitat2],
       locationName: 'Arctic Regions',
+      ecosystemImages: [ecosystemSeal, ecosystemWalrus, ecosystemFish],
       ecosystem: [
         { name: 'Ringed Seal', role: 'Primary prey', icon: '🦭' },
         { name: 'Bearded Seal', role: 'Food source', icon: '🦭' },
@@ -52,9 +59,11 @@ const Index = () => {
   const [userPins, setUserPins] = useState<any[]>([]);
   const [pinImagesVisible, setPinImagesVisible] = useState(false);
   const [pinLocation, setPinLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
+    setHasInteracted(true);
     
     setTimeout(() => {
       const lowerQuery = query.toLowerCase();
@@ -105,6 +114,7 @@ const Index = () => {
   };
 
   const handleDoubleGlobeClick = (lat: number, lng: number) => {
+    setHasInteracted(true);
     setUserPins((prev) => [...prev, { lat, lng, species: 'Searched Location', size: 0.8, color: '#22C55E' }]);
     setPinLocation({ lat, lng });
     
@@ -134,10 +144,7 @@ const Index = () => {
     setUserPins([]);
     setPinLocation(null);
     setPinImagesVisible(false);
-    toast({
-      title: 'Reset Complete',
-      description: 'Cleared all searches and pins',
-    });
+    setHasInteracted(false);
   };
 
   return (
@@ -162,22 +169,24 @@ const Index = () => {
             images={speciesInfo.habitatImages}
             locationName={speciesInfo.locationName}
           />
-          {speciesInfo.ecosystem && (
-            <EcosystemCard
-              species={speciesInfo.ecosystem}
-              mainSpecies={currentSpecies || ''}
-            />
-          )}
+          <HabitatCarousel
+            images={speciesInfo.threatImages}
+            locationName="Conservation Threats"
+          />
         </div>
       )}
 
       {/* Right Side Card */}
       {speciesInfo && (
-        <div className="absolute right-6 top-6 w-60 z-20">
+        <div className="absolute right-6 top-6 w-60 max-h-[calc(100vh-12rem)] overflow-y-auto z-20 space-y-2">
           <ChatWithMeCard
             avatarUrl={speciesInfo.avatarUrl}
             animalName={currentSpecies || ''}
             onChatClick={handleChatClick}
+          />
+          <HabitatCarousel
+            images={speciesInfo.ecosystemImages}
+            locationName="Ecosystem Connections"
           />
         </div>
       )}
@@ -208,7 +217,7 @@ const Index = () => {
       </div>
 
       {/* Info Card */}
-      {habitats.length === 0 && (
+      {habitats.length === 0 && !hasInteracted && (
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20">
           <div className="glass-panel rounded-2xl px-8 py-4 max-w-lg text-center animate-float">
             <p className="text-muted-foreground">

@@ -33,7 +33,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           {
             lat: firstHabitat.lat,
             lng: firstHabitat.lng,
-            altitude: 1.2,
+            altitude: 1.5,
+          },
+          2000
+        );
+      } else {
+        // Center the globe when no habitats
+        globeEl.current.pointOfView(
+          {
+            lat: 20,
+            lng: 0,
+            altitude: 2,
           },
           2000
         );
