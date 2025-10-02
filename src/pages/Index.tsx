@@ -161,7 +161,6 @@ const Index = () => {
             commonName={speciesInfo.commonName}
             scientificName={speciesInfo.scientificName}
             population={speciesInfo.population}
-            threats={speciesInfo.threats}
             imageUrl={speciesInfo.imageUrl}
             onLearnMore={handleLearnMore}
           />
@@ -186,7 +185,7 @@ const Index = () => {
           />
           <HabitatCarousel
             images={speciesInfo.ecosystemImages}
-            locationName="Ecosystem Connections"
+            locationName="Connections"
           />
         </div>
       )}

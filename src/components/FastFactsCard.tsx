@@ -5,7 +5,6 @@ interface FastFactsCardProps {
   commonName: string;
   scientificName: string;
   population: string;
-  threats: string;
   imageUrl: string;
   onLearnMore: () => void;
 }
@@ -14,7 +13,6 @@ const FastFactsCard = ({
   commonName, 
   scientificName, 
   population, 
-  threats,
   imageUrl,
   onLearnMore 
 }: FastFactsCardProps) => {
@@ -46,11 +44,6 @@ const FastFactsCard = ({
           <div>
             <p className="text-xs text-muted-foreground">Population</p>
             <p className="text-base font-semibold text-accent">{population}</p>
-          </div>
-
-          <div>
-            <p className="text-xs text-muted-foreground">Conservation Threats</p>
-            <p className="text-base text-foreground">{threats}</p>
           </div>
         </div>
 
