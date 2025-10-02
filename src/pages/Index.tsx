@@ -4,8 +4,10 @@ import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import HabitatCarousel from '@/components/HabitatCarousel';
 import ChatWithMeCard from '@/components/ChatWithMeCard';
+import EcosystemCard from '@/components/EcosystemCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { RotateCcw } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import polarBearAvatar from '@/assets/polar-bear-avatar.png';
@@ -29,7 +31,14 @@ const speciesData = {
       imageUrl: polarBearReal,
       avatarUrl: polarBearAvatar,
       habitatImages: [arcticHabitat1, arcticHabitat2],
-      locationName: 'Arctic Regions'
+      locationName: 'Arctic Regions',
+      ecosystem: [
+        { name: 'Ringed Seal', role: 'Primary prey', icon: '🦭' },
+        { name: 'Bearded Seal', role: 'Food source', icon: '🦭' },
+        { name: 'Walrus', role: 'Occasional prey', icon: '🦣' },
+        { name: 'Arctic Cod', role: 'Indirect food source', icon: '🐟' },
+        { name: 'Phytoplankton', role: 'Base of food web', icon: '🦠' }
+      ]
     }
   }
 };
@@ -96,9 +105,39 @@ const Index = () => {
   };
 
   const handleDoubleGlobeClick = (lat: number, lng: number) => {
-    setUserPins((prev) => [...prev, { lat, lng, species: 'Pinned', size: 0.8, color: '#22C55E' }]);
+    setUserPins((prev) => [...prev, { lat, lng, species: 'Searched Location', size: 0.8, color: '#22C55E' }]);
     setPinLocation({ lat, lng });
-    setPinImagesVisible(true);
+    
+    // Search for species in this region (Arctic for demo)
+    if (lat > 60 || lat < -60) {
+      // Arctic or Antarctic region
+      const data = speciesData['polar bear'];
+      setHabitats([{ lat, lng, species: 'Polar Bear', size: 0.8, color: '#F59E0B' }]);
+      setCurrentSpecies('Polar Bear');
+      setSpeciesInfo(data.info);
+      toast({
+        title: 'Species Found!',
+        description: `Found Polar Bear in this Arctic region`,
+      });
+    } else {
+      toast({
+        title: 'Searching Region',
+        description: `Searching for species at ${lat.toFixed(2)}, ${lng.toFixed(2)}...`,
+      });
+    }
+  };
+
+  const handleReset = () => {
+    setHabitats([]);
+    setCurrentSpecies(null);
+    setSpeciesInfo(null);
+    setUserPins([]);
+    setPinLocation(null);
+    setPinImagesVisible(false);
+    toast({
+      title: 'Reset Complete',
+      description: 'Cleared all searches and pins',
+    });
   };
 
   return (
@@ -123,6 +162,12 @@ const Index = () => {
             images={speciesInfo.habitatImages}
             locationName={speciesInfo.locationName}
           />
+          {speciesInfo.ecosystem && (
+            <EcosystemCard
+              species={speciesInfo.ecosystem}
+              mainSpecies={currentSpecies || ''}
+            />
+          )}
         </div>
       )}
 
@@ -134,6 +179,21 @@ const Index = () => {
             animalName={currentSpecies || ''}
             onChatClick={handleChatClick}
           />
+        </div>
+      )}
+
+      {/* Reset Button */}
+      {(habitats.length > 0 || userPins.length > 0) && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
+          <Button 
+            onClick={handleReset}
+            variant="secondary"
+            size="sm"
+            className="glass-panel"
+          >
+            <RotateCcw className="h-4 w-4 mr-2" />
+            Reset
+          </Button>
         </div>
       )}
 
@@ -158,20 +218,6 @@ const Index = () => {
         </div>
       )}
 
-      {/* Pinned Location Carousel */}
-      {pinImagesVisible && (
-        <div className="absolute top-20 left-1/2 -translate-x-1/2 z-30 w-[28rem] max-w-[90vw]">
-          <div className="glass-panel rounded-2xl p-3">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm text-muted-foreground">
-                Endangered animals near {pinLocation?.lat.toFixed(2)}, {pinLocation?.lng.toFixed(2)}
-              </p>
-              <Button size="sm" variant="secondary" onClick={() => setPinImagesVisible(false)}>Close</Button>
-            </div>
-            <HabitatCarousel images={speciesInfo?.habitatImages || [arcticHabitat1, arcticHabitat2]} locationName={speciesInfo?.locationName || 'Nearby Region'} />
-          </div>
-        </div>
-      )}
     </div>
   );
 };
