@@ -73,10 +73,6 @@ const Index = () => {
         setHabitats(data.habitats);
         setCurrentSpecies('Polar Bear');
         setSpeciesInfo(data.info);
-        toast({
-          title: 'Habitats Found!',
-          description: `Displaying ${data.habitats.length} locations for Polar Bear`,
-        });
       } else {
         toast({
           title: 'No Results',
