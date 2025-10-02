@@ -165,12 +165,8 @@ const Index = () => {
             onLearnMore={handleLearnMore}
           />
           <HabitatCarousel
-            images={speciesInfo.habitatImages}
-            locationName={speciesInfo.locationName}
-          />
-          <HabitatCarousel
             images={speciesInfo.threatImages}
-            locationName="Conservation Threats"
+            locationName="Threats to Habitat"
           />
         </div>
       )}
@@ -185,7 +181,7 @@ const Index = () => {
           />
           <HabitatCarousel
             images={speciesInfo.ecosystemImages}
-            locationName="Connections"
+            locationName="Ecosystem"
           />
         </div>
       )}
