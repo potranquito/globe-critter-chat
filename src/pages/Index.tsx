@@ -1,108 +1,137 @@
 import { useState } from 'react';
 import GlobeComponent from '@/components/Globe';
 import ChatInput from '@/components/ChatInput';
-import SpeciesInfo from '@/components/SpeciesInfo';
+import FastFactsCard from '@/components/FastFactsCard';
+import HabitatCarousel from '@/components/HabitatCarousel';
+import ChatWithMeCard from '@/components/ChatWithMeCard';
 import { useToast } from '@/hooks/use-toast';
+import earthMascot from '@/assets/earth-mascot.png';
+import polarBearReal from '@/assets/polar-bear-real.jpg';
+import polarBearAvatar from '@/assets/polar-bear-avatar.png';
+import arcticHabitat1 from '@/assets/arctic-habitat-1.jpg';
+import arcticHabitat2 from '@/assets/arctic-habitat-2.jpg';
 
-// Sample habitat data
-const sampleHabitats = {
-  'polar bear': [
-    { lat: 71.2, lng: -156.8, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
-    { lat: 78.9, lng: 11.9, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
-    { lat: 69.6, lng: 18.9, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
-    { lat: 74.4, lng: -95.8, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
-  ],
-  'bengal tiger': [
-    { lat: 27.7, lng: 88.4, species: 'Bengal Tiger', size: 0.8, color: '#F97316' },
-    { lat: 28.6, lng: 77.2, species: 'Bengal Tiger', size: 0.8, color: '#F97316' },
-    { lat: 22.5, lng: 88.3, species: 'Bengal Tiger', size: 0.8, color: '#F97316' },
-  ],
-  'mountain gorilla': [
-    { lat: -1.4, lng: 29.7, species: 'Mountain Gorilla', size: 0.8, color: '#10B981' },
-    { lat: -1.1, lng: 29.5, species: 'Mountain Gorilla', size: 0.8, color: '#10B981' },
-  ],
-  'giant panda': [
-    { lat: 31.2, lng: 103.7, species: 'Giant Panda', size: 0.8, color: '#EC4899' },
-    { lat: 30.7, lng: 104.0, species: 'Giant Panda', size: 0.8, color: '#EC4899' },
-  ],
+// Sample habitat data with species info
+const speciesData = {
+  'polar bear': {
+    habitats: [
+      { lat: 71.2, lng: -156.8, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
+      { lat: 78.9, lng: 11.9, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
+      { lat: 69.6, lng: 18.9, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
+      { lat: 74.4, lng: -95.8, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
+    ],
+    info: {
+      commonName: 'Polar Bear',
+      scientificName: 'Ursus maritimus',
+      population: '22,000 - 31,000',
+      imageUrl: polarBearReal,
+      avatarUrl: polarBearAvatar,
+      habitatImages: [arcticHabitat1, arcticHabitat2],
+      locationName: 'Arctic Regions'
+    }
+  }
 };
 
 const Index = () => {
   const { toast } = useToast();
   const [habitats, setHabitats] = useState<any[]>([]);
   const [currentSpecies, setCurrentSpecies] = useState<string | null>(null);
+  const [speciesInfo, setSpeciesInfo] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
     
-    // Simulate AI processing
     setTimeout(() => {
       const lowerQuery = query.toLowerCase();
-      let foundHabitats: any[] = [];
-      let species = '';
-
-      // Simple matching logic (will be replaced with AI)
+      
       if (lowerQuery.includes('polar bear') || lowerQuery.includes('arctic')) {
-        foundHabitats = sampleHabitats['polar bear'];
-        species = 'Polar Bear';
-      } else if (lowerQuery.includes('tiger') || lowerQuery.includes('bengal')) {
-        foundHabitats = sampleHabitats['bengal tiger'];
-        species = 'Bengal Tiger';
-      } else if (lowerQuery.includes('gorilla')) {
-        foundHabitats = sampleHabitats['mountain gorilla'];
-        species = 'Mountain Gorilla';
-      } else if (lowerQuery.includes('panda')) {
-        foundHabitats = sampleHabitats['giant panda'];
-        species = 'Giant Panda';
-      }
-
-      if (foundHabitats.length > 0) {
-        setHabitats(foundHabitats);
-        setCurrentSpecies(species);
+        const data = speciesData['polar bear'];
+        setHabitats(data.habitats);
+        setCurrentSpecies('Polar Bear');
+        setSpeciesInfo(data.info);
         toast({
           title: 'Habitats Found!',
-          description: `Displaying ${foundHabitats.length} locations for ${species}`,
+          description: `Displaying ${data.habitats.length} locations for Polar Bear`,
         });
       } else {
         toast({
           title: 'No Results',
-          description: 'Try searching for: Polar Bear, Bengal Tiger, Mountain Gorilla, or Giant Panda',
+          description: 'Try searching for: Polar Bear',
           variant: 'destructive',
         });
+        setHabitats([]);
+        setCurrentSpecies(null);
+        setSpeciesInfo(null);
       }
       
       setIsLoading(false);
     }, 1000);
   };
 
+  const handlePointClick = (point: any) => {
+    toast({
+      title: 'Location Selected',
+      description: `Viewing ${point.species} habitat at ${point.lat.toFixed(2)}, ${point.lng.toFixed(2)}`,
+    });
+  };
+
+  const handleLearnMore = () => {
+    toast({
+      title: 'Learn More',
+      description: 'Opening species conservation information...',
+    });
+  };
+
+  const handleChatClick = () => {
+    toast({
+      title: 'Chat Started',
+      description: `Starting conversation with ${currentSpecies}...`,
+    });
+  };
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Header */}
-      <header className="absolute top-0 left-0 right-0 z-20 p-6">
-        <div className="flex justify-between items-center">
-          <div className="glass-panel px-6 py-3 rounded-2xl">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Wildlife Habitat Explorer
-            </h1>
-          </div>
-          {currentSpecies && (
-            <SpeciesInfo
-              species={currentSpecies}
-              status="Endangered"
-              locations={habitats.length}
-            />
-          )}
-        </div>
-      </header>
-
       {/* Globe */}
       <div className="absolute inset-0">
-        <GlobeComponent habitats={habitats} />
+        <GlobeComponent habitats={habitats} onPointClick={handlePointClick} />
       </div>
 
-      {/* Chat Input */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full px-6 flex justify-center">
+      {/* Left Side Cards */}
+      {speciesInfo && (
+        <div className="absolute left-6 top-6 w-80 max-h-[calc(100vh-12rem)] overflow-y-auto z-20 space-y-4">
+          <FastFactsCard
+            commonName={speciesInfo.commonName}
+            scientificName={speciesInfo.scientificName}
+            population={speciesInfo.population}
+            imageUrl={speciesInfo.imageUrl}
+            onLearnMore={handleLearnMore}
+          />
+          <HabitatCarousel
+            images={speciesInfo.habitatImages}
+            locationName={speciesInfo.locationName}
+          />
+        </div>
+      )}
+
+      {/* Right Side Card */}
+      {speciesInfo && (
+        <div className="absolute right-6 top-6 w-80 z-20">
+          <ChatWithMeCard
+            avatarUrl={speciesInfo.avatarUrl}
+            animalName={currentSpecies || ''}
+            onChatClick={handleChatClick}
+          />
+        </div>
+      )}
+
+      {/* Chat Input with Earth Mascot */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full px-6 flex justify-center items-end gap-4">
+        <img 
+          src={earthMascot} 
+          alt="Earth Mascot" 
+          className="w-20 h-20 object-contain animate-float mb-2"
+        />
         <ChatInput onSubmit={handleSearch} isLoading={isLoading} />
       </div>
 
@@ -111,7 +140,7 @@ const Index = () => {
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20">
           <div className="glass-panel rounded-2xl px-8 py-4 max-w-lg text-center animate-float">
             <p className="text-muted-foreground">
-              Search for endangered species like <span className="text-accent font-medium">Polar Bear</span>, <span className="text-accent font-medium">Bengal Tiger</span>, or enter a location
+              Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or enter a location
             </p>
           </div>
         </div>
