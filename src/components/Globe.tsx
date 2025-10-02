@@ -14,7 +14,7 @@ interface GlobeComponentProps {
   onPointClick?: (point: HabitatPoint) => void;
 }
 
-const GlobeComponent = ({ habitats, onPointClick }: GlobeComponentProps) => {
+const GlobeComponent = ({ habitats, onPointClick: onPointClickProp }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
   const [globeReady, setGlobeReady] = useState(false);
 
@@ -55,7 +55,15 @@ const GlobeComponent = ({ habitats, onPointClick }: GlobeComponentProps) => {
         pointAltitude={0.01}
         pointRadius="size"
         pointLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.species}</strong><br/>Location: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}<br/><em>Click to view</em></div>`}
-        onPointClick={onPointClick}
+        onPointClick={(d: any) => {
+          if (globeEl.current) {
+            globeEl.current.pointOfView(
+              { lat: d.lat, lng: d.lng, altitude: 0.4 },
+              1500
+            );
+          }
+          onPointClickProp?.(d);
+        }}
         onGlobeReady={() => setGlobeReady(true)}
         animateIn={true}
       />
