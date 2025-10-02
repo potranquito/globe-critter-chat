@@ -12,11 +12,13 @@ interface HabitatPoint {
 interface GlobeComponentProps {
   habitats: HabitatPoint[];
   onPointClick?: (point: HabitatPoint) => void;
+  onDoubleGlobeClick?: (lat: number, lng: number) => void;
 }
 
-const GlobeComponent = ({ habitats, onPointClick: onPointClickProp }: GlobeComponentProps) => {
+const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
   const [globeReady, setGlobeReady] = useState(false);
+  const lastClickRef = useRef<number>(0);
 
   useEffect(() => {
     if (globeEl.current && globeReady) {
@@ -63,6 +65,22 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp }: GlobeCompo
             );
           }
           onPointClickProp?.(d);
+        }}
+        onGlobeClick={(coords: any) => {
+          const now = Date.now();
+          const isDouble = now - (lastClickRef.current || 0) < 300;
+          lastClickRef.current = now;
+
+          if (isDouble) {
+            const lat = coords?.lat ?? coords?.[0];
+            const lng = coords?.lng ?? coords?.[1];
+            if (typeof lat === 'number' && typeof lng === 'number') {
+              if (globeEl.current) {
+                globeEl.current.pointOfView({ lat, lng, altitude: 0.6 }, 1200);
+              }
+              onDoubleGlobeClick?.(lat, lng);
+            }
+          }
         }}
         onGlobeReady={() => setGlobeReady(true)}
         animateIn={true}
