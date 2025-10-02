@@ -5,7 +5,7 @@ import FastFactsCard from '@/components/FastFactsCard';
 import HabitatCarousel from '@/components/HabitatCarousel';
 import ChatWithMeCard from '@/components/ChatWithMeCard';
 import { useToast } from '@/hooks/use-toast';
-import earthMascot from '@/assets/earth-mascot.png';
+import earthMascot from '@/assets/earth-mascot-transparent.png';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import polarBearAvatar from '@/assets/polar-bear-avatar.png';
 import arcticHabitat1 from '@/assets/arctic-habitat-1.jpg';
