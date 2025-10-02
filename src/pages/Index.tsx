@@ -99,7 +99,7 @@ const Index = () => {
 
       {/* Left Side Cards */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-72 max-h-[calc(100vh-12rem)] overflow-y-auto z-20 space-y-3">
+        <div className="absolute left-6 top-6 w-64 max-h[calc(100vh-12rem)] overflow-y-auto z-20 space-y-2">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             scientificName={speciesInfo.scientificName}
@@ -116,7 +116,7 @@ const Index = () => {
 
       {/* Right Side Card */}
       {speciesInfo && (
-        <div className="absolute right-6 top-6 w-72 z-20">
+        <div className="absolute right-6 top-6 w-60 z-20">
           <ChatWithMeCard
             avatarUrl={speciesInfo.avatarUrl}
             animalName={currentSpecies || ''}
