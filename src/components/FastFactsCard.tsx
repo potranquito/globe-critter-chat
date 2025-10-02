@@ -17,21 +17,21 @@ const FastFactsCard = ({
   onLearnMore 
 }: FastFactsCardProps) => {
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-3 animate-fade-in">
       {/* Animal Image */}
-      <div className="glass-panel rounded-2xl p-4 overflow-hidden">
+      <div className="glass-panel rounded-2xl p-3 overflow-hidden">
         <img 
           src={imageUrl} 
           alt={commonName}
-          className="w-full h-64 object-cover rounded-xl"
+          className="w-full h-48 object-cover rounded-xl"
         />
       </div>
 
       {/* Fast Facts Card */}
-      <div className="glass-panel rounded-2xl p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Info className="h-5 w-5 text-accent" />
-          <h3 className="text-xl font-bold text-foreground">Fast Facts</h3>
+      <div className="glass-panel rounded-2xl p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Info className="h-4 w-4 text-accent" />
+          <h3 className="text-lg font-bold text-foreground">Fast Facts</h3>
         </div>
         
         <div className="space-y-3">
@@ -53,7 +53,7 @@ const FastFactsCard = ({
 
         <Button 
           onClick={onLearnMore}
-          className="w-full mt-6 bg-primary hover:bg-primary/90 glow-effect"
+          className="w-full mt-4 bg-primary hover:bg-primary/90 glow-effect"
         >
           Learn More
         </Button>

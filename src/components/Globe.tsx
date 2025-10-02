@@ -31,7 +31,7 @@ const GlobeComponent = ({ habitats, onPointClick }: GlobeComponentProps) => {
           {
             lat: firstHabitat.lat,
             lng: firstHabitat.lng,
-            altitude: 1.5,
+            altitude: 1.2,
           },
           2000
         );
@@ -43,7 +43,7 @@ const GlobeComponent = ({ habitats, onPointClick }: GlobeComponentProps) => {
     <div className="w-full h-full">
       <Globe
         ref={globeEl}
-        globeImageUrl="//unpkg.com/three-globe/example/img/earth-night.jpg"
+        globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="rgba(0,0,0,0)"
         atmosphereColor="rgba(22, 163, 74, 0.5)"

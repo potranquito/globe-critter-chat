@@ -9,18 +9,18 @@ interface ChatWithMeCardProps {
 
 const ChatWithMeCard = ({ avatarUrl, animalName, onChatClick }: ChatWithMeCardProps) => {
   return (
-    <div className="glass-panel rounded-2xl p-6 animate-fade-in">
-      <div className="flex flex-col items-center text-center space-y-4">
+    <div className="glass-panel rounded-2xl p-4 animate-fade-in">
+      <div className="flex flex-col items-center text-center space-y-3">
         <div className="relative">
           <img 
             src={avatarUrl} 
             alt={`${animalName} avatar`}
-            className="w-32 h-32 object-contain animate-float"
+            className="w-24 h-24 object-contain animate-float"
           />
         </div>
         
         <div>
-          <h3 className="text-xl font-bold text-foreground mb-2">
+          <h3 className="text-lg font-bold text-foreground mb-1">
             Hi! I'm {animalName}
           </h3>
           <p className="text-sm text-muted-foreground">
