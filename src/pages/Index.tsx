@@ -190,22 +190,7 @@ const Index = () => {
         </div>
       )}
 
-      {/* Reset Button */}
-      {(habitats.length > 0 || userPins.length > 0) && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20">
-          <Button 
-            onClick={handleReset}
-            variant="secondary"
-            size="sm"
-            className="glass-panel"
-          >
-            <RotateCcw className="h-4 w-4 mr-2" />
-            Reset
-          </Button>
-        </div>
-      )}
-
-      {/* Chat Input with Earth Mascot */}
+      {/* Chat Input with Earth Mascot and Reset Button */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full px-6 flex justify-center items-end gap-4">
         <img 
           src={earthMascot} 
@@ -213,6 +198,16 @@ const Index = () => {
           className="w-20 h-20 object-contain animate-float mb-2"
         />
         <ChatInput onSubmit={handleSearch} isLoading={isLoading} />
+        {(habitats.length > 0 || userPins.length > 0) && (
+          <Button 
+            onClick={handleReset}
+            variant="secondary"
+            size="icon"
+            className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2"
+          >
+            <RotateCcw className="h-5 w-5" />
+          </Button>
+        )}
       </div>
 
       {/* Info Card */}
