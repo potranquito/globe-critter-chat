@@ -38,15 +38,15 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       controls.enableZoom = true;
       controls.enablePan = true;
       controls.enableRotate = true;
-      controls.minDistance = 101; // Minimum zoom distance (closer)
-      controls.maxDistance = 500; // Maximum zoom distance (farther)
       controls.zoomSpeed = 1.0;
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
 
-      // Track altitude changes from mouse wheel
+      // Track altitude changes from mouse wheel / interactions
       controls.addEventListener('change', () => {
         if (globeEl.current) {
           const pov = globeEl.current.pointOfView();
-          setCurrentAltitude(pov.altitude);
+          if (typeof pov.altitude === 'number') setCurrentAltitude(pov.altitude);
         }
       });
 

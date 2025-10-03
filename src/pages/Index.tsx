@@ -214,8 +214,16 @@ const Index = () => {
 
   const handleDoubleGlobeClick = (lat: number, lng: number) => {
     setHasInteracted(true);
+
+    // If a species is currently selected, don't clear the view.
+    // Treat double-click as a quick inspect without resetting cards/data.
+    if (speciesInfo) {
+      setPinLocation({ lat, lng });
+      toast({ title: 'Location Selected', description: `${lat.toFixed(2)}, ${lng.toFixed(2)}` });
+      return;
+    }
     
-    // Reset everything first
+    // Reset everything first when no species is selected
     setHabitats([]);
     setCurrentSpecies(null);
     setSpeciesInfo(null);
