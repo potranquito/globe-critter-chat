@@ -44,6 +44,19 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
 
+      // Ensure the canvas actually receives pointer events
+      const canvas = globeEl.current.renderer().domElement as HTMLCanvasElement | undefined;
+      if (canvas) {
+        canvas.style.pointerEvents = 'auto';
+        // Prevent browser gestures from hijacking drag/zoom on touch devices
+        (canvas.style as any).touchAction = 'none';
+        canvas.style.cursor = 'grab';
+        const onDown = () => (canvas.style.cursor = 'grabbing');
+        const onUp = () => (canvas.style.cursor = 'grab');
+        canvas.addEventListener('pointerdown', onDown);
+        canvas.addEventListener('pointerup', onUp);
+      }
+
       // Track altitude changes from mouse wheel / interactions
       controls.addEventListener('change', () => {
         if (globeEl.current) {
@@ -111,7 +124,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   };
 
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0">
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none">
       <ZoomControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
