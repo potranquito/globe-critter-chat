@@ -3,15 +3,11 @@ import GlobeComponent from '@/components/Globe';
 import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import HabitatCarousel from '@/components/HabitatCarousel';
-import ChatWithMeCard from '@/components/ChatWithMeCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
-import polarBearAvatar from '@/assets/polar-bear-avatar.png';
-import arcticHabitat1 from '@/assets/arctic-habitat-1.jpg';
-import arcticHabitat2 from '@/assets/arctic-habitat-2.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
 import threatHumanActivity from '@/assets/threat-human-activity.jpg';
@@ -30,14 +26,10 @@ const speciesData = {
     ],
     info: {
       commonName: 'Polar Bear',
-      scientificName: 'Ursus maritimus',
       population: '22,000 - 31,000',
       threats: 'Sea ice loss from climate change, pollution, and oil spills',
       threatImages: [threatIceLoss, threatPollution, threatHumanActivity],
       imageUrl: polarBearReal,
-      avatarUrl: polarBearAvatar,
-      habitatImages: [arcticHabitat1, arcticHabitat2],
-      locationName: 'Arctic Regions',
       ecosystemImages: [ecosystemSeal, ecosystemWalrus, ecosystemFish],
       ecosystem: [
         { name: 'Ringed Seal', role: 'Primary prey', icon: '🦭' },
@@ -95,13 +87,6 @@ const Index = () => {
     });
   };
 
-  const handleLearnMore = () => {
-    toast({
-      title: 'Learn More',
-      description: 'Opening species conservation information...',
-    });
-  };
-
   const handleChatClick = () => {
     toast({
       title: 'Chat Started',
@@ -150,30 +135,24 @@ const Index = () => {
         <GlobeComponent habitats={[...habitats, ...userPins]} onPointClick={handlePointClick} onDoubleGlobeClick={handleDoubleGlobeClick} />
       </div>
 
-      {/* Left Side Cards */}
+      {/* Left Side Card */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-20 space-y-2">
+        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-20">
           <FastFactsCard
             commonName={speciesInfo.commonName}
-            scientificName={speciesInfo.scientificName}
             population={speciesInfo.population}
             imageUrl={speciesInfo.imageUrl}
-            onLearnMore={handleLearnMore}
-          />
-          <HabitatCarousel
-            images={speciesInfo.threatImages}
-            locationName="Threats to Habitat"
+            onChatClick={handleChatClick}
           />
         </div>
       )}
 
-      {/* Right Side Card */}
+      {/* Right Side Cards */}
       {speciesInfo && (
         <div className="absolute right-6 top-6 w-60 max-h-[calc(100vh-12rem)] overflow-y-auto z-20 space-y-2">
-          <ChatWithMeCard
-            avatarUrl={speciesInfo.avatarUrl}
-            animalName={currentSpecies || ''}
-            onChatClick={handleChatClick}
+          <HabitatCarousel
+            images={speciesInfo.threatImages}
+            locationName="Threats to Habitat"
           />
           <HabitatCarousel
             images={speciesInfo.ecosystemImages}
