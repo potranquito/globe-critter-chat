@@ -416,12 +416,13 @@ const Index = () => {
           isLoading={isLoading}
           placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
         />
-        {(habitats.length > 0 || userPins.length > 0) && (
+        {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
           <Button 
             onClick={handleReset}
             variant="secondary"
             size="icon"
-            className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2"
+            className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2 hover:bg-secondary/80"
+            title="Reset view"
           >
             <RotateCcw className="h-5 w-5" />
           </Button>
