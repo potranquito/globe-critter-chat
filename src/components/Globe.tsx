@@ -33,11 +33,14 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   useEffect(() => {
     if (globeEl.current && globeReady) {
       const controls = globeEl.current.controls();
+      controls.enabled = true; // Explicitly enable controls
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.3;
       controls.enableZoom = true;
       controls.enablePan = true;
       controls.enableRotate = true;
+      controls.minDistance = 50; // Minimum zoom distance
+      controls.maxDistance = 800; // Maximum zoom distance
       controls.zoomSpeed = 1.0;
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
@@ -109,7 +112,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   };
 
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
       <ZoomControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}

@@ -17,16 +17,19 @@ const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
   const fetchLayerData = async (layerType: string) => {
     if (activeLayers.has(layerType)) {
       // Toggle off
+      console.log(`Removing layer: ${layerType}`);
       setActiveLayers(prev => {
         const next = new Set(prev);
         next.delete(layerType);
         return next;
       });
-      onToggleLayer(layerType, null);
+      onToggleLayer(layerType, { remove: true });
       return;
     }
 
     setLoading(layerType);
+    console.log(`Fetching layer: ${layerType}...`);
+    
     try {
       const { data, error } = await supabase.functions.invoke('google-earth-engine', {
         body: { layerType, region: 'global' },
@@ -34,15 +37,13 @@ const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
 
       if (error) throw error;
 
-      toast({
-        title: "Layer loaded",
-        description: `${data.description} loaded successfully`,
-      });
+      const count = data.data?.length || 0;
+      console.log(`Layer ${layerType} loaded: ${count} points`);
 
       setActiveLayers(prev => new Set(prev).add(layerType));
       onToggleLayer(layerType, data);
     } catch (error: any) {
-      console.error('Error fetching layer:', error);
+      console.error(`Error fetching ${layerType}:`, error);
       toast({
         title: "Error",
         description: error.message || 'Failed to load conservation layer',

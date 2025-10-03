@@ -136,6 +136,7 @@ const Index = () => {
   const [imageMarkers, setImageMarkers] = useState<any[]>([]);
   const [chatMessage, setChatMessage] = useState<string>('');
   const [conservationLayers, setConservationLayers] = useState<any[]>([]);
+  const [activeLayers, setActiveLayers] = useState<Array<{ name: string; count: number }>>([]);
 
   const handleSearch = async (query: string) => {
     // If expanded image is open, send message to chat instead
@@ -315,15 +316,36 @@ const Index = () => {
   };
 
   const handleLayerToggle = (layerType: string, data?: any) => {
-    if (data) {
-      // Add or update layer
+    console.log('Layer toggle:', layerType, data);
+    
+    if (data && !data.remove) {
+      // Add layer
+      const count = data.data?.length || 0;
+      const layerName = layerType.charAt(0).toUpperCase() + layerType.slice(1);
+      
+      setActiveLayers(prev => {
+        const filtered = prev.filter(l => l.name !== layerName);
+        return [...filtered, { name: layerName, count }];
+      });
+      
       setConservationLayers(prev => {
         const filtered = prev.filter(l => l.type !== layerType);
         return [...filtered, data];
       });
+      
+      toast({ 
+        title: 'Layer Active', 
+        description: `${layerName}: ${count} points loaded` 
+      });
     } else {
       // Remove layer
+      const layerName = layerType.charAt(0).toUpperCase() + layerType.slice(1);
+      setActiveLayers(prev => prev.filter(l => l.name !== layerName));
       setConservationLayers(prev => prev.filter(l => l.type !== layerType));
+      toast({ 
+        title: 'Layer Removed', 
+        description: `${layerName} layer cleared` 
+      });
     }
   };
 
@@ -340,6 +362,7 @@ const Index = () => {
     setExpandedImage(null);
     setImageMarkers([]);
     setConservationLayers([]);
+    setActiveLayers([]);
   };
 
   return (
@@ -413,28 +436,40 @@ const Index = () => {
       )}
 
       {/* Chat Input with Earth Mascot and Reset Button */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full px-6 flex justify-center items-end gap-2">
-        <img 
-          src={earthMascot} 
-          alt="Earth Mascot" 
-          className="w-16 h-16 object-contain animate-float -mb-1"
-        />
-        <ChatInput 
-          onSubmit={handleSearch} 
-          isLoading={isLoading}
-          placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
-        />
-        {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
-          <Button 
-            onClick={handleReset}
-            variant="secondary"
-            size="icon"
-            className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2 hover:bg-secondary/80"
-            title="Reset view"
-          >
-            <RotateCcw className="h-5 w-5" />
-          </Button>
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full px-6 flex flex-col items-center gap-3 pointer-events-none">
+        {/* Active Layers Chip */}
+        {activeLayers.length > 0 && (
+          <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 pointer-events-auto">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-sm font-medium">
+              {activeLayers.map(l => `${l.name}: ${l.count}`).join(' • ')}
+            </span>
+          </div>
         )}
+        
+        <div className="flex justify-center items-end gap-2 pointer-events-auto">
+          <img 
+            src={earthMascot} 
+            alt="Earth Mascot" 
+            className="w-16 h-16 object-contain animate-float -mb-1"
+          />
+          <ChatInput 
+            onSubmit={handleSearch} 
+            isLoading={isLoading}
+            placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
+          />
+          {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
+            <Button 
+              onClick={handleReset}
+              variant="secondary"
+              size="icon"
+              className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2 hover:bg-secondary/80"
+              title="Reset view"
+            >
+              <RotateCcw className="h-5 w-5" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Info Card */}
