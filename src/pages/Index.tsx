@@ -57,6 +57,7 @@ const speciesData: any = {
     info: {
       commonName: 'Polar Bear',
       population: '22,000 - 31,000',
+      conservationStatus: 'Vulnerable',
       threats: 'Sea ice loss from climate change, pollution, and oil spills',
       threatImages: [threatIceLoss, threatPollution, threatHumanActivity],
       imageUrl: polarBearReal,
@@ -77,6 +78,7 @@ const speciesData: any = {
     info: {
       commonName: 'Arctic Fox',
       population: 'Several hundred thousand',
+      conservationStatus: 'Least Concern',
       threats: 'Climate change and competition with red foxes',
       threatImages: [threatIceLoss, threatHumanActivity, threatPollution],
       imageUrl: polarBearReal,
@@ -95,6 +97,7 @@ const speciesData: any = {
     info: {
       commonName: 'Beluga Whale',
       population: '~150,000',
+      conservationStatus: 'Least Concern',
       threats: 'Pollution, shipping traffic, and habitat loss',
       threatImages: [threatPollution, threatHumanActivity, threatIceLoss],
       imageUrl: polarBearReal,
@@ -247,6 +250,7 @@ const Index = () => {
           <FastFactsCard
             commonName={speciesInfo.commonName}
             population={speciesInfo.population}
+            conservationStatus={speciesInfo.conservationStatus}
             imageUrl={speciesInfo.imageUrl}
             onChatClick={handleChatClick}
           />

@@ -4,6 +4,7 @@ import { MessageCircle } from 'lucide-react';
 interface FastFactsCardProps {
   commonName: string;
   population: string;
+  conservationStatus: string;
   imageUrl: string;
   onChatClick: () => void;
 }
@@ -11,6 +12,7 @@ interface FastFactsCardProps {
 const FastFactsCard = ({ 
   commonName, 
   population, 
+  conservationStatus,
   imageUrl,
   onChatClick 
 }: FastFactsCardProps) => {
@@ -30,8 +32,13 @@ const FastFactsCard = ({
         <h3 className="text-base font-bold text-foreground mb-3">{commonName}</h3>
         
         <div className="mb-3">
+          <p className="text-xs text-muted-foreground">Conservation Status</p>
+          <p className="text-base font-semibold text-accent">{conservationStatus}</p>
+        </div>
+
+        <div className="mb-3">
           <p className="text-xs text-muted-foreground">Population</p>
-          <p className="text-base font-semibold text-accent">{population}</p>
+          <p className="text-base font-semibold text-primary">{population}</p>
         </div>
 
         <Button 
