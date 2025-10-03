@@ -29,12 +29,26 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const regularPoints = habitats.filter(h => !('imageUrl' in h));
   const imageMarkers = habitats.filter(h => 'imageUrl' in h);
 
-  // Restore simple controls to ensure interaction works reliably
+  // Enable full zoom and interaction controls
   useEffect(() => {
     if (globeEl.current && globeReady) {
       const controls = globeEl.current.controls();
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.3;
+      controls.enableZoom = true;
+      controls.enablePan = true;
+      controls.enableRotate = true;
+      controls.minDistance = 101; // Minimum zoom distance (closer)
+      controls.maxDistance = 500; // Maximum zoom distance (farther)
+      controls.zoomSpeed = 1.0;
+
+      // Track altitude changes from mouse wheel
+      controls.addEventListener('change', () => {
+        if (globeEl.current) {
+          const pov = globeEl.current.pointOfView();
+          setCurrentAltitude(pov.altitude);
+        }
+      });
 
       if (regularPoints.length > 0) {
         const firstHabitat = regularPoints[0];
