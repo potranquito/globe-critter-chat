@@ -349,11 +349,11 @@ const Index = () => {
       )}
 
       {/* Chat Input with Earth Mascot and Reset Button */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full px-6 flex justify-center items-end gap-4">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full px-6 flex justify-center items-end gap-2">
         <img 
           src={earthMascot} 
           alt="Earth Mascot" 
-          className="w-20 h-20 object-contain animate-float"
+          className="w-16 h-16 object-contain animate-float -mb-1"
         />
         <ChatInput 
           onSubmit={handleSearch} 
