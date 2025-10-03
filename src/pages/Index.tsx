@@ -3,6 +3,7 @@ import GlobeComponent from '@/components/Globe';
 import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import HabitatCarousel from '@/components/HabitatCarousel';
+import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
@@ -15,9 +16,38 @@ import ecosystemSeal from '@/assets/ecosystem-seal.jpg';
 import ecosystemWalrus from '@/assets/ecosystem-walrus.jpg';
 import ecosystemFish from '@/assets/ecosystem-fish.jpg';
 
+// Regional species data
+const regionalSpecies: any = {
+  arctic: {
+    name: 'Arctic Region',
+    animals: [
+      { id: 'polar-bear', name: 'Polar Bear', population: '22,000 - 31,000', emoji: '🐻‍❄️' },
+      { id: 'arctic-fox', name: 'Arctic Fox', population: 'Several hundred thousand', emoji: '🦊' },
+      { id: 'beluga', name: 'Beluga Whale', population: '~150,000', emoji: '🐋' },
+      { id: 'narwhal', name: 'Narwhal', population: '~80,000', emoji: '🦄' },
+    ]
+  },
+  antarctic: {
+    name: 'Antarctic Region',
+    animals: [
+      { id: 'emperor-penguin', name: 'Emperor Penguin', population: '~595,000', emoji: '🐧' },
+      { id: 'leopard-seal', name: 'Leopard Seal', population: '~35,000', emoji: '🦭' },
+      { id: 'blue-whale', name: 'Blue Whale', population: '10,000 - 25,000', emoji: '🐋' },
+    ]
+  },
+  tropical: {
+    name: 'Tropical Region',
+    animals: [
+      { id: 'orangutan', name: 'Orangutan', population: '~100,000', emoji: '🦧' },
+      { id: 'tiger', name: 'Tiger', population: '~4,500', emoji: '🐯' },
+      { id: 'elephant', name: 'Asian Elephant', population: '~50,000', emoji: '🐘' },
+    ]
+  }
+};
+
 // Sample habitat data with species info
-const speciesData = {
-  'polar bear': {
+const speciesData: any = {
+  'polar-bear': {
     habitats: [
       { lat: 71.2, lng: -156.8, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
       { lat: 78.9, lng: 11.9, species: 'Polar Bear', size: 0.8, color: '#F59E0B' },
@@ -39,6 +69,42 @@ const speciesData = {
         { name: 'Phytoplankton', role: 'Base of food web', icon: '🦠' }
       ]
     }
+  },
+  'arctic-fox': {
+    habitats: [
+      { lat: 70.0, lng: -150.0, species: 'Arctic Fox', size: 0.6, color: '#94A3B8' }
+    ],
+    info: {
+      commonName: 'Arctic Fox',
+      population: 'Several hundred thousand',
+      threats: 'Climate change and competition with red foxes',
+      threatImages: [threatIceLoss, threatHumanActivity, threatPollution],
+      imageUrl: polarBearReal,
+      ecosystemImages: [ecosystemSeal, ecosystemWalrus, ecosystemFish],
+      ecosystem: [
+        { name: 'Lemmings', role: 'Primary prey', icon: '🐁' },
+        { name: 'Arctic Birds', role: 'Food source', icon: '🦅' },
+        { name: 'Seal Carcasses', role: 'Scavenged food', icon: '🦭' }
+      ]
+    }
+  },
+  'beluga': {
+    habitats: [
+      { lat: 75.0, lng: -100.0, species: 'Beluga Whale', size: 0.7, color: '#E0E7FF' }
+    ],
+    info: {
+      commonName: 'Beluga Whale',
+      population: '~150,000',
+      threats: 'Pollution, shipping traffic, and habitat loss',
+      threatImages: [threatPollution, threatHumanActivity, threatIceLoss],
+      imageUrl: polarBearReal,
+      ecosystemImages: [ecosystemFish, ecosystemSeal, ecosystemWalrus],
+      ecosystem: [
+        { name: 'Arctic Cod', role: 'Primary prey', icon: '🐟' },
+        { name: 'Shrimp', role: 'Food source', icon: '🦐' },
+        { name: 'Squid', role: 'Food source', icon: '🦑' }
+      ]
+    }
   }
 };
 
@@ -52,6 +118,8 @@ const Index = () => {
   const [pinImagesVisible, setPinImagesVisible] = useState(false);
   const [pinLocation, setPinLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [regionalAnimals, setRegionalAnimals] = useState<any>(null);
+  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -61,10 +129,12 @@ const Index = () => {
       const lowerQuery = query.toLowerCase();
       
       if (lowerQuery.includes('polar bear') || lowerQuery.includes('arctic')) {
-        const data = speciesData['polar bear'];
+        const data = speciesData['polar-bear'];
         setHabitats(data.habitats);
         setCurrentSpecies('Polar Bear');
         setSpeciesInfo(data.info);
+        setRegionalAnimals(null);
+        setSelectedRegion(null);
       } else {
         toast({
           title: 'No Results',
@@ -99,23 +169,45 @@ const Index = () => {
     setUserPins((prev) => [...prev, { lat, lng, species: 'Searched Location', size: 0.8, color: '#22C55E' }]);
     setPinLocation({ lat, lng });
     
-    // Search for species in this region (Arctic for demo)
-    if (lat > 60 || lat < -60) {
-      // Arctic or Antarctic region
-      const data = speciesData['polar bear'];
-      setHabitats([{ lat, lng, species: 'Polar Bear', size: 0.8, color: '#F59E0B' }]);
-      setCurrentSpecies('Polar Bear');
-      setSpeciesInfo(data.info);
-      toast({
-        title: 'Species Found!',
-        description: `Found Polar Bear in this Arctic region`,
-      });
+    // Determine region based on latitude
+    let region;
+    if (lat > 60) {
+      region = 'arctic';
+    } else if (lat < -60) {
+      region = 'antarctic';
+    } else if (lat > -23.5 && lat < 23.5) {
+      region = 'tropical';
+    }
+
+    if (region && regionalSpecies[region]) {
+      setRegionalAnimals(regionalSpecies[region].animals);
+      setSelectedRegion(regionalSpecies[region].name);
+      // Clear previous species info
+      setHabitats([]);
+      setCurrentSpecies(null);
+      setSpeciesInfo(null);
     } else {
       toast({
-        title: 'Searching Region',
-        description: `Searching for species at ${lat.toFixed(2)}, ${lng.toFixed(2)}...`,
+        title: 'No Data Available',
+        description: `No species data for this region yet.`,
       });
     }
+  };
+
+  const handleAnimalSelect = (animalId: string) => {
+    const data = speciesData[animalId];
+    if (data) {
+      setHabitats(data.habitats);
+      setCurrentSpecies(data.info.commonName);
+      setSpeciesInfo(data.info);
+      setRegionalAnimals(null);
+      setSelectedRegion(null);
+    }
+  };
+
+  const handleCloseRegionalList = () => {
+    setRegionalAnimals(null);
+    setSelectedRegion(null);
   };
 
   const handleReset = () => {
@@ -126,6 +218,8 @@ const Index = () => {
     setPinLocation(null);
     setPinImagesVisible(false);
     setHasInteracted(false);
+    setRegionalAnimals(null);
+    setSelectedRegion(null);
   };
 
   return (
@@ -134,6 +228,18 @@ const Index = () => {
       <div className="absolute inset-0">
         <GlobeComponent habitats={[...habitats, ...userPins]} onPointClick={handlePointClick} onDoubleGlobeClick={handleDoubleGlobeClick} />
       </div>
+
+      {/* Regional Animals List */}
+      {regionalAnimals && selectedRegion && (
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 max-w-3xl w-full px-6">
+          <RegionalAnimalsList
+            animals={regionalAnimals}
+            region={selectedRegion}
+            onAnimalClick={handleAnimalSelect}
+            onClose={handleCloseRegionalList}
+          />
+        </div>
+      )}
 
       {/* Left Side Card */}
       {speciesInfo && (
