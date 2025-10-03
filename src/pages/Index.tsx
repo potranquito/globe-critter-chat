@@ -362,6 +362,7 @@ const Index = () => {
           imageUrl={expandedImage.url}
           type={expandedImage.type}
           context={currentSpecies || 'this habitat'}
+          title={expandedImage.type === 'threat' ? 'Environmental Threat' : 'Ecosystem Connection'}
           onClose={() => {
             console.log('Closing expanded image');
             setExpandedImage(null);

@@ -8,16 +8,36 @@ interface ExpandedImageViewProps {
   imageUrl: string;
   type: 'threat' | 'ecosystem';
   context: string;
+  title: string;
   onClose: () => void;
   onNext?: () => void;
   externalMessage?: string;
 }
 
-const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalMessage }: ExpandedImageViewProps) => {
-  const [messages, setMessages] = useState<Array<{role: string; content: string}>>([]);
+const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, externalMessage }: ExpandedImageViewProps) => {
+  const [messages, setMessages] = useState<Array<{role: string; content: string; isStreaming?: boolean}>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [streamingText, setStreamingText] = useState('');
   const { toast } = useToast();
+
+  const streamTextWithTyping = useCallback((text: string, index: number) => {
+    let currentIndex = 0;
+    const words = text.split(' ');
+    const interval = setInterval(() => {
+      if (currentIndex < words.length) {
+        setMessages(prev => prev.map((msg, i) => 
+          i === index ? { ...msg, content: words.slice(0, currentIndex + 1).join(' ') } : msg
+        ));
+        currentIndex++;
+      } else {
+        clearInterval(interval);
+        setMessages(prev => prev.map((msg, i) => 
+          i === index ? { ...msg, isStreaming: false } : msg
+        ));
+      }
+    }, 100);
+  }, []);
 
   const playAudio = useCallback(async (text: string) => {
     try {
@@ -53,13 +73,17 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalM
       if (error) throw error;
 
       const aiResponse = data.message;
-      setMessages(prev => [
-        ...prev,
+      const newMessages = [
+        ...messages,
         { role: 'user', content: messageText },
-        { role: 'assistant', content: aiResponse }
-      ]);
-
-      // Auto-play TTS for AI responses
+        { role: 'assistant', content: '', isStreaming: true }
+      ];
+      setMessages(newMessages);
+      
+      const assistantIndex = newMessages.length - 1;
+      
+      // Start text streaming and audio simultaneously
+      streamTextWithTyping(aiResponse, assistantIndex);
       await playAudio(aiResponse);
       
     } catch (error) {
@@ -91,25 +115,16 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalM
 
   return (
     <div className="absolute right-6 top-6 w-80 max-h-[calc(100vh-10rem)] glass-panel rounded-2xl p-4 animate-fade-in overflow-hidden flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-bold text-foreground">Learn More</h3>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={onClose}
-          className="h-8 w-8"
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-
       <div className="flex-1 overflow-y-auto mb-4 space-y-3">
-        <div className="rounded-xl overflow-hidden mb-3">
-          <img 
-            src={imageUrl} 
-            alt={type}
-            className="w-full h-48 object-cover"
-          />
+        <div className="mb-4">
+          <div className="rounded-xl overflow-hidden mb-2">
+            <img 
+              src={imageUrl} 
+              alt={type}
+              className="w-full h-48 object-cover"
+            />
+          </div>
+          <h3 className="text-base font-bold text-foreground">{title}</h3>
         </div>
         {messages.map((msg, idx) => (
           <div 
@@ -121,8 +136,11 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalM
             }`}
           >
             <div className="flex justify-between items-start">
-              <p className="text-sm">{msg.content}</p>
-              {msg.role === 'assistant' && (
+              <p className="text-sm">
+                {msg.content}
+                {msg.isStreaming && <span className="inline-block w-1 h-4 bg-foreground ml-1 animate-pulse" />}
+              </p>
+              {msg.role === 'assistant' && !msg.isStreaming && msg.content && (
                 <Button
                   variant="ghost"
                   size="icon"
