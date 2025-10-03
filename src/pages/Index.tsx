@@ -2,7 +2,7 @@ import { useState } from 'react';
 import GlobeComponent from '@/components/Globe';
 import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
-import HabitatCarousel from '@/components/HabitatCarousel';
+import ExpandedImageView from '@/components/ExpandedImageView';
 import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -125,6 +125,8 @@ const Index = () => {
   const [hasInteracted, setHasInteracted] = useState(false);
   const [regionalAnimals, setRegionalAnimals] = useState<any>(null);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [expandedImage, setExpandedImage] = useState<{url: string; type: 'threat' | 'ecosystem'; index: number} | null>(null);
+  const [imageMarkers, setImageMarkers] = useState<any[]>([]);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -208,12 +210,58 @@ const Index = () => {
       setSpeciesInfo(data.info);
       setRegionalAnimals(null);
       setSelectedRegion(null);
+      
+      // Create image markers from threats and ecosystem images
+      const allImages = [
+        ...data.info.threatImages.map((img: string) => ({ url: img, type: 'threat' as const })),
+        ...data.info.ecosystemImages.map((img: string) => ({ url: img, type: 'ecosystem' as const }))
+      ];
+      
+      const markers = allImages.map((img, idx) => {
+        const habitat = data.habitats[Math.floor(Math.random() * data.habitats.length)];
+        const offset = () => (Math.random() - 0.5) * 5;
+        return {
+          lat: habitat.lat + offset(),
+          lng: habitat.lng + offset(),
+          imageUrl: img.url,
+          type: img.type,
+          size: 0.05,
+          color: '#FFFFFF',
+          index: idx
+        };
+      });
+      
+      setImageMarkers(markers);
     }
   };
 
   const handleCloseRegionalList = () => {
     setRegionalAnimals(null);
     setSelectedRegion(null);
+  };
+
+  const handleImageMarkerClick = (marker: any) => {
+    setExpandedImage({
+      url: marker.imageUrl,
+      type: marker.type,
+      index: marker.index
+    });
+  };
+
+  const handleNextImage = () => {
+    if (!expandedImage || !speciesInfo) return;
+    
+    const allImages = [
+      ...speciesInfo.threatImages.map((img: string) => ({ url: img, type: 'threat' as const })),
+      ...speciesInfo.ecosystemImages.map((img: string) => ({ url: img, type: 'ecosystem' as const }))
+    ];
+    
+    const nextIndex = (expandedImage.index + 1) % allImages.length;
+    setExpandedImage({
+      url: allImages[nextIndex].url,
+      type: allImages[nextIndex].type,
+      index: nextIndex
+    });
   };
 
   const handleReset = () => {
@@ -226,13 +274,20 @@ const Index = () => {
     setHasInteracted(false);
     setRegionalAnimals(null);
     setSelectedRegion(null);
+    setExpandedImage(null);
+    setImageMarkers([]);
   };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
       {/* Globe */}
       <div className="absolute inset-0">
-        <GlobeComponent habitats={[...habitats, ...userPins]} onPointClick={handlePointClick} onDoubleGlobeClick={handleDoubleGlobeClick} />
+        <GlobeComponent 
+          habitats={[...habitats, ...userPins, ...imageMarkers]} 
+          onPointClick={handlePointClick} 
+          onDoubleGlobeClick={handleDoubleGlobeClick}
+          onImageMarkerClick={handleImageMarkerClick}
+        />
       </div>
 
       {/* Regional Animals List */}
@@ -260,18 +315,15 @@ const Index = () => {
         </div>
       )}
 
-      {/* Right Side Cards */}
-      {speciesInfo && (
-        <div className="absolute right-6 top-6 w-60 max-h-[calc(100vh-12rem)] overflow-y-auto z-20 space-y-2">
-          <HabitatCarousel
-            images={speciesInfo.threatImages}
-            locationName="Threats to Habitat"
-          />
-          <HabitatCarousel
-            images={speciesInfo.ecosystemImages}
-            locationName="Ecosystem"
-          />
-        </div>
+      {/* Expanded Image View */}
+      {expandedImage && currentSpecies && (
+        <ExpandedImageView
+          imageUrl={expandedImage.url}
+          type={expandedImage.type}
+          context={currentSpecies}
+          onClose={() => setExpandedImage(null)}
+          onNext={handleNextImage}
+        />
       )}
 
       {/* Chat Input with Earth Mascot and Reset Button */}
@@ -281,7 +333,11 @@ const Index = () => {
           alt="Earth Mascot" 
           className="w-20 h-20 object-contain animate-float mb-2"
         />
-        <ChatInput onSubmit={handleSearch} isLoading={isLoading} />
+        <ChatInput 
+          onSubmit={handleSearch} 
+          isLoading={isLoading}
+          placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
+        />
         {(habitats.length > 0 || userPins.length > 0) && (
           <Button 
             onClick={handleReset}

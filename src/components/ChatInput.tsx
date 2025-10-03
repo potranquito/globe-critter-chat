@@ -6,9 +6,10 @@ import { Send } from 'lucide-react';
 interface ChatInputProps {
   onSubmit: (message: string) => void;
   isLoading?: boolean;
+  placeholder?: string;
 }
 
-const ChatInput = ({ onSubmit, isLoading = false }: ChatInputProps) => {
+const ChatInput = ({ onSubmit, isLoading = false, placeholder }: ChatInputProps) => {
   const [message, setMessage] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -25,7 +26,7 @@ const ChatInput = ({ onSubmit, isLoading = false }: ChatInputProps) => {
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Enter an animal species (e.g., 'Polar Bear') or location..."
+          placeholder={placeholder || "Enter an animal species (e.g., 'Polar Bear') or location..."}
           className="border-0 bg-transparent text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
           disabled={isLoading}
         />

@@ -13,9 +13,10 @@ interface GlobeComponentProps {
   habitats: HabitatPoint[];
   onPointClick?: (point: HabitatPoint) => void;
   onDoubleGlobeClick?: (lat: number, lng: number) => void;
+  onImageMarkerClick?: (marker: any) => void;
 }
 
-const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick }: GlobeComponentProps) => {
+const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
   const [globeReady, setGlobeReady] = useState(false);
   const lastClickRef = useRef<number>(0);
@@ -68,13 +69,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         pointRadius="size"
         pointLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.species}</strong><br/>Location: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}<br/><em>Click to view</em></div>`}
         onPointClick={(d: any) => {
-          if (globeEl.current) {
-            globeEl.current.pointOfView(
-              { lat: d.lat, lng: d.lng, altitude: 0.4 },
-              1500
-            );
+          if (d.imageUrl) {
+            onImageMarkerClick?.(d);
+          } else {
+            if (globeEl.current) {
+              globeEl.current.pointOfView(
+                { lat: d.lat, lng: d.lng, altitude: 0.4 },
+                1500
+              );
+            }
+            onPointClickProp?.(d);
           }
-          onPointClickProp?.(d);
         }}
         onGlobeClick={(coords: any) => {
           const now = Date.now();

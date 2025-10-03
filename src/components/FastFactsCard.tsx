@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { MessageCircle } from 'lucide-react';
+import { Heart } from 'lucide-react';
 
 interface FastFactsCardProps {
   commonName: string;
@@ -44,10 +44,10 @@ const FastFactsCard = ({
         <Button 
           size="sm"
           onClick={onChatClick}
-          className="w-full bg-accent hover:bg-accent/90 glow-effect"
+          className="w-full bg-pink-200 hover:bg-pink-300 text-pink-900 glow-effect"
         >
-          <MessageCircle className="h-3 w-3 mr-2" />
-          Chat with me
+          <Heart className="h-3 w-3 mr-2" />
+          Rescue Me
         </Button>
       </div>
     </div>
