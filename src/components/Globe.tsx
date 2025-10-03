@@ -33,13 +33,27 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   useEffect(() => {
     if (globeEl.current && globeReady) {
       const controls = globeEl.current.controls();
-      controls.enabled = true; // Explicitly enable controls
+      // Force-enable interactions across OrbitControls or TrackballControls
+      controls.enabled = true;
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.3;
-      controls.enableZoom = true;
-      controls.enablePan = true;
-      controls.enableRotate = true;
-      // Use library defaults for zoom distances to prevent clamping issues
+
+      // Support both controls APIs
+      if ('noZoom' in controls) {
+        // TrackballControls style flags
+        controls.noZoom = false;
+        controls.noPan = false;
+        controls.noRotate = false;
+      }
+      if ('enableZoom' in controls) {
+        controls.enableZoom = true;
+        controls.enablePan = true;
+        controls.enableRotate = true;
+      }
+
+      // Reasonable ranges and smoothing
+      if ('minDistance' in controls) (controls as any).minDistance = 0.15;
+      if ('maxDistance' in controls) (controls as any).maxDistance = 8;
       controls.zoomSpeed = 1.0;
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
