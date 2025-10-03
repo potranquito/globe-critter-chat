@@ -391,7 +391,7 @@ const Index = () => {
 
       {/* Conservation Layers Control - shown in top right when no species selected */}
       {!speciesInfo && (
-        <div className="absolute top-6 right-6 z-10">
+        <div className="absolute top-6 right-6 z-50">
           <ConservationLayers onToggleLayer={handleLayerToggle} />
         </div>
       )}
@@ -410,7 +410,7 @@ const Index = () => {
 
       {/* Left Side Card with Conservation Layers */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-40 flex flex-col gap-3">
+        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-50 flex flex-col gap-3">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}

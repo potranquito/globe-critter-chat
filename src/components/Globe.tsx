@@ -82,16 +82,16 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       if (regularPoints.length > 0) {
         const firstHabitat = regularPoints[0];
         globeEl.current.pointOfView(
-          { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 0.5 },
+          { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 0.35 },
           2000
         );
-        setCurrentAltitude(0.5);
+        setCurrentAltitude(0.35);
       } else {
         globeEl.current.pointOfView(
-          { lat: 20, lng: 0, altitude: 0.8 },
+          { lat: 20, lng: 0, altitude: 0.4 },
           2000
         );
-        setCurrentAltitude(0.8);
+        setCurrentAltitude(0.4);
       }
     }
   }, [regularPoints, globeReady]);
@@ -121,11 +121,11 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         {
           lat: 20,
           lng: 0,
-          altitude: 0.8,
+          altitude: 0.4,
         },
         1500
       );
-      setCurrentAltitude(0.8);
+      setCurrentAltitude(0.4);
     }
   };
 
