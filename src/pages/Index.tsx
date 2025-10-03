@@ -181,6 +181,7 @@ const Index = () => {
         });
         
         setImageMarkers(markers);
+        toast({ title: 'Polar Bear found', description: 'Showing habitats and ecosystem images' });
       } else {
         toast({
           title: 'No Results',
@@ -374,7 +375,7 @@ const Index = () => {
 
       {/* Left Side Card */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-20">
+        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-40">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -404,7 +405,7 @@ const Index = () => {
       )}
 
       {/* Chat Input with Earth Mascot and Reset Button */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 w-full px-6 flex justify-center items-end gap-2">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full px-6 flex justify-center items-end gap-2">
         <img 
           src={earthMascot} 
           alt="Earth Mascot" 
