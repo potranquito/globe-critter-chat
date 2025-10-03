@@ -353,7 +353,7 @@ const Index = () => {
         <img 
           src={earthMascot} 
           alt="Earth Mascot" 
-          className="w-20 h-20 object-contain animate-float mb-2"
+          className="w-20 h-20 object-contain animate-float"
         />
         <ChatInput 
           onSubmit={handleSearch} 
