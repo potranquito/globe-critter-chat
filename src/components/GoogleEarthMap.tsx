@@ -5,7 +5,7 @@ import ZoomControls from './ZoomControls';
 import ConservationLayers from './ConservationLayers';
 import UsageIndicator from './UsageIndicator';
 import ImageMarker from './ImageMarker';
-
+import GlobeComponent from './Globe';
 interface HabitatPoint {
   lat: number;
   lng: number;
@@ -59,8 +59,19 @@ const GoogleEarthMap = ({
   const { apiKey, loading, usage, error } = useGoogleMapsApi();
   const [mapLoaded, setMapLoaded] = useState(false);
   const [currentZoom, setCurrentZoom] = useState(3);
+  const [authError, setAuthError] = useState(false);
   const mapRef = useRef<google.maps.Map | null>(null);
 
+  useEffect(() => {
+    (window as any).gm_authFailure = () => {
+      setAuthError(true);
+      console.error('Google Maps auth failure');
+    };
+    return () => {
+      // cleanup
+      try { delete (window as any).gm_authFailure; } catch {}
+    };
+  }, []);
   // Separate regular points from image markers
   const regularPoints = habitats.filter(h => !h.imageUrl);
   const imageMarkers = habitats.filter(h => h.imageUrl);
@@ -115,13 +126,28 @@ const GoogleEarthMap = ({
       </div>
     );
   }
+  if (authError) {
+    return (
+      <div className="relative w-full h-screen">
+        <GlobeComponent 
+          habitats={habitats as any}
+          onPointClick={onPointClick}
+          onDoubleGlobeClick={onDoubleGlobeClick}
+          onImageMarkerClick={onImageMarkerClick}
+        />
+      </div>
+    );
+  }
 
   if (error || !apiKey) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-background">
-        <div className="glass-panel rounded-lg p-6 max-w-md">
-          <p className="text-sm text-destructive">{error || 'Failed to load Google Maps'}</p>
-        </div>
+      <div className="relative w-full h-screen">
+        <GlobeComponent 
+          habitats={habitats as any}
+          onPointClick={onPointClick}
+          onDoubleGlobeClick={onDoubleGlobeClick}
+          onImageMarkerClick={onImageMarkerClick}
+        />
       </div>
     );
   }
@@ -134,7 +160,6 @@ const GoogleEarthMap = ({
     <APIProvider apiKey={apiKey}>
       <div className="relative w-full h-screen">
         <Map
-          mapId="conservation-map"
           defaultCenter={defaultCenter}
           defaultZoom={regularPoints.length > 0 ? 5 : 3}
           defaultTilt={45}
