@@ -169,7 +169,12 @@ const Index = () => {
 
   const handleDoubleGlobeClick = (lat: number, lng: number) => {
     setHasInteracted(true);
-    setUserPins((prev) => [...prev, { lat, lng, species: 'Searched Location', size: 0.8, color: '#22C55E' }]);
+    
+    // Reset everything first
+    setHabitats([]);
+    setCurrentSpecies(null);
+    setSpeciesInfo(null);
+    setUserPins([]);
     setPinLocation({ lat, lng });
     
     // Determine region based on latitude
@@ -185,10 +190,6 @@ const Index = () => {
     if (region && regionalSpecies[region]) {
       setRegionalAnimals(regionalSpecies[region].animals);
       setSelectedRegion(regionalSpecies[region].name);
-      // Clear previous species info
-      setHabitats([]);
-      setCurrentSpecies(null);
-      setSpeciesInfo(null);
     } else {
       toast({
         title: 'No Data Available',
