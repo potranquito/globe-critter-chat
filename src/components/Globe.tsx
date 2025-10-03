@@ -21,6 +21,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const [globeReady, setGlobeReady] = useState(false);
   const lastClickRef = useRef<number>(0);
 
+  // Separate regular points from image markers
+  const regularPoints = habitats.filter(h => !('imageUrl' in h));
+  const imageMarkers = habitats.filter(h => 'imageUrl' in h);
+
   useEffect(() => {
     if (globeEl.current && globeReady) {
       // Auto-rotate
@@ -28,8 +32,8 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       globeEl.current.controls().autoRotateSpeed = 0.3;
       
       // Point camera at the first habitat if exists
-      if (habitats.length > 0) {
-        const firstHabitat = habitats[0];
+      if (regularPoints.length > 0) {
+        const firstHabitat = regularPoints[0];
         globeEl.current.pointOfView(
           {
             lat: firstHabitat.lat,
@@ -50,7 +54,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         );
       }
     }
-  }, [habitats, globeReady]);
+  }, [regularPoints, globeReady]);
 
   return (
     <div className="w-full h-full">
@@ -61,7 +65,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         backgroundColor="rgba(0,0,0,0)"
         atmosphereColor="rgba(22, 163, 74, 0.5)"
         atmosphereAltitude={0.25}
-        pointsData={habitats}
+        pointsData={regularPoints}
         pointLat="lat"
         pointLng="lng"
         pointColor="color"
@@ -69,17 +73,28 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         pointRadius="size"
         pointLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.species}</strong><br/>Location: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}<br/><em>Click to view</em></div>`}
         onPointClick={(d: any) => {
-          if (d.imageUrl) {
-            onImageMarkerClick?.(d);
-          } else {
-            if (globeEl.current) {
-              globeEl.current.pointOfView(
-                { lat: d.lat, lng: d.lng, altitude: 0.4 },
-                1500
-              );
-            }
-            onPointClickProp?.(d);
+          if (globeEl.current) {
+            globeEl.current.pointOfView(
+              { lat: d.lat, lng: d.lng, altitude: 0.4 },
+              1500
+            );
           }
+          onPointClickProp?.(d);
+        }}
+        htmlElementsData={imageMarkers}
+        htmlLat="lat"
+        htmlLng="lng"
+        htmlAltitude={0.01}
+        htmlElement={(d: any) => {
+          const el = document.createElement('div');
+          el.className = 'cursor-pointer hover:scale-110 transition-transform';
+          el.innerHTML = `
+            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg">
+              <img src="${d.imageUrl}" alt="${d.type}" class="w-full h-full object-cover" />
+            </div>
+          `;
+          el.onclick = () => onImageMarkerClick?.(d);
+          return el;
         }}
         onGlobeClick={(coords: any) => {
           const now = Date.now();
