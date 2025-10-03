@@ -35,7 +35,7 @@ const FastFactsCard = ({
       {/* Fast Facts Card */}
       <div className="glass-panel rounded-2xl p-3">
         <h3 className="text-base font-bold text-foreground mb-1">{commonName}</h3>
-        <p className="text-sm text-muted-foreground mb-3">{animalType}</p>
+        <p className="text-sm text-primary mb-3">{animalType}</p>
         
         <div className="mb-3">
           <p className="text-xs text-muted-foreground">Conservation Status</p>

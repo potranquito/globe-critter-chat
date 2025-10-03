@@ -90,7 +90,7 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalM
   }, [externalMessage, sendMessage]);
 
   return (
-    <div className="absolute right-6 top-6 w-80 max-h-[calc(100vh-3rem)] glass-panel rounded-2xl p-4 animate-fade-in overflow-hidden flex flex-col">
+    <div className="absolute right-6 top-6 w-80 max-h-[calc(100vh-10rem)] glass-panel rounded-2xl p-4 animate-fade-in overflow-hidden flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-bold text-foreground">Learn More</h3>
         <Button 
@@ -103,15 +103,14 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalM
         </Button>
       </div>
 
-      <div className="mb-4 rounded-xl overflow-hidden">
-        <img 
-          src={imageUrl} 
-          alt={type}
-          className="w-full h-48 object-cover"
-        />
-      </div>
-
       <div className="flex-1 overflow-y-auto mb-4 space-y-3">
+        <div className="rounded-xl overflow-hidden mb-3">
+          <img 
+            src={imageUrl} 
+            alt={type}
+            className="w-full h-48 object-cover"
+          />
+        </div>
         {messages.map((msg, idx) => (
           <div 
             key={idx}
@@ -141,12 +140,13 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalM
             Thinking...
           </div>
         )}
+
       </div>
 
       {onNext && (
         <Button 
           onClick={onNext}
-          className="w-full"
+          className="w-full mt-2"
           variant="secondary"
         >
           Next
