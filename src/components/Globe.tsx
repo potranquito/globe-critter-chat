@@ -34,31 +34,13 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     if (globeEl.current && globeReady) {
       const controls = globeEl.current.controls();
       
-      // Enhanced controls configuration
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.05;
-      controls.rotateSpeed = 0.5;
+      // Simplified controls configuration that works with react-globe.gl
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.3;
       controls.enableZoom = true;
-      controls.minDistance = 101; // ~0.15 altitude (earth radius = 100)
+      controls.zoomSpeed = 1.0;
+      controls.minDistance = 101; // ~0.15 altitude
       controls.maxDistance = 450; // ~3.5 altitude
-      controls.enablePan = false;
-      controls.minPolarAngle = 0;
-      controls.maxPolarAngle = Math.PI;
-      
-      // Dynamic zoom speed based on altitude
-      const updateZoomSpeed = () => {
-        const pov = globeEl.current.pointOfView();
-        const altitude = pov.altitude;
-        setCurrentAltitude(altitude);
-        
-        if (altitude > 2) {
-          controls.zoomSpeed = 1.5;
-        } else if (altitude > 0.8) {
-          controls.zoomSpeed = 1.0;
-        } else {
-          controls.zoomSpeed = 0.5;
-        }
-      };
       
       // Smart auto-rotation control
       const handleInteractionStart = () => {
@@ -78,13 +60,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         }, 2000);
       };
       
+      // Track altitude changes
+      const handleChange = () => {
+        const pov = globeEl.current?.pointOfView();
+        if (pov) {
+          setCurrentAltitude(pov.altitude);
+        }
+      };
+      
       controls.addEventListener('start', handleInteractionStart);
       controls.addEventListener('end', handleInteractionEnd);
-      controls.addEventListener('change', updateZoomSpeed);
-      
-      // Initial auto-rotate setup
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.3;
+      controls.addEventListener('change', handleChange);
       
       // Point camera at the first habitat if exists
       if (regularPoints.length > 0) {
@@ -114,7 +100,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       return () => {
         controls.removeEventListener('start', handleInteractionStart);
         controls.removeEventListener('end', handleInteractionEnd);
-        controls.removeEventListener('change', updateZoomSpeed);
+        controls.removeEventListener('change', handleChange);
         if (autoRotateTimeoutRef.current) {
           clearTimeout(autoRotateTimeoutRef.current);
         }
