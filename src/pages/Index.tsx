@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import GlobeComponent from '@/components/Globe';
+import GoogleEarthMap from '@/components/GoogleEarthMap';
 import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
@@ -319,9 +319,9 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Globe */}
+      {/* Google Earth Map */}
       <div className="absolute inset-0">
-        <GlobeComponent 
+        <GoogleEarthMap 
           habitats={[...habitats, ...userPins, ...imageMarkers]} 
           onPointClick={handlePointClick} 
           onDoubleGlobeClick={handleDoubleGlobeClick}
