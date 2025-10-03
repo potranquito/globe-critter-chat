@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Send, Volume2 } from 'lucide-react';
@@ -77,10 +77,12 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
   };
 
   // Initialize with threat message
-  if (!isInitialized && type === 'threat') {
-    setIsInitialized(true);
-    sendMessage(`Tell me about this threat to ${context}`, true);
-  }
+  useEffect(() => {
+    if (!isInitialized && type === 'threat') {
+      setIsInitialized(true);
+      sendMessage(`Tell me about this threat to ${context}`, true);
+    }
+  }, [isInitialized, type, context]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
