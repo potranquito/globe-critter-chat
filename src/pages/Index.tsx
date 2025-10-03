@@ -25,6 +25,8 @@ const regionalSpecies: any = {
       { id: 'arctic-fox', name: 'Arctic Fox', population: 'Several hundred thousand', emoji: '🦊' },
       { id: 'beluga', name: 'Beluga Whale', population: '~150,000', emoji: '🐋' },
       { id: 'narwhal', name: 'Narwhal', population: '~80,000', emoji: '🦄' },
+      { id: 'walrus', name: 'Walrus', population: '~225,000', emoji: '🦭' },
+      { id: 'snowy-owl', name: 'Snowy Owl', population: '~28,000', emoji: '🦉' },
     ]
   },
   antarctic: {
