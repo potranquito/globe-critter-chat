@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X, Send, Volume2 } from 'lucide-react';
@@ -20,7 +20,7 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
   const [isInitialized, setIsInitialized] = useState(false);
   const { toast } = useToast();
 
-  const playAudio = async (text: string) => {
+  const playAudio = useCallback(async (text: string) => {
     try {
       const { data, error } = await supabase.functions.invoke('text-to-speech', {
         body: { text }
@@ -35,9 +35,9 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
     } catch (error) {
       console.error('Error playing audio:', error);
     }
-  };
+  }, []);
 
-  const sendMessage = async (messageText: string, isInitial = false) => {
+  const sendMessage = useCallback(async (messageText: string, isInitial = false) => {
     if (!messageText.trim() && !isInitial) return;
 
     setIsLoading(true);
@@ -74,7 +74,7 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
       setIsLoading(false);
       setInput('');
     }
-  };
+  }, [context, playAudio, toast]);
 
   // Initialize with threat message
   useEffect(() => {
@@ -82,7 +82,7 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
       setIsInitialized(true);
       sendMessage(`Tell me about this threat to ${context}`, true);
     }
-  }, [isInitialized, type, context]);
+  }, [isInitialized, type, context, sendMessage]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
