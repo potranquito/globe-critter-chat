@@ -39,8 +39,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       controls.enableZoom = true;
       controls.enablePan = true;
       controls.enableRotate = true;
-      controls.minDistance = 50; // Minimum zoom distance
-      controls.maxDistance = 800; // Maximum zoom distance
+      // Use library defaults for zoom distances to prevent clamping issues
       controls.zoomSpeed = 1.0;
       controls.enableDamping = true;
       controls.dampingFactor = 0.08;
@@ -112,7 +111,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   };
 
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
+    <div className="w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0">
       <ZoomControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
@@ -124,7 +123,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
         backgroundImageUrl="//unpkg.com/three-globe/example/img/night-sky.png"
         backgroundColor="rgba(0,0,0,0)"
-        atmosphereColor="rgba(22, 163, 74, 0.5)"
+        atmosphereColor="rgb(22, 163, 74)"
         atmosphereAltitude={0.25}
         enablePointerInteraction={true}
         pointsData={regularPoints}
@@ -188,7 +187,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
             }
           }
         }}
-        onGlobeReady={() => setGlobeReady(true)}
+        onGlobeReady={() => { console.log('Globe ready'); setGlobeReady(true); }}
         animateIn={true}
       />
     </div>
