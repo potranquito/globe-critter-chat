@@ -10,8 +10,8 @@ interface ZoomControlsProps {
 
 const ZoomControls = ({ onZoomIn, onZoomOut, onReset, zoomLevel }: ZoomControlsProps) => {
   return (
-    <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10">
-      <div className="glass-panel rounded-lg p-2 flex flex-col gap-2">
+    <div className="absolute bottom-6 right-6 flex flex-col gap-2 z-10 pointer-events-none">
+      <div className="glass-panel rounded-lg p-2 flex flex-col gap-2 pointer-events-auto">
         <Button
           variant="ghost"
           size="icon"
@@ -36,13 +36,13 @@ const ZoomControls = ({ onZoomIn, onZoomOut, onReset, zoomLevel }: ZoomControlsP
         variant="ghost"
         size="sm"
         onClick={onReset}
-        className="glass-panel hover:bg-primary/20 gap-2"
+        className="glass-panel hover:bg-primary/20 gap-2 pointer-events-auto"
         title="Reset View"
       >
         <Maximize2 className="h-4 w-4" />
         Reset
       </Button>
-      <div className="glass-panel rounded-lg px-3 py-2 text-xs text-center">
+      <div className="glass-panel rounded-lg px-3 py-2 text-xs text-center pointer-events-none">
         <div className="text-muted-foreground">Zoom</div>
         <div className="font-semibold">{zoomLevel}</div>
       </div>

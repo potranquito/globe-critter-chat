@@ -29,82 +29,27 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const regularPoints = habitats.filter(h => !('imageUrl' in h));
   const imageMarkers = habitats.filter(h => 'imageUrl' in h);
 
-  // Configure enhanced OrbitControls for Google Earth-style zoom
+  // Restore simple controls to ensure interaction works reliably
   useEffect(() => {
     if (globeEl.current && globeReady) {
       const controls = globeEl.current.controls();
-      
-      // Simplified controls configuration that works with react-globe.gl
       controls.autoRotate = true;
       controls.autoRotateSpeed = 0.3;
-      controls.enableZoom = true;
-      controls.zoomSpeed = 1.0;
-      controls.minDistance = 101; // ~0.15 altitude
-      controls.maxDistance = 450; // ~3.5 altitude
-      
-      // Smart auto-rotation control
-      const handleInteractionStart = () => {
-        interactionRef.current = true;
-        controls.autoRotate = false;
-        if (autoRotateTimeoutRef.current) {
-          clearTimeout(autoRotateTimeoutRef.current);
-        }
-      };
-      
-      const handleInteractionEnd = () => {
-        interactionRef.current = false;
-        autoRotateTimeoutRef.current = setTimeout(() => {
-          if (!interactionRef.current && controls) {
-            controls.autoRotate = true;
-          }
-        }, 2000);
-      };
-      
-      // Track altitude changes
-      const handleChange = () => {
-        const pov = globeEl.current?.pointOfView();
-        if (pov) {
-          setCurrentAltitude(pov.altitude);
-        }
-      };
-      
-      controls.addEventListener('start', handleInteractionStart);
-      controls.addEventListener('end', handleInteractionEnd);
-      controls.addEventListener('change', handleChange);
-      
-      // Point camera at the first habitat if exists
+
       if (regularPoints.length > 0) {
         const firstHabitat = regularPoints[0];
         globeEl.current.pointOfView(
-          {
-            lat: firstHabitat.lat,
-            lng: firstHabitat.lng,
-            altitude: 1.5,
-          },
+          { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 1.5 },
           2000
         );
         setCurrentAltitude(1.5);
       } else {
-        // Center the globe when no habitats
         globeEl.current.pointOfView(
-          {
-            lat: 20,
-            lng: 0,
-            altitude: 2,
-          },
+          { lat: 20, lng: 0, altitude: 2 },
           2000
         );
         setCurrentAltitude(2);
       }
-      
-      return () => {
-        controls.removeEventListener('start', handleInteractionStart);
-        controls.removeEventListener('end', handleInteractionEnd);
-        controls.removeEventListener('change', handleChange);
-        if (autoRotateTimeoutRef.current) {
-          clearTimeout(autoRotateTimeoutRef.current);
-        }
-      };
     }
   }, [regularPoints, globeReady]);
 
@@ -164,6 +109,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         backgroundColor="rgba(0,0,0,0)"
         atmosphereColor="rgba(22, 163, 74, 0.5)"
         atmosphereAltitude={0.25}
+        enablePointerInteraction={true}
         pointsData={regularPoints}
         pointLat="lat"
         pointLng="lng"
