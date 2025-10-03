@@ -58,7 +58,9 @@ const speciesData: any = {
     ],
     info: {
       commonName: 'Polar Bear',
+      animalType: 'Mammal',
       population: '22,000 - 31,000',
+      populationTrend: 'decreasing' as const,
       conservationStatus: 'Vulnerable',
       threats: 'Sea ice loss from climate change, pollution, and oil spills',
       threatImages: [threatIceLoss, threatPollution, threatHumanActivity],
@@ -79,7 +81,9 @@ const speciesData: any = {
     ],
     info: {
       commonName: 'Arctic Fox',
+      animalType: 'Mammal',
       population: 'Several hundred thousand',
+      populationTrend: 'stable' as const,
       conservationStatus: 'Least Concern',
       threats: 'Climate change and competition with red foxes',
       threatImages: [threatIceLoss, threatHumanActivity, threatPollution],
@@ -98,7 +102,9 @@ const speciesData: any = {
     ],
     info: {
       commonName: 'Beluga Whale',
+      animalType: 'Mammal',
       population: '~150,000',
+      populationTrend: 'stable' as const,
       conservationStatus: 'Least Concern',
       threats: 'Pollution, shipping traffic, and habitat loss',
       threatImages: [threatPollution, threatHumanActivity, threatIceLoss],
@@ -127,8 +133,17 @@ const Index = () => {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [expandedImage, setExpandedImage] = useState<{url: string; type: 'threat' | 'ecosystem'; index: number} | null>(null);
   const [imageMarkers, setImageMarkers] = useState<any[]>([]);
+  const [chatMessage, setChatMessage] = useState<string>('');
 
   const handleSearch = async (query: string) => {
+    // If expanded image is open, send message to chat instead
+    if (expandedImage) {
+      setChatMessage(query);
+      // Reset after a brief moment to allow useEffect to pick it up
+      setTimeout(() => setChatMessage(''), 100);
+      return;
+    }
+
     setIsLoading(true);
     setHasInteracted(true);
     
@@ -218,8 +233,8 @@ const Index = () => {
       ];
       
       const markers = allImages.map((img, idx) => {
-        const habitat = data.habitats[Math.floor(Math.random() * data.habitats.length)];
-        const offset = () => (Math.random() - 0.5) * 5;
+        const habitat = data.habitats[idx % data.habitats.length];
+        const offset = () => (Math.random() - 0.5) * 2;
         return {
           lat: habitat.lat + offset(),
           lng: habitat.lng + offset(),
@@ -308,7 +323,9 @@ const Index = () => {
         <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-20">
           <FastFactsCard
             commonName={speciesInfo.commonName}
+            animalType={speciesInfo.animalType}
             population={speciesInfo.population}
+            populationTrend={speciesInfo.populationTrend}
             conservationStatus={speciesInfo.conservationStatus}
             imageUrl={speciesInfo.imageUrl}
             onChatClick={handleChatClick}
@@ -327,6 +344,7 @@ const Index = () => {
             setExpandedImage(null);
           }}
           onNext={handleNextImage}
+          externalMessage={chatMessage}
         />
       )}
 

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { X, Send, Volume2 } from 'lucide-react';
+import { X, Volume2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,11 +10,11 @@ interface ExpandedImageViewProps {
   context: string;
   onClose: () => void;
   onNext?: () => void;
+  externalMessage?: string;
 }
 
-const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: ExpandedImageViewProps) => {
+const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext, externalMessage }: ExpandedImageViewProps) => {
   const [messages, setMessages] = useState<Array<{role: string; content: string}>>([]);
-  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const { toast } = useToast();
@@ -72,7 +71,6 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
       });
     } finally {
       setIsLoading(false);
-      setInput('');
     }
   }, [context, playAudio, toast]);
 
@@ -84,12 +82,12 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
     }
   }, [isInitialized, type, context, sendMessage]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim()) {
-      sendMessage(input);
+  // Handle external messages from bottom input
+  useEffect(() => {
+    if (externalMessage) {
+      sendMessage(externalMessage);
     }
-  };
+  }, [externalMessage, sendMessage]);
 
   return (
     <div className="absolute right-6 top-6 w-80 max-h-[calc(100vh-3rem)] glass-panel rounded-2xl p-4 animate-fade-in overflow-hidden flex flex-col">
@@ -145,28 +143,10 @@ const ExpandedImageView = ({ imageUrl, type, context, onClose, onNext }: Expande
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <Input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a question..."
-          disabled={isLoading}
-          className="flex-1"
-        />
-        <Button 
-          type="submit" 
-          size="icon"
-          disabled={isLoading || !input.trim()}
-          className="shrink-0"
-        >
-          <Send className="h-4 w-4" />
-        </Button>
-      </form>
-
       {onNext && (
         <Button 
           onClick={onNext}
-          className="w-full mt-3"
+          className="w-full"
           variant="secondary"
         >
           Next
