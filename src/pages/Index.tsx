@@ -241,6 +241,7 @@ const Index = () => {
   };
 
   const handleImageMarkerClick = (marker: any) => {
+    console.log('Image marker clicked:', marker);
     setExpandedImage({
       url: marker.imageUrl,
       type: marker.type,
@@ -316,12 +317,15 @@ const Index = () => {
       )}
 
       {/* Expanded Image View */}
-      {expandedImage && currentSpecies && (
+      {expandedImage && (
         <ExpandedImageView
           imageUrl={expandedImage.url}
           type={expandedImage.type}
-          context={currentSpecies}
-          onClose={() => setExpandedImage(null)}
+          context={currentSpecies || 'this habitat'}
+          onClose={() => {
+            console.log('Closing expanded image');
+            setExpandedImage(null);
+          }}
           onNext={handleNextImage}
         />
       )}

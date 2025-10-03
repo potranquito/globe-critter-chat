@@ -88,12 +88,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         htmlElement={(d: any) => {
           const el = document.createElement('div');
           el.className = 'cursor-pointer hover:scale-110 transition-transform';
+          el.style.pointerEvents = 'auto';
           el.innerHTML = `
             <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg">
               <img src="${d.imageUrl}" alt="${d.type}" class="w-full h-full object-cover" />
             </div>
           `;
-          el.onclick = () => onImageMarkerClick?.(d);
+          el.onclick = (e) => {
+            e.stopPropagation();
+            console.log('HTML element clicked:', d);
+            onImageMarkerClick?.(d);
+          };
           return el;
         }}
         onGlobeClick={(coords: any) => {
