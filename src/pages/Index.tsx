@@ -474,7 +474,7 @@ const Index = () => {
 
       {/* Info Card */}
       {habitats.length === 0 && !hasInteracted && (
-        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20">
+        <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
           <div className="glass-panel rounded-2xl px-8 py-4 max-w-lg text-center animate-float">
             <p className="text-muted-foreground">
               Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or enter a location

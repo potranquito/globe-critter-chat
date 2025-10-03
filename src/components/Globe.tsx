@@ -124,7 +124,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   };
 
   return (
-    <div className="w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none">
+    <div className="globe-root w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none">
       <ZoomControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
