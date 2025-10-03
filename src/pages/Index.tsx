@@ -4,6 +4,7 @@ import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
 import RegionalAnimalsList from '@/components/RegionalAnimalsList';
+import ConservationLayers from '@/components/ConservationLayers';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
@@ -134,6 +135,7 @@ const Index = () => {
   const [expandedImage, setExpandedImage] = useState<{url: string; type: 'threat' | 'ecosystem'; index: number} | null>(null);
   const [imageMarkers, setImageMarkers] = useState<any[]>([]);
   const [chatMessage, setChatMessage] = useState<string>('');
+  const [conservationLayers, setConservationLayers] = useState<any[]>([]);
 
   const handleSearch = async (query: string) => {
     // If expanded image is open, send message to chat instead
@@ -303,6 +305,19 @@ const Index = () => {
     });
   };
 
+  const handleLayerToggle = (layerType: string, data?: any) => {
+    if (data) {
+      // Add or update layer
+      setConservationLayers(prev => {
+        const filtered = prev.filter(l => l.type !== layerType);
+        return [...filtered, data];
+      });
+    } else {
+      // Remove layer
+      setConservationLayers(prev => prev.filter(l => l.type !== layerType));
+    }
+  };
+
   const handleReset = () => {
     setHabitats([]);
     setCurrentSpecies(null);
@@ -315,6 +330,7 @@ const Index = () => {
     setSelectedRegion(null);
     setExpandedImage(null);
     setImageMarkers([]);
+    setConservationLayers([]);
   };
 
   return (
@@ -322,12 +338,27 @@ const Index = () => {
       {/* Globe */}
       <div className="absolute inset-0">
         <GlobeComponent 
-          habitats={[...habitats, ...userPins, ...imageMarkers]} 
+          habitats={[
+            ...habitats, 
+            ...userPins, 
+            ...imageMarkers,
+            ...conservationLayers.flatMap(layer => 
+              layer.data.map((point: any) => ({
+                ...point,
+                color: layer.color,
+                size: 0.3,
+                species: point.name,
+              }))
+            )
+          ]} 
           onPointClick={handlePointClick} 
           onDoubleGlobeClick={handleDoubleGlobeClick}
           onImageMarkerClick={handleImageMarkerClick}
         />
       </div>
+
+      {/* Conservation Layers Control */}
+      <ConservationLayers onToggleLayer={handleLayerToggle} />
 
       {/* Regional Animals List */}
       {regionalAnimals && selectedRegion && (

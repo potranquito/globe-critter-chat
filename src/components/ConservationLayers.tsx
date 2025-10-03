@@ -1,24 +1,56 @@
 import { Button } from "@/components/ui/button";
-import { Layers, Snowflake, TreePine, Waves, Shield } from "lucide-react";
+import { Layers, Snowflake, TreePine, Shield } from "lucide-react";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface ConservationLayersProps {
-  onToggleLayer: (layer: string, enabled: boolean) => void;
+  onToggleLayer: (layerType: string, data?: any) => void;
 }
 
 const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
   const [expanded, setExpanded] = useState(false);
-  const [layers, setLayers] = useState({
-    arcticIce: false,
-    deforestation: false,
-    oceanHealth: false,
-    protectedAreas: false,
-  });
+  const [loading, setLoading] = useState<string | null>(null);
+  const [activeLayers, setActiveLayers] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
-  const toggleLayer = (layerName: keyof typeof layers) => {
-    const newState = !layers[layerName];
-    setLayers(prev => ({ ...prev, [layerName]: newState }));
-    onToggleLayer(layerName, newState);
+  const fetchLayerData = async (layerType: string) => {
+    if (activeLayers.has(layerType)) {
+      // Toggle off
+      setActiveLayers(prev => {
+        const next = new Set(prev);
+        next.delete(layerType);
+        return next;
+      });
+      onToggleLayer(layerType, null);
+      return;
+    }
+
+    setLoading(layerType);
+    try {
+      const { data, error } = await supabase.functions.invoke('google-earth-engine', {
+        body: { layerType, region: 'global' },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Layer loaded",
+        description: `${data.description} loaded successfully`,
+      });
+
+      setActiveLayers(prev => new Set(prev).add(layerType));
+      onToggleLayer(layerType, data);
+    } catch (error: any) {
+      console.error('Error fetching layer:', error);
+      toast({
+        title: "Error",
+        description: error.message || 'Failed to load conservation layer',
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(null);
+    }
   };
 
   return (
@@ -40,43 +72,36 @@ const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
         {expanded && (
           <div className="mt-3 space-y-2 border-t border-border/50 pt-3">
             <Button
-              variant={layers.arcticIce ? "default" : "ghost"}
+              variant={activeLayers.has('forest') ? "default" : "ghost"}
               size="sm"
-              onClick={() => toggleLayer('arcticIce')}
-              className="w-full justify-start gap-2 text-sm"
-            >
-              <Snowflake className="h-4 w-4" />
-              Arctic Ice Loss
-            </Button>
-
-            <Button
-              variant={layers.deforestation ? "default" : "ghost"}
-              size="sm"
-              onClick={() => toggleLayer('deforestation')}
+              onClick={() => fetchLayerData('forest')}
+              disabled={loading === 'forest'}
               className="w-full justify-start gap-2 text-sm"
             >
               <TreePine className="h-4 w-4" />
-              Deforestation
+              {loading === 'forest' ? 'Loading...' : 'Forest Cover'}
             </Button>
 
             <Button
-              variant={layers.oceanHealth ? "default" : "ghost"}
+              variant={activeLayers.has('ice') ? "default" : "ghost"}
               size="sm"
-              onClick={() => toggleLayer('oceanHealth')}
+              onClick={() => fetchLayerData('ice')}
+              disabled={loading === 'ice'}
               className="w-full justify-start gap-2 text-sm"
             >
-              <Waves className="h-4 w-4" />
-              Ocean Health
+              <Snowflake className="h-4 w-4" />
+              {loading === 'ice' ? 'Loading...' : 'Ice Coverage'}
             </Button>
 
             <Button
-              variant={layers.protectedAreas ? "default" : "ghost"}
+              variant={activeLayers.has('protected') ? "default" : "ghost"}
               size="sm"
-              onClick={() => toggleLayer('protectedAreas')}
+              onClick={() => fetchLayerData('protected')}
+              disabled={loading === 'protected'}
               className="w-full justify-start gap-2 text-sm"
             >
               <Shield className="h-4 w-4" />
-              Protected Areas
+              {loading === 'protected' ? 'Loading...' : 'Protected Areas'}
             </Button>
           </div>
         )}
