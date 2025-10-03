@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import CesiumGlobe from '@/components/CesiumGlobe';
+import GlobeComponent from '@/components/Globe';
 import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
@@ -319,9 +319,9 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Cesium Globe */}
+      {/* Globe */}
       <div className="absolute inset-0">
-        <CesiumGlobe 
+        <GlobeComponent 
           habitats={[...habitats, ...userPins, ...imageMarkers]} 
           onPointClick={handlePointClick} 
           onDoubleGlobeClick={handleDoubleGlobeClick}
