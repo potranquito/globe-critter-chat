@@ -157,6 +157,28 @@ const Index = () => {
         setSpeciesInfo(data.info);
         setRegionalAnimals(null);
         setSelectedRegion(null);
+        
+        // Create image markers from threats and ecosystem images
+        const allImages = [
+          ...data.info.threatImages.map((img: string) => ({ url: img, type: 'threat' as const })),
+          ...data.info.ecosystemImages.map((img: string) => ({ url: img, type: 'ecosystem' as const }))
+        ];
+        
+        const markers = allImages.map((img, idx) => {
+          const habitat = data.habitats[idx % data.habitats.length];
+          const offset = () => (Math.random() - 0.5) * 2;
+          return {
+            lat: habitat.lat + offset(),
+            lng: habitat.lng + offset(),
+            imageUrl: img.url,
+            type: img.type,
+            size: 0.05,
+            color: '#FFFFFF',
+            index: idx
+          };
+        });
+        
+        setImageMarkers(markers);
       } else {
         toast({
           title: 'No Results',
@@ -166,6 +188,7 @@ const Index = () => {
         setHabitats([]);
         setCurrentSpecies(null);
         setSpeciesInfo(null);
+        setImageMarkers([]);
       }
       
       setIsLoading(false);
