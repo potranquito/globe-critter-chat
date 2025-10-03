@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
+import ZoomControls from './ZoomControls';
 
 interface HabitatPoint {
   lat: number;
@@ -20,16 +21,70 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const globeEl = useRef<any>();
   const [globeReady, setGlobeReady] = useState(false);
   const lastClickRef = useRef<number>(0);
+  const [currentAltitude, setCurrentAltitude] = useState(2);
+  const autoRotateTimeoutRef = useRef<NodeJS.Timeout>();
+  const interactionRef = useRef(false);
 
   // Separate regular points from image markers
   const regularPoints = habitats.filter(h => !('imageUrl' in h));
   const imageMarkers = habitats.filter(h => 'imageUrl' in h);
 
+  // Configure enhanced OrbitControls for Google Earth-style zoom
   useEffect(() => {
     if (globeEl.current && globeReady) {
-      // Auto-rotate
-      globeEl.current.controls().autoRotate = true;
-      globeEl.current.controls().autoRotateSpeed = 0.3;
+      const controls = globeEl.current.controls();
+      
+      // Enhanced controls configuration
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.rotateSpeed = 0.5;
+      controls.enableZoom = true;
+      controls.minDistance = 101; // ~0.15 altitude (earth radius = 100)
+      controls.maxDistance = 450; // ~3.5 altitude
+      controls.enablePan = false;
+      controls.minPolarAngle = 0;
+      controls.maxPolarAngle = Math.PI;
+      
+      // Dynamic zoom speed based on altitude
+      const updateZoomSpeed = () => {
+        const pov = globeEl.current.pointOfView();
+        const altitude = pov.altitude;
+        setCurrentAltitude(altitude);
+        
+        if (altitude > 2) {
+          controls.zoomSpeed = 1.5;
+        } else if (altitude > 0.8) {
+          controls.zoomSpeed = 1.0;
+        } else {
+          controls.zoomSpeed = 0.5;
+        }
+      };
+      
+      // Smart auto-rotation control
+      const handleInteractionStart = () => {
+        interactionRef.current = true;
+        controls.autoRotate = false;
+        if (autoRotateTimeoutRef.current) {
+          clearTimeout(autoRotateTimeoutRef.current);
+        }
+      };
+      
+      const handleInteractionEnd = () => {
+        interactionRef.current = false;
+        autoRotateTimeoutRef.current = setTimeout(() => {
+          if (!interactionRef.current && controls) {
+            controls.autoRotate = true;
+          }
+        }, 2000);
+      };
+      
+      controls.addEventListener('start', handleInteractionStart);
+      controls.addEventListener('end', handleInteractionEnd);
+      controls.addEventListener('change', updateZoomSpeed);
+      
+      // Initial auto-rotate setup
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.3;
       
       // Point camera at the first habitat if exists
       if (regularPoints.length > 0) {
@@ -42,6 +97,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           },
           2000
         );
+        setCurrentAltitude(1.5);
       } else {
         // Center the globe when no habitats
         globeEl.current.pointOfView(
@@ -52,12 +108,69 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           },
           2000
         );
+        setCurrentAltitude(2);
       }
+      
+      return () => {
+        controls.removeEventListener('start', handleInteractionStart);
+        controls.removeEventListener('end', handleInteractionEnd);
+        controls.removeEventListener('change', updateZoomSpeed);
+        if (autoRotateTimeoutRef.current) {
+          clearTimeout(autoRotateTimeoutRef.current);
+        }
+      };
     }
   }, [regularPoints, globeReady]);
 
+  // Zoom control handlers
+  const handleZoomIn = () => {
+    if (globeEl.current) {
+      const pov = globeEl.current.pointOfView();
+      const newAltitude = Math.max(0.15, pov.altitude - 0.3);
+      globeEl.current.pointOfView({ ...pov, altitude: newAltitude }, 800);
+      setCurrentAltitude(newAltitude);
+    }
+  };
+
+  const handleZoomOut = () => {
+    if (globeEl.current) {
+      const pov = globeEl.current.pointOfView();
+      const newAltitude = Math.min(3.5, pov.altitude + 0.3);
+      globeEl.current.pointOfView({ ...pov, altitude: newAltitude }, 800);
+      setCurrentAltitude(newAltitude);
+    }
+  };
+
+  const handleResetView = () => {
+    if (globeEl.current) {
+      globeEl.current.pointOfView(
+        {
+          lat: 20,
+          lng: 0,
+          altitude: 2,
+        },
+        1500
+      );
+      setCurrentAltitude(2);
+    }
+  };
+
+  const getZoomLevel = () => {
+    if (currentAltitude < 0.5) return 'Very Close';
+    if (currentAltitude < 1) return 'Close';
+    if (currentAltitude < 2) return 'Medium';
+    if (currentAltitude < 3) return 'Far';
+    return 'Very Far';
+  };
+
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
+      <ZoomControls
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onReset={handleResetView}
+        zoomLevel={getZoomLevel()}
+      />
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
@@ -75,9 +188,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         onPointClick={(d: any) => {
           if (globeEl.current) {
             globeEl.current.pointOfView(
-              { lat: d.lat, lng: d.lng, altitude: 0.4 },
-              1500
+              { lat: d.lat, lng: d.lng, altitude: 0.25 },
+              1800
             );
+            setCurrentAltitude(0.25);
           }
           onPointClickProp?.(d);
         }}
@@ -97,6 +211,13 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           el.onclick = (e) => {
             e.stopPropagation();
             console.log('HTML element clicked:', d);
+            if (globeEl.current) {
+              globeEl.current.pointOfView(
+                { lat: d.lat, lng: d.lng, altitude: 0.4 },
+                1800
+              );
+              setCurrentAltitude(0.4);
+            }
             onImageMarkerClick?.(d);
           };
           return el;
@@ -111,7 +232,8 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
             const lng = coords?.lng ?? coords?.[1];
             if (typeof lat === 'number' && typeof lng === 'number') {
               if (globeEl.current) {
-                globeEl.current.pointOfView({ lat, lng, altitude: 0.6 }, 1200);
+                globeEl.current.pointOfView({ lat, lng, altitude: 0.8 }, 1800);
+                setCurrentAltitude(0.8);
               }
               onDoubleGlobeClick?.(lat, lng);
             }
@@ -125,3 +247,4 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
 };
 
 export default GlobeComponent;
+export type { HabitatPoint, GlobeComponentProps };
