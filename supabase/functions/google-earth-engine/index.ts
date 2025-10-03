@@ -15,43 +15,46 @@ serve(async (req) => {
     const { layerType, region } = await req.json();
     
     console.log(`Fetching GEE data for layer: ${layerType}, region: ${region}`);
-    
-    const serviceAccountJson = Deno.env.get('GEE_SERVICE_ACCOUNT_JSON');
-    if (!serviceAccountJson) {
-      throw new Error('GEE service account not configured');
+
+    // Try to get an OAuth token using the service account, but fall back gracefully
+    let accessToken: string | null = null;
+    try {
+      const serviceAccountJson = Deno.env.get('GEE_SERVICE_ACCOUNT_JSON');
+      if (!serviceAccountJson) {
+        console.warn('GEE service account not configured. Proceeding with sample data.');
+      } else {
+        const serviceAccount = JSON.parse(serviceAccountJson);
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+            assertion: await createJWT(serviceAccount),
+          }),
+        });
+        if (!tokenResponse.ok) {
+          const error = await tokenResponse.text();
+          console.warn('Token error (non-fatal):', error);
+        } else {
+          const tokenJson = await tokenResponse.json();
+          accessToken = tokenJson.access_token as string;
+        }
+      }
+    } catch (tokenErr) {
+      console.warn('Failed to initialize GEE auth (non-fatal):', tokenErr);
     }
-
-    const serviceAccount = JSON.parse(serviceAccountJson);
     
-    // Get OAuth token using service account
-    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-        assertion: await createJWT(serviceAccount),
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      const error = await tokenResponse.text();
-      console.error('Token error:', error);
-      throw new Error(`Failed to get OAuth token: ${error}`);
-    }
-
-    const { access_token } = await tokenResponse.json();
-    
-    // Fetch conservation data based on layer type
+    // Fetch conservation data based on layer type (uses sample data for now)
     let layerData;
     switch (layerType) {
       case 'forest':
-        layerData = await fetchForestCover(access_token, region);
+        layerData = await fetchForestCover(accessToken ?? '', region);
         break;
       case 'ice':
-        layerData = await fetchIceCoverage(access_token, region);
+        layerData = await fetchIceCoverage(accessToken ?? '', region);
         break;
       case 'protected':
-        layerData = await fetchProtectedAreas(access_token, region);
+        layerData = await fetchProtectedAreas(accessToken ?? '', region);
         break;
       default:
         throw new Error(`Unknown layer type: ${layerType}`);
