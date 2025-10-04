@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import GlobeComponent from '@/components/Globe';
+import GoogleEarthMap from '@/components/GoogleEarthMap';
 import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
@@ -137,6 +138,8 @@ const Index = () => {
   const [chatMessage, setChatMessage] = useState<string>('');
   const [conservationLayers, setConservationLayers] = useState<any[]>([]);
   const [activeLayers, setActiveLayers] = useState<Array<{ name: string; count: number }>>([]);
+  const [useGoogleMaps, setUseGoogleMaps] = useState(false);
+  const [currentZoomLevel, setCurrentZoomLevel] = useState(3);
 
   const handleSearch = async (query: string) => {
     // If expanded image is open, send message to chat instead
@@ -363,30 +366,73 @@ const Index = () => {
     setImageMarkers([]);
     setConservationLayers([]);
     setActiveLayers([]);
+    setUseGoogleMaps(false);
+    setCurrentZoomLevel(3);
+  };
+
+  // Toggle between Globe and Google Maps based on interaction or zoom
+  const handleToggleMapView = () => {
+    setUseGoogleMaps(prev => !prev);
+    toast({
+      title: useGoogleMaps ? 'Switched to Globe View' : 'Switched to Satellite View',
+      description: useGoogleMaps ? 'Exploring with 3D globe' : 'Exploring with Google Maps satellite imagery'
+    });
   };
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Globe */}
+      {/* Globe or Google Maps */}
       <div className="absolute inset-0">
-        <GlobeComponent 
-          habitats={[
-            ...habitats, 
-            ...userPins, 
-            ...imageMarkers,
-            ...conservationLayers.flatMap(layer => 
-              layer.data.map((point: any) => ({
-                ...point,
-                color: layer.color,
-                size: 0.3,
-                species: point.name,
-              }))
-            )
-          ]} 
-          onPointClick={handlePointClick} 
-          onDoubleGlobeClick={handleDoubleGlobeClick}
-          onImageMarkerClick={handleImageMarkerClick}
-        />
+        {useGoogleMaps ? (
+          <GoogleEarthMap
+            habitats={[
+              ...habitats, 
+              ...userPins, 
+              ...imageMarkers,
+              ...conservationLayers.flatMap(layer => 
+                layer.data.map((point: any) => ({
+                  ...point,
+                  color: layer.color,
+                  size: 0.3,
+                  species: point.name,
+                }))
+              )
+            ]} 
+            onPointClick={handlePointClick} 
+            onDoubleGlobeClick={handleDoubleGlobeClick}
+            onImageMarkerClick={handleImageMarkerClick}
+          />
+        ) : (
+          <GlobeComponent 
+            habitats={[
+              ...habitats, 
+              ...userPins, 
+              ...imageMarkers,
+              ...conservationLayers.flatMap(layer => 
+                layer.data.map((point: any) => ({
+                  ...point,
+                  color: layer.color,
+                  size: 0.3,
+                  species: point.name,
+                }))
+              )
+            ]} 
+            onPointClick={handlePointClick} 
+            onDoubleGlobeClick={handleDoubleGlobeClick}
+            onImageMarkerClick={handleImageMarkerClick}
+          />
+        )}
+      </div>
+
+      {/* Map View Toggle Button */}
+      <div className="absolute top-6 right-6 z-30">
+        <Button
+          onClick={handleToggleMapView}
+          variant="secondary"
+          className="glass-panel rounded-xl px-4 py-2 hover:bg-secondary/80"
+        >
+          {useGoogleMaps ? '🌍 Globe View' : '🛰️ Satellite View'}
+        </Button>
       </div>
 
 

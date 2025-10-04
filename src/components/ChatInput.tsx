@@ -22,11 +22,11 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder }: ChatInputProps)
 
   return (
     <form onSubmit={handleSubmit} className="w-full flex justify-center">
-      <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full max-w-lg">
+      <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full max-w-4xl">
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder={placeholder || "Enter an animal species (e.g., 'Polar Bear') or location..."}
+          placeholder={placeholder || "Enter an animal species or location to begin"}
           className="border-0 bg-transparent text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
           disabled={isLoading}
         />
