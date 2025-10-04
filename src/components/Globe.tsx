@@ -19,9 +19,12 @@ interface GlobeComponentProps {
 
 const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
+  const MIN_ALT = 1.4;
+  const MAX_ALT = 3.0;
+  const INITIAL_ALT = 2.2;
   const [globeReady, setGlobeReady] = useState(false);
   const lastClickRef = useRef<number>(0);
-  const [currentAltitude, setCurrentAltitude] = useState(2);
+  const [currentAltitude, setCurrentAltitude] = useState(INITIAL_ALT);
   const autoRotateTimeoutRef = useRef<NodeJS.Timeout>();
   const interactionRef = useRef(false);
 
@@ -52,12 +55,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       controls.enableRotate = true;
     }
 
-    // Reasonable ranges and smoothing
-    if ('minDistance' in controls) (controls as any).minDistance = 1.0;
-    if ('maxDistance' in controls) (controls as any).maxDistance = 6;
+    // Disable minDistance/maxDistance - we'll control zoom via altitude only
+    if ('minDistance' in controls) (controls as any).minDistance = 0;
+    if ('maxDistance' in controls) (controls as any).maxDistance = Infinity;
     controls.zoomSpeed = 0.8;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    
+    // Pause auto-rotate during user interaction
+    controls.addEventListener('start', () => {
+      controls.autoRotate = false;
+    });
 
     // Ensure the canvas actually receives pointer events
     const canvas = globeEl.current.renderer().domElement as HTMLCanvasElement | undefined;
@@ -78,13 +86,13 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       const pov = globeEl.current.pointOfView();
       if (typeof pov.altitude === 'number') {
         let alt = pov.altitude;
-        if (alt < 1.0) {
-          globeEl.current.pointOfView({ ...pov, altitude: 1.0 });
-          alt = 1.0;
+        if (alt < MIN_ALT) {
+          globeEl.current.pointOfView({ ...pov, altitude: MIN_ALT });
+          alt = MIN_ALT;
         }
-        if (alt > 2.8) {
-          globeEl.current.pointOfView({ ...pov, altitude: 2.8 });
-          alt = 2.8;
+        if (alt > MAX_ALT) {
+          globeEl.current.pointOfView({ ...pov, altitude: MAX_ALT });
+          alt = MAX_ALT;
         }
         setCurrentAltitude(alt);
       }
@@ -92,10 +100,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
 
     // Set initial camera position only once
     globeEl.current.pointOfView(
-      { lat: 20, lng: 0, altitude: 1.6 },
+      { lat: 20, lng: 0, altitude: INITIAL_ALT },
       1500
     );
-    setCurrentAltitude(1.6);
+    setCurrentAltitude(INITIAL_ALT);
   }, [globeReady]);
 
   // Separate effect to handle habitat changes without resetting camera
@@ -104,17 +112,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     
     const firstHabitat = regularPoints[0];
     globeEl.current.pointOfView(
-      { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 1.6 },
+      { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: INITIAL_ALT },
       1500
     );
-    setCurrentAltitude(1.6);
+    setCurrentAltitude(INITIAL_ALT);
   }, [regularPoints.length > 0 ? regularPoints[0]?.species : null, globeReady]);
 
   // Zoom control handlers
   const handleZoomIn = () => {
     if (globeEl.current) {
       const pov = globeEl.current.pointOfView();
-      const newAltitude = Math.max(1.0, pov.altitude - 0.2);
+      const newAltitude = Math.max(MIN_ALT, pov.altitude - 0.3);
       globeEl.current.pointOfView({ ...pov, altitude: newAltitude }, 800);
       setCurrentAltitude(newAltitude);
     }
@@ -123,7 +131,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const handleZoomOut = () => {
     if (globeEl.current) {
       const pov = globeEl.current.pointOfView();
-      const newAltitude = Math.min(2.8, pov.altitude + 0.2);
+      const newAltitude = Math.min(MAX_ALT, pov.altitude + 0.3);
       globeEl.current.pointOfView({ ...pov, altitude: newAltitude }, 800);
       setCurrentAltitude(newAltitude);
     }
@@ -135,11 +143,14 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         {
           lat: 20,
           lng: 0,
-          altitude: 1.6,
+          altitude: INITIAL_ALT,
         },
         1500
       );
-      setCurrentAltitude(1.6);
+      setCurrentAltitude(INITIAL_ALT);
+      // Re-enable auto-rotate on reset
+      const controls = globeEl.current.controls();
+      if (controls) controls.autoRotate = true;
     }
   };
 
