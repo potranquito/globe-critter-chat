@@ -55,7 +55,7 @@ const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
   };
 
   return (
-    <div className="relative z-50 flex flex-col gap-2">
+    <div className="relative z-50 flex flex-col gap-2 pointer-events-auto">
       <div className="glass-panel rounded-lg p-3 pointer-events-auto">
         <Button
           variant="ghost"

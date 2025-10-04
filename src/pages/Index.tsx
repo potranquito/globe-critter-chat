@@ -448,7 +448,7 @@ const Index = () => {
       )}
 
       {/* Conservation Data - Bottom Left */}
-      <div className="absolute bottom-8 left-6 z-30 pointer-events-auto">
+      <div className="absolute bottom-8 left-6 z-50 pointer-events-auto">
         <ConservationLayers onToggleLayer={handleLayerToggle} />
       </div>
 
