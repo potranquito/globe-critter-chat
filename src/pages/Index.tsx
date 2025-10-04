@@ -410,7 +410,7 @@ const Index = () => {
 
       {/* Left Side Card with Conservation Layers */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-50 flex flex-col gap-3">
+        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-[60] flex flex-col gap-3">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -441,7 +441,7 @@ const Index = () => {
       )}
 
       {/* Chat Input with Earth Mascot and Reset Button */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-50 w-full px-6 flex flex-col items-center gap-3 pointer-events-none">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-full px-6 flex flex-col items-center gap-3 pointer-events-none">
         {/* Active Layers Chip */}
         {activeLayers.length > 0 && (
           <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 pointer-events-auto">

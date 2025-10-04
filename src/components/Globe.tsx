@@ -82,16 +82,16 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       if (regularPoints.length > 0) {
         const firstHabitat = regularPoints[0];
         globeEl.current.pointOfView(
-          { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 0.35 },
+          { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 0.22 },
           2000
         );
-        setCurrentAltitude(0.35);
+        setCurrentAltitude(0.22);
       } else {
         globeEl.current.pointOfView(
-          { lat: 20, lng: 0, altitude: 0.4 },
+          { lat: 20, lng: 0, altitude: 0.25 },
           2000
         );
-        setCurrentAltitude(0.4);
+        setCurrentAltitude(0.25);
       }
     }
   }, [regularPoints, globeReady]);
@@ -121,11 +121,11 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         {
           lat: 20,
           lng: 0,
-          altitude: 0.4,
+          altitude: 0.25,
         },
         1500
       );
-      setCurrentAltitude(0.4);
+      setCurrentAltitude(0.25);
     }
   };
 
@@ -163,10 +163,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         onPointClick={(d: any) => {
           if (globeEl.current) {
             globeEl.current.pointOfView(
-              { lat: d.lat, lng: d.lng, altitude: 0.25 },
+              { lat: d.lat, lng: d.lng, altitude: 0.2 },
               1800
             );
-            setCurrentAltitude(0.25);
+            setCurrentAltitude(0.2);
           }
           onPointClickProp?.(d);
         }}
@@ -188,10 +188,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
             console.log('HTML element clicked:', d);
             if (globeEl.current) {
               globeEl.current.pointOfView(
-                { lat: d.lat, lng: d.lng, altitude: 0.4 },
+                { lat: d.lat, lng: d.lng, altitude: 0.3 },
                 1800
               );
-              setCurrentAltitude(0.4);
+              setCurrentAltitude(0.3);
             }
             onImageMarkerClick?.(d);
           };
@@ -207,8 +207,8 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
             const lng = coords?.lng ?? coords?.[1];
             if (typeof lat === 'number' && typeof lng === 'number') {
               if (globeEl.current) {
-                globeEl.current.pointOfView({ lat, lng, altitude: 0.8 }, 1800);
-                setCurrentAltitude(0.8);
+                globeEl.current.pointOfView({ lat, lng, altitude: 0.5 }, 1800);
+                setCurrentAltitude(0.5);
               }
               onDoubleGlobeClick?.(lat, lng);
             }
