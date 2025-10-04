@@ -162,7 +162,9 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   };
 
   return (
-    <div className="globe-root w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none" aria-label="Interactive 3D Earth">
+    <div className="globe-root w-full h-full relative cursor-grab active:cursor-grabbing z-0 touch-none select-none" 
+         style={{ pointerEvents: 'auto' }} 
+         aria-label="Interactive 3D Earth">
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"

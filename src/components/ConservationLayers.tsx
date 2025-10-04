@@ -55,7 +55,7 @@ const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
   };
 
   return (
-    <div className="relative z-50 flex flex-col gap-2 pointer-events-none">
+    <div className="relative z-50 flex flex-col gap-2">
       <div className="glass-panel rounded-lg p-3 pointer-events-auto">
         <Button
           variant="ghost"
@@ -109,7 +109,7 @@ const ConservationLayers = ({ onToggleLayer }: ConservationLayersProps) => {
       </div>
 
       {expanded && (
-        <div className="glass-panel rounded-lg px-3 py-2 text-xs pointer-events-none">
+        <div className="glass-panel rounded-lg px-3 py-2 text-xs pointer-events-auto">
           <div className="text-muted-foreground">Data Sources</div>
           <div className="font-medium mt-1">Google Earth Engine</div>
         </div>
