@@ -8,7 +8,7 @@ import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import ConservationLayers from '@/components/ConservationLayers';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RotateCcw, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
@@ -386,6 +386,34 @@ const Index = () => {
     setCurrentZoomLevel(3);
   };
 
+  const handleFetchLocation = async () => {
+    try {
+      const response = await fetch('https://ipapi.co/json/');
+      const data = await response.json();
+      
+      if (data.latitude && data.longitude) {
+        const location = {
+          lat: data.latitude,
+          lng: data.longitude,
+          name: data.city ? `${data.city}, ${data.country_name}` : data.country_name
+        };
+        
+        setUserPins([location]);
+        toast({
+          title: "Location Found",
+          description: `Showing ${location.name}`,
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching location:', error);
+      toast({
+        title: "Location Error",
+        description: "Unable to fetch your location",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Toggle between Globe and Google Maps based on interaction or zoom
   const handleToggleMapView = () => {
     setUseGoogleMaps(prev => !prev);
@@ -518,6 +546,15 @@ const Index = () => {
               placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
             />
           </div>
+          <Button 
+            onClick={handleFetchLocation}
+            variant="secondary"
+            size="icon"
+            className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2 hover:bg-secondary/80"
+            title="Show my location"
+          >
+            <MapPin className="h-5 w-5" />
+          </Button>
           {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
             <Button 
               onClick={handleReset}
