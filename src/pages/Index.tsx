@@ -453,7 +453,7 @@ const Index = () => {
       </div>
 
       {/* Chat Input with Earth Mascot and Reset Button */}
-      <div className="absolute bottom-8 left-6 z-30 w-full pr-6 flex flex-col items-start gap-3 pointer-events-none">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-full max-w-[1250px] flex flex-col items-center gap-3 pointer-events-none">
         {/* Active Layers Chip */}
         {activeLayers.length > 0 && (
           <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 pointer-events-auto">
@@ -464,7 +464,7 @@ const Index = () => {
           </div>
         )}
         
-        <div className="flex items-end gap-3 pointer-events-auto">
+        <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
           <img 
             src={earthMascot} 
             alt="Earth Mascot" 
