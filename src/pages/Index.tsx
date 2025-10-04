@@ -410,7 +410,7 @@ const Index = () => {
 
       {/* Left Side Card with Conservation Layers */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-64 max-h-[calc(100vh-12rem)] overflow-y-auto z-[60] flex flex-col gap-3">
+        <div className="absolute left-6 top-6 w-64 z-[60] flex flex-col gap-3">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
