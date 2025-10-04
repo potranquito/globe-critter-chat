@@ -470,11 +470,13 @@ const Index = () => {
             alt="Earth Mascot" 
             className="w-16 h-16 object-contain animate-float -mb-1"
           />
-          <ChatInput 
-            onSubmit={handleSearch} 
-            isLoading={isLoading}
-            placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
-          />
+          <div className="w-full max-w-[712px]">
+            <ChatInput 
+              onSubmit={handleSearch} 
+              isLoading={isLoading}
+              placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
+            />
+          </div>
           {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
             <Button 
               onClick={handleReset}
