@@ -8,7 +8,7 @@ import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import ConservationLayers from '@/components/ConservationLayers';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
+import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
@@ -478,6 +478,30 @@ const Index = () => {
             <span className="text-sm font-medium">
               {activeLayers.map(l => `${l.name}: ${l.count}`).join(' • ')}
             </span>
+          </div>
+        )}
+
+        {/* Navigation buttons - only show when image is expanded */}
+        {expandedImage && (
+          <div className="flex gap-2 pointer-events-auto">
+            <Button 
+              onClick={handlePreviousImage}
+              variant="secondary"
+              size="sm"
+              className="glass-panel"
+            >
+              <ChevronLeft className="h-4 w-4 mr-1" />
+              Back
+            </Button>
+            <Button 
+              onClick={handleNextImage}
+              variant="secondary"
+              size="sm"
+              className="glass-panel"
+            >
+              Next
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
           </div>
         )}
         

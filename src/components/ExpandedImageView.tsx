@@ -138,34 +138,6 @@ const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, on
           <h3 className="text-base font-bold text-foreground">{title}</h3>
         </div>
 
-        {/* Navigation buttons */}
-        {(onNext || onPrevious) && (
-          <div className="flex gap-2 mb-4">
-            {onPrevious && (
-              <Button 
-                onClick={onPrevious}
-                className="flex-1"
-                variant="secondary"
-                size="sm"
-              >
-                <ChevronLeft className="h-4 w-4 mr-1" />
-                Back
-              </Button>
-            )}
-            {onNext && (
-              <Button 
-                onClick={onNext}
-                className="flex-1"
-                variant="secondary"
-                size="sm"
-              >
-                Next
-                <ChevronRight className="h-4 w-4 ml-1" />
-              </Button>
-            )}
-          </div>
-        )}
-
         {messages.map((msg, idx) => (
           <div 
             key={idx}
