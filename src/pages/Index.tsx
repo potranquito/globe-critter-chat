@@ -433,6 +433,11 @@ const Index = () => {
         />
       )}
 
+      {/* Conservation Data - Bottom Left */}
+      <div className="absolute bottom-8 left-6 z-30 pointer-events-auto">
+        <ConservationLayers onToggleLayer={handleLayerToggle} />
+      </div>
+
       {/* Chat Input with Earth Mascot and Reset Button */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-full px-6 flex flex-col items-center gap-3 pointer-events-none">
         {/* Active Layers Chip */}
@@ -446,9 +451,6 @@ const Index = () => {
         )}
         
         <div className="flex justify-center items-end gap-3 pointer-events-auto">
-          <div className="mb-2">
-            <ConservationLayers onToggleLayer={handleLayerToggle} />
-          </div>
           <img 
             src={earthMascot} 
             alt="Earth Mascot" 
