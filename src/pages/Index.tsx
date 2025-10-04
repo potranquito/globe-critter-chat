@@ -318,6 +318,22 @@ const Index = () => {
     });
   };
 
+  const handlePreviousImage = () => {
+    if (!expandedImage || !speciesInfo) return;
+    
+    const allImages = [
+      ...speciesInfo.threatImages.map((img: string) => ({ url: img, type: 'threat' as const })),
+      ...speciesInfo.ecosystemImages.map((img: string) => ({ url: img, type: 'ecosystem' as const }))
+    ];
+    
+    const prevIndex = (expandedImage.index - 1 + allImages.length) % allImages.length;
+    setExpandedImage({
+      url: allImages[prevIndex].url,
+      type: allImages[prevIndex].type,
+      index: prevIndex
+    });
+  };
+
   const handleLayerToggle = (layerType: string, data?: any) => {
     console.log('Layer toggle:', layerType, data);
     
@@ -443,6 +459,7 @@ const Index = () => {
             setExpandedImage(null);
           }}
           onNext={handleNextImage}
+          onPrevious={handlePreviousImage}
           externalMessage={chatMessage}
         />
       )}

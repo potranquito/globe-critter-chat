@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Volume2 } from 'lucide-react';
+import { X, Volume2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -11,10 +11,11 @@ interface ExpandedImageViewProps {
   title: string;
   onClose: () => void;
   onNext?: () => void;
+  onPrevious?: () => void;
   externalMessage?: string;
 }
 
-const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, externalMessage }: ExpandedImageViewProps) => {
+const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, onPrevious, externalMessage }: ExpandedImageViewProps) => {
   const [messages, setMessages] = useState<Array<{role: string; content: string; isStreaming?: boolean}>>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -115,6 +116,16 @@ const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, ex
 
   return (
     <div className="absolute right-6 top-6 w-80 max-h-[calc(100vh-10rem)] glass-panel rounded-2xl p-4 animate-fade-in overflow-hidden flex flex-col">
+      {/* Close button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={onClose}
+        className="absolute top-2 right-2 h-8 w-8 z-10"
+      >
+        <X className="h-4 w-4" />
+      </Button>
+
       <div className="flex-1 overflow-y-auto mb-4 space-y-3">
         <div className="mb-4">
           <div className="rounded-xl overflow-hidden mb-2">
@@ -126,6 +137,35 @@ const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, ex
           </div>
           <h3 className="text-base font-bold text-foreground">{title}</h3>
         </div>
+
+        {/* Navigation buttons */}
+        {(onNext || onPrevious) && (
+          <div className="flex gap-2 mb-4">
+            {onPrevious && (
+              <Button 
+                onClick={onPrevious}
+                className="flex-1"
+                variant="secondary"
+                size="sm"
+              >
+                <ChevronLeft className="h-4 w-4 mr-1" />
+                Back
+              </Button>
+            )}
+            {onNext && (
+              <Button 
+                onClick={onNext}
+                className="flex-1"
+                variant="secondary"
+                size="sm"
+              >
+                Next
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            )}
+          </div>
+        )}
+
         {messages.map((msg, idx) => (
           <div 
             key={idx}
@@ -158,18 +198,7 @@ const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, ex
             Thinking...
           </div>
         )}
-
       </div>
-
-      {onNext && (
-        <Button 
-          onClick={onNext}
-          className="w-full mt-2"
-          variant="secondary"
-        >
-          Next
-        </Button>
-      )}
     </div>
   );
 };
