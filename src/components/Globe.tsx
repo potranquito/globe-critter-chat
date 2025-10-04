@@ -53,7 +53,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     }
 
     // Reasonable ranges and smoothing
-    if ('minDistance' in controls) (controls as any).minDistance = 0.15;
+    if ('minDistance' in controls) (controls as any).minDistance = 0.8;
     if ('maxDistance' in controls) (controls as any).maxDistance = 8;
     controls.zoomSpeed = 1.0;
     controls.enableDamping = true;
@@ -74,18 +74,28 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
 
     // Track altitude changes from mouse wheel / interactions
     controls.addEventListener('change', () => {
-      if (globeEl.current) {
-        const pov = globeEl.current.pointOfView();
-        if (typeof pov.altitude === 'number') setCurrentAltitude(pov.altitude);
+      if (!globeEl.current) return;
+      const pov = globeEl.current.pointOfView();
+      if (typeof pov.altitude === 'number') {
+        let alt = pov.altitude;
+        if (alt < 0.8) {
+          globeEl.current.pointOfView({ ...pov, altitude: 0.8 });
+          alt = 0.8;
+        }
+        if (alt > 3) {
+          globeEl.current.pointOfView({ ...pov, altitude: 3 });
+          alt = 3;
+        }
+        setCurrentAltitude(alt);
       }
     });
 
     // Set initial camera position only once
     globeEl.current.pointOfView(
-      { lat: 20, lng: 0, altitude: 1.4 },
+      { lat: 20, lng: 0, altitude: 1.6 },
       1500
     );
-    setCurrentAltitude(1.4);
+    setCurrentAltitude(1.6);
   }, [globeReady]);
 
   // Separate effect to handle habitat changes without resetting camera
@@ -94,10 +104,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     
     const firstHabitat = regularPoints[0];
     globeEl.current.pointOfView(
-      { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 1.4 },
+      { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 1.6 },
       1500
     );
-    setCurrentAltitude(1.4);
+    setCurrentAltitude(1.6);
   }, [regularPoints.length > 0 ? regularPoints[0]?.species : null, globeReady]);
 
   // Zoom control handlers
@@ -125,11 +135,11 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         {
           lat: 20,
           lng: 0,
-          altitude: 1.4,
+          altitude: 1.6,
         },
         1500
       );
-      setCurrentAltitude(1.4);
+      setCurrentAltitude(1.6);
     }
   };
 
@@ -142,7 +152,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   };
 
   return (
-    <div className="globe-root w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none">
+    <div className="globe-root w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none" aria-label="Interactive 3D Earth">
       <ZoomControls
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
