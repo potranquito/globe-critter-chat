@@ -29,72 +29,76 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const regularPoints = habitats.filter(h => !('imageUrl' in h));
   const imageMarkers = habitats.filter(h => 'imageUrl' in h);
 
-  // Enable full zoom and interaction controls
+  // Enable full zoom and interaction controls - only run once when globe is ready
   useEffect(() => {
-    if (globeEl.current && globeReady) {
-      const controls = globeEl.current.controls();
-      // Force-enable interactions across OrbitControls or TrackballControls
-      controls.enabled = true;
-      controls.autoRotate = true;
-      controls.autoRotateSpeed = 0.3;
+    if (!globeEl.current || !globeReady) return;
+    
+    const controls = globeEl.current.controls();
+    // Force-enable interactions across OrbitControls or TrackballControls
+    controls.enabled = true;
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.3;
 
-      // Support both controls APIs
-      if ('noZoom' in controls) {
-        // TrackballControls style flags
-        controls.noZoom = false;
-        controls.noPan = false;
-        controls.noRotate = false;
-      }
-      if ('enableZoom' in controls) {
-        controls.enableZoom = true;
-        controls.enablePan = true;
-        controls.enableRotate = true;
-      }
-
-      // Reasonable ranges and smoothing
-      if ('minDistance' in controls) (controls as any).minDistance = 0.15;
-      if ('maxDistance' in controls) (controls as any).maxDistance = 8;
-      controls.zoomSpeed = 1.0;
-      controls.enableDamping = true;
-      controls.dampingFactor = 0.08;
-
-      // Ensure the canvas actually receives pointer events
-      const canvas = globeEl.current.renderer().domElement as HTMLCanvasElement | undefined;
-      if (canvas) {
-        canvas.style.pointerEvents = 'auto';
-        // Prevent browser gestures from hijacking drag/zoom on touch devices
-        (canvas.style as any).touchAction = 'none';
-        canvas.style.cursor = 'grab';
-        const onDown = () => (canvas.style.cursor = 'grabbing');
-        const onUp = () => (canvas.style.cursor = 'grab');
-        canvas.addEventListener('pointerdown', onDown);
-        canvas.addEventListener('pointerup', onUp);
-      }
-
-      // Track altitude changes from mouse wheel / interactions
-      controls.addEventListener('change', () => {
-        if (globeEl.current) {
-          const pov = globeEl.current.pointOfView();
-          if (typeof pov.altitude === 'number') setCurrentAltitude(pov.altitude);
-        }
-      });
-
-      if (regularPoints.length > 0) {
-        const firstHabitat = regularPoints[0];
-        globeEl.current.pointOfView(
-          { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 1.4 },
-          1500
-        );
-        setCurrentAltitude(1.4);
-      } else {
-        globeEl.current.pointOfView(
-          { lat: 20, lng: 0, altitude: 1.4 },
-          1500
-        );
-        setCurrentAltitude(1.4);
-      }
+    // Support both controls APIs
+    if ('noZoom' in controls) {
+      // TrackballControls style flags
+      controls.noZoom = false;
+      controls.noPan = false;
+      controls.noRotate = false;
     }
-  }, [regularPoints, globeReady]);
+    if ('enableZoom' in controls) {
+      controls.enableZoom = true;
+      controls.enablePan = true;
+      controls.enableRotate = true;
+    }
+
+    // Reasonable ranges and smoothing
+    if ('minDistance' in controls) (controls as any).minDistance = 0.15;
+    if ('maxDistance' in controls) (controls as any).maxDistance = 8;
+    controls.zoomSpeed = 1.0;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+
+    // Ensure the canvas actually receives pointer events
+    const canvas = globeEl.current.renderer().domElement as HTMLCanvasElement | undefined;
+    if (canvas) {
+      canvas.style.pointerEvents = 'auto';
+      // Prevent browser gestures from hijacking drag/zoom on touch devices
+      (canvas.style as any).touchAction = 'none';
+      canvas.style.cursor = 'grab';
+      const onDown = () => (canvas.style.cursor = 'grabbing');
+      const onUp = () => (canvas.style.cursor = 'grab');
+      canvas.addEventListener('pointerdown', onDown);
+      canvas.addEventListener('pointerup', onUp);
+    }
+
+    // Track altitude changes from mouse wheel / interactions
+    controls.addEventListener('change', () => {
+      if (globeEl.current) {
+        const pov = globeEl.current.pointOfView();
+        if (typeof pov.altitude === 'number') setCurrentAltitude(pov.altitude);
+      }
+    });
+
+    // Set initial camera position only once
+    globeEl.current.pointOfView(
+      { lat: 20, lng: 0, altitude: 1.4 },
+      1500
+    );
+    setCurrentAltitude(1.4);
+  }, [globeReady]);
+
+  // Separate effect to handle habitat changes without resetting camera
+  useEffect(() => {
+    if (!globeEl.current || !globeReady || regularPoints.length === 0) return;
+    
+    const firstHabitat = regularPoints[0];
+    globeEl.current.pointOfView(
+      { lat: firstHabitat.lat, lng: firstHabitat.lng, altitude: 1.4 },
+      1500
+    );
+    setCurrentAltitude(1.4);
+  }, [regularPoints.length > 0 ? regularPoints[0]?.species : null, globeReady]);
 
   // Zoom control handlers
   const handleZoomIn = () => {
