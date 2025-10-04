@@ -381,58 +381,26 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Globe or Google Maps */}
+      {/* Globe */}
       <div className="absolute inset-0">
-        {useGoogleMaps ? (
-          <GoogleEarthMap
-            habitats={[
-              ...habitats, 
-              ...userPins, 
-              ...imageMarkers,
-              ...conservationLayers.flatMap(layer => 
-                layer.data.map((point: any) => ({
-                  ...point,
-                  color: layer.color,
-                  size: 0.3,
-                  species: point.name,
-                }))
-              )
-            ]} 
-            onPointClick={handlePointClick} 
-            onDoubleGlobeClick={handleDoubleGlobeClick}
-            onImageMarkerClick={handleImageMarkerClick}
-          />
-        ) : (
-          <GlobeComponent 
-            habitats={[
-              ...habitats, 
-              ...userPins, 
-              ...imageMarkers,
-              ...conservationLayers.flatMap(layer => 
-                layer.data.map((point: any) => ({
-                  ...point,
-                  color: layer.color,
-                  size: 0.3,
-                  species: point.name,
-                }))
-              )
-            ]} 
-            onPointClick={handlePointClick} 
-            onDoubleGlobeClick={handleDoubleGlobeClick}
-            onImageMarkerClick={handleImageMarkerClick}
-          />
-        )}
-      </div>
-
-      {/* Map View Toggle Button */}
-      <div className="absolute top-6 right-6 z-30">
-        <Button
-          onClick={handleToggleMapView}
-          variant="secondary"
-          className="glass-panel rounded-xl px-4 py-2 hover:bg-secondary/80"
-        >
-          {useGoogleMaps ? '🌍 Globe View' : '🛰️ Satellite View'}
-        </Button>
+        <GlobeComponent 
+          habitats={[
+            ...habitats, 
+            ...userPins, 
+            ...imageMarkers,
+            ...conservationLayers.flatMap(layer => 
+              layer.data.map((point: any) => ({
+                ...point,
+                color: layer.color,
+                size: 0.3,
+                species: point.name,
+              }))
+            )
+          ]} 
+          onPointClick={handlePointClick} 
+          onDoubleGlobeClick={handleDoubleGlobeClick}
+          onImageMarkerClick={handleImageMarkerClick}
+        />
       </div>
 
 
