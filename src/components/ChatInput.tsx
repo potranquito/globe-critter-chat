@@ -21,7 +21,7 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder }: ChatInputProps)
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex justify-center">
+    <form onSubmit={handleSubmit} className="w-full flex">
       <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full" style={{ maxWidth: '1150px' }}>
         <Input
           value={message}
