@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
 import Globe from 'react-globe.gl';
-import ZoomControls from './ZoomControls';
 
 interface HabitatPoint {
   lat: number;
@@ -164,12 +163,6 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
 
   return (
     <div className="globe-root w-full h-full relative cursor-grab active:cursor-grabbing pointer-events-auto z-0 touch-none select-none" aria-label="Interactive 3D Earth">
-      <ZoomControls
-        onZoomIn={handleZoomIn}
-        onZoomOut={handleZoomOut}
-        onReset={handleResetView}
-        zoomLevel={getZoomLevel()}
-      />
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"

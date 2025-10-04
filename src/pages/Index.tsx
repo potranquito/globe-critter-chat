@@ -389,12 +389,6 @@ const Index = () => {
         />
       </div>
 
-      {/* Conservation Layers Control - shown in top right when no species selected */}
-      {!speciesInfo && (
-        <div className="absolute top-6 right-6 z-50">
-          <ConservationLayers onToggleLayer={handleLayerToggle} />
-        </div>
-      )}
 
       {/* Regional Animals List */}
       {regionalAnimals && selectedRegion && (
@@ -408,9 +402,9 @@ const Index = () => {
         </div>
       )}
 
-      {/* Left Side Card with Conservation Layers */}
+      {/* Left Side Card */}
       {speciesInfo && (
-        <div className="absolute left-6 top-6 w-64 z-[60] flex flex-col gap-3">
+        <div className="absolute left-6 top-6 w-64 z-[60]">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -420,7 +414,6 @@ const Index = () => {
             imageUrl={speciesInfo.imageUrl}
             onChatClick={handleChatClick}
           />
-          <ConservationLayers onToggleLayer={handleLayerToggle} />
         </div>
       )}
 
@@ -452,7 +445,10 @@ const Index = () => {
           </div>
         )}
         
-        <div className="flex justify-center items-end gap-2 pointer-events-auto">
+        <div className="flex justify-center items-end gap-3 pointer-events-auto">
+          <div className="mb-2">
+            <ConservationLayers onToggleLayer={handleLayerToggle} />
+          </div>
           <img 
             src={earthMascot} 
             alt="Earth Mascot" 
