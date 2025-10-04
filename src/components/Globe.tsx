@@ -53,9 +53,9 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     }
 
     // Reasonable ranges and smoothing
-    if ('minDistance' in controls) (controls as any).minDistance = 0.8;
-    if ('maxDistance' in controls) (controls as any).maxDistance = 8;
-    controls.zoomSpeed = 1.0;
+    if ('minDistance' in controls) (controls as any).minDistance = 1.0;
+    if ('maxDistance' in controls) (controls as any).maxDistance = 6;
+    controls.zoomSpeed = 0.8;
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
 
@@ -78,13 +78,13 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
       const pov = globeEl.current.pointOfView();
       if (typeof pov.altitude === 'number') {
         let alt = pov.altitude;
-        if (alt < 0.8) {
-          globeEl.current.pointOfView({ ...pov, altitude: 0.8 });
-          alt = 0.8;
+        if (alt < 1.0) {
+          globeEl.current.pointOfView({ ...pov, altitude: 1.0 });
+          alt = 1.0;
         }
-        if (alt > 3) {
-          globeEl.current.pointOfView({ ...pov, altitude: 3 });
-          alt = 3;
+        if (alt > 2.8) {
+          globeEl.current.pointOfView({ ...pov, altitude: 2.8 });
+          alt = 2.8;
         }
         setCurrentAltitude(alt);
       }
@@ -114,7 +114,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const handleZoomIn = () => {
     if (globeEl.current) {
       const pov = globeEl.current.pointOfView();
-      const newAltitude = Math.max(0.8, pov.altitude - 0.25);
+      const newAltitude = Math.max(1.0, pov.altitude - 0.2);
       globeEl.current.pointOfView({ ...pov, altitude: newAltitude }, 800);
       setCurrentAltitude(newAltitude);
     }
@@ -123,7 +123,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const handleZoomOut = () => {
     if (globeEl.current) {
       const pov = globeEl.current.pointOfView();
-      const newAltitude = Math.min(3, pov.altitude + 0.25);
+      const newAltitude = Math.min(2.8, pov.altitude + 0.2);
       globeEl.current.pointOfView({ ...pov, altitude: newAltitude }, 800);
       setCurrentAltitude(newAltitude);
     }
