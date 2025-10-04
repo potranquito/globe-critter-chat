@@ -22,7 +22,7 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder }: ChatInputProps)
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-none justify-center">
-      <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full max-w-lg">
+      <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full" style={{ maxWidth: '712px' }}>
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
