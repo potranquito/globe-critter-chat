@@ -17,3 +17,12 @@ verify_jwt = false
 
 [functions.nearby-wildlife]
 verify_jwt = false
+
+[functions.habitat-discovery]
+verify_jwt = false
+
+[functions.habitat-image]
+verify_jwt = false
+
+[functions.protected-areas]
+verify_jwt = false
