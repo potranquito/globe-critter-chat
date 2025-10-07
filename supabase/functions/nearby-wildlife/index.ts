@@ -1,5 +1,3 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' } });
@@ -63,7 +61,7 @@ Deno.serve(async (req) => {
       JSON.stringify({ places: formattedPlaces }),
       { headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' } }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Nearby wildlife error:', error.message);
     return new Response(
       JSON.stringify({ error: error.message }),
