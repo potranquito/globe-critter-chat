@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
+import { MapPin } from 'lucide-react';
 import { useGoogleMapsApi } from '@/hooks/useGoogleMapsApi';
 import ZoomControls from './ZoomControls';
 import ConservationLayers from './ConservationLayers';
 import UsageIndicator from './UsageIndicator';
 import ImageMarker from './ImageMarker';
 import GlobeComponent from './Globe';
+import WildlifeLocationCard from './WildlifeLocationCard';
+import { ScrollArea } from './ui/scroll-area';
 interface HabitatPoint {
   lat: number;
   lng: number;
@@ -23,6 +26,9 @@ interface GoogleEarthMapProps {
   onPointClick?: (habitat: HabitatPoint) => void;
   onDoubleGlobeClick?: (lat: number, lng: number) => void;
   onImageMarkerClick?: (marker: HabitatPoint) => void;
+  center?: { lat: number; lng: number } | null;
+  zoom?: number;
+  wildlifePlaces?: any[];
 }
 
 // Helper component to access map instance and add event listeners
@@ -54,7 +60,10 @@ const GoogleEarthMap = ({
   habitats, 
   onPointClick, 
   onDoubleGlobeClick,
-  onImageMarkerClick 
+  onImageMarkerClick,
+  center,
+  zoom = 3,
+  wildlifePlaces = []
 }: GoogleEarthMapProps) => {
   const { apiKey, loading, usage, error } = useGoogleMapsApi();
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -92,17 +101,22 @@ const GoogleEarthMap = ({
 
   const handleResetView = useCallback(() => {
     if (mapRef.current) {
-      if (regularPoints.length > 0) {
+      if (center) {
+        mapRef.current.setCenter(center);
+        mapRef.current.setZoom(zoom);
+        mapRef.current.setTilt(zoom >= 10 ? 0 : 45);
+      } else if (regularPoints.length > 0) {
         const firstPoint = regularPoints[0];
         mapRef.current.setCenter({ lat: firstPoint.lat, lng: firstPoint.lng });
         mapRef.current.setZoom(5);
+        mapRef.current.setTilt(45);
       } else {
         mapRef.current.setCenter({ lat: 20, lng: 0 });
         mapRef.current.setZoom(3);
+        mapRef.current.setTilt(45);
       }
-      mapRef.current.setTilt(45);
     }
-  }, [regularPoints]);
+  }, [regularPoints, center, zoom]);
 
   const getZoomLevel = () => {
     if (currentZoom >= 15) return 'Street';
@@ -152,17 +166,20 @@ const GoogleEarthMap = ({
     );
   }
 
-  const defaultCenter = regularPoints.length > 0 
+  const defaultCenter = center || (regularPoints.length > 0 
     ? { lat: regularPoints[0].lat, lng: regularPoints[0].lng }
-    : { lat: 20, lng: 0 };
+    : { lat: 20, lng: 0 });
+
+  const defaultZoom = zoom > 3 ? zoom : (regularPoints.length > 0 ? 5 : 3);
+  const defaultTilt = zoom >= 10 ? 0 : 45; // Top-down view for city zoom
 
   return (
     <APIProvider apiKey={apiKey}>
       <div className="relative w-full h-screen">
         <Map
           defaultCenter={defaultCenter}
-          defaultZoom={regularPoints.length > 0 ? 5 : 3}
-          defaultTilt={45}
+          defaultZoom={defaultZoom}
+          defaultTilt={defaultTilt}
           defaultHeading={0}
           gestureHandling="greedy"
           disableDefaultUI={true}
@@ -232,6 +249,38 @@ const GoogleEarthMap = ({
             dailyLimit={usage.dailyLimit}
             monthlyLimit={usage.monthlyLimit}
           />
+        )}
+
+        {/* Wildlife locations sidebar */}
+        {wildlifePlaces.length > 0 && (
+          <div className="absolute top-6 left-6 w-80 max-h-[80vh] z-10">
+            <div className="glass-panel rounded-lg p-4">
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-primary" />
+                Wildlife Locations ({wildlifePlaces.length})
+              </h3>
+              <ScrollArea className="h-[calc(80vh-8rem)]">
+                <div className="space-y-3 pr-3">
+                  {wildlifePlaces.map((place, idx) => (
+                    <WildlifeLocationCard
+                      key={idx}
+                      name={place.name}
+                      address={place.address}
+                      rating={place.rating}
+                      types={place.types}
+                      photoReference={place.photoReference}
+                      onClick={() => {
+                        if (mapRef.current) {
+                          mapRef.current.panTo({ lat: place.lat, lng: place.lng });
+                          mapRef.current.setZoom(15);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
         )}
       </div>
     </APIProvider>

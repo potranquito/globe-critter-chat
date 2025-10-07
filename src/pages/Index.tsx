@@ -140,6 +140,8 @@ const Index = () => {
   const [activeLayers, setActiveLayers] = useState<Array<{ name: string; count: number }>>([]);
   const [useGoogleMaps, setUseGoogleMaps] = useState(false);
   const [currentZoomLevel, setCurrentZoomLevel] = useState(3);
+  const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
+  const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
 
   const handleSearch = async (query: string) => {
     // If expanded image is open, send message to chat instead
@@ -242,9 +244,13 @@ const Index = () => {
       
       // Set user location pin
       setUserPins([{ lat, lng, name }]);
+      setMapCenter({ lat, lng });
       
-      // Add wildlife place markers
+      // Store wildlife places for card display
       if (wildlifeData?.places) {
+        setWildlifePlaces(wildlifeData.places);
+        
+        // Add wildlife place markers
         const wildlifeMarkers = wildlifeData.places.map((place: any) => ({
           lat: place.lat,
           lng: place.lng,
@@ -252,13 +258,15 @@ const Index = () => {
           size: 0.6,
           color: '#22c55e',
           title: place.name,
-          description: place.address
+          description: place.address,
+          photoReference: place.photoReference
         }));
         setHabitats(wildlifeMarkers);
       }
       
-      // Switch to 2D map view
+      // Switch to 2D map view with city zoom
       setUseGoogleMaps(true);
+      setCurrentZoomLevel(12);
       
       toast({
         title: 'Location Found',
@@ -459,6 +467,8 @@ const Index = () => {
     setActiveLayers([]);
     setUseGoogleMaps(false);
     setCurrentZoomLevel(3);
+    setMapCenter(null);
+    setWildlifePlaces([]);
   };
 
   const handleFetchLocation = async () => {
@@ -520,6 +530,9 @@ const Index = () => {
             onPointClick={handlePointClick}
             onDoubleGlobeClick={handleDoubleGlobeClick}
             onImageMarkerClick={handleImageMarkerClick}
+            center={mapCenter}
+            zoom={currentZoomLevel}
+            wildlifePlaces={wildlifePlaces}
           />
         ) : (
           <GlobeComponent 
