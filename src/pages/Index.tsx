@@ -150,13 +150,23 @@ const Index = () => {
       return;
     }
 
+    if (!query.trim()) {
+      toast({
+        title: 'Empty Search',
+        description: 'Please enter a species name or location to search',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setIsLoading(true);
     setHasInteracted(true);
     
-    setTimeout(() => {
-      const lowerQuery = query.toLowerCase();
-      
-      if (lowerQuery.includes('polar bear') || lowerQuery.includes('arctic')) {
+    const lowerQuery = query.toLowerCase();
+    
+    // Check if searching for species
+    if (lowerQuery.includes('polar bear') || lowerQuery.includes('arctic')) {
+      setTimeout(() => {
         const data = speciesData['polar-bear'];
         setHabitats(data.habitats);
         setCurrentSpecies('Polar Bear');
@@ -185,21 +195,79 @@ const Index = () => {
         });
         
         setImageMarkers(markers);
+        setUseGoogleMaps(false);
         toast({ title: 'Polar Bear found', description: 'Showing habitats and ecosystem images' });
-      } else {
-        toast({
-          title: 'No Results',
-          description: 'Try searching for: Polar Bear',
-          variant: 'destructive',
-        });
-        setHabitats([]);
-        setCurrentSpecies(null);
-        setSpeciesInfo(null);
-        setImageMarkers([]);
+        setIsLoading(false);
+      }, 1000);
+      return;
+    }
+    
+    // Otherwise treat as location search
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      // Geocode the location
+      const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-location', {
+        body: { location: query }
+      });
+      
+      if (geocodeError || !geocodeData) {
+        throw new Error('Location not found');
       }
       
+      const { lat, lng, name } = geocodeData;
+      
+      // Get nearby wildlife places
+      const { data: wildlifeData, error: wildlifeError } = await supabase.functions.invoke('nearby-wildlife', {
+        body: { lat, lng, radius: 50000 }
+      });
+      
+      if (wildlifeError) {
+        console.error('Error fetching wildlife places:', wildlifeError);
+      }
+      
+      // Clear previous data
+      setCurrentSpecies(null);
+      setSpeciesInfo(null);
+      setRegionalAnimals(null);
+      setSelectedRegion(null);
+      setImageMarkers([]);
+      
+      // Set user location pin
+      setUserPins([{ lat, lng, name }]);
+      
+      // Add wildlife place markers
+      if (wildlifeData?.places) {
+        const wildlifeMarkers = wildlifeData.places.map((place: any) => ({
+          lat: place.lat,
+          lng: place.lng,
+          species: place.name,
+          size: 0.6,
+          color: '#22c55e',
+          title: place.name,
+          description: place.address
+        }));
+        setHabitats(wildlifeMarkers);
+      }
+      
+      // Switch to 2D map view
+      setUseGoogleMaps(true);
+      
+      toast({
+        title: 'Location Found',
+        description: `Showing ${wildlifeData?.places?.length || 0} wildlife locations near ${name}`,
+      });
+      
       setIsLoading(false);
-    }, 1000);
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: 'No Results',
+        description: 'Try searching for: Polar Bear or a location like Las Vegas',
+        variant: 'destructive',
+      });
+      setIsLoading(false);
+    }
   };
 
   const handlePointClick = (point: any) => {
@@ -425,26 +493,47 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
-      {/* Globe */}
+      {/* Globe or Google Maps */}
       <div className="absolute inset-0">
-        <GlobeComponent 
-          habitats={[
-            ...habitats, 
-            ...userPins, 
-            ...imageMarkers,
-            ...conservationLayers.flatMap(layer => 
-              layer.data.map((point: any) => ({
-                ...point,
-                color: layer.color,
-                size: 0.3,
-                species: point.name,
-              }))
-            )
-          ]} 
-          onPointClick={handlePointClick} 
-          onDoubleGlobeClick={handleDoubleGlobeClick}
-          onImageMarkerClick={handleImageMarkerClick}
-        />
+        {useGoogleMaps ? (
+          <GoogleEarthMap
+            habitats={[
+              ...habitats, 
+              ...userPins, 
+              ...imageMarkers,
+              ...conservationLayers.flatMap(layer => 
+                layer.data.map((point: any) => ({
+                  ...point,
+                  color: layer.color,
+                  size: 0.3,
+                  species: point.name,
+                }))
+              )
+            ]}
+            onPointClick={handlePointClick}
+            onDoubleGlobeClick={handleDoubleGlobeClick}
+            onImageMarkerClick={handleImageMarkerClick}
+          />
+        ) : (
+          <GlobeComponent 
+            habitats={[
+              ...habitats, 
+              ...userPins, 
+              ...imageMarkers,
+              ...conservationLayers.flatMap(layer => 
+                layer.data.map((point: any) => ({
+                  ...point,
+                  color: layer.color,
+                  size: 0.3,
+                  species: point.name,
+                }))
+              )
+            ]} 
+            onPointClick={handlePointClick} 
+            onDoubleGlobeClick={handleDoubleGlobeClick}
+            onImageMarkerClick={handleImageMarkerClick}
+          />
+        )}
       </div>
 
 
@@ -574,7 +663,7 @@ const Index = () => {
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
           <div className="glass-panel rounded-2xl px-8 py-4 max-w-lg text-center animate-float">
             <p className="text-muted-foreground">
-              Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or enter a location
+              Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or locations like <span className="text-accent font-medium">Las Vegas</span>
             </p>
           </div>
         </div>
