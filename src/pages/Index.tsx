@@ -6,10 +6,12 @@ import FastFactsCard from '@/components/FastFactsCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
 import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import ConservationLayers from '@/components/ConservationLayers';
+import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
+import type { HabitatRegion } from '@/types/habitat';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
@@ -143,6 +145,8 @@ const Index = () => {
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
   const [locationName, setLocationName] = useState<string>('');
+  const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
+  const [showHabitatCard, setShowHabitatCard] = useState(false);
 
   const handleSearch = async (query: string) => {
     // If expanded image is open, send message to chat instead
@@ -205,35 +209,44 @@ const Index = () => {
       return;
     }
     
-    // Otherwise treat as location search
+    // Otherwise treat as location search - use new habitat discovery workflow
     try {
       const { supabase } = await import('@/integrations/supabase/client');
       
-      // Geocode the location
-      console.log('Invoking geocode-location for:', query);
-      const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-location', {
+      // Step 1: Discover habitat region using Lovable AI
+      console.log('Discovering habitat for location:', query);
+      const { data: habitatData, error: habitatError } = await supabase.functions.invoke('habitat-discovery', {
         body: { location: query }
       });
       
-      console.log('Geocode response:', { geocodeData, geocodeError });
+      console.log('Habitat discovery response:', { habitatData, habitatError });
       
-      if (geocodeError || !geocodeData) {
-        console.error('Geocode failed:', geocodeError);
-        throw new Error(geocodeError?.message || 'Location not found');
+      if (habitatError || !habitatData?.success) {
+        console.error('Habitat discovery failed:', habitatError);
+        throw new Error(habitatError?.message || 'Unable to identify habitat region');
       }
       
-      const { lat, lng, name } = geocodeData;
+      const habitat: HabitatRegion = habitatData.habitat;
       
-      // Get nearby wildlife places
-      console.log('Invoking nearby-wildlife for coordinates:', lat, lng);
-      const { data: wildlifeData, error: wildlifeError } = await supabase.functions.invoke('nearby-wildlife', {
-        body: { lat, lng, radius: 50000 }
+      // Step 2: Fetch habitat image
+      console.log('Fetching image for habitat:', habitat.name);
+      const { data: imageData, error: imageError } = await supabase.functions.invoke('habitat-image', {
+        body: { habitatName: habitat.name }
       });
       
-      console.log('Wildlife response:', { wildlifeData, wildlifeError });
+      if (!imageError && imageData?.success) {
+        habitat.imageUrl = imageData.imageUrl;
+      }
       
-      if (wildlifeError) {
-        console.error('Error fetching wildlife places:', wildlifeError);
+      // Step 3: Fetch protected areas within habitat bounds
+      console.log('Fetching protected areas for bounds:', habitat.bounds);
+      const { data: protectedData, error: protectedError } = await supabase.functions.invoke('protected-areas', {
+        body: { bounds: habitat.bounds }
+      });
+      
+      if (!protectedError && protectedData?.success) {
+        habitat.protectedAreas = protectedData.protectedAreas;
+        habitat.parkCount = protectedData.count;
       }
       
       // Clear previous data
@@ -242,49 +255,32 @@ const Index = () => {
       setRegionalAnimals(null);
       setSelectedRegion(null);
       setImageMarkers([]);
+      setWildlifePlaces([]);
       
-      // Set user location pin
-      setUserPins([{ lat, lng, name }]);
-      setMapCenter({ lat, lng });
-      setLocationName(name);
+      // Set habitat data
+      setCurrentHabitat(habitat);
+      setShowHabitatCard(false); // Will show on thumbnail click
       
-      // Store wildlife places for card display
-      if (wildlifeData?.places) {
-        setWildlifePlaces(wildlifeData.places);
-        
-        // Add wildlife place markers for both globe and map
-        const wildlifeMarkers = wildlifeData.places.map((place: any) => ({
-          lat: place.lat,
-          lng: place.lng,
-          species: place.name,
-          size: 0.6,
-          color: '#22c55e',
-          title: place.name,
-          description: place.address,
-          photoReference: place.photoReference
-        }));
-        
-        // Create image markers for globe from wildlife photos
-        const thumbnailMarkers = wildlifeData.places
-          .filter((place: any) => place.photoReference)
-          .map((place: any) => ({
-            lat: place.lat,
-            lng: place.lng,
-            imageUrl: place.photoReference, // Store reference, will fetch via edge function
-            type: 'wildlife',
-            species: place.name
-          }));
-        
-        setHabitats(wildlifeMarkers);
-        setImageMarkers(thumbnailMarkers);
-      }
+      // Create single habitat thumbnail marker on globe
+      const habitatMarker = {
+        lat: habitat.location.lat,
+        lng: habitat.location.lng,
+        species: habitat.name,
+        size: 1.0,
+        color: '#10b981',
+        imageUrl: habitat.imageUrl,
+        type: 'habitat',
+        habitatId: habitat.id
+      };
       
-      // Don't auto-switch to map view, let user decide
-      setCurrentZoomLevel(12);
+      setHabitats([habitatMarker]);
+      setImageMarkers([habitatMarker]); // Show as thumbnail
+      setMapCenter(habitat.location);
+      setLocationName(habitat.name);
       
       toast({
-        title: 'Location Found',
-        description: `Showing ${wildlifeData?.places?.length || 0} wildlife locations near ${name}`,
+        title: 'Habitat Discovered',
+        description: `${habitat.name} - ${habitat.climate}`,
       });
       
       setIsLoading(false);
@@ -392,6 +388,18 @@ const Index = () => {
 
   const handleImageMarkerClick = (marker: any) => {
     console.log('Image marker clicked:', marker);
+    
+    // If it's a habitat marker, show the habitat card
+    if (marker.type === 'habitat' && currentHabitat) {
+      setShowHabitatCard(true);
+      toast({
+        title: 'Habitat Details',
+        description: `Viewing ${currentHabitat.name}`,
+      });
+      return;
+    }
+    
+    // Otherwise, show expanded image view
     setExpandedImage({
       url: marker.imageUrl,
       type: marker.type,
@@ -484,6 +492,8 @@ const Index = () => {
     setMapCenter(null);
     setWildlifePlaces([]);
     setLocationName('');
+    setCurrentHabitat(null);
+    setShowHabitatCard(false);
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -600,8 +610,34 @@ const Index = () => {
         </div>
       )}
 
+      {/* Habitat Split View - Image Left, Info Card Right */}
+      {showHabitatCard && currentHabitat && (
+        <div className="absolute inset-0 z-[70] flex pointer-events-auto bg-background/80 backdrop-blur-sm">
+          {/* Left: Enlarged Habitat Image */}
+          <div className="w-3/5 relative">
+            <img 
+              src={currentHabitat.imageUrl} 
+              alt={currentHabitat.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          {/* Right: Habitat Info Card */}
+          <div className="w-2/5 overflow-auto p-6">
+            <HabitatInfoCard 
+              habitat={currentHabitat}
+              onClose={() => setShowHabitatCard(false)}
+              onThreatClick={(threatId) => {
+                console.log('Threat clicked:', threatId);
+                // TODO: Handle threat detail view
+              }}
+            />
+          </div>
+        </div>
+      )}
+
       {/* Left Side Card */}
-      {speciesInfo && (
+      {speciesInfo && !showHabitatCard && (
         <div className="absolute left-6 top-6 w-64 z-[60]">
           <FastFactsCard
             commonName={speciesInfo.commonName}
