@@ -122,11 +122,12 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   useEffect(() => {
     if (!globeEl.current || !globeReady || !targetLocation) return;
     
+    // Animate to target location with closer zoom
     globeEl.current.pointOfView(
-      { lat: targetLocation.lat, lng: targetLocation.lng, altitude: 1.5 },
-      2000
+      { lat: targetLocation.lat, lng: targetLocation.lng, altitude: 1.0 },
+      3000 // Slower animation for better visual effect
     );
-    setCurrentAltitude(1.5);
+    setCurrentAltitude(1.0);
   }, [targetLocation, globeReady]);
 
   // Zoom control handlers
@@ -210,11 +211,41 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           const el = document.createElement('div');
           el.className = 'cursor-pointer hover:scale-110 transition-transform';
           el.style.pointerEvents = 'auto';
+          
+          // Create container with loading state
           el.innerHTML = `
-            <div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-lg">
-              <img src="${d.imageUrl}" alt="${d.type}" class="w-full h-full object-cover" />
+            <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg bg-gray-200">
+              <div class="w-full h-full flex items-center justify-center">
+                <div class="animate-pulse text-xs text-gray-500">Loading...</div>
+              </div>
             </div>
           `;
+          
+          // Fetch actual photo via edge function
+          if (d.imageUrl) {
+            (async () => {
+              try {
+                const { supabase } = await import('@/integrations/supabase/client');
+                const { data, error } = await supabase.functions.invoke('google-photo', {
+                  body: { photoReference: d.imageUrl, maxWidth: 200 }
+                });
+                
+                if (!error && data) {
+                  // Convert blob to URL
+                  const blob = new Blob([data], { type: 'image/jpeg' });
+                  const imageUrl = URL.createObjectURL(blob);
+                  el.innerHTML = `
+                    <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg">
+                      <img src="${imageUrl}" alt="${d.species || d.type}" class="w-full h-full object-cover" />
+                    </div>
+                  `;
+                }
+              } catch (err) {
+                console.error('Error loading photo:', err);
+              }
+            })();
+          }
+          
           el.onclick = (e) => {
             e.stopPropagation();
             console.log('HTML element clicked:', d);

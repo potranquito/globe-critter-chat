@@ -270,7 +270,7 @@ const Index = () => {
           .map((place: any) => ({
             lat: place.lat,
             lng: place.lng,
-            imageUrl: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photo_reference=${place.photoReference}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}`,
+            imageUrl: place.photoReference, // Store reference, will fetch via edge function
             type: 'wildlife',
             species: place.name
           }));
