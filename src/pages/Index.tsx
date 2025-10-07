@@ -8,7 +8,7 @@ import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import ConservationLayers from '@/components/ConservationLayers';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
@@ -543,6 +543,19 @@ const Index = () => {
         )}
       </div>
 
+      {/* Map/Globe Toggle - Top Right */}
+      <div className="absolute top-6 right-6 z-50 pointer-events-auto">
+        <Button 
+          onClick={handleToggleMapView}
+          variant="secondary"
+          size="sm"
+          className="glass-panel rounded-xl h-10 px-3 flex items-center gap-2 hover:bg-secondary/80"
+          title={useGoogleMaps ? 'Switch to Globe View' : 'Switch to Map View'}
+        >
+          {useGoogleMaps ? <Globe className="h-4 w-4" /> : <Map className="h-4 w-4" />}
+          <span className="hidden sm:inline">{useGoogleMaps ? 'Globe View' : 'Map View'}</span>
+        </Button>
+      </div>
 
       {/* Regional Animals List */}
       {regionalAnimals && selectedRegion && (
