@@ -7,10 +7,10 @@ Deno.serve(async (req) => {
     const { location } = await req.json();
     console.log('Geocoding location:', location);
     
-    const GOOGLE_MAPS_KEY = Deno.env.get('GOOGLE_MAPS_API_KEY');
+    const GOOGLE_MAPS_KEY = Deno.env.get('GOOGLE_MAPS_SERVER_API_KEY') || Deno.env.get('GOOGLE_MAPS_API_KEY');
 
     if (!GOOGLE_MAPS_KEY) {
-      console.error('Google Maps API key not configured');
+      console.error('Google Maps Server API key not configured');
       throw new Error('Google Maps API key not configured');
     }
 

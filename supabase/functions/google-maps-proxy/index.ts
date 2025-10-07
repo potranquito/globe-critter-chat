@@ -63,8 +63,8 @@ serve(async (req) => {
     const { type, params } = await req.json();
     console.log('Request body parsed:', { type });
     
-    const apiKey = Deno.env.get('GOOGLE_MAPS_API_KEY');
-    console.log('API key loaded:', apiKey ? 'YES' : 'NO');
+    const apiKey = Deno.env.get('GOOGLE_MAPS_BROWSER_API_KEY') || Deno.env.get('GOOGLE_MAPS_API_KEY');
+    console.log('Browser API key loaded:', apiKey ? 'YES' : 'NO');
     
     if (!apiKey) {
       console.error('API key not found in environment');
