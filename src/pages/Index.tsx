@@ -252,7 +252,7 @@ const Index = () => {
       if (wildlifeData?.places) {
         setWildlifePlaces(wildlifeData.places);
         
-        // Add wildlife place markers
+        // Add wildlife place markers for both globe and map
         const wildlifeMarkers = wildlifeData.places.map((place: any) => ({
           lat: place.lat,
           lng: place.lng,
@@ -263,11 +263,23 @@ const Index = () => {
           description: place.address,
           photoReference: place.photoReference
         }));
+        
+        // Create image markers for globe from wildlife photos
+        const thumbnailMarkers = wildlifeData.places
+          .filter((place: any) => place.photoReference)
+          .map((place: any) => ({
+            lat: place.lat,
+            lng: place.lng,
+            imageUrl: `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photo_reference=${place.photoReference}&key=${import.meta.env.VITE_GOOGLE_MAPS_API_KEY || ''}`,
+            type: 'wildlife',
+            species: place.name
+          }));
+        
         setHabitats(wildlifeMarkers);
+        setImageMarkers(thumbnailMarkers);
       }
       
-      // Switch to 2D map view with city zoom
-      setUseGoogleMaps(true);
+      // Don't auto-switch to map view, let user decide
       setCurrentZoomLevel(12);
       
       toast({
@@ -472,6 +484,7 @@ const Index = () => {
     setMapCenter(null);
     setWildlifePlaces([]);
     setLocationName('');
+    toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
   const handleFetchLocation = async () => {
@@ -556,6 +569,7 @@ const Index = () => {
             onPointClick={handlePointClick} 
             onDoubleGlobeClick={handleDoubleGlobeClick}
             onImageMarkerClick={handleImageMarkerClick}
+            targetLocation={mapCenter}
           />
         )}
       </div>

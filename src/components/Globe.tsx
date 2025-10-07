@@ -14,11 +14,12 @@ interface GlobeComponentProps {
   onPointClick?: (point: HabitatPoint) => void;
   onDoubleGlobeClick?: (lat: number, lng: number) => void;
   onImageMarkerClick?: (marker: any) => void;
+  targetLocation?: { lat: number; lng: number } | null;
 }
 
-const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick }: GlobeComponentProps) => {
+const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick, targetLocation }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
-  const MIN_ALT = 1.4;
+  const MIN_ALT = 0.8;
   const MAX_ALT = 3.0;
   const INITIAL_ALT = 2.2;
   const [globeReady, setGlobeReady] = useState(false);
@@ -116,6 +117,17 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     );
     setCurrentAltitude(INITIAL_ALT);
   }, [regularPoints.length > 0 ? regularPoints[0]?.species : null, globeReady]);
+
+  // Effect to fly to target location when searching
+  useEffect(() => {
+    if (!globeEl.current || !globeReady || !targetLocation) return;
+    
+    globeEl.current.pointOfView(
+      { lat: targetLocation.lat, lng: targetLocation.lng, altitude: 1.5 },
+      2000
+    );
+    setCurrentAltitude(1.5);
+  }, [targetLocation, globeReady]);
 
   // Zoom control handlers
   const handleZoomIn = () => {
