@@ -274,15 +274,6 @@ const GoogleEarthMap = ({
           })}
         </Map>
 
-        {/* Location name label */}
-        {locationName && (
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
-            <div className="glass-panel rounded-lg px-6 py-3">
-              <h2 className="text-2xl font-bold text-foreground">{locationName}</h2>
-            </div>
-          </div>
-        )}
-
         {/* UI Overlays */}
         <ZoomControls
           onZoomIn={handleZoomIn}
