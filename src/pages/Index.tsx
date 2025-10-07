@@ -9,7 +9,7 @@ import ConservationLayers from '@/components/ConservationLayers';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map } from 'lucide-react';
+import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map, X } from 'lucide-react';
 import earthMascot from '@/assets/earth-mascot-user.png';
 import type { HabitatRegion } from '@/types/habitat';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
@@ -149,149 +149,198 @@ const Index = () => {
   const [showHabitatCard, setShowHabitatCard] = useState(false);
 
   const handleSearch = async (query: string) => {
-    // If expanded image is open, send message to chat instead
-    if (expandedImage) {
-      setChatMessage(query);
-      // Reset after a brief moment to allow useEffect to pick it up
-      setTimeout(() => setChatMessage(''), 100);
-      return;
-    }
-
-    if (!query.trim()) {
-      toast({
-        title: 'Empty Search',
-        description: 'Please enter a species name or location to search',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    setHasInteracted(true);
+    console.log('Search query:', query);
     
+    // Check if it's a species or location search
     const lowerQuery = query.toLowerCase();
-    
-    // Check if searching for species
-    if (lowerQuery.includes('polar bear') || lowerQuery.includes('arctic')) {
-      setTimeout(() => {
-        const data = speciesData['polar-bear'];
-        setHabitats(data.habitats);
-        setCurrentSpecies('Polar Bear');
-        setSpeciesInfo(data.info);
-        setRegionalAnimals(null);
-        setSelectedRegion(null);
-        
-        // Create image markers from threats and ecosystem images
-        const allImages = [
-          ...data.info.threatImages.map((img: string) => ({ url: img, type: 'threat' as const })),
-          ...data.info.ecosystemImages.map((img: string) => ({ url: img, type: 'ecosystem' as const }))
-        ];
-        
-        const markers = allImages.map((img, idx) => {
-          const habitat = data.habitats[idx % data.habitats.length];
-          const offset = () => (Math.random() - 0.5) * 2;
-          return {
-            lat: habitat.lat + offset(),
-            lng: habitat.lng + offset(),
-            imageUrl: img.url,
-            type: img.type,
-            size: 0.05,
-            color: '#FFFFFF',
-            index: idx
-          };
-        });
-        
-        setImageMarkers(markers);
-        setUseGoogleMaps(false);
-        toast({ title: 'Polar Bear found', description: 'Showing habitats and ecosystem images' });
-        setIsLoading(false);
-      }, 1000);
-      return;
-    }
-    
-    // Otherwise treat as location search - use new habitat discovery workflow
-    try {
+    const isSpeciesSearch = Object.keys(speciesData).some(species => 
+      species.toLowerCase().includes(lowerQuery)
+    );
+
+    if (isSpeciesSearch) {
+      // Handle species search as before
       const { supabase } = await import('@/integrations/supabase/client');
-      
-      // Step 1: Discover habitat region using Lovable AI
-      console.log('Discovering habitat for location:', query);
-      const { data: habitatData, error: habitatError } = await supabase.functions.invoke('habitat-discovery', {
+      const { data, error } = await supabase.functions.invoke('nearby-wildlife', {
         body: { location: query }
       });
-      
-      console.log('Habitat discovery response:', { habitatData, habitatError });
-      
-      if (habitatError || !habitatData?.success) {
-        console.error('Habitat discovery failed:', habitatError);
-        throw new Error(habitatError?.message || 'Unable to identify habitat region');
+
+      if (error || !data?.success) {
+        console.error('Error fetching wildlife:', error);
+        toast({
+          title: "Species Search",
+          description: `No observations found for "${query}"`,
+        });
+        return;
       }
-      
-      const habitat: HabitatRegion = habitatData.habitat;
-      
-      // Step 2: Fetch habitat image
-      console.log('Fetching image for habitat:', habitat.name);
-      const { data: imageData, error: imageError } = await supabase.functions.invoke('habitat-image', {
-        body: { habitatName: habitat.name }
-      });
-      
-      if (!imageError && imageData?.success) {
-        habitat.imageUrl = imageData.imageUrl;
+
+      const speciesKey = Object.keys(speciesData).find(species => 
+        species.toLowerCase().includes(lowerQuery)
+      );
+      if (speciesKey) {
+        const species = speciesData[speciesKey];
+        setSpeciesInfo({
+          species: speciesKey,
+          scientificName: species.scientificName || speciesKey,
+          ...species
+        });
       }
-      
-      // Step 3: Fetch protected areas within habitat bounds
-      console.log('Fetching protected areas for bounds:', habitat.bounds);
-      const { data: protectedData, error: protectedError } = await supabase.functions.invoke('protected-areas', {
-        body: { bounds: habitat.bounds }
-      });
-      
-      if (!protectedError && protectedData?.success) {
-        habitat.protectedAreas = protectedData.protectedAreas;
-        habitat.parkCount = protectedData.count;
+
+      // Zoom to the first observation
+      const firstObs = data.observations[0];
+      if (firstObs) {
+        setCurrentSpecies(query);
+        setHabitats(data.observations.map((obs: any) => ({
+          lat: obs.latitude,
+          lng: obs.longitude,
+          species: obs.species_guess,
+          size: 0.5,
+          color: '#22c55e',
+          emoji: '🟢'
+        })));
       }
+    } else {
+      // Handle location/habitat search
+      console.log('Location search:', query);
       
-      // Clear previous data
-      setCurrentSpecies(null);
-      setSpeciesInfo(null);
-      setRegionalAnimals(null);
-      setSelectedRegion(null);
-      setImageMarkers([]);
-      setWildlifePlaces([]);
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      // Set habitat data
-      setCurrentHabitat(habitat);
-      setShowHabitatCard(false); // Will show on thumbnail click
-      
-      // Create single habitat thumbnail marker on globe
-      const habitatMarker = {
-        lat: habitat.location.lat,
-        lng: habitat.location.lng,
-        species: habitat.name,
-        size: 1.0,
-        color: '#10b981',
-        imageUrl: habitat.imageUrl,
-        type: 'habitat',
-        habitatId: habitat.id
-      };
-      
-      setHabitats([habitatMarker]);
-      setImageMarkers([habitatMarker]); // Show as thumbnail
-      setMapCenter(habitat.location);
-      setLocationName(habitat.name);
-      
-      toast({
-        title: 'Habitat Discovered',
-        description: `${habitat.name} - ${habitat.climate}`,
-      });
-      
-      setIsLoading(false);
-    } catch (error: any) {
-      console.error('Search error:', error);
-      toast({
-        title: 'Search Failed',
-        description: error.message || 'Unable to find location. Try: Las Vegas, New York, or Polar Bear',
-        variant: 'destructive',
-      });
-      setIsLoading(false);
+      try {
+        // Step 1: Discover habitat
+        const { data: habitatData, error: habitatError } = await supabase.functions.invoke('habitat-discovery', {
+          body: { location: query }
+        });
+
+        if (habitatError || !habitatData?.success) {
+          console.error('Error discovering habitat:', habitatError);
+          toast({
+            title: "Location Search",
+            description: `Could not find habitat for "${query}"`,
+          });
+          return;
+        }
+
+        const habitat = habitatData.habitat;
+        console.log('Habitat discovered:', habitat);
+        
+        // Step 2: Fetch habitat image (Wikipedia)
+        let habitatImageUrl = '';
+        try {
+          const { data: imageData, error: imageError } = await supabase.functions.invoke('habitat-image', {
+            body: { habitatName: habitat.name }
+          });
+          
+          if (!imageError && imageData?.success && imageData.imageUrl) {
+            habitatImageUrl = imageData.imageUrl;
+            console.log('Habitat image found:', habitatImageUrl);
+          }
+        } catch (err) {
+          console.error('Error fetching habitat image:', err);
+        }
+
+        // Step 3: Fetch protected areas
+        let protectedAreas: any[] = [];
+        try {
+          const { data: areasData, error: areasError } = await supabase.functions.invoke('protected-areas', {
+            body: { bounds: habitat.bounds }
+          });
+          
+          if (!areasError && areasData?.success) {
+            protectedAreas = areasData.protectedAreas || [];
+            console.log(`Found ${protectedAreas.length} protected areas`);
+          }
+        } catch (err) {
+          console.error('Error fetching protected areas:', err);
+        }
+
+        // Step 4: Fetch threats
+        let threats: any[] = [];
+        try {
+          const { data: threatsData, error: threatsError } = await supabase.functions.invoke('habitat-threats', {
+            body: { bounds: habitat.bounds }
+          });
+          
+          if (!threatsError && threatsData?.success) {
+            threats = threatsData.threats || [];
+            console.log(`Found ${threats.length} threats`);
+          }
+        } catch (err) {
+          console.error('Error fetching threats:', err);
+        }
+
+        // Update habitat with all data
+        const enrichedHabitat = {
+          ...habitat,
+          imageUrl: habitatImageUrl || habitat.imageUrl,
+          protectedAreas,
+          threats,
+          keySpecies: []
+        };
+        
+        setCurrentHabitat(enrichedHabitat);
+        
+        // Get habitat emoji based on climate
+        const getHabitatEmoji = (climate: string) => {
+          if (climate.toLowerCase().includes('desert')) return '🏜️';
+          if (climate.toLowerCase().includes('forest') || climate.toLowerCase().includes('tropical')) return '🌲';
+          if (climate.toLowerCase().includes('arctic') || climate.toLowerCase().includes('tundra')) return '❄️';
+          if (climate.toLowerCase().includes('ocean') || climate.toLowerCase().includes('marine')) return '🌊';
+          if (climate.toLowerCase().includes('grassland') || climate.toLowerCase().includes('savanna')) return '🌾';
+          if (climate.toLowerCase().includes('wetland')) return '💧';
+          return '🌍';
+        };
+
+        // Create markers for globe
+        const markers: any[] = [
+          // Main habitat marker
+          {
+            lat: habitat.location.lat,
+            lng: habitat.location.lng,
+            name: habitat.name,
+            size: 2,
+            emoji: getHabitatEmoji(habitat.climate),
+            type: 'habitat',
+            imageUrl: habitatImageUrl
+          }
+        ];
+
+        // Add protected area markers
+        protectedAreas.slice(0, 10).forEach(area => {
+          markers.push({
+            lat: area.location.lat,
+            lng: area.location.lng,
+            name: area.name,
+            size: 1,
+            emoji: '🛡️',
+            type: 'protected'
+          });
+        });
+
+        // Add threat markers
+        threats.forEach(threat => {
+          markers.push({
+            lat: threat.location.lat,
+            lng: threat.location.lng,
+            name: threat.title,
+            size: 1,
+            emoji: threat.emoji,
+            type: 'threat'
+          });
+        });
+
+        setHabitats(markers);
+        
+        toast({
+          title: `${habitat.name} Discovered`,
+          description: `${protectedAreas.length} protected areas, ${threats.length} active threats`,
+        });
+      } catch (err) {
+        console.error('Error in habitat search:', err);
+        toast({
+          title: "Search Error",
+          description: "Failed to search for location",
+          variant: "destructive"
+        });
+      }
     }
   };
 

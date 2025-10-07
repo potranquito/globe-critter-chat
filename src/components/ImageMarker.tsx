@@ -1,6 +1,6 @@
 interface ImageMarkerProps {
   imageUrl: string;
-  type: 'threat' | 'ecosystem';
+  type: 'threat' | 'ecosystem' | 'habitat' | 'protected' | 'species';
   onClick: () => void;
 }
 

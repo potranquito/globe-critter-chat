@@ -4,9 +4,14 @@ import Globe from 'react-globe.gl';
 interface HabitatPoint {
   lat: number;
   lng: number;
-  species: string;
+  species?: string;
   size: number;
-  color: string;
+  color?: string;
+  emoji?: string;
+  imageUrl?: string;
+  type?: 'species' | 'habitat' | 'threat' | 'protected';
+  name?: string;
+  title?: string;
 }
 
 interface GlobeComponentProps {
@@ -28,9 +33,11 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const autoRotateTimeoutRef = useRef<NodeJS.Timeout>();
   const interactionRef = useRef(false);
 
-  // Separate regular points from image markers
-  const regularPoints = habitats.filter(h => !('imageUrl' in h));
-  const imageMarkers = habitats.filter(h => 'imageUrl' in h);
+  // Separate markers by type
+  const emojiMarkers = habitats.filter(h => h.emoji);
+  const imageMarkers = habitats.filter(h => h.imageUrl && h.type === 'species');
+  const habitatImageMarkers = habitats.filter(h => h.imageUrl && h.type === 'habitat');
+  const regularPoints = habitats.filter(h => !h.emoji && !h.imageUrl);
 
   // Enable full zoom and interaction controls - only run once when globe is ready
   useEffect(() => {
@@ -192,7 +199,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         pointColor="color"
         pointAltitude={0.01}
         pointRadius="size"
-        pointLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.species}</strong><br/>Location: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}<br/><em>Click to view</em></div>`}
+        pointLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.species || d.name}</strong><br/>Location: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}<br/><em>Click to view</em></div>`}
         onPointClick={(d: any) => {
           if (globeEl.current) {
             globeEl.current.pointOfView(
@@ -203,26 +210,41 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           }
           onPointClickProp?.(d);
         }}
-        htmlElementsData={imageMarkers}
+        htmlElementsData={[...emojiMarkers, ...imageMarkers, ...habitatImageMarkers]}
         htmlLat="lat"
         htmlLng="lng"
         htmlAltitude={0.01}
         htmlElement={(d: any) => {
           const el = document.createElement('div');
-          el.className = 'cursor-pointer hover:scale-110 transition-transform';
+          el.className = 'cursor-pointer hover:scale-125 transition-transform';
           el.style.pointerEvents = 'auto';
           
-          // Create container with loading state
-          el.innerHTML = `
-            <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg bg-gray-200">
-              <div class="w-full h-full flex items-center justify-center">
-                <div class="animate-pulse text-xs text-gray-500">Loading...</div>
+          // If it's an emoji marker, render emoji directly
+          if (d.emoji) {
+            el.innerHTML = `
+              <div class="text-4xl drop-shadow-lg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                ${d.emoji}
               </div>
-            </div>
-          `;
-          
-          // Fetch actual photo via edge function
-          if (d.imageUrl) {
+            `;
+          }
+          // If it's a habitat image marker (Wikipedia URL), use directly
+          else if (d.imageUrl && d.type === 'habitat') {
+            el.innerHTML = `
+              <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg">
+                <img src="${d.imageUrl}" alt="${d.name || 'Habitat'}" class="w-full h-full object-cover" />
+              </div>
+            `;
+          }
+          // If it's a species image marker (Google photo reference), fetch via proxy
+          else if (d.imageUrl && d.type === 'species') {
+            el.innerHTML = `
+              <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg bg-gray-200">
+                <div class="w-full h-full flex items-center justify-center">
+                  <div class="animate-pulse text-xs text-gray-500">Loading...</div>
+                </div>
+              </div>
+            `;
+            
             (async () => {
               try {
                 const { supabase } = await import('@/integrations/supabase/client');
@@ -231,12 +253,11 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
                 });
                 
                 if (!error && data) {
-                  // Convert blob to URL
                   const blob = new Blob([data], { type: 'image/jpeg' });
                   const imageUrl = URL.createObjectURL(blob);
                   el.innerHTML = `
                     <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg">
-                      <img src="${imageUrl}" alt="${d.species || d.type}" class="w-full h-full object-cover" />
+                      <img src="${imageUrl}" alt="${d.species || 'Species'}" class="w-full h-full object-cover" />
                     </div>
                   `;
                 }

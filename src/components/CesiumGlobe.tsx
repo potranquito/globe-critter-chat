@@ -17,8 +17,10 @@ interface HabitatPoint {
   species?: string;
   size?: number;
   color?: string;
+  emoji?: string;
   imageUrl?: string;
-  type?: 'threat' | 'ecosystem';
+  type?: 'species' | 'habitat' | 'threat' | 'protected';
+  name?: string;
   title?: string;
   description?: string;
   index?: number;
