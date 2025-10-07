@@ -142,6 +142,7 @@ const Index = () => {
   const [currentZoomLevel, setCurrentZoomLevel] = useState(3);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
+  const [locationName, setLocationName] = useState<string>('');
 
   const handleSearch = async (query: string) => {
     // If expanded image is open, send message to chat instead
@@ -245,6 +246,7 @@ const Index = () => {
       // Set user location pin
       setUserPins([{ lat, lng, name }]);
       setMapCenter({ lat, lng });
+      setLocationName(name);
       
       // Store wildlife places for card display
       if (wildlifeData?.places) {
@@ -469,6 +471,7 @@ const Index = () => {
     setCurrentZoomLevel(3);
     setMapCenter(null);
     setWildlifePlaces([]);
+    setLocationName('');
   };
 
   const handleFetchLocation = async () => {
@@ -533,6 +536,7 @@ const Index = () => {
             center={mapCenter}
             zoom={currentZoomLevel}
             wildlifePlaces={wildlifePlaces}
+            locationName={locationName}
           />
         ) : (
           <GlobeComponent 

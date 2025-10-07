@@ -29,6 +29,7 @@ interface GoogleEarthMapProps {
   center?: { lat: number; lng: number } | null;
   zoom?: number;
   wildlifePlaces?: any[];
+  locationName?: string;
 }
 
 // Helper component to access map instance and add event listeners
@@ -63,7 +64,8 @@ const GoogleEarthMap = ({
   onImageMarkerClick,
   center,
   zoom = 3,
-  wildlifePlaces = []
+  wildlifePlaces = [],
+  locationName
 }: GoogleEarthMapProps) => {
   const { apiKey, loading, usage, error } = useGoogleMapsApi();
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -230,7 +232,56 @@ const GoogleEarthMap = ({
               />
             </AdvancedMarker>
           ))}
+
+          {/* Wildlife location markers with thumbnails */}
+          {wildlifePlaces.map((place, idx) => {
+            const apiKey = 'AIzaSyC4205XHgzRi8VswW7zqdFVanY-HoEDTIg';
+            const photoUrl = place.photoReference 
+              ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photoReference}&key=${apiKey}`
+              : null;
+
+            return (
+              <AdvancedMarker
+                key={`wildlife-${idx}`}
+                position={{ lat: place.lat, lng: place.lng }}
+                onClick={() => {
+                  if (mapRef.current) {
+                    mapRef.current.panTo({ lat: place.lat, lng: place.lng });
+                    mapRef.current.setZoom(15);
+                  }
+                }}
+              >
+                <div className="cursor-pointer hover:scale-110 transition-transform group">
+                  {photoUrl ? (
+                    <div className="relative">
+                      <img 
+                        src={photoUrl} 
+                        alt={place.name}
+                        className="w-16 h-16 rounded-lg border-2 border-white shadow-lg object-cover"
+                      />
+                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                        {place.name}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 rounded-lg border-2 border-white shadow-lg bg-primary/20 flex items-center justify-center">
+                      <MapPin className="w-8 h-8 text-primary" />
+                    </div>
+                  )}
+                </div>
+              </AdvancedMarker>
+            );
+          })}
         </Map>
+
+        {/* Location name label */}
+        {locationName && (
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-10">
+            <div className="glass-panel rounded-lg px-6 py-3">
+              <h2 className="text-2xl font-bold text-foreground">{locationName}</h2>
+            </div>
+          </div>
+        )}
 
         {/* UI Overlays */}
         <ZoomControls
@@ -251,37 +302,6 @@ const GoogleEarthMap = ({
           />
         )}
 
-        {/* Wildlife locations sidebar */}
-        {wildlifePlaces.length > 0 && (
-          <div className="absolute top-6 left-6 w-80 max-h-[80vh] z-10">
-            <div className="glass-panel rounded-lg p-4">
-              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
-                Wildlife Locations ({wildlifePlaces.length})
-              </h3>
-              <ScrollArea className="h-[calc(80vh-8rem)]">
-                <div className="space-y-3 pr-3">
-                  {wildlifePlaces.map((place, idx) => (
-                    <WildlifeLocationCard
-                      key={idx}
-                      name={place.name}
-                      address={place.address}
-                      rating={place.rating}
-                      types={place.types}
-                      photoReference={place.photoReference}
-                      onClick={() => {
-                        if (mapRef.current) {
-                          mapRef.current.panTo({ lat: place.lat, lng: place.lng });
-                          mapRef.current.setZoom(15);
-                        }
-                      }}
-                    />
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </div>
-        )}
       </div>
     </APIProvider>
   );
