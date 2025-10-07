@@ -179,6 +179,7 @@ const GoogleEarthMap = ({
     <APIProvider apiKey={apiKey}>
       <div className="relative w-full h-screen">
         <Map
+          mapId="wildlife-map"
           defaultCenter={defaultCenter}
           defaultZoom={defaultZoom}
           defaultTilt={defaultTilt}
