@@ -8,6 +8,7 @@ import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import ConservationLayers from '@/components/ConservationLayers';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { HabitatFactsCard } from '@/components/HabitatFactsCard';
+import { SearchLoader } from '@/components/SearchLoader';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map, X } from 'lucide-react';
@@ -150,6 +151,8 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
+    setIsLoading(true);
+    setHasInteracted(true);
     
     // Check if it's a species or location search
     const lowerQuery = query.toLowerCase();
@@ -170,6 +173,7 @@ const Index = () => {
           title: "Species Search",
           description: `No observations found for "${query}"`,
         });
+        setIsLoading(false);
         return;
       }
 
@@ -198,6 +202,7 @@ const Index = () => {
           emoji: '🟢'
         })));
       }
+      setIsLoading(false);
     } else {
       // Handle location/habitat search
       console.log('Location search:', query);
@@ -216,6 +221,7 @@ const Index = () => {
             title: "Location Search",
             description: `Could not find habitat for "${query}"`,
           });
+          setIsLoading(false);
           return;
         }
 
@@ -336,6 +342,7 @@ const Index = () => {
           title: `${habitat.name} Discovered`,
           description: `${protectedAreas.length} protected areas, ${threats.length} active threats`,
         });
+        setIsLoading(false);
       } catch (err) {
         console.error('Error in habitat search:', err);
         toast({
@@ -343,6 +350,7 @@ const Index = () => {
           description: "Failed to search for location",
           variant: "destructive"
         });
+        setIsLoading(false);
       }
     }
   };
@@ -724,6 +732,12 @@ const Index = () => {
             </span>
           </div>
         )}
+
+        {/* Search Loader */}
+        <SearchLoader 
+          isLoading={isLoading} 
+          message={currentSpecies ? "Fetching wildlife data..." : "Discovering habitat..."}
+        />
 
         {/* Navigation buttons - only show when image is expanded */}
         {expandedImage && (
