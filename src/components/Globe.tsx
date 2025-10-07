@@ -129,12 +129,18 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   useEffect(() => {
     if (!globeEl.current || !globeReady || !targetLocation) return;
     
-    // Animate to target location with closer zoom
+    // Stop auto-rotation when flying to a location
+    const controls = globeEl.current.controls();
+    if (controls) {
+      controls.autoRotate = false;
+    }
+    
+    // Animate to target location with much closer zoom (0.5 instead of 1.0)
     globeEl.current.pointOfView(
-      { lat: targetLocation.lat, lng: targetLocation.lng, altitude: 1.0 },
+      { lat: targetLocation.lat, lng: targetLocation.lng, altitude: 0.5 },
       3000 // Slower animation for better visual effect
     );
-    setCurrentAltitude(1.0);
+    setCurrentAltitude(0.5);
   }, [targetLocation, globeReady]);
 
   // Zoom control handlers

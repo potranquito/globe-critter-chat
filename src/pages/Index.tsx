@@ -7,6 +7,7 @@ import ExpandedImageView from '@/components/ExpandedImageView';
 import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import ConservationLayers from '@/components/ConservationLayers';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
+import { HabitatFactsCard } from '@/components/HabitatFactsCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map, X } from 'lucide-react';
@@ -146,7 +147,6 @@ const Index = () => {
   const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
   const [locationName, setLocationName] = useState<string>('');
   const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
-  const [showHabitatCard, setShowHabitatCard] = useState(false);
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
@@ -329,6 +329,9 @@ const Index = () => {
 
         setHabitats(markers);
         
+        // Set target location for globe to zoom to
+        setMapCenter({ lat: habitat.location.lat, lng: habitat.location.lng });
+        
         toast({
           title: `${habitat.name} Discovered`,
           description: `${protectedAreas.length} protected areas, ${threats.length} active threats`,
@@ -438,9 +441,8 @@ const Index = () => {
   const handleImageMarkerClick = (marker: any) => {
     console.log('Image marker clicked:', marker);
     
-    // If it's a habitat marker, show the habitat card
+    // If it's a habitat marker, just show the left-side card (already showing)
     if (marker.type === 'habitat' && currentHabitat) {
-      setShowHabitatCard(true);
       toast({
         title: 'Habitat Details',
         description: `Viewing ${currentHabitat.name}`,
@@ -448,7 +450,7 @@ const Index = () => {
       return;
     }
     
-    // Otherwise, show expanded image view
+    // Otherwise, show expanded image view for species
     setExpandedImage({
       url: marker.imageUrl,
       type: marker.type,
@@ -542,7 +544,6 @@ const Index = () => {
     setWildlifePlaces([]);
     setLocationName('');
     setCurrentHabitat(null);
-    setShowHabitatCard(false);
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -659,35 +660,9 @@ const Index = () => {
         </div>
       )}
 
-      {/* Habitat Split View - Image Left, Info Card Right */}
-      {showHabitatCard && currentHabitat && (
-        <div className="absolute inset-0 z-[70] flex pointer-events-auto bg-background/80 backdrop-blur-sm">
-          {/* Left: Enlarged Habitat Image */}
-          <div className="w-3/5 relative">
-            <img 
-              src={currentHabitat.imageUrl} 
-              alt={currentHabitat.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          
-          {/* Right: Habitat Info Card */}
-          <div className="w-2/5 overflow-auto p-6">
-            <HabitatInfoCard 
-              habitat={currentHabitat}
-              onClose={() => setShowHabitatCard(false)}
-              onThreatClick={(threatId) => {
-                console.log('Threat clicked:', threatId);
-                // TODO: Handle threat detail view
-              }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Left Side Card */}
-      {speciesInfo && !showHabitatCard && (
-        <div className="absolute left-6 top-6 w-64 z-[60]">
+      {/* Left Side Card - Species */}
+      {speciesInfo && !currentHabitat && (
+        <div className="absolute left-6 top-6 w-64 z-[60] pointer-events-auto">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -696,6 +671,22 @@ const Index = () => {
             conservationStatus={speciesInfo.conservationStatus}
             imageUrl={speciesInfo.imageUrl}
             onChatClick={handleChatClick}
+          />
+        </div>
+      )}
+
+      {/* Left Side Card - Habitat */}
+      {currentHabitat && (
+        <div className="absolute left-6 top-6 w-64 z-[60] pointer-events-auto">
+          <HabitatFactsCard
+            habitat={currentHabitat}
+            imageUrl={currentHabitat.imageUrl}
+            onChatClick={() => {
+              toast({
+                title: 'Habitat Chat',
+                description: 'Ask me anything about this habitat!',
+              });
+            }}
           />
         </div>
       )}
