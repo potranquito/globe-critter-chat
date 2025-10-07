@@ -11,3 +11,9 @@ verify_jwt = false
 
 [functions.google-earth-engine]
 verify_jwt = false
+
+[functions.geocode-location]
+verify_jwt = false
+
+[functions.nearby-wildlife]
+verify_jwt = false

@@ -207,20 +207,27 @@ const Index = () => {
       const { supabase } = await import('@/integrations/supabase/client');
       
       // Geocode the location
+      console.log('Invoking geocode-location for:', query);
       const { data: geocodeData, error: geocodeError } = await supabase.functions.invoke('geocode-location', {
         body: { location: query }
       });
       
+      console.log('Geocode response:', { geocodeData, geocodeError });
+      
       if (geocodeError || !geocodeData) {
-        throw new Error('Location not found');
+        console.error('Geocode failed:', geocodeError);
+        throw new Error(geocodeError?.message || 'Location not found');
       }
       
       const { lat, lng, name } = geocodeData;
       
       // Get nearby wildlife places
+      console.log('Invoking nearby-wildlife for coordinates:', lat, lng);
       const { data: wildlifeData, error: wildlifeError } = await supabase.functions.invoke('nearby-wildlife', {
         body: { lat, lng, radius: 50000 }
       });
+      
+      console.log('Wildlife response:', { wildlifeData, wildlifeError });
       
       if (wildlifeError) {
         console.error('Error fetching wildlife places:', wildlifeError);
@@ -259,11 +266,11 @@ const Index = () => {
       });
       
       setIsLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Search error:', error);
       toast({
-        title: 'No Results',
-        description: 'Try searching for: Polar Bear or a location like Las Vegas',
+        title: 'Search Failed',
+        description: error.message || 'Unable to find location. Try: Las Vegas, New York, or Polar Bear',
         variant: 'destructive',
       });
       setIsLoading(false);
