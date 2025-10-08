@@ -185,12 +185,14 @@ const Index = () => {
       setCurrentHabitat(null);
       setCurrentSpecies(query);
       
-      // Set habitat markers from species data
+      // Set habitat markers from species data with animal image
       if (species.habitats) {
         setHabitats(species.habitats.map((h: any) => ({
           ...h,
           emoji: '🟢',
-          type: 'species'
+          type: 'species',
+          imageUrl: species.info.imageUrl, // Add the animal image to markers
+          name: species.info.commonName
         })));
         
         // Zoom to first habitat location
@@ -450,19 +452,158 @@ const Index = () => {
     setSelectedRegion(null);
   };
 
-  const handleImageMarkerClick = (marker: any) => {
+  const handleImageMarkerClick = async (marker: any) => {
     console.log('Image marker clicked:', marker);
     
-    // If it's a habitat marker, just show the left-side card (already showing)
-    if (marker.type === 'habitat' && currentHabitat) {
-      toast({
-        title: 'Habitat Details',
-        description: `Viewing ${currentHabitat.name}`,
+    // If it's a habitat marker, search for nearby habitats and parks
+    if (marker.type === 'habitat' && marker.lat && marker.lng) {
+      setIsLoading(true);
+      try {
+        const { supabase } = await import('@/integrations/supabase/client');
+        
+        // Search for location name first
+        const { data: geocodeData } = await supabase.functions.invoke('geocode-location', {
+          body: { lat: marker.lat, lng: marker.lng }
+        });
+        
+        const locationName = geocodeData?.location || marker.name;
+        
+        // Fetch habitat discovery for this location
+        const { data: habitatData, error: habitatError } = await supabase.functions.invoke('habitat-discovery', {
+          body: { location: locationName }
+        });
+        
+        if (!habitatError && habitatData?.success) {
+          const habitat = habitatData.habitat;
+          
+          // Fetch habitat image
+          let habitatImageUrl = marker.imageUrl || '';
+          try {
+            const { data: imageData } = await supabase.functions.invoke('habitat-image', {
+              body: { habitatName: habitat.name }
+            });
+            if (imageData?.success && imageData.imageUrl) {
+              habitatImageUrl = imageData.imageUrl;
+            }
+          } catch (err) {
+            console.error('Error fetching habitat image:', err);
+          }
+          
+          // Fetch protected areas
+          let protectedAreas: any[] = [];
+          try {
+            const { data: areasData } = await supabase.functions.invoke('protected-areas', {
+              body: { bounds: habitat.bounds }
+            });
+            if (areasData?.success) {
+              protectedAreas = areasData.protectedAreas || [];
+            }
+          } catch (err) {
+            console.error('Error fetching protected areas:', err);
+          }
+          
+          // Fetch threats
+          let threats: any[] = [];
+          try {
+            const { data: threatsData } = await supabase.functions.invoke('habitat-threats', {
+              body: { bounds: habitat.bounds }
+            });
+            if (threatsData?.success) {
+              threats = threatsData.threats || [];
+            }
+          } catch (err) {
+            console.error('Error fetching threats:', err);
+          }
+          
+          // Update habitat with all data
+          const enrichedHabitat = {
+            ...habitat,
+            imageUrl: habitatImageUrl,
+            protectedAreas,
+            threats,
+            keySpecies: []
+          };
+          
+          setCurrentHabitat(enrichedHabitat);
+          setSpeciesInfo(null);
+          setCurrentSpecies(null);
+          
+          // Create markers for nearby habitats and protected areas
+          const getHabitatEmoji = (climate: string) => {
+            if (climate.toLowerCase().includes('desert')) return '🏜️';
+            if (climate.toLowerCase().includes('forest') || climate.toLowerCase().includes('tropical')) return '🌲';
+            if (climate.toLowerCase().includes('arctic') || climate.toLowerCase().includes('tundra')) return '❄️';
+            if (climate.toLowerCase().includes('ocean') || climate.toLowerCase().includes('marine')) return '🌊';
+            if (climate.toLowerCase().includes('grassland') || climate.toLowerCase().includes('savanna')) return '🌾';
+            if (climate.toLowerCase().includes('wetland')) return '💧';
+            return '🌍';
+          };
+          
+          const markers: any[] = [{
+            lat: habitat.location.lat,
+            lng: habitat.location.lng,
+            name: habitat.name,
+            size: 2,
+            emoji: getHabitatEmoji(habitat.climate),
+            type: 'habitat',
+            imageUrl: habitatImageUrl
+          }];
+          
+          // Add protected area markers
+          protectedAreas.slice(0, 10).forEach(area => {
+            markers.push({
+              lat: area.location.lat,
+              lng: area.location.lng,
+              name: area.name,
+              size: 1,
+              emoji: '🛡️',
+              type: 'protected'
+            });
+          });
+          
+          // Add threat markers
+          threats.forEach(threat => {
+            markers.push({
+              lat: threat.location.lat,
+              lng: threat.location.lng,
+              name: threat.title,
+              size: 1,
+              emoji: threat.emoji,
+              type: 'threat'
+            });
+          });
+          
+          setHabitats(markers);
+          setMapCenter({ lat: habitat.location.lat, lng: habitat.location.lng });
+          
+          toast({
+            title: `${habitat.name} Discovered`,
+            description: `${protectedAreas.length} protected areas, ${threats.length} threats nearby`,
+          });
+        }
+      } catch (err) {
+        console.error('Error fetching habitat details:', err);
+        toast({
+          title: 'Habitat Details',
+          description: `Viewing ${marker.name || 'habitat'}`,
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+    
+    // For species markers, show expanded image view
+    if (marker.type === 'species' && marker.imageUrl) {
+      setExpandedImage({
+        url: marker.imageUrl,
+        type: 'threat',
+        index: 0
       });
       return;
     }
     
-    // Otherwise, show expanded image view for species
+    // Otherwise, show expanded image view
     setExpandedImage({
       url: marker.imageUrl,
       type: marker.type,
