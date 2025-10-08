@@ -684,6 +684,15 @@ const Index = () => {
       const count = data.data?.length || 0;
       const layerName = layerType.charAt(0).toUpperCase() + layerType.slice(1);
       
+      // Define colors for different layer types
+      const layerColors: Record<string, string> = {
+        fires: '#FF6B6B',
+        earthquakes: '#FFA500',
+        forest: '#34D399',
+        ice: '#60A5FA',
+        protected: '#10B981'
+      };
+      
       setActiveLayers(prev => {
         const filtered = prev.filter(l => l.name !== layerName);
         return [...filtered, { name: layerName, count }];
@@ -691,7 +700,11 @@ const Index = () => {
       
       setConservationLayers(prev => {
         const filtered = prev.filter(l => l.type !== layerType);
-        return [...filtered, data];
+        return [...filtered, { 
+          type: layerType, 
+          data: data.data || data,
+          color: layerColors[layerType] || '#10B981'
+        }];
       });
       
       toast({ 
