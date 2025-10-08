@@ -913,7 +913,7 @@ const Index = () => {
       )}
 
       {/* Map Controls - Top Center */}
-      <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 pointer-events-auto items-center">
+      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-auto items-center">
         <MapControls
           useGoogleMaps={useGoogleMaps}
           onToggleMap={handleToggleMapView}
