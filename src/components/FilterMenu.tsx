@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Flame, Mountain, TreePine, Snowflake, Shield, Utensils, Leaf, Newspaper } from "lucide-react";
+import { Flame, Mountain, TreePine, Snowflake, Shield, Utensils, Leaf, Newspaper, PawPrint, Bird } from "lucide-react";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +22,8 @@ const FilterMenu = ({ isOpen, onClose, onToggleLayer }: FilterMenuProps) => {
     { id: 'forest', label: 'Forest Cover', icon: TreePine, color: 'text-green-600' },
     { id: 'ice', label: 'Ice Coverage', icon: Snowflake, color: 'text-blue-400' },
     { id: 'protected', label: 'Protected Areas', icon: Shield, color: 'text-green-500' },
+    { id: 'endangered-animals', label: 'Endangered Animals', icon: PawPrint, color: 'text-amber-600', disabled: true },
+    { id: 'endangered-birds', label: 'Endangered Birds', icon: Bird, color: 'text-sky-600', disabled: true },
     { id: 'food-pyramid', label: 'Food Pyramid', icon: Utensils, color: 'text-yellow-600', disabled: true },
     { id: 'ecosystems', label: 'Ecosystems', icon: Leaf, color: 'text-emerald-600', disabled: true },
     { id: 'events', label: 'News & Events', icon: Newspaper, color: 'text-purple-600', disabled: true },

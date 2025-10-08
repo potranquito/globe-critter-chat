@@ -10,7 +10,7 @@ interface MapControlsProps {
 
 const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onFilterClick }: MapControlsProps) => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-row gap-2">
       <Button
         onClick={onFetchLocation}
         size="icon"
