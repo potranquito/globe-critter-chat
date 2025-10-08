@@ -3,7 +3,6 @@ import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-m
 import { MapPin } from 'lucide-react';
 import { useGoogleMapsApi } from '@/hooks/useGoogleMapsApi';
 import ZoomControls from './ZoomControls';
-import ConservationLayers from './ConservationLayers';
 import UsageIndicator from './UsageIndicator';
 import ImageMarker from './ImageMarker';
 import GlobeComponent from './Globe';
@@ -290,8 +289,6 @@ const GoogleEarthMap = ({
           onReset={handleResetView}
           zoomLevel={getZoomLevel()}
         />
-
-        <ConservationLayers onToggleLayer={handleLayerToggle} />
 
         {usage && (
           <UsageIndicator

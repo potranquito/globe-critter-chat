@@ -27,7 +27,8 @@ export const HabitatFactsCard = ({ habitat, imageUrl, onChatClick }: HabitatFact
   const totalThreats = habitat.threats?.length || 0;
 
   return (
-    <Card className="glass-card animate-slide-in-left shadow-2xl overflow-hidden">
+    <Card className="glass-card animate-slide-in-left shadow-2xl overflow-hidden max-h-[calc(100vh-200px)]">
+      <div className="overflow-y-auto h-full">
       {/* Habitat Image */}
       {imageUrl && (
         <div className="relative h-40 overflow-hidden">
@@ -143,6 +144,7 @@ export const HabitatFactsCard = ({ habitat, imageUrl, onChatClick }: HabitatFact
           </Button>
         )}
       </CardContent>
+      </div>
     </Card>
   );
 };

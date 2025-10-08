@@ -5,15 +5,15 @@ import ChatInput from '@/components/ChatInput';
 import FastFactsCard from '@/components/FastFactsCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
 import RegionalAnimalsList from '@/components/RegionalAnimalsList';
-import ConservationLayers from '@/components/ConservationLayers';
+import MapControls from '@/components/MapControls';
+import FilterMenu from '@/components/FilterMenu';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { HabitatFactsCard } from '@/components/HabitatFactsCard';
 import { SearchLoader } from '@/components/SearchLoader';
 import WildlifeLocationCard from '@/components/WildlifeLocationCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map, X } from 'lucide-react';
-import earthMascot from '@/assets/earth-mascot-user.png';
+import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { HabitatRegion } from '@/types/habitat';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
@@ -150,6 +150,7 @@ const Index = () => {
   const [locationName, setLocationName] = useState<string>('');
   const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
   const [selectedWildlifePark, setSelectedWildlifePark] = useState<any>(null);
+  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
@@ -820,19 +821,7 @@ const Index = () => {
         )}
       </div>
 
-      {/* Map/Globe Toggle - Top Right */}
-      <div className="absolute top-6 right-6 z-50 pointer-events-auto">
-        <Button 
-          onClick={handleToggleMapView}
-          variant="secondary"
-          size="sm"
-          className="glass-panel rounded-xl h-10 px-3 flex items-center gap-2 hover:bg-secondary/80"
-          title={useGoogleMaps ? 'Switch to Globe View' : 'Switch to Map View'}
-        >
-          {useGoogleMaps ? <Globe className="h-4 w-4" /> : <Map className="h-4 w-4" />}
-          <span className="hidden sm:inline">{useGoogleMaps ? 'Globe View' : 'Map View'}</span>
-        </Button>
-      </div>
+      {/* Map/Globe Toggle - Hidden (now in left controls) */}
 
       {/* Regional Animals List */}
       {regionalAnimals && selectedRegion && (
@@ -911,11 +900,23 @@ const Index = () => {
       )}
 
       {/* Conservation Data - Bottom Left */}
-      <div className="absolute bottom-8 left-6 z-50 pointer-events-auto">
-        <ConservationLayers onToggleLayer={handleLayerToggle} />
+      <div className="absolute bottom-8 left-6 z-50 flex flex-col gap-4 pointer-events-auto">
+        <MapControls
+          useGoogleMaps={useGoogleMaps}
+          onToggleMap={handleToggleMapView}
+          onFetchLocation={handleFetchLocation}
+          onFilterClick={() => setFilterMenuOpen(!filterMenuOpen)}
+        />
+        {filterMenuOpen && (
+          <FilterMenu
+            isOpen={filterMenuOpen}
+            onClose={() => setFilterMenuOpen(false)}
+            onToggleLayer={handleLayerToggle}
+          />
+        )}
       </div>
 
-      {/* Chat Input with Earth Mascot and Reset Button */}
+      {/* Chat Input with Reset Button */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-full max-w-[1250px] flex flex-col items-center gap-3 pointer-events-none">
         {/* Active Layers Chip */}
         {activeLayers.length > 0 && (
@@ -958,11 +959,6 @@ const Index = () => {
         )}
         
         <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
-          <img 
-            src={earthMascot} 
-            alt="Earth Mascot" 
-            className="w-16 h-16 object-contain animate-float -mb-1"
-          />
           <div className="w-full max-w-[450px]">
             <ChatInput
               onSubmit={handleSearch} 
@@ -970,15 +966,6 @@ const Index = () => {
               placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
             />
           </div>
-          <Button 
-            onClick={handleFetchLocation}
-            variant="secondary"
-            size="icon"
-            className="glass-panel rounded-xl h-12 w-12 shrink-0 mb-2 hover:bg-secondary/80"
-            title="Show my location"
-          >
-            <MapPin className="h-5 w-5" />
-          </Button>
           {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
             <Button 
               onClick={handleReset}

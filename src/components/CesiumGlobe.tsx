@@ -3,7 +3,6 @@ import { Viewer, Entity, CameraFlyTo } from 'resium';
 import * as Cesium from 'cesium';
 import { useGoogleMapsApi } from '@/hooks/useGoogleMapsApi';
 import ZoomControls from './ZoomControls';
-import ConservationLayers from './ConservationLayers';
 import UsageIndicator from './UsageIndicator';
 import GlobeComponent from './Globe';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
@@ -249,8 +248,6 @@ const CesiumGlobe = ({
         onReset={handleResetView}
         zoomLevel={getZoomLevel()}
       />
-
-      <ConservationLayers onToggleLayer={handleLayerToggle} />
 
       {usage && (
         <UsageIndicator

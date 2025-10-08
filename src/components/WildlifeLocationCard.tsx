@@ -65,14 +65,15 @@ const WildlifeLocationCard = ({
   };
 
   return (
-    <Card className="glass-panel p-6 max-w-md animate-fade-in">
-      <div className="flex justify-between items-start mb-4">
+    <Card className="glass-panel p-6 max-w-md animate-fade-in max-h-[calc(100vh-200px)]">
+      <div className="overflow-y-auto h-full space-y-4">
+      <div className="flex justify-between items-start">
         <h2 className="text-2xl font-bold text-foreground">{name}</h2>
         <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
       </div>
 
       {displayImageUrl && (
-        <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
+        <div className="w-full h-48 rounded-lg overflow-hidden">
           <img 
             src={displayImageUrl} 
             alt={name}
@@ -81,7 +82,7 @@ const WildlifeLocationCard = ({
         </div>
       )}
 
-      <div className="space-y-3 mb-4">
+      <div className="space-y-3">
         {rating && (
           <div className="flex items-center gap-2">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
@@ -132,6 +133,7 @@ const WildlifeLocationCard = ({
           )}
         </div>
       )}
+      </div>
     </Card>
   );
 };

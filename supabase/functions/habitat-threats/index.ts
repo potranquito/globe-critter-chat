@@ -31,6 +31,29 @@ interface Threat {
     url: string;
   };
   emoji: string;
+  imageUrl?: string;
+}
+
+async function fetchWikipediaImage(searchTerm: string): Promise<string | undefined> {
+  try {
+    const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTerm)}&format=json&origin=*`;
+    const searchRes = await fetch(searchUrl);
+    const searchData = await searchRes.json();
+    
+    if (!searchData.query?.search?.[0]) return undefined;
+    
+    const pageTitle = searchData.query.search[0].title;
+    const imageUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(pageTitle)}&prop=pageimages&format=json&pithumbsize=400&origin=*`;
+    const imageRes = await fetch(imageUrl);
+    const imageData = await imageRes.json();
+    
+    const pages = imageData.query?.pages;
+    const pageId = Object.keys(pages || {})[0];
+    return pages?.[pageId]?.thumbnail?.source;
+  } catch (err) {
+    console.error('Wikipedia image fetch failed:', err);
+    return undefined;
+  }
 }
 
 function isInBounds(coords: [number, number], bounds: Bounds): boolean {
@@ -59,7 +82,7 @@ async function fetchFireThreats(bounds: Bounds): Promise<Threat[]> {
     const res = await fetch('https://eonet.gsfc.nasa.gov/api/v3/events?category=wildfires&status=open');
     const data = await res.json();
     
-    return data.events
+    const threats = data.events
       .filter((event: any) => 
         event.geometry && event.geometry[0] && 
         isInBounds([event.geometry[0].coordinates[0], event.geometry[0].coordinates[1]], bounds)
@@ -86,6 +109,16 @@ async function fetchFireThreats(bounds: Bounds): Promise<Threat[]> {
         },
         emoji: '🔥'
       }));
+    
+    // Fetch images for each threat
+    const threatsWithImages = await Promise.all(
+      threats.map(async (threat: Threat) => {
+        const imageUrl = await fetchWikipediaImage(`wildfire ${threat.location.name}`);
+        return { ...threat, imageUrl };
+      })
+    );
+    
+    return threatsWithImages;
   } catch (err) {
     console.error('Fire fetch failed:', err);
     return [];
@@ -97,7 +130,7 @@ async function fetchEarthquakeThreats(bounds: Bounds): Promise<Threat[]> {
     const res = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson');
     const data = await res.json();
     
-    return data.features
+    const threats = data.features
       .filter((f: any) => 
         f.geometry && f.geometry.coordinates &&
         isInBounds([f.geometry.coordinates[0], f.geometry.coordinates[1]], bounds)
@@ -123,6 +156,16 @@ async function fetchEarthquakeThreats(bounds: Bounds): Promise<Threat[]> {
         },
         emoji: '🌋'
       }));
+    
+    // Fetch images for each threat
+    const threatsWithImages = await Promise.all(
+      threats.map(async (threat: Threat) => {
+        const imageUrl = await fetchWikipediaImage(`earthquake ${threat.location.name}`);
+        return { ...threat, imageUrl };
+      })
+    );
+    
+    return threatsWithImages;
   } catch (err) {
     console.error('Earthquake fetch failed:', err);
     return [];
