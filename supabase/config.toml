@@ -1,4 +1,4 @@
-project_id = "jqirupugxgsqgydxaebt"
+project_id = "iwmbvpdqwekgxegaxrhr"
 
 [functions.species-chat]
 verify_jwt = false
@@ -34,4 +34,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.location-info]
+verify_jwt = false
+
+[functions.analyze-habitat-region]
+verify_jwt = false
+
+[functions.discover-region-species]
 verify_jwt = false
