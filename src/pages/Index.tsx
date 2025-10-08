@@ -248,34 +248,61 @@ const Index = () => {
           console.error('Error fetching habitat image:', err);
         }
 
-        // Step 3: Fetch protected areas
+        // Step 3: Fetch nearby wildlife parks, protected areas, and threats in parallel
+        const [wildlifeResult, areasResult, threatsResult] = await Promise.all([
+          supabase.functions.invoke('nearby-wildlife', {
+            body: { 
+              lat: habitat.location.lat, 
+              lng: habitat.location.lng,
+              radius: 50000 
+            }
+          }),
+          supabase.functions.invoke('protected-areas', {
+            body: { bounds: habitat.bounds }
+          }),
+          supabase.functions.invoke('habitat-threats', {
+            body: { bounds: habitat.bounds }
+          })
+        ]);
+        
         let protectedAreas: any[] = [];
-        try {
-          const { data: areasData, error: areasError } = await supabase.functions.invoke('protected-areas', {
-            body: { bounds: habitat.bounds }
-          });
-          
-          if (!areasError && areasData?.success) {
-            protectedAreas = areasData.protectedAreas || [];
-            console.log(`Found ${protectedAreas.length} protected areas`);
-          }
-        } catch (err) {
-          console.error('Error fetching protected areas:', err);
+        if (!areasResult.error && areasResult.data?.success) {
+          protectedAreas = areasResult.data.protectedAreas || [];
+          console.log(`Found ${protectedAreas.length} protected areas`);
         }
-
-        // Step 4: Fetch threats
+        
         let threats: any[] = [];
-        try {
-          const { data: threatsData, error: threatsError } = await supabase.functions.invoke('habitat-threats', {
-            body: { bounds: habitat.bounds }
-          });
+        if (!threatsResult.error && threatsResult.data?.success) {
+          threats = threatsResult.data.threats || [];
+          console.log(`Found ${threats.length} threats`);
+        }
+        
+        // Step 4: Fetch Wikipedia images for nearby wildlife parks
+        let wildlifeParks: any[] = [];
+        if (!wildlifeResult.error && wildlifeResult.data?.places) {
+          const places = wildlifeResult.data.places;
+          console.log(`Found ${places.length} wildlife parks nearby`);
           
-          if (!threatsError && threatsData?.success) {
-            threats = threatsData.threats || [];
-            console.log(`Found ${threats.length} threats`);
-          }
-        } catch (err) {
-          console.error('Error fetching threats:', err);
+          // Fetch images for each park in parallel
+          const parksWithImages = await Promise.all(
+            places.map(async (park: any) => {
+              try {
+                const { data: imageData } = await supabase.functions.invoke('habitat-image', {
+                  body: { habitatName: park.name }
+                });
+                
+                return {
+                  ...park,
+                  imageUrl: imageData?.success ? imageData.imageUrl : undefined
+                };
+              } catch (error) {
+                console.error(`Failed to fetch image for ${park.name}:`, error);
+                return park;
+              }
+            })
+          );
+          
+          wildlifeParks = parksWithImages;
         }
 
         // Update habitat with all data
@@ -291,41 +318,36 @@ const Index = () => {
         setSpeciesInfo(null); // Clear species info when showing habitat
         setCurrentSpecies(null); // Clear current species
         
-        // Get habitat emoji based on climate
-        const getHabitatEmoji = (climate: string) => {
-          if (climate.toLowerCase().includes('desert')) return '🏜️';
-          if (climate.toLowerCase().includes('forest') || climate.toLowerCase().includes('tropical')) return '🌲';
-          if (climate.toLowerCase().includes('arctic') || climate.toLowerCase().includes('tundra')) return '❄️';
-          if (climate.toLowerCase().includes('ocean') || climate.toLowerCase().includes('marine')) return '🌊';
-          if (climate.toLowerCase().includes('grassland') || climate.toLowerCase().includes('savanna')) return '🌾';
-          if (climate.toLowerCase().includes('wetland')) return '💧';
-          return '🌍';
-        };
-
         // Create markers for globe
-        const markers: any[] = [
-          // Main habitat marker
-          {
-            lat: habitat.location.lat,
-            lng: habitat.location.lng,
-            name: habitat.name,
-            size: 2,
-            emoji: getHabitatEmoji(habitat.climate),
-            type: 'habitat',
-            imageUrl: habitatImageUrl
-          }
-        ];
+        const markers: any[] = [];
 
-        // Add protected area markers
-        protectedAreas.slice(0, 10).forEach(area => {
-          markers.push({
-            lat: area.location.lat,
-            lng: area.location.lng,
-            name: area.name,
-            size: 1,
-            emoji: '🛡️',
-            type: 'protected'
-          });
+        // Add wildlife park markers with images as thumbnails
+        wildlifeParks.forEach(park => {
+          if (park.imageUrl) {
+            markers.push({
+              lat: park.lat,
+              lng: park.lng,
+              name: park.name,
+              size: 1.2,
+              type: 'wildlife-park',
+              imageUrl: park.imageUrl,
+              info: {
+                name: park.name,
+                address: park.address,
+                rating: park.rating
+              }
+            });
+          } else {
+            // Fallback to emoji if no image found
+            markers.push({
+              lat: park.lat,
+              lng: park.lng,
+              name: park.name,
+              size: 1,
+              emoji: '🌳',
+              type: 'wildlife-park'
+            });
+          }
         });
 
         // Add threat markers
@@ -347,7 +369,7 @@ const Index = () => {
         
         toast({
           title: `${habitat.name} Discovered`,
-          description: `${protectedAreas.length} protected areas, ${threats.length} active threats`,
+          description: `${wildlifeParks.length} wildlife parks, ${threats.length} active threats`,
         });
         setIsLoading(false);
       } catch (err) {
