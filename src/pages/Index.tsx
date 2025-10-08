@@ -154,60 +154,63 @@ const Index = () => {
     setIsLoading(true);
     setHasInteracted(true);
     
+    const { supabase } = await import('@/integrations/supabase/client');
+    
     // Check if it's a species or location search
     const lowerQuery = query.toLowerCase();
-    const isSpeciesSearch = Object.keys(speciesData).some(species => 
-      species.toLowerCase().includes(lowerQuery)
+    const normalizedQuery = lowerQuery.replace(/\s+/g, '-'); // "polar bear" -> "polar-bear"
+    
+    // Check if query matches any species in our data (handle both "polar bear" and "polar-bear")
+    const speciesKey = Object.keys(speciesData).find(species => 
+      species.toLowerCase() === normalizedQuery || 
+      species.toLowerCase().replace(/-/g, ' ') === lowerQuery ||
+      lowerQuery.includes(species.toLowerCase().replace(/-/g, ' '))
     );
+    
+    const isSpeciesSearch = !!speciesKey;
 
-    if (isSpeciesSearch) {
-      // Handle species search as before
-      const { supabase } = await import('@/integrations/supabase/client');
-      const { data, error } = await supabase.functions.invoke('nearby-wildlife', {
-        body: { location: query }
+    if (isSpeciesSearch && speciesKey) {
+      // Handle species search - show animal card
+      console.log('Species search detected:', speciesKey);
+      
+      const species = speciesData[speciesKey];
+      
+      // Set species info to show the FastFactsCard
+      setSpeciesInfo({
+        ...species.info,
+        species: speciesKey
       });
-
-      if (error || !data?.success) {
-        console.error('Error fetching wildlife:', error);
-        toast({
-          title: "Species Search",
-          description: `No observations found for "${query}"`,
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      const speciesKey = Object.keys(speciesData).find(species => 
-        species.toLowerCase().includes(lowerQuery)
-      );
-      if (speciesKey) {
-        const species = speciesData[speciesKey];
-        setSpeciesInfo({
-          species: speciesKey,
-          scientificName: species.scientificName || speciesKey,
-          ...species
-        });
-      }
-
-      // Zoom to the first observation
-      const firstObs = data.observations[0];
-      if (firstObs) {
-        setCurrentSpecies(query);
-        setHabitats(data.observations.map((obs: any) => ({
-          lat: obs.latitude,
-          lng: obs.longitude,
-          species: obs.species_guess,
-          size: 0.5,
-          color: '#22c55e',
-          emoji: '🟢'
+      
+      // Clear habitat to ensure species card shows
+      setCurrentHabitat(null);
+      setCurrentSpecies(query);
+      
+      // Set habitat markers from species data
+      if (species.habitats) {
+        setHabitats(species.habitats.map((h: any) => ({
+          ...h,
+          emoji: '🟢',
+          type: 'species'
         })));
+        
+        // Zoom to first habitat location
+        if (species.habitats[0]) {
+          setMapCenter({ 
+            lat: species.habitats[0].lat, 
+            lng: species.habitats[0].lng 
+          });
+        }
       }
+      
       setIsLoading(false);
-    } else {
+      return;
+    }
+    
+    // Handle location/habitat search
+    console.log('Location search:', query);
+      
       // Handle location/habitat search
       console.log('Location search:', query);
-      
-      const { supabase } = await import('@/integrations/supabase/client');
       
       try {
         // Step 1: Discover habitat
@@ -283,6 +286,8 @@ const Index = () => {
         };
         
         setCurrentHabitat(enrichedHabitat);
+        setSpeciesInfo(null); // Clear species info when showing habitat
+        setCurrentSpecies(null); // Clear current species
         
         // Get habitat emoji based on climate
         const getHabitatEmoji = (climate: string) => {
@@ -352,7 +357,6 @@ const Index = () => {
         });
         setIsLoading(false);
       }
-    }
   };
 
   const handlePointClick = (point: any) => {
