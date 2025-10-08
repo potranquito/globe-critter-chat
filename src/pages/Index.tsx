@@ -11,10 +11,13 @@ import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { HabitatFactsCard } from '@/components/HabitatFactsCard';
 import { SearchLoader } from '@/components/SearchLoader';
 import WildlifeLocationCard from '@/components/WildlifeLocationCard';
+import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { HabitatRegion } from '@/types/habitat';
+import { performRegionAnalysis } from '@/services/regionService';
+import type { RegionInfo, RegionSpecies } from '@/services/regionService';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
@@ -151,6 +154,8 @@ const Index = () => {
   const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
   const [selectedWildlifePark, setSelectedWildlifePark] = useState<any>(null);
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
+  const [regionInfo, setRegionInfo] = useState<RegionInfo | null>(null);
+  const [regionSpecies, setRegionSpecies] = useState<RegionSpecies[]>([]);
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
@@ -190,23 +195,38 @@ const Index = () => {
       
       // Set habitat markers from species data with animal image
       if (species.habitats) {
-        setHabitats(species.habitats.map((h: any) => ({
+        const habitatPoints = species.habitats.map((h: any) => ({
           ...h,
           emoji: '🟢',
           type: 'species',
           imageUrl: species.info.imageUrl, // Add the animal image to markers
           name: species.info.commonName
-        })));
-        
+        }));
+        setHabitats(habitatPoints);
+
         // Zoom to first habitat location
         if (species.habitats[0]) {
-          setMapCenter({ 
-            lat: species.habitats[0].lat, 
-            lng: species.habitats[0].lng 
+          setMapCenter({
+            lat: species.habitats[0].lat,
+            lng: species.habitats[0].lng
           });
         }
+
+        // NEW: Analyze region and discover species
+        try {
+          const { region, species: discoveredSpecies } = await performRegionAnalysis(
+            habitatPoints,
+            species.info.commonName,
+            30
+          );
+          setRegionInfo(region);
+          setRegionSpecies(discoveredSpecies);
+          console.log('Region analysis complete:', region.regionName);
+        } catch (regionError) {
+          console.error('Region analysis failed:', regionError);
+        }
       }
-      
+
       setIsLoading(false);
       return;
     }
@@ -723,6 +743,11 @@ const Index = () => {
     }
   };
 
+  const handleCarouselSpeciesSelect = async (species: RegionSpecies) => {
+    // When a species is selected from the carousel, search for it
+    await handleSearch(species.commonName);
+  };
+
   const handleReset = () => {
     setHabitats([]);
     setCurrentSpecies(null);
@@ -744,6 +769,8 @@ const Index = () => {
     setLocationName('');
     setCurrentHabitat(null);
     setSelectedWildlifePark(null);
+    setRegionInfo(null);
+    setRegionSpecies([]);
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -836,6 +863,18 @@ const Index = () => {
 
       {/* Map/Globe Toggle - Hidden (now in left controls) */}
 
+      {/* Region Species Carousel - Left Side Vertical */}
+      {regionInfo && regionSpecies.length > 0 && (
+        <div className="absolute left-6 top-6 bottom-6 w-80 z-[60] pointer-events-auto">
+          <RegionSpeciesCarousel
+            species={regionSpecies}
+            regionName={regionInfo.regionName}
+            currentSpecies={speciesInfo?.scientificName}
+            onSpeciesSelect={handleCarouselSpeciesSelect}
+          />
+        </div>
+      )}
+
       {/* Regional Animals List */}
       {regionalAnimals && selectedRegion && (
         <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 max-w-3xl w-full px-6">
@@ -848,8 +887,8 @@ const Index = () => {
         </div>
       )}
 
-      {/* Wildlife Park Card */}
-      {selectedWildlifePark && (
+      {/* Wildlife Park Card - Left Side */}
+      {selectedWildlifePark && !regionInfo && (
         <div className="absolute left-6 top-6 w-80 z-[60] pointer-events-auto">
           <WildlifeLocationCard
             name={selectedWildlifePark.name}
@@ -864,9 +903,9 @@ const Index = () => {
         </div>
       )}
 
-      {/* Left Side Card - Species */}
+      {/* Right Side Card - Species with Chat Below */}
       {speciesInfo && !currentHabitat && !selectedWildlifePark && (
-        <div className="absolute left-6 top-6 w-64 z-[60] pointer-events-auto">
+        <div className="absolute right-6 top-6 w-96 z-[60] pointer-events-auto flex flex-col gap-4">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -876,6 +915,15 @@ const Index = () => {
             imageUrl={speciesInfo.imageUrl}
             onChatClick={handleChatClick}
           />
+
+          {/* Chat Input Below Animal Card */}
+          <div className="glass-panel rounded-2xl p-2">
+            <ChatInput
+              onSubmit={handleSearch}
+              isLoading={isLoading}
+              placeholder={`Ask about ${speciesInfo.commonName}...`}
+            />
+          </div>
         </div>
       )}
 
