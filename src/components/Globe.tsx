@@ -233,6 +233,22 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
               </div>
             `;
           }
+          // If it's a wildlife park marker, show image with name overlay
+          else if (d.type === 'wildlife-park') {
+            el.innerHTML = `
+              <div class="relative group">
+                <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-emerald-400 shadow-lg">
+                  ${d.imageUrl 
+                    ? `<img src="${d.imageUrl}" alt="${d.name || 'Wildlife Park'}" class="w-full h-full object-cover" />`
+                    : `<div class="w-full h-full bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-2xl">🌳</div>`
+                  }
+                </div>
+                <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-black/80 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  ${d.name || 'Wildlife Park'}
+                </div>
+              </div>
+            `;
+          }
           // If it's a habitat image marker (Wikipedia URL), use directly
           else if (d.imageUrl && d.type === 'habitat') {
             el.innerHTML = `

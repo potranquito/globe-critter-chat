@@ -1,70 +1,107 @@
 import { Card } from './ui/card';
-import { MapPin, Star } from 'lucide-react';
+import { Button } from './ui/button';
+import { MapPin, Star, MessageCircle, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface WildlifeLocationCardProps {
   name: string;
   address?: string;
   rating?: number;
-  types?: string[];
+  imageUrl?: string;
   photoReference?: string;
-  onClick?: () => void;
+  types?: string[];
+  location: { lat: number; lng: number };
+  onClose: () => void;
 }
 
-const WildlifeLocationCard = ({ 
-  name, 
-  address, 
+const WildlifeLocationCard = ({
+  name,
+  address,
   rating,
-  types,
+  imageUrl,
   photoReference,
-  onClick 
+  types,
+  location,
+  onClose
 }: WildlifeLocationCardProps) => {
-  const apiKey = 'AIzaSyC4205XHgzRi8VswW7zqdFVanY-HoEDTIg'; // From google-maps-proxy
-  const photoUrl = photoReference 
-    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=200&photoreference=${photoReference}&key=${apiKey}`
-    : null;
+  const [aiInfo, setAiInfo] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasAsked, setHasAsked] = useState(false);
+
+  const displayImageUrl = imageUrl || (photoReference 
+    ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=AIzaSyC4205XHgzRi8VswW7zqdFVanY-HoEDTIg`
+    : null);
+
+  const handleAskAboutLocation = async () => {
+    setIsLoading(true);
+    setHasAsked(true);
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('location-info', {
+        body: {
+          name,
+          address,
+          rating,
+          types,
+          location
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        setAiInfo(data.response);
+      } else {
+        toast.error('Failed to get location information');
+      }
+    } catch (error) {
+      console.error('Error fetching location info:', error);
+      toast.error('Failed to get location information');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <Card 
-      className="cursor-pointer hover:shadow-lg transition-all bg-card/95 backdrop-blur-sm border-2 border-primary/20 overflow-hidden"
-      onClick={onClick}
-    >
-      {photoUrl ? (
-        <div className="w-full h-32 overflow-hidden">
+    <Card className="glass-panel p-6 max-w-md animate-fade-in">
+      <div className="flex justify-between items-start mb-4">
+        <h2 className="text-2xl font-bold text-foreground">{name}</h2>
+        <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
+      </div>
+
+      {displayImageUrl && (
+        <div className="w-full h-48 rounded-lg overflow-hidden mb-4">
           <img 
-            src={photoUrl} 
+            src={displayImageUrl} 
             alt={name}
-            className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+            className="w-full h-full object-cover"
           />
         </div>
-      ) : (
-        <div className="w-full h-32 bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
-          <MapPin className="w-12 h-12 text-primary/40" />
-        </div>
       )}
-      
-      <div className="p-3">
-        <h3 className="font-semibold text-sm line-clamp-2 mb-1">{name}</h3>
-        
+
+      <div className="space-y-3 mb-4">
         {rating && (
-          <div className="flex items-center gap-1 mb-2">
-            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs text-muted-foreground">{rating.toFixed(1)}</span>
+          <div className="flex items-center gap-2">
+            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-sm font-medium">{rating.toFixed(1)} Rating</span>
           </div>
         )}
-        
+
         {address && (
-          <p className="text-xs text-muted-foreground line-clamp-2 flex items-start gap-1">
-            <MapPin className="w-3 h-3 mt-0.5 flex-shrink-0" />
-            <span>{address}</span>
-          </p>
+          <div className="flex items-start gap-2">
+            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">{address}</span>
+          </div>
         )}
-        
+
         {types && types.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {types.slice(0, 2).map((type, idx) => (
+          <div className="flex flex-wrap gap-2">
+            {types.slice(0, 3).map((type, idx) => (
               <span 
                 key={idx}
-                className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary"
+                className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
               >
                 {type.replace(/_/g, ' ')}
               </span>
@@ -72,6 +109,29 @@ const WildlifeLocationCard = ({
           </div>
         )}
       </div>
+
+      {!hasAsked ? (
+        <Button 
+          onClick={handleAskAboutLocation}
+          disabled={isLoading}
+          className="w-full"
+        >
+          <MessageCircle className="w-4 h-4 mr-2" />
+          Learn More About This Location
+        </Button>
+      ) : (
+        <div className="space-y-3">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="w-6 h-6 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="bg-muted/50 rounded-lg p-4">
+              <p className="text-sm text-foreground whitespace-pre-line">{aiInfo}</p>
+            </div>
+          )}
+        </div>
+      )}
     </Card>
   );
 };

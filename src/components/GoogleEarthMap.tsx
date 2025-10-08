@@ -252,23 +252,29 @@ const GoogleEarthMap = ({
                     mapRef.current.panTo({ lat: place.lat, lng: place.lng });
                     mapRef.current.setZoom(15);
                   }
+                  // Trigger the image marker click handler with wildlife park data
+                  onImageMarkerClick?.({
+                    ...place,
+                    type: 'wildlife-park',
+                    imageUrl: place.imageUrl
+                  });
                 }}
               >
                 <div className="cursor-pointer hover:scale-110 transition-transform group">
-                  {photoUrl ? (
+                  {photoUrl || place.imageUrl ? (
                     <div className="relative">
                       <img 
-                        src={photoUrl} 
+                        src={photoUrl || place.imageUrl} 
                         alt={place.name}
-                        className="w-16 h-16 rounded-lg border-2 border-white shadow-lg object-cover"
+                        className="w-16 h-16 rounded-lg border-2 border-emerald-400 shadow-lg object-cover"
                       />
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
                         {place.name}
                       </div>
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-lg border-2 border-white shadow-lg bg-primary/20 flex items-center justify-center">
-                      <MapPin className="w-8 h-8 text-primary" />
+                    <div className="w-16 h-16 rounded-lg border-2 border-emerald-400 shadow-lg bg-emerald-500/20 flex items-center justify-center">
+                      🌳
                     </div>
                   )}
                 </div>

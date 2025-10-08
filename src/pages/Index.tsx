@@ -9,6 +9,7 @@ import ConservationLayers from '@/components/ConservationLayers';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { HabitatFactsCard } from '@/components/HabitatFactsCard';
 import { SearchLoader } from '@/components/SearchLoader';
+import WildlifeLocationCard from '@/components/WildlifeLocationCard';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight, MapPin, Globe, Map, X } from 'lucide-react';
@@ -148,6 +149,7 @@ const Index = () => {
   const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
   const [locationName, setLocationName] = useState<string>('');
   const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
+  const [selectedWildlifePark, setSelectedWildlifePark] = useState<any>(null);
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
@@ -477,6 +479,14 @@ const Index = () => {
   const handleImageMarkerClick = async (marker: any) => {
     console.log('Image marker clicked:', marker);
     
+    // If it's a wildlife park marker, show the wildlife location card
+    if (marker.type === 'wildlife-park') {
+      setSelectedWildlifePark(marker);
+      setSpeciesInfo(null);
+      setCurrentHabitat(null);
+      return;
+    }
+    
     // If it's a habitat marker, search for nearby habitats and parks
     if (marker.type === 'habitat' && marker.lat && marker.lng) {
       setIsLoading(true);
@@ -719,6 +729,7 @@ const Index = () => {
     setWildlifePlaces([]);
     setLocationName('');
     setCurrentHabitat(null);
+    setSelectedWildlifePark(null);
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -835,8 +846,24 @@ const Index = () => {
         </div>
       )}
 
+      {/* Wildlife Park Card */}
+      {selectedWildlifePark && (
+        <div className="absolute left-6 top-6 w-80 z-[60] pointer-events-auto">
+          <WildlifeLocationCard
+            name={selectedWildlifePark.name}
+            address={selectedWildlifePark.address}
+            rating={selectedWildlifePark.rating}
+            imageUrl={selectedWildlifePark.imageUrl}
+            photoReference={selectedWildlifePark.photoReference}
+            types={selectedWildlifePark.types}
+            location={{ lat: selectedWildlifePark.lat, lng: selectedWildlifePark.lng }}
+            onClose={() => setSelectedWildlifePark(null)}
+          />
+        </div>
+      )}
+
       {/* Left Side Card - Species */}
-      {speciesInfo && !currentHabitat && (
+      {speciesInfo && !currentHabitat && !selectedWildlifePark && (
         <div className="absolute left-6 top-6 w-64 z-[60] pointer-events-auto">
           <FastFactsCard
             commonName={speciesInfo.commonName}
