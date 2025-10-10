@@ -1,9 +1,4 @@
-import { Card } from './ui/card';
-import { Button } from './ui/button';
-import { MapPin, Star, MessageCircle, Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import { MapPin, Star } from 'lucide-react';
 
 interface WildlifeLocationCardProps {
   name: string;
@@ -26,115 +21,69 @@ const WildlifeLocationCard = ({
   location,
   onClose
 }: WildlifeLocationCardProps) => {
-  const [aiInfo, setAiInfo] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasAsked, setHasAsked] = useState(false);
 
-  const displayImageUrl = imageUrl || (photoReference 
+  const displayImageUrl = imageUrl || (photoReference
     ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${photoReference}&key=AIzaSyC4205XHgzRi8VswW7zqdFVanY-HoEDTIg`
     : null);
 
-  const handleAskAboutLocation = async () => {
-    setIsLoading(true);
-    setHasAsked(true);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('location-info', {
-        body: {
-          name,
-          address,
-          rating,
-          types,
-          location
-        }
-      });
+  // Format location type for display
+  const getLocationType = () => {
+    if (!types || types.length === 0) return 'Wildlife Location';
 
-      if (error) throw error;
-
-      if (data.success) {
-        setAiInfo(data.response);
-      } else {
-        toast.error('Failed to get location information');
-      }
-    } catch (error) {
-      console.error('Error fetching location info:', error);
-      toast.error('Failed to get location information');
-    } finally {
-      setIsLoading(false);
-    }
+    const type = types[0].replace(/_/g, ' ');
+    return type.charAt(0).toUpperCase() + type.slice(1);
   };
 
   return (
-    <Card className="glass-panel p-6 max-w-md animate-fade-in max-h-[calc(100vh-200px)]">
-      <div className="overflow-y-auto h-full space-y-4">
-      <div className="flex justify-between items-start">
-        <h2 className="text-2xl font-bold text-foreground">{name}</h2>
-        <Button variant="ghost" size="sm" onClick={onClose}>✕</Button>
-      </div>
-
-      {displayImageUrl && (
-        <div className="w-full h-48 rounded-lg overflow-hidden">
-          <img 
-            src={displayImageUrl} 
+    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in">
+      {/* Location Image or Placeholder */}
+      <div className="w-full">
+        {displayImageUrl ? (
+          <img
+            src={displayImageUrl}
             alt={name}
-            className="w-full h-full object-cover"
+            className="w-full h-64 object-cover"
           />
-        </div>
-      )}
-
-      <div className="space-y-3">
-        {rating && (
-          <div className="flex items-center gap-2">
-            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-            <span className="text-sm font-medium">{rating.toFixed(1)} Rating</span>
+        ) : (
+          <div className="w-full h-64 bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-6xl mb-2">🌳</div>
+              <p className="text-sm text-muted-foreground">Wildlife Park</p>
+            </div>
           </div>
         )}
+      </div>
+
+      {/* Fast Facts */}
+      <div className="p-4">
+        <h3 className="text-xl font-bold text-foreground mb-1">{name}</h3>
+        <p className="text-sm text-primary mb-4">{getLocationType()}</p>
+
+        {rating && (
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground">Rating</p>
+            <div className="flex items-center gap-2">
+              <p className="text-base font-semibold text-primary">{rating.toFixed(1)}</p>
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            </div>
+          </div>
+        )}
+
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground">Coordinates</p>
+          <p className="text-base font-semibold text-primary">
+            {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+          </p>
+        </div>
 
         {address && (
-          <div className="flex items-start gap-2">
-            <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">{address}</span>
-          </div>
-        )}
-
-        {types && types.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {types.slice(0, 3).map((type, idx) => (
-              <span 
-                key={idx}
-                className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary"
-              >
-                {type.replace(/_/g, ' ')}
-              </span>
-            ))}
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 pt-3 border-t border-border">
+            <MapPin className="h-3 w-3" />
+            <span>{address}</span>
           </div>
         )}
       </div>
-
-      {!hasAsked ? (
-        <Button 
-          onClick={handleAskAboutLocation}
-          disabled={isLoading}
-          className="w-full"
-        >
-          <MessageCircle className="w-4 h-4 mr-2" />
-          Learn More About This Location
-        </Button>
-      ) : (
-        <div className="space-y-3">
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-primary" />
-            </div>
-          ) : (
-            <div className="bg-muted/50 rounded-lg p-4">
-              <p className="text-sm text-foreground whitespace-pre-line">{aiInfo}</p>
-            </div>
-          )}
-        </div>
-      )}
-      </div>
-    </Card>
+    </div>
   );
 };
 

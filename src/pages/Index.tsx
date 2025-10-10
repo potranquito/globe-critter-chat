@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import GlobeComponent from '@/components/Globe';
 import GoogleEarthMap from '@/components/GoogleEarthMap';
-import ChatInput from '@/components/ChatInput';
+import ChatInput, { ChatContext } from '@/components/ChatInput';
+import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
 import FastFactsCard from '@/components/FastFactsCard';
+import RegionSpeciesCard from '@/components/RegionSpeciesCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
 import RegionalAnimalsList from '@/components/RegionalAnimalsList';
 import MapControls from '@/components/MapControls';
-import FilterMenu from '@/components/FilterMenu';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { HabitatFactsCard } from '@/components/HabitatFactsCard';
 import { HabitatSpeciesList } from '@/components/HabitatSpeciesList';
@@ -156,16 +157,53 @@ const Index = () => {
   const [locationName, setLocationName] = useState<string>('');
   const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
   const [selectedWildlifePark, setSelectedWildlifePark] = useState<any>(null);
-  const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [regionInfo, setRegionInfo] = useState<RegionInfo | null>(null);
   const [regionSpecies, setRegionSpecies] = useState<RegionSpecies[]>([]);
   const [activeSpeciesFilters, setActiveSpeciesFilters] = useState<Set<FilterCategory>>(new Set());
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [isChatHistoryExpanded, setIsChatHistoryExpanded] = useState(false);
+  const [isDeepDiveMode, setIsDeepDiveMode] = useState(false);
+  const [currentSpeciesIndex, setCurrentSpeciesIndex] = useState<number>(0);
+  const [selectedCarouselSpecies, setSelectedCarouselSpecies] = useState<RegionSpecies | null>(null);
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
     setIsLoading(true);
     setHasInteracted(true);
-    
+
+    // Check if this is a follow-up question (deep dive mode)
+    // Deep dive mode activates when a species or habitat is already selected
+    const isFollowUpQuestion = (speciesInfo !== null || currentHabitat !== null) && isDeepDiveMode;
+
+    if (isFollowUpQuestion) {
+      // Add user message to chat history
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: query,
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, userMessage]);
+
+      // Expand chat history if it's a follow-up question
+      setIsChatHistoryExpanded(true);
+
+      // TODO: Add API call here to get AI response
+      // For now, add a placeholder response
+      setTimeout(() => {
+        const assistantMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `This is information about your question regarding ${speciesInfo?.commonName || currentHabitat?.name}. [AI response will be integrated here]`,
+          timestamp: new Date()
+        };
+        setChatHistory(prev => [...prev, assistantMessage]);
+        setIsLoading(false);
+      }, 1000);
+
+      return;
+    }
+
     const { supabase } = await import('@/integrations/supabase/client');
     
     // Check if it's a species or location search
@@ -550,6 +588,8 @@ const Index = () => {
       setSelectedWildlifePark(marker);
       setSpeciesInfo(null);
       setCurrentHabitat(null);
+      setSelectedCarouselSpecies(null);
+      setExpandedImage(null);
       return;
     }
     
@@ -789,8 +829,92 @@ const Index = () => {
   };
 
   const handleCarouselSpeciesSelect = async (species: RegionSpecies) => {
-    // When a species is selected from the carousel, search for it
-    await handleSearch(species.commonName);
+    // When a species is selected from the carousel, show the carousel species card
+    const index = getFilteredSpecies().findIndex(s => s.scientificName === species.scientificName);
+    if (index !== -1) {
+      setCurrentSpeciesIndex(index);
+    }
+
+    // Set the selected carousel species to show RegionSpeciesCard
+    setSelectedCarouselSpecies(species);
+
+    // Clear ALL other cards to ensure mutual exclusivity
+    setSpeciesInfo(null);
+    setSelectedWildlifePark(null);
+    setExpandedImage(null);
+    setCurrentHabitat(null);
+
+    // Optionally: You could also search for more detailed info
+    // await handleSearch(species.commonName);
+  };
+
+  // Filter species based on active filters - works for both region and habitat species
+  const getFilteredSpecies = () => {
+    // Use habitat species if viewing a habitat, otherwise use region species
+    const speciesList = currentHabitat?.keySpecies || regionSpecies;
+
+    if (activeSpeciesFilters.size === 0) return speciesList;
+
+    return speciesList.filter(sp => {
+      for (const filter of activeSpeciesFilters) {
+        // Handle both RegionSpecies (animalType) and Species (type) formats
+        const animalType = (sp.animalType || sp.type)?.toLowerCase() || '';
+        const conservationStatus = sp.conservationStatus?.toUpperCase() || '';
+
+        const animalTypes = ['mammal', 'bird', 'fish', 'reptile', 'amphibian', 'insect'];
+        if (filter === 'all-animals' && animalTypes.includes(animalType)) return true;
+        if (filter === 'mammals' && animalType === 'mammal') return true;
+        if (filter === 'birds' && animalType === 'bird') return true;
+        if (filter === 'fish' && animalType === 'fish') return true;
+        if (filter === 'reptiles' && animalType === 'reptile') return true;
+        if (filter === 'amphibians' && animalType === 'amphibian') return true;
+        if (filter === 'insects' && animalType === 'insect') return true;
+        if (filter === 'plants' && animalType === 'plant') return true;
+        if (filter === 'endangered') {
+          const endangeredStatuses = ['CR', 'EN', 'VU'];
+          if (endangeredStatuses.includes(conservationStatus)) return true;
+        }
+      }
+      return false;
+    });
+  };
+
+  const handlePreviousSpecies = async () => {
+    const filtered = getFilteredSpecies();
+    if (filtered.length === 0) return;
+
+    const newIndex = (currentSpeciesIndex - 1 + filtered.length) % filtered.length;
+    setCurrentSpeciesIndex(newIndex);
+
+    // If we're viewing a carousel species, show the previous carousel species
+    if (selectedCarouselSpecies) {
+      setSelectedCarouselSpecies(filtered[newIndex]);
+    } else if (currentHabitat) {
+      // If we're viewing a habitat, search for the habitat species
+      await handleSearch(filtered[newIndex].name);
+    } else {
+      // Otherwise search for the species (hardcoded data flow)
+      await handleSearch(filtered[newIndex].commonName);
+    }
+  };
+
+  const handleNextSpecies = async () => {
+    const filtered = getFilteredSpecies();
+    if (filtered.length === 0) return;
+
+    const newIndex = (currentSpeciesIndex + 1) % filtered.length;
+    setCurrentSpeciesIndex(newIndex);
+
+    // If we're viewing a carousel species, show the next carousel species
+    if (selectedCarouselSpecies) {
+      setSelectedCarouselSpecies(filtered[newIndex]);
+    } else if (currentHabitat) {
+      // If we're viewing a habitat, search for the habitat species
+      await handleSearch(filtered[newIndex].name);
+    } else {
+      // Otherwise search for the species (hardcoded data flow)
+      await handleSearch(filtered[newIndex].commonName);
+    }
   };
 
   const handleSpeciesFilterToggle = (filterId: FilterCategory) => {
@@ -834,6 +958,11 @@ const Index = () => {
     setRegionInfo(null);
     setRegionSpecies([]);
     setActiveSpeciesFilters(new Set());
+    setChatHistory([]);
+    setIsChatHistoryExpanded(false);
+    setIsDeepDiveMode(false);
+    setSelectedCarouselSpecies(null);
+    setCurrentSpeciesIndex(0);
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -894,6 +1023,60 @@ const Index = () => {
     });
   };
 
+  // Compute chat context based on what's showing on the right side
+  const chatContext = useMemo((): ChatContext => {
+    // Priority 1: Wildlife Park
+    if (selectedWildlifePark) {
+      return {
+        type: 'wildlife-park',
+        name: selectedWildlifePark.name,
+        details: selectedWildlifePark.address
+      };
+    }
+
+    // Priority 2: Expanded Image
+    if (expandedImage) {
+      return {
+        type: expandedImage.type === 'threat' ? 'threat' : 'ecosystem',
+        name: currentSpecies || currentHabitat?.name || 'this habitat',
+        details: expandedImage.type === 'threat' ? 'Environmental Threat' : 'Ecosystem Connection'
+      };
+    }
+
+    // Priority 3: Carousel Species
+    if (selectedCarouselSpecies) {
+      return {
+        type: 'region-species',
+        name: selectedCarouselSpecies.commonName,
+        details: regionInfo?.regionName
+      };
+    }
+
+    // Priority 4: Hardcoded Species
+    if (speciesInfo) {
+      return {
+        type: 'species',
+        name: speciesInfo.commonName,
+        details: speciesInfo.animalType
+      };
+    }
+
+    // Priority 5: Habitat
+    if (currentHabitat) {
+      return {
+        type: 'habitat',
+        name: currentHabitat.name,
+        details: currentHabitat.climate
+      };
+    }
+
+    // Default: No card showing
+    return {
+      type: 'default',
+      name: 'Globe Critter Chat'
+    };
+  }, [selectedWildlifePark, expandedImage, selectedCarouselSpecies, speciesInfo, currentHabitat, currentSpecies, regionInfo]);
+
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
       {/* Globe or Google Maps */}
@@ -946,22 +1129,32 @@ const Index = () => {
 
       {/* Map/Globe Toggle - Hidden (now in left controls) */}
 
-      {/* Region Species Carousel - Left Side Vertical */}
+      {/* Species Filter Banner - Far Left Edge (pinned to screen edge) */}
+      {(regionInfo || currentHabitat) && (
+        <div className="absolute left-0 top-6 bottom-6 w-16 z-[50] pointer-events-auto">
+          <SpeciesFilterBanner
+            activeFilters={activeSpeciesFilters}
+            onFilterToggle={handleSpeciesFilterToggle}
+          />
+        </div>
+      )}
+
+      {/* Region Species Carousel - Left Side Vertical (narrower, closer to filter) */}
       {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
-        <div className="absolute left-6 top-6 bottom-6 w-80 z-[60] pointer-events-auto">
+        <div className="absolute left-20 top-6 bottom-6 w-72 z-[60] pointer-events-auto">
           <RegionSpeciesCarousel
             species={regionSpecies}
             regionName={regionInfo.regionName}
-            currentSpecies={speciesInfo?.scientificName}
+            currentSpecies={selectedCarouselSpecies?.scientificName || speciesInfo?.scientificName}
             onSpeciesSelect={handleCarouselSpeciesSelect}
             activeFilters={activeSpeciesFilters}
           />
         </div>
       )}
 
-      {/* Habitat Species List - Left Side Vertical */}
+      {/* Habitat Species List - Left Side Vertical (narrower, closer to filter) */}
       {currentHabitat && currentHabitat.keySpecies && currentHabitat.keySpecies.length > 0 && (
-        <div className="absolute left-6 top-6 bottom-6 w-80 z-[60] pointer-events-auto">
+        <div className="absolute left-20 top-6 bottom-6 w-72 z-[60] pointer-events-auto">
           <HabitatSpeciesList
             species={currentHabitat.keySpecies}
             habitatName={currentHabitat.name}
@@ -987,9 +1180,11 @@ const Index = () => {
         </div>
       )}
 
-      {/* Wildlife Park Card - Left Side */}
-      {selectedWildlifePark && !regionInfo && (
-        <div className="absolute left-6 top-6 w-80 z-[60] pointer-events-auto">
+      {/* Right Side Card - MUTUALLY EXCLUSIVE - Only ONE card shows at a time */}
+
+      {/* Priority 1: Wildlife Park Card */}
+      {selectedWildlifePark ? (
+        <div className="absolute right-0 top-6 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
           <WildlifeLocationCard
             name={selectedWildlifePark.name}
             address={selectedWildlifePark.address}
@@ -1000,12 +1195,152 @@ const Index = () => {
             location={{ lat: selectedWildlifePark.lat, lng: selectedWildlifePark.lng }}
             onClose={() => setSelectedWildlifePark(null)}
           />
-        </div>
-      )}
 
-      {/* Right Side Card - Species with Chat Below */}
-      {speciesInfo && !currentHabitat && !selectedWildlifePark && (
-        <div className="absolute right-28 top-6 w-96 z-[60] pointer-events-auto flex flex-col gap-4">
+          {/* Navigation Arrows - Disabled for wildlife parks (no carousel) */}
+          <div className="flex gap-2">
+            <Button
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Generate Lesson Plan Button */}
+          <Button
+            onClick={() => {
+              toast({
+                title: 'Lesson Plan',
+                description: `Generating lesson plan for ${selectedWildlifePark.name}...`,
+              });
+            }}
+            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+            variant="secondary"
+          >
+            Generate Lesson Plan
+          </Button>
+        </div>
+      )
+
+      /* Priority 2: Expanded Image View */
+      : expandedImage ? (
+        <div className="absolute right-0 top-6 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+          <ExpandedImageView
+            imageUrl={expandedImage.url}
+            type={expandedImage.type}
+            context={currentSpecies || 'this habitat'}
+            title={expandedImage.type === 'threat' ? 'Environmental Threat' : 'Ecosystem Connection'}
+            onClose={() => {
+              console.log('Closing expanded image');
+              setExpandedImage(null);
+            }}
+            onNext={handleNextImage}
+            onPrevious={handlePreviousImage}
+            externalMessage={chatMessage}
+            severity="High"
+            location={currentHabitat?.name || regionInfo?.regionName || 'Unknown Location'}
+          />
+
+          {/* Navigation Arrows */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousImage}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={handleNextImage}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Generate Lesson Plan Button */}
+          <Button
+            onClick={() => {
+              toast({
+                title: 'Lesson Plan',
+                description: `Generating lesson plan about this ${expandedImage.type}...`,
+              });
+            }}
+            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+            variant="secondary"
+          >
+            Generate Lesson Plan
+          </Button>
+        </div>
+      )
+
+      /* Priority 3: Carousel Species */
+      : selectedCarouselSpecies ? (
+        <div className="absolute right-0 top-6 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+          <RegionSpeciesCard
+            commonName={selectedCarouselSpecies.commonName}
+            scientificName={selectedCarouselSpecies.scientificName}
+            animalType={selectedCarouselSpecies.animalType}
+            conservationStatus={selectedCarouselSpecies.conservationStatus}
+            occurrenceCount={selectedCarouselSpecies.occurrenceCount}
+            regionName={regionInfo?.regionName || 'Unknown Region'}
+            regionImageUrl={regionInfo?.regionName ? undefined : undefined}
+            onChatClick={() => {
+              toast({
+                title: 'Learn More',
+                description: `Ask questions about ${selectedCarouselSpecies.commonName}...`,
+              });
+            }}
+          />
+
+          {/* Navigation Arrows */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousSpecies}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled={isLoading || regionSpecies.length === 0}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={handleNextSpecies}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled={isLoading || regionSpecies.length === 0}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+
+          {/* Generate Lesson Plan Button */}
+          <Button
+            onClick={() => {
+              toast({
+                title: 'Lesson Plan',
+                description: `Generating lesson plan for ${selectedCarouselSpecies.commonName}...`,
+              });
+            }}
+            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+            variant="secondary"
+          >
+            Generate Lesson Plan
+          </Button>
+        </div>
+      )
+
+      /* Priority 4: Hardcoded Species (e.g., Polar Bear) */
+      : speciesInfo ? (
+        <div className="absolute right-0 top-6 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -1016,20 +1351,45 @@ const Index = () => {
             onChatClick={handleChatClick}
           />
 
-          {/* Chat Input Below Animal Card */}
-          <div className="glass-panel rounded-2xl p-2">
-            <ChatInput
-              onSubmit={handleSearch}
-              isLoading={isLoading}
-              placeholder={`Ask about ${speciesInfo.commonName}...`}
-            />
+          {/* Navigation Arrows */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousSpecies}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled={isLoading || regionSpecies.length === 0}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={handleNextSpecies}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled={isLoading || regionSpecies.length === 0}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
           </div>
-        </div>
-      )}
 
-      {/* Right Side Card - Habitat with Chat Below */}
-      {currentHabitat && !speciesInfo && !selectedWildlifePark && (
-        <div className="absolute right-28 top-6 w-96 z-[60] pointer-events-auto flex flex-col gap-4">
+          {/* Generate Lesson Plan Button */}
+          <Button
+            onClick={() => {
+              toast({
+                title: 'Lesson Plan',
+                description: `Generating lesson plan for ${speciesInfo.commonName}...`,
+              });
+            }}
+            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+            variant="secondary"
+          >
+            Generate Lesson Plan
+          </Button>
+        </div>
+      )
+
+      /* Priority 5: Habitat */
+      : currentHabitat ? (
+        <div className="absolute right-0 top-6 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
           <HabitatFactsCard
             habitat={currentHabitat}
             imageUrl={currentHabitat.imageUrl}
@@ -1041,33 +1401,41 @@ const Index = () => {
             }}
           />
 
-          {/* Chat Input Below Habitat Card */}
-          <div className="glass-panel rounded-2xl p-2">
-            <ChatInput
-              onSubmit={handleSearch}
-              isLoading={isLoading}
-              placeholder={`Ask about ${currentHabitat.name}...`}
-            />
+          {/* Navigation Arrows */}
+          <div className="flex gap-2">
+            <Button
+              onClick={handlePreviousSpecies}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled={isLoading || getFilteredSpecies().length === 0}
+            >
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <Button
+              onClick={handleNextSpecies}
+              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
+              variant="secondary"
+              disabled={isLoading || getFilteredSpecies().length === 0}
+            >
+              <ChevronRight className="h-5 w-5" />
+            </Button>
           </div>
-        </div>
-      )}
 
-      {/* Expanded Image View */}
-      {expandedImage && (
-        <ExpandedImageView
-          imageUrl={expandedImage.url}
-          type={expandedImage.type}
-          context={currentSpecies || 'this habitat'}
-          title={expandedImage.type === 'threat' ? 'Environmental Threat' : 'Ecosystem Connection'}
-          onClose={() => {
-            console.log('Closing expanded image');
-            setExpandedImage(null);
-          }}
-          onNext={handleNextImage}
-          onPrevious={handlePreviousImage}
-          externalMessage={chatMessage}
-        />
-      )}
+          {/* Generate Lesson Plan Button */}
+          <Button
+            onClick={() => {
+              toast({
+                title: 'Lesson Plan',
+                description: `Generating lesson plan for ${currentHabitat.name}...`,
+              });
+            }}
+            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+            variant="secondary"
+          >
+            Generate Lesson Plan
+          </Button>
+        </div>
+      ) : null}
 
       {/* Map Controls - Top Center */}
       <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-auto items-center">
@@ -1075,18 +1443,16 @@ const Index = () => {
           useGoogleMaps={useGoogleMaps}
           onToggleMap={handleToggleMapView}
           onFetchLocation={handleFetchLocation}
-          onFilterClick={() => setFilterMenuOpen(!filterMenuOpen)}
+          onLeaderboardClick={() => {
+            toast({
+              title: 'Leaderboard Coming Soon',
+              description: 'Track top contributors and conservation efforts!',
+            });
+          }}
         />
-        {filterMenuOpen && (
-          <FilterMenu
-            isOpen={filterMenuOpen}
-            onClose={() => setFilterMenuOpen(false)}
-            onToggleLayer={handleLayerToggle}
-          />
-        )}
       </div>
 
-      {/* Chat Input with Reset Button */}
+      {/* Chat History and Input with Reset Button */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-full max-w-[1250px] flex flex-col items-center gap-3 pointer-events-none">
         {/* Active Layers Chip */}
         {activeLayers.length > 0 && (
@@ -1104,36 +1470,30 @@ const Index = () => {
           message={currentSpecies ? "Fetching wildlife data..." : "Discovering habitat..."}
         />
 
-        {/* Navigation buttons - only show when image is expanded */}
-        {expandedImage && (
-          <div className="flex gap-2 pointer-events-auto">
-            <Button 
-              onClick={handlePreviousImage}
-              variant="secondary"
-              size="sm"
-              className="glass-panel"
-            >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Back
-            </Button>
-            <Button 
-              onClick={handleNextImage}
-              variant="secondary"
-              size="sm"
-              className="glass-panel"
-            >
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
-        )}
-        
+
         <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
-          <div className="w-full max-w-[450px]">
+          <div className="w-full max-w-[450px] flex flex-col gap-1">
+            {/* Chat History - shows above input when expanded */}
+            <ChatHistory
+              messages={chatHistory}
+              isExpanded={isChatHistoryExpanded}
+              onMinimize={() => setIsChatHistoryExpanded(false)}
+            />
+
             <ChatInput
-              onSubmit={handleSearch} 
+              onSubmit={handleSearch}
               isLoading={isLoading}
-              placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
+              context={chatContext}
+              onFocus={() => {
+                // Enable deep dive mode when user focuses on the input with a species/habitat selected
+                if (speciesInfo || currentHabitat) {
+                  setIsDeepDiveMode(true);
+                  // Expand chat history if there are messages
+                  if (chatHistory.length > 0) {
+                    setIsChatHistoryExpanded(true);
+                  }
+                }
+              }}
             />
           </div>
           {(habitats.length > 0 || userPins.length > 0 || speciesInfo || currentHabitat) && (
@@ -1158,16 +1518,6 @@ const Index = () => {
               Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or locations like <span className="text-accent font-medium">Las Vegas</span>
             </p>
           </div>
-        </div>
-      )}
-
-      {/* Species Filter Banner - Far Right */}
-      {(regionInfo || currentHabitat) && (
-        <div className="absolute right-6 top-6 bottom-6 w-20 z-[50] pointer-events-auto">
-          <SpeciesFilterBanner
-            activeFilters={activeSpeciesFilters}
-            onFilterToggle={handleSpeciesFilterToggle}
-          />
         </div>
       )}
 

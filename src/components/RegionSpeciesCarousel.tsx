@@ -121,7 +121,7 @@ export const RegionSpeciesCarousel = ({
             <p>No species match the selected filters</p>
           </div>
         ) : (
-          <div className="space-y-2 pr-4">
+          <div className="space-y-2 pr-1">
             {filteredSpecies.map((sp) => (
             <Card
               key={sp.scientificName}

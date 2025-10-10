@@ -27,10 +27,10 @@ export const SpeciesFilterBanner = ({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="glass-panel rounded-2xl p-2 w-20 h-full flex flex-col animate-fade-in">
+      <div className="glass-panel rounded-r-2xl rounded-l-none p-2 w-16 h-full flex flex-col animate-fade-in">
         {/* Header */}
-        <div className="text-center mb-3 pb-2 border-b border-border/50">
-          <h3 className="text-xs font-semibold text-muted-foreground">Filters</h3>
+        <div className="text-center mb-2 pb-2 border-b border-border/50">
+          <h3 className="text-[10px] font-semibold text-muted-foreground">Filters</h3>
         </div>
 
         {/* Scrollable Filter Options */}
@@ -44,7 +44,7 @@ export const SpeciesFilterBanner = ({
                     <Button
                       variant={isAnimalFilterActive() ? 'default' : 'ghost'}
                       size="icon"
-                      className={`w-full h-14 text-2xl relative ${
+                      className={`w-full h-12 text-xl relative ${
                         isAnimalFilterActive() ? 'bg-primary/20 hover:bg-primary/30' : ''
                       }`}
                       onClick={() => setIsAnimalsExpanded(!isAnimalsExpanded)}
@@ -64,7 +64,7 @@ export const SpeciesFilterBanner = ({
                     )}
                   </div>
                 </TooltipTrigger>
-                <TooltipContent side="left" className="glass-panel">
+                <TooltipContent side="right" className="glass-panel">
                   <p className="font-semibold">Animals</p>
                   <p className="text-xs text-muted-foreground">Click to expand categories</p>
                 </TooltipContent>
@@ -72,7 +72,7 @@ export const SpeciesFilterBanner = ({
 
               {/* Animal Sub-categories */}
               {isAnimalsExpanded && (
-                <div className="mt-2 ml-2 space-y-1 animate-fade-in">
+                <div className="mt-1 ml-1 space-y-1 animate-fade-in">
                   {ANIMAL_FILTERS.map((filter) => (
                     <Tooltip key={filter.id}>
                       <TooltipTrigger asChild>
@@ -80,7 +80,7 @@ export const SpeciesFilterBanner = ({
                           <Button
                             variant={activeFilters.has(filter.id) ? 'default' : 'ghost'}
                             size="icon"
-                            className={`w-14 h-12 text-xl ${
+                            className={`w-12 h-10 text-lg ${
                               activeFilters.has(filter.id) ? 'bg-primary/20 hover:bg-primary/30' : ''
                             }`}
                             onClick={() => onFilterToggle(filter.id)}
@@ -92,7 +92,7 @@ export const SpeciesFilterBanner = ({
                           )}
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="left" className="glass-panel">
+                      <TooltipContent side="right" className="glass-panel">
                         <p className="font-semibold">{filter.label}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -109,7 +109,7 @@ export const SpeciesFilterBanner = ({
                     <Button
                       variant={activeFilters.has(filter.id) ? 'default' : 'ghost'}
                       size="icon"
-                      className={`w-full h-14 text-2xl ${
+                      className={`w-full h-12 text-xl ${
                         activeFilters.has(filter.id) ? 'bg-primary/20 hover:bg-primary/30' : ''
                       }`}
                       onClick={() => onFilterToggle(filter.id)}
@@ -121,7 +121,7 @@ export const SpeciesFilterBanner = ({
                     )}
                   </div>
                 </TooltipTrigger>
-                <TooltipContent side="left" className="glass-panel">
+                <TooltipContent side="right" className="glass-panel">
                   <p className="font-semibold">{filter.label}</p>
                   {filter.description && (
                     <p className="text-xs text-muted-foreground">{filter.description}</p>
