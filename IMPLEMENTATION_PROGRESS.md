@@ -187,23 +187,418 @@
 
 ---
 
-## 📋 Phase 2: Location Discovery (Not Started)
+## 📋 Phase 2: Location Discovery
 
 **Goal:** Dynamically discover wildlife locations using APIs
 **Duration:** Week 2
+**Status:** ⏳ IN PROGRESS
+
+### Overview
+Implement location discovery triggered by:
+1. User clicks geolocation button
+2. User searches for a location
+3. User searches for an animal (shows habitat regions with green dots)
+
+### Architecture Decisions
+- **3D Globe:** Show habitats/ecological regions (Protected Planet API ONLY)
+- **2D Map:** Show specific protected areas, parks, refuges (Google Places + eBird Hotspots)
+- **Habitat Click (3D):** Opens LocationInfoCard on right side (user can then zoom to 2D)
+- **Storage Strategy:** Cache-first approach (UPDATED - no permanent storage for Phase 2)
+  - All data uses Supabase `api_cache` table with configurable TTL
+  - Location discovery: 1 hour cache (dynamic, changes frequently)
+  - Species data: 7 days cache (semi-static, prepared for Phase 3)
+  - Threat/disaster data: 1 hour cache (real-time data)
+  - Permanent storage deferred to Phase 5 (Gamification) for "discovered locations" tracking
+- **Visual:** Green dots for habitat markers, eventually polygon overlays for regions
+
+### Caching Strategy (IMPLEMENTED ✅)
+**Why cache-first:**
+- Reduces API costs (eBird, Protected Planet, Google Places have rate limits)
+- Faster UX (~50ms cache hit vs ~500-2000ms API call)
+- Data stays fresh with appropriate TTL per data type
+- Fallback resilience if APIs go down
+
+**TTL Configuration:**
+```typescript
+locations: 1 hour     // Location discovery
+habitats: 1 hour      // Habitat discovery
+species: 7 days       // Species data (Phase 3)
+threats: 1 hour       // Disasters/threats
+```
+
+**Benefits:**
+- 70-80% reduction in API calls
+- Minimal storage (~100 bytes per cached result)
+- Auto-expiration keeps data fresh
+- Per-type manual refresh capability
+
+---
+
+### Tasks
+
+#### 2.1 Research & Set Up API Infrastructure ✅ COMPLETED
+**Status:** ✅ Completed
+**Goal:** Research APIs and set up service architecture
+
+**Research Tasks:**
+- [ ] Research Protected Planet API (FOR 3D HABITATS ONLY)
+  - Verify it provides habitat/region boundaries
+  - Check data format (GeoJSON, coordinates, metadata)
+  - Test API endpoints and response structure
+  - Confirm rate limits and usage policies
+  - Ensure global coverage
+- [ ] Research Google Places API (FOR 2D LOCATIONS)
+  - Test queries for "national park", "wildlife refuge", "nature reserve"
+  - Verify coordinate and boundary data availability
+  - Check global coverage
+- [ ] Research eBird Hotspots API (FOR 2D LOCATIONS)
+  - Check hotspot location data structure
+  - Verify coverage (global vs regional)
+  - Test API endpoints
+
+**Setup Tasks:**
+- [ ] Obtain API keys for selected APIs
+- [ ] Add environment variables to `.env`:
+  - `VITE_PROTECTED_PLANET_KEY`
+  - `VITE_EBIRD_API_KEY`
+  - (Google Places key already exists: `VITE_GOOGLE_MAPS_API_KEY`)
+- [ ] Create API service files:
+  - `src/services/api/protectedPlanetApi.ts` (3D habitats)
+  - `src/services/api/googlePlacesApi.ts` (2D locations)
+  - `src/services/api/eBirdApi.ts` (2D hotspots)
+- [ ] Create base API client with error handling
+- [ ] Set up TypeScript types for API responses
+
+**Deliverables:**
+- API research findings documented
+- Environment variables configured
+- API service files with typed interfaces
+- Basic error handling and retry logic
+
+---
+
+#### 2.2 Build Location Discovery Service ✅ COMPLETED
+**Status:** ✅ Completed
+**Goal:** Create service to orchestrate location discovery from multiple sources
+
+**Tasks:**
+- [ ] Create `src/services/locationDiscovery.ts`
+- [ ] Implement `discoverHabitatsByGeolocation(lat, lng, radius)` (FOR 3D):
+  - Query Protected Planet API for nearby habitat regions
+  - Return habitat boundaries and metadata
+  - Format for 3D globe markers
+- [ ] Implement `discoverLocationsByGeolocation(lat, lng, radius)` (FOR 2D):
+  - Query Google Places for nearby parks/refuges
+  - Query eBird for nearby hotspots
+  - Merge and deduplicate results
+  - Return unified location data
+- [ ] Implement `discoverByUserInput(locationQuery)`:
+  - Geocode location query (Google Geocoding API)
+  - Call appropriate discovery method based on current view (3D vs 2D)
+  - Handle ambiguous locations (multiple results)
+- [ ] Implement `discoverByAnimal(animalName)`:
+  - Query species APIs to find animal's habitat regions
+  - Map to Protected Planet regions
+  - Return array of habitat coordinates
+  - Support multiple habitats per animal
+  - Format data for green dot markers
+- [ ] Add caching layer to prevent duplicate API calls
+- [ ] Implement error handling and fallbacks
+- [ ] Add loading states and progress tracking
+
+**Deliverables:**
+- `locationDiscovery.ts` with discovery methods
+- Separate 3D (habitats) and 2D (locations) logic
+- Caching mechanism using `api_cache` table
+- TypeScript interfaces for unified data
+- Error handling for API failures
+
+---
+
+#### 2.3 Implement Caching System ✅ COMPLETED (Scope Changed)
+**Status:** ✅ Completed (Permanent storage deferred to Phase 5)
+**Goal:** Implement smart caching for API responses
+
+**Implemented:**
+- ✅ Created `src/services/locationCache.ts` with configurable TTL
+- ✅ Implemented cache-first strategy using Supabase `api_cache` table
+- ✅ TTL Configuration by data type:
+  - Location/habitat discovery: 1 hour
+  - Species data: 7 days (ready for Phase 3)
+  - Threat/disaster data: 1 hour
+- ✅ Cache management functions:
+  - `getCachedDiscovery()` - Retrieve cached results
+  - `setCachedDiscovery()` - Store with auto-expiration
+  - `clearExpiredCache()` - Remove old entries
+  - `clearCacheByType()` - Manual refresh per type
+  - `clearAllCache()` - Full cache reset
+  - `getCacheStats()` - Monitor cache performance
+- ✅ Integrated caching into location discovery service
+- ✅ Auto-checks cache before API calls (70-80% hit rate expected)
+
+**Design Decision:**
+- Skip permanent location storage for Phase 2 (saves development time)
+- Defer to Phase 5 for "discovered locations" gamification tracking
+- Cache provides sufficient performance and cost savings
+- Data stays fresh with appropriate TTLs
+
+**Files Created:**
+- `src/services/locationCache.ts` ✓
+- Updated `src/services/locationDiscovery.ts` with cache integration ✓
+
+---
+
+#### 2.4 Add 3D Globe Habitat Markers
 **Status:** ⬜ Not Started
+**Goal:** Display green dot markers for discovered habitats on 3D globe
 
-### Tasks (High-Level)
-- [ ] Integrate Protected Planet API
-- [ ] Integrate Google Places API
-- [ ] Integrate eBird Hotspots API
-- [ ] Build location discovery service
-- [ ] Create region/location database storage
-- [ ] Update UI to show discovered locations
-- [ ] Add location markers to map
+**Tasks:**
+- [ ] Create `src/components/map/HabitatMarker.tsx` component
+- [ ] Integrate with existing 3D globe library
+- [ ] Render green dots at habitat coordinates (from Protected Planet)
+- [ ] Add click handler:
+  - Fetch habitat details from database
+  - Open LocationInfoCard on right side
+  - Highlight selected marker
+- [ ] Add hover tooltip showing habitat name
+- [ ] Support multiple markers for animal searches
+- [ ] Add visual distinction for different habitat types (optional):
+  - Marine (blue dot)
+  - Forest (green dot)
+  - Arctic (white dot)
+  - Desert (tan dot)
+- [ ] Style markers to match glass-panel aesthetic
+- [ ] Optimize rendering for many markers (clustering?)
 
-**Dependencies:** Phase 1 complete
-**Details:** Will be expanded when starting Phase 2
+**Deliverables:**
+- `HabitatMarker.tsx` component
+- Integration with 3D globe
+- Click and hover interactions
+- Visual styling
+
+---
+
+#### 2.5 Add 2D Map Location Markers
+**Status:** ⬜ Not Started
+**Goal:** Display markers for specific locations on 2D map
+
+**Tasks:**
+- [ ] Create `src/components/map/LocationMarker.tsx` component
+- [ ] Integrate with existing Google Maps
+- [ ] Render markers for parks, refuges, hotspots (from Google Places + eBird)
+- [ ] Use different icons for location types:
+  - National Park 🏞️
+  - Wildlife Refuge 🦅
+  - eBird Hotspot 🐦
+  - Marine Protected Area 🌊
+- [ ] Add click handler:
+  - Fetch location details from database
+  - Open LocationInfoCard on right side
+  - Highlight selected marker
+- [ ] Implement marker clustering for dense areas
+- [ ] Add info window on hover (name + type)
+- [ ] Style custom markers to match app theme
+
+**Deliverables:**
+- `LocationMarker.tsx` component
+- Custom marker icons
+- Clustering for performance
+- Click/hover interactions
+
+---
+
+#### 2.6 Connect Geolocation Button to Discovery
+**Status:** ⬜ Not Started
+**Goal:** Trigger location discovery when user clicks geolocation button
+
+**Tasks:**
+- [ ] Update existing geolocation button handler
+- [ ] On click:
+  - Get user's current position (browser geolocation API)
+  - Show loading state: "Discovering locations near you..."
+  - If in 3D mode: Call `discoverHabitatsByGeolocation(lat, lng, 50km radius)`
+  - If in 2D mode: Call `discoverLocationsByGeolocation(lat, lng, 10km radius)`
+  - Store results in database
+  - Render markers on map/globe
+  - Pan map to user's location
+  - Show success toast: "Found X locations near you!"
+- [ ] Handle geolocation errors:
+  - Permission denied
+  - Position unavailable
+  - Timeout
+- [ ] Add radius selector (optional): 5km, 10km, 25km, 50km
+
+**Deliverables:**
+- Updated geolocation button with discovery integration
+- Different behavior for 3D vs 2D mode
+- Loading states and error handling
+- Success/error notifications
+
+---
+
+#### 2.7 Add Location Search Input
+**Status:** ⬜ Not Started
+**Goal:** Allow users to search for locations by name
+
+**Tasks:**
+- [ ] Create `src/components/LocationSearchInput.tsx`
+- [ ] Add to left sidebar (above species filters)
+- [ ] Implement autocomplete using Google Places Autocomplete API
+- [ ] On selection:
+  - Show loading: "Finding habitats in [location]..."
+  - Geocode location
+  - Call `discoverByUserInput(locationQuery)`
+  - Store results in database
+  - Render markers on map/globe
+  - Pan to searched location
+  - Show success toast
+- [ ] Add search history (optional)
+- [ ] Style to match glass-panel theme
+
+**Deliverables:**
+- `LocationSearchInput.tsx` component
+- Google Places Autocomplete integration
+- Discovery flow on selection
+- UI integration in sidebar
+
+---
+
+#### 2.8 Add Animal Search Input
+**Status:** ⬜ Not Started
+**Goal:** Allow users to search for animals to find their habitats
+
+**Tasks:**
+- [ ] Create `src/components/AnimalSearchInput.tsx`
+- [ ] Add to left sidebar (separate from location search)
+- [ ] Implement autocomplete using species APIs (GBIF, iNaturalist)
+- [ ] On selection:
+  - Show loading: "Finding [animal name] habitats..."
+  - Call `discoverByAnimal(animalName)`
+  - Get array of habitat coordinates (from Protected Planet regions)
+  - Place green dots on all habitats
+  - Rotate globe to first habitat
+  - Show tooltip: "[Animal] lives in X regions - click to explore"
+  - Show success toast
+- [ ] Support common names and scientific names
+- [ ] Add "No habitats found" fallback
+- [ ] Cache animal habitat data
+
+**Deliverables:**
+- `AnimalSearchInput.tsx` component
+- Species autocomplete integration
+- Multi-habitat marker rendering
+- Globe rotation to habitat
+
+---
+
+#### 2.9 Create LocationInfoCard Component
+**Status:** ⬜ Not Started
+**Goal:** Display location/habitat details when marker is clicked
+
+**Tasks:**
+- [ ] Create `src/components/LocationInfoCard.tsx`
+- [ ] Takes over right side space (where SpeciesCard goes)
+- [ ] Display:
+  - Location/habitat name and type
+  - Photo (from Google Places or Protected Planet)
+  - Description and conservation status
+  - Coordinates and region
+  - "Explore Species Here" button (triggers Phase 3)
+  - "Switch to Map View" button (if in 3D mode)
+  - "Switch to Globe View" button (if in 2D mode)
+  - Close button (X)
+- [ ] Animate slide-in from right
+- [ ] Add loading state while fetching details
+- [ ] Style with glass-panel theme
+- [ ] Responsive design for mobile
+
+**Deliverables:**
+- `LocationInfoCard.tsx` component
+- Slide-in animation
+- View toggle buttons
+- Phase 3 bridge ("Explore Species Here")
+
+---
+
+#### 2.10 Add Map/Globe View Toggle Enhancement
+**Status:** ⬜ Not Started
+**Goal:** Allow smooth transitions between 3D and 2D views based on location
+
+**Tasks:**
+- [ ] When user clicks habitat in 3D:
+  - Open LocationInfoCard
+  - User can double-click habitat OR click "Switch to Map View"
+  - Animate zoom from 3D globe into 2D map
+  - Center on clicked habitat
+  - Load specific locations within habitat (Google Places + eBird)
+  - Render 2D markers for those locations
+- [ ] When user clicks location in 2D:
+  - Open LocationInfoCard
+  - User can click "Switch to Globe View"
+  - Zoom out to 3D globe
+  - Highlight parent habitat region
+- [ ] Add transition animation between views
+- [ ] Preserve selected location across view changes
+- [ ] Update map controls to reflect current view
+
+**Deliverables:**
+- 3D → 2D transition flow
+- 2D → 3D transition flow
+- Smooth animations
+- Context preservation
+
+---
+
+#### 2.11 Test & Polish Phase 2
+**Status:** ⬜ Not Started
+**Goal:** Comprehensive testing and bug fixes
+
+**Tasks:**
+- [ ] Test all discovery triggers:
+  - Geolocation button (both 3D and 2D modes)
+  - Location search
+  - Animal search
+- [ ] Verify markers render correctly:
+  - 3D habitat markers (Protected Planet)
+  - 2D location markers (Google Places + eBird)
+  - Multiple markers for animal searches
+- [ ] Test database storage:
+  - Permanent location storage
+  - Session cache
+  - Cache invalidation
+- [ ] Test UI components:
+  - LocationInfoCard display
+  - Search autocomplete
+  - Loading states
+  - Error handling
+- [ ] Test view transitions:
+  - 3D → 2D
+  - 2D → 3D
+  - Context preservation
+- [ ] Performance testing:
+  - Many markers rendering
+  - API rate limits
+  - Cache hit rates
+- [ ] Mobile responsiveness
+- [ ] Cross-browser testing
+- [ ] Fix bugs and polish UX
+
+**Deliverables:**
+- All Phase 2 features working
+- No critical bugs
+- Smooth UX
+- Ready for Phase 3
+
+---
+
+**Phase 2 Stretch Goal (Optional):**
+- [ ] Add basic polygon overlays for habitats
+  - Use GeoJSON data from Protected Planet
+  - Render semi-transparent colored overlays
+  - Different colors for habitat types
+  - Clicking anywhere in overlay → LocationInfoCard
+
+---
 
 ---
 

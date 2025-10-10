@@ -3,7 +3,6 @@
  * Compact widget showing global Earth health percentage
  */
 
-import { Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGlobalHealth } from '@/hooks/useGlobalHealth';
 import {
@@ -25,6 +24,13 @@ export function GlobalHealthBar() {
     return 'text-green-500';
   };
 
+  // Determine health emoji based on percentage
+  const getHealthEmoji = () => {
+    if (healthPercentage < 30) return '💩'; // Sick/poopy earth
+    if (healthPercentage < 90) return '🌍'; // Healing earth
+    return '🦸'; // Healthy earth with superhero
+  };
+
   // Determine status text
   const getStatusText = () => {
     if (healthPercentage < 30) return 'Critical';
@@ -43,7 +49,7 @@ export function GlobalHealthBar() {
             className="glass-panel hover:bg-accent rounded-xl h-12 px-3 flex items-center gap-2"
             disabled={loading}
           >
-            <Heart className={`h-5 w-5 ${getHealthColor()}`} fill="currentColor" />
+            <span className="text-xl">{getHealthEmoji()}</span>
             <span className={`text-sm font-bold ${getHealthColor()}`}>
               {healthPercentage.toFixed(1)}%
             </span>
