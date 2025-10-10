@@ -27,7 +27,7 @@ export const SpeciesFilterBanner = ({
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="glass-panel rounded-r-2xl rounded-l-none p-2 w-16 h-full flex flex-col animate-fade-in">
+      <div className="glass-panel rounded-r-2xl rounded-l-none p-2 w-16 flex flex-col animate-fade-in" style={{height: 'calc(100vh - 48px)'}}>
         {/* Header */}
         <div className="text-center mb-2 pb-2 border-b border-border/50">
           <h3 className="text-[10px] font-semibold text-muted-foreground">Filters</h3>

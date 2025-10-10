@@ -32,7 +32,12 @@ export const LocationsCarousel = ({
 }: LocationsCarouselProps) => {
 
   // Combine both lists and deduplicate by name
-  const allLocations = [...wildlifePlaces, ...protectedAreas];
+  // Filter out any locations with invalid/missing location data
+  const allLocations = [...wildlifePlaces, ...protectedAreas].filter(loc => 
+    loc && loc.location && 
+    typeof loc.location.lat === 'number' && 
+    typeof loc.location.lng === 'number'
+  );
   const uniqueLocations = allLocations.filter((loc, index, self) =>
     index === self.findIndex(l => l.name === loc.name)
   );
@@ -54,10 +59,9 @@ export const LocationsCarousel = ({
     return 'Wildlife Location';
   };
 
-  if (uniqueLocations.length === 0) return null;
-
+  // ✅ ALWAYS show the carousel (even when empty) so it appears instantly
   return (
-    <div className="glass-panel rounded-2xl p-4 h-full flex flex-col animate-fade-in">
+    <div className="glass-panel rounded-2xl p-4 flex flex-col animate-fade-in" style={{height: 'calc(100vh - 48px)'}}>
       {/* Header */}
       <div className="mb-3">
         <h3 className="text-lg font-bold flex items-center gap-2">
@@ -65,14 +69,26 @@ export const LocationsCarousel = ({
           {regionName} Locations
         </h3>
         <p className="text-sm text-muted-foreground">
-          {uniqueLocations.length} park{uniqueLocations.length !== 1 ? 's' : ''}, refuge{uniqueLocations.length !== 1 ? 's' : ''} & preserve{uniqueLocations.length !== 1 ? 's' : ''}
+          {uniqueLocations.length > 0 
+            ? `${uniqueLocations.length} park${uniqueLocations.length !== 1 ? 's' : ''}, refuge${uniqueLocations.length !== 1 ? 's' : ''} & preserve${uniqueLocations.length !== 1 ? 's' : ''}`
+            : 'Searching for nearby locations...'
+          }
         </p>
       </div>
 
       {/* Scrollable Locations List */}
       <ScrollArea className="flex-1">
-        <div className="space-y-2 pr-1">
-          {uniqueLocations.map((location, index) => (
+        {uniqueLocations.length === 0 ? (
+          // ✅ Empty state (while loading)
+          <div className="flex flex-col items-center justify-center h-full text-center p-8">
+            <div className="w-16 h-16 border-4 border-orange-400/20 border-t-orange-400 rounded-full animate-spin mb-4"></div>
+            <p className="text-sm text-muted-foreground">
+              Finding wildlife parks and refuges...
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2 pr-1">
+            {uniqueLocations.map((location, index) => (
             <Card
               key={`${location.name}-${index}`}
               className={`cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg ${
@@ -115,13 +131,16 @@ export const LocationsCarousel = ({
                 )}
 
                 {/* Coordinates */}
-                <p className="text-[10px] text-muted-foreground mt-1 font-mono">
-                  {location.location.lat.toFixed(4)}, {location.location.lng.toFixed(4)}
-                </p>
+                {location.location && location.location.lat && location.location.lng && (
+                  <p className="text-[10px] text-muted-foreground mt-1 font-mono">
+                    {location.location.lat.toFixed(4)}, {location.location.lng.toFixed(4)}
+                  </p>
+                )}
               </div>
             </Card>
           ))}
-        </div>
+          </div>
+        )}
       </ScrollArea>
     </div>
   );

@@ -171,11 +171,28 @@ const Index = () => {
   const [isDeepDiveMode, setIsDeepDiveMode] = useState(false);
   const [currentSpeciesIndex, setCurrentSpeciesIndex] = useState<number>(0);
   const [selectedCarouselSpecies, setSelectedCarouselSpecies] = useState<RegionSpecies | null>(null);
+  const [habitatZones, setHabitatZones] = useState<any[]>([]); // NEW: Transparent habitat overlays
+  const [searchType, setSearchType] = useState<'species' | 'location' | null>(null); // Track search type
+  
+  // ✅ NEW: AbortController to cancel pending API calls on reset
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  
+  // ✅ NEW: Separate loading state for background fetches (wildlife, protected areas)
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
     setIsLoading(true);
     setHasInteracted(true);
+
+    // ✅ Cancel any previous ongoing requests
+    if (abortController) {
+      abortController.abort();
+    }
+    
+    // Create new AbortController for this search
+    const newController = new AbortController();
+    setAbortController(newController);
 
     // Check if this is a follow-up question (deep dive mode)
     // Deep dive mode activates when a species or habitat is already selected
@@ -228,71 +245,156 @@ const Index = () => {
     if (isSpeciesSearch && speciesKey) {
       // Handle species search - show animal card
       console.log('Species search detected:', speciesKey);
-      
+      setSearchType('species'); // ✅ Mark this as a species search
+
       const species = speciesData[speciesKey];
-      
+
       // Set species info to show the FastFactsCard
       setSpeciesInfo({
         ...species.info,
         species: speciesKey
       });
-      
+
       // Clear habitat to ensure species card shows
       setCurrentHabitat(null);
       setCurrentSpecies(query);
-      
-      // Set habitat markers from species data with animal image
-      if (species.habitats) {
-        const habitatPoints = species.habitats.map((h: any) => ({
-          ...h,
-          emoji: '🟢',
-          type: 'species',
-          imageUrl: species.info.imageUrl, // Add the animal image to markers
-          name: species.info.commonName
-        }));
-        setHabitats(habitatPoints);
 
-        // Zoom to first habitat location
-        if (species.habitats[0]) {
+      // NEW: Use OpenAI to resolve species to habitat zone (instead of multiple pins)
+      let centerLat = 0;
+      let centerLng = 0;
+
+      try {
+        const { resolveSpeciesHabitat } = await import('@/services/habitatResolver');
+        const habitatResolution = await resolveSpeciesHabitat(species.info.commonName);
+
+        if (habitatResolution.success && habitatResolution.habitats) {
+          const zones = habitatResolution.habitats;
+          console.log(`✅ Resolved ${species.info.commonName} to ${zones.length} habitat zone(s)`);
+
+          // Use first zone for center coordinates
+          centerLat = zones[0].centerLat;
+          centerLng = zones[0].centerLng;
+
+          // Create pins for ALL habitat zones
+          const habitatPins = zones.map(zone => ({
+            lat: zone.centerLat,
+            lng: zone.centerLng,
+            species: species.info.commonName,
+            size: 1.2,
+            emoji: '🟢',
+            type: 'species',
+            imageUrl: species.info.imageUrl,
+            name: zone.name
+          }));
+
+          setHabitats(habitatPins);
+
+          // Create transparent green circular overlays for ALL zones
+          const zoneOverlays = zones.map(zone => ({
+            lat: zone.centerLat,
+            lng: zone.centerLng,
+            radiusKm: zone.radiusKm,
+            color: 'rgba(16, 185, 129, 0.15)', // Transparent green
+            name: zone.name
+          }));
+
+          setHabitatZones(zoneOverlays);
+
+          // Zoom to first habitat zone center
           setMapCenter({
-            lat: species.habitats[0].lat,
-            lng: species.habitats[0].lng
+            lat: zones[0].centerLat,
+            lng: zones[0].centerLng
           });
         }
+      } catch (habitatError) {
+        console.error('Habitat resolution failed, using fallback:', habitatError);
 
-        // NEW: Analyze region and discover species
-        try {
+        // Fallback to old behavior (multiple pins)
+        if (species.habitats) {
+          const habitatPoints = species.habitats.map((h: any) => ({
+            ...h,
+            emoji: '🟢',
+            type: 'species',
+            imageUrl: species.info.imageUrl,
+            name: species.info.commonName
+          }));
+          setHabitats(habitatPoints);
+
+          // Use first habitat for center
+          if (species.habitats[0]) {
+            centerLat = species.habitats[0].lat;
+            centerLng = species.habitats[0].lng;
+            setMapCenter({
+              lat: centerLat,
+              lng: centerLng
+            });
+          }
+        }
+      }
+
+      // ✅ INSTANT UI: Set everything immediately so filter/carousel appear without delay
+      const placeholderRegion: RegionInfo = {
+        regionName: `${species.info.commonName} Habitat`,
+        centerLat: centerLat || 0,
+        centerLng: centerLng || 0,
+        description: `Discovering ${species.info.commonName} habitat locations...`
+      };
+      
+      // Set these BEFORE any async calls to make UI instant
+      setRegionInfo(placeholderRegion);
+      setRegionSpecies([]); // Will populate later
+      setWildlifePlaces([]); // Will populate later
+      setProtectedAreas([]); // Will populate later
+      setActiveSpeciesFilters(new Set(['locations'])); // ← Auto-select locations filter
+      setIsLoading(false); // ← Stop loading indicator EARLY so UI appears
+      setIsBackgroundLoading(true); // ← But show background loading for wildlife data
+
+      try {
+          // Create a dummy habitat point for region analysis
+          const habitatPoint = {
+            lat: centerLat,
+            lng: centerLng,
+            species: species.info.commonName,
+            size: 1.2,
+            emoji: '🟢'
+          };
+
           const { region, species: discoveredSpecies } = await performRegionAnalysis(
-            habitatPoints,
+            [habitatPoint],
             species.info.commonName,
             30
           );
+          
+          // ✅ Check if request was aborted
+          if (newController.signal.aborted) return;
+          
           setRegionInfo(region);
           setRegionSpecies(discoveredSpecies);
           console.log('Region analysis complete:', region.regionName);
 
           // ALSO fetch nearby locations (parks, refuges, protected areas) for Locations filter
-          const centerLat = region.centerLat;
-          const centerLng = region.centerLng;
-
+          // Use region center coordinates for fetching nearby locations
           // Fetch nearby wildlife parks and protected areas in parallel
           const [wildlifeResult, areasResult] = await Promise.all([
             supabase.functions.invoke('nearby-wildlife', {
               body: {
-                lat: centerLat,
-                lng: centerLng,
+                lat: region.centerLat,
+                lng: region.centerLng,
                 radius: 50000
               }
             }),
             supabase.functions.invoke('protected-areas', {
               body: {
                 bounds: {
-                  sw: { lat: centerLat - 0.5, lng: centerLng - 0.5 },
-                  ne: { lat: centerLat + 0.5, lng: centerLng + 0.5 }
+                  sw: { lat: region.centerLat - 0.5, lng: region.centerLng - 0.5 },
+                  ne: { lat: region.centerLat + 0.5, lng: region.centerLng + 0.5 }
                 }
               }
             })
           ]);
+
+          // ✅ Check if request was aborted
+          if (newController.signal.aborted) return;
 
           let wildlifeParks: any[] = [];
           if (!wildlifeResult.error && wildlifeResult.data?.places) {
@@ -308,26 +410,155 @@ const Index = () => {
 
           setWildlifePlaces(wildlifeParks);
           setProtectedAreas(protectedAreas);
+          
+          setIsBackgroundLoading(false); // ✅ Done loading background data
 
-          // AUTO-ACTIVATE Locations filter to show locations carousel first
-          setActiveSpeciesFilters(new Set(['locations']));
-
-        } catch (regionError) {
-          console.error('Region analysis failed:', regionError);
-        }
+      } catch (regionError) {
+        console.error('Region analysis failed:', regionError);
+        // Check if aborted
+        if (newController.signal.aborted) return;
+        // Keep the placeholder regionInfo so filter/carousel stay visible
+        // User can still interact with the UI
+        setIsBackgroundLoading(false); // ✅ Stop background loading even on error
       }
 
-      setIsLoading(false);
+      // Don't set isLoading here - already set to false earlier for instant UI
       return;
     }
-    
-    // Handle location/habitat search
-    console.log('Location search:', query);
-      
-      // Handle location/habitat search
-      console.log('Location search:', query);
-      
-      try {
+
+    // Handle location/habitat search (OR unknown species)
+    console.log('Location/Species search:', query);
+
+    try {
+        // ✅ FIRST: Try to resolve as species using smart ecoregion resolver
+        // This handles ANY species (not just hardcoded ones like polar bear)
+        const { resolveSpeciesHabitat } = await import('@/services/habitatResolver');
+        
+        try {
+          const habitatResolution = await resolveSpeciesHabitat(query);
+          
+          if (habitatResolution.success && habitatResolution.habitats && habitatResolution.habitats.length > 0) {
+            // ✅ This is a SPECIES search! (e.g., "red panda", "tiger", etc.)
+            console.log(`✅ Detected species search for: ${query}`);
+            setSearchType('species');
+            
+            const zones = habitatResolution.habitats;
+            const centerLat = zones[0].centerLat;
+            const centerLng = zones[0].centerLng;
+            
+            // ✅ Create placeholder speciesInfo so the SPECIES CARD shows (not region card!)
+            setSpeciesInfo({
+              commonName: query.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+              animalType: 'Loading...',
+              population: 'Loading data...',
+              populationTrend: 'stable' as const,
+              conservationStatus: 'Loading...',
+              threats: 'Loading threat information...',
+              threatImages: [threatIceLoss, threatPollution, threatHumanActivity],
+              imageUrl: polarBearReal, // Placeholder image
+              ecosystemImages: [ecosystemSeal, ecosystemWalrus, ecosystemFish],
+              ecosystem: []
+            });
+            
+            // Clear habitat to ensure species card shows
+            setCurrentHabitat(null);
+            setCurrentSpecies(query);
+            
+            // Create pins for ALL habitat zones
+            const habitatPins = zones.map(zone => ({
+              lat: zone.centerLat,
+              lng: zone.centerLng,
+              species: query,
+              size: 1.2,
+              emoji: '🟢',
+              type: 'species',
+              imageUrl: polarBearReal,
+              name: zone.name
+            }));
+            
+            setHabitats(habitatPins);
+            
+            // Create transparent green circular overlays
+            const zoneOverlays = zones.map(zone => ({
+              lat: zone.centerLat,
+              lng: zone.centerLng,
+              radiusKm: zone.radiusKm,
+              color: 'rgba(16, 185, 129, 0.15)',
+              name: zone.name
+            }));
+            
+            setHabitatZones(zoneOverlays);
+            setMapCenter({ lat: centerLat, lng: centerLng });
+            
+            // Set placeholder region for filter/carousel
+            const placeholderRegion: RegionInfo = {
+              regionName: `${query} Habitat`,
+              centerLat: centerLat,
+              centerLng: centerLng,
+              description: `Discovering habitat locations for ${query}...`
+            };
+            
+            setRegionInfo(placeholderRegion);
+            setRegionSpecies([]);
+            setWildlifePlaces([]);
+            setProtectedAreas([]);
+            setActiveSpeciesFilters(new Set(['locations']));
+            setIsLoading(false);
+            setIsBackgroundLoading(true); // ✅ Show background loading for wildlife data
+            
+            // Background: Fetch region data
+            try {
+              const habitatPoint = { lat: centerLat, lng: centerLng, species: query, size: 1.2, emoji: '🟢' };
+              const { region, species: discoveredSpecies } = await performRegionAnalysis([habitatPoint], query, 30);
+              
+              // Check if request was aborted
+              if (newController.signal.aborted) return;
+              
+              setRegionInfo(region);
+              setRegionSpecies(discoveredSpecies);
+              
+              // Fetch nearby locations with abort signal
+              const [wildlifeResult, areasResult] = await Promise.all([
+                supabase.functions.invoke('nearby-wildlife', {
+                  body: { lat: region.centerLat, lng: region.centerLng, radius: 50000 }
+                }),
+                supabase.functions.invoke('protected-areas', {
+                  body: {
+                    bounds: {
+                      sw: { lat: region.centerLat - 0.5, lng: region.centerLng - 0.5 },
+                      ne: { lat: region.centerLat + 0.5, lng: region.centerLng + 0.5 }
+                    }
+                  }
+                })
+              ]);
+              
+              // Check if request was aborted
+              if (newController.signal.aborted) return;
+              
+              if (!wildlifeResult.error && wildlifeResult.data?.places) {
+                setWildlifePlaces(wildlifeResult.data.places);
+              }
+              
+              if (!areasResult.error && areasResult.data?.success) {
+                setProtectedAreas(areasResult.data.protectedAreas || []);
+              }
+              
+              setIsBackgroundLoading(false); // ✅ Done loading background data
+            } catch (bgError) {
+              console.error('Background region fetch failed:', bgError);
+              setIsBackgroundLoading(false); // ✅ Stop even on error
+            }
+            
+            return; // ✅ DONE! Species search complete
+          }
+        } catch (speciesError) {
+          console.log('Not a species, trying location search...', speciesError);
+        }
+        
+        // ✅ If we're here, it's a LOCATION search (not species)
+        console.log('Location search confirmed:', query);
+        setSearchType('location');
+        
         // Step 1: Discover habitat
         const { data: habitatData, error: habitatError } = await supabase.functions.invoke('habitat-discovery', {
           body: { location: query }
@@ -346,6 +577,12 @@ const Index = () => {
         const habitat = habitatData.habitat;
         console.log('Habitat discovered:', habitat);
         
+        // ✅ Check if request was aborted
+        if (newController.signal.aborted) {
+          setIsLoading(false);
+          return;
+        }
+        
         // Step 2: Fetch habitat image (Wikipedia)
         let habitatImageUrl = '';
         try {
@@ -359,6 +596,12 @@ const Index = () => {
           }
         } catch (err) {
           console.error('Error fetching habitat image:', err);
+        }
+
+        // ✅ Check if request was aborted
+        if (newController.signal.aborted) {
+          setIsLoading(false);
+          return;
         }
 
         // Step 3: Fetch nearby wildlife parks, protected areas, threats, and species in parallel
@@ -389,6 +632,12 @@ const Index = () => {
             }
           })
         ]);
+        
+        // ✅ Check if request was aborted
+        if (newController.signal.aborted) {
+          setIsLoading(false);
+          return;
+        }
         
         let protectedAreas: any[] = [];
         if (!areasResult.error && areasResult.data?.success) {
@@ -963,6 +1212,13 @@ const Index = () => {
   };
 
   const handleReset = () => {
+    // ✅ Cancel ALL pending API calls immediately
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+    }
+    
+    // Clear ALL state
     setHabitats([]);
     setCurrentSpecies(null);
     setSpeciesInfo(null);
@@ -992,6 +1248,11 @@ const Index = () => {
     setIsDeepDiveMode(false);
     setSelectedCarouselSpecies(null);
     setCurrentSpeciesIndex(0);
+    setHabitatZones([]); // ✅ Clear habitat zone overlays
+    setSearchType(null); // ✅ Clear search type
+    setIsLoading(false); // ✅ Stop loading indicator
+    setIsBackgroundLoading(false); // ✅ Stop background loading
+    
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -1148,7 +1409,7 @@ const Index = () => {
       <UserProfile />
 
       {/* Globe or Google Maps */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         {useGoogleMaps ? (
           <GoogleEarthMap
             habitats={[
@@ -1173,12 +1434,12 @@ const Index = () => {
             locationName={locationName}
           />
         ) : (
-          <GlobeComponent 
+          <GlobeComponent
             habitats={[
-              ...habitats, 
-              ...userPins, 
+              ...habitats,
+              ...userPins,
               ...imageMarkers,
-              ...conservationLayers.flatMap(layer => 
+              ...conservationLayers.flatMap(layer =>
                 layer.data.map((point: any) => ({
                   ...point,
                   color: layer.color,
@@ -1186,11 +1447,12 @@ const Index = () => {
                   species: point.name,
                 }))
               )
-            ]} 
-            onPointClick={handlePointClick} 
+            ]}
+            onPointClick={handlePointClick}
             onDoubleGlobeClick={handleDoubleGlobeClick}
             onImageMarkerClick={handleImageMarkerClick}
             targetLocation={mapCenter}
+            habitatZones={habitatZones}
           />
         )}
       </div>
@@ -1199,7 +1461,7 @@ const Index = () => {
 
       {/* Species Filter Banner - Far Left Edge (pinned to screen edge) */}
       {(regionInfo || currentHabitat) && (
-        <div className="absolute left-0 top-6 bottom-6 w-16 z-[50] pointer-events-auto">
+        <div className="absolute left-0 top-6 bottom-6 w-16 z-[50] pointer-events-auto" style={{visibility: 'visible'}}>
           <SpeciesFilterBanner
             activeFilters={activeSpeciesFilters}
             onFilterToggle={handleSpeciesFilterToggle}
@@ -1208,8 +1470,8 @@ const Index = () => {
       )}
 
       {/* Locations Carousel - Left Side Vertical (when locations filter is active) */}
-      {activeSpeciesFilters.has('locations') && (wildlifePlaces.length > 0 || protectedAreas.length > 0) && regionInfo && (
-        <div className="absolute left-20 top-6 bottom-6 w-72 z-[60] pointer-events-auto">
+      {activeSpeciesFilters.has('locations') && regionInfo && (
+        <div className="absolute left-20 top-6 bottom-6 w-72 z-[60] pointer-events-auto" style={{visibility: 'visible'}}>
           <LocationsCarousel
             wildlifePlaces={wildlifePlaces}
             protectedAreas={protectedAreas}
@@ -1554,10 +1816,14 @@ const Index = () => {
           </div>
         )}
 
-        {/* Search Loader */}
+        {/* Search Loader - Shows for initial load OR background fetches */}
         <SearchLoader 
-          isLoading={isLoading} 
-          message={currentSpecies ? "Fetching wildlife data..." : "Discovering habitat..."}
+          isLoading={isLoading || isBackgroundLoading} 
+          message={
+            isBackgroundLoading ? "Finding nearby wildlife locations..." :
+            currentSpecies ? "Fetching wildlife data..." : 
+            "Discovering habitat..."
+          }
         />
 
 

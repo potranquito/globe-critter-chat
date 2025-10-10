@@ -100,7 +100,7 @@ export const HabitatSpeciesList = ({
   if (species.length === 0) return null;
 
   return (
-    <div className="glass-panel rounded-2xl p-4 h-full flex flex-col animate-fade-in">
+    <div className="glass-panel rounded-2xl p-4 flex flex-col animate-fade-in" style={{height: 'calc(100vh - 48px)'}}>
       {/* Header */}
       <div className="mb-3">
         <h3 className="text-lg font-bold">
