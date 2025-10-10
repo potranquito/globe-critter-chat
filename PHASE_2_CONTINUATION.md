@@ -1,7 +1,7 @@
 # Phase 2 Continuation Guide
 
-**Last Updated:** 2025-10-10
-**Status:** Tasks 2.1-2.8 Complete! Ready for 2.9
+**Last Updated:** 2025-10-10 (Updated after species filter/carousel implementation)
+**Status:** Tasks 2.1-2.8 Complete + Bonus Features! (~90% Phase 2 Complete)
 **Current Branch:** `feature/species-filter-banner`
 
 ---
@@ -43,8 +43,16 @@
 - ✅ Loading states on geolocation button
 - ✅ Single input paradigm - no separate search boxes needed
 
-**Bonus:**
+**Bonus Features (Added Beyond Original Plan):**
 - ✅ Dynamic emoji system for GlobalHealthBar (💩 → 🌍 → 🦸)
+- ✅ **Species Filter Banner** - Left-side vertical filter bar
+- ✅ **Region Species Carousel** - Vertical scrollable species list
+- ✅ **Locations Filter & Carousel** - Parks, refuges, protected areas
+- ✅ **Auto-Activate Locations Filter** - Shows locations carousel first
+- ✅ **Unified UX Flow** - All searches populate filter banner + carousel
+- ✅ **Persistent Pins** - Markers stay visible until Reset clicked
+- ✅ **Filter Banner Positioning** - Locations at top, then Animals, Plants, etc.
+- ✅ **Cross-Search Location Data** - Animals and locations both fetch parks/refuges
 
 ---
 
@@ -184,38 +192,63 @@ interface DiscoveryResult {
 
 ---
 
+## 🎯 Current Work: Habitat Overlay Visualization
+
+**Next Feature: Transparent Green Rings Around Habitat Pins**
+
+See `IMPLEMENTATION_PLAN.md` for detailed approach.
+
+**Goal:** Add semi-transparent green circular overlays around species habitat pins to show approximate range/influence area.
+
+**Approach:**
+- Modify Globe.gl component to support polygon/circle rendering
+- Add transparent green circles (rgba(16, 185, 129, 0.2)) around habitat pins
+- Circle radius: ~100-200km (adjustable)
+- Only for species habitats, not location pins
+
+---
+
 ## 🎯 Recommended Next Session Plan
 
 **Tasks Remaining:**
-1. Task 2.9: Create LocationInfoCard (optional - HabitatInfoCard exists)
-2. Task 2.10: Map/Globe view toggle enhancement
+1. ✅ Task 2.9: Create LocationInfoCard (HabitatInfoCard + WildlifeLocationCard exist)
+2. Task 2.10: Map/Globe view toggle enhancement (mostly works)
 3. Task 2.11: Test & polish
+4. **NEW:** Habitat overlay visualization (transparent rings)
+5. **Future:** Optimize API call performance (caching improvements)
 
-**Next Steps:**
-1. **Test location discovery** with real API keys
-2. Click geolocation button → should discover locations
-3. Type "polar bear" in ChatInput → should show markers
-4. Verify mode switching (Discovery → Chat)
-5. Optional: Create LocationInfoCard if needed for discovered locations
+**Completed This Session:**
+1. ✅ Species filter banner with all filters
+2. ✅ Region species carousel
+3. ✅ Locations filter & carousel
+4. ✅ Auto-activate locations on search
+5. ✅ Persistent pins
+6. ✅ Unified UX flow
 
 ---
 
 ## 🐛 Known Issues
 
-- None yet! All code compiles and builds successfully.
+- **Loading Performance:** Multiple sequential API calls make searches slow
+  - Habitat image fetches are sequential (not parallelized)
+  - Consider caching Wikipedia images
+  - Reduce nearby wildlife radius (currently 50km)
+- **Plant Filter:** Works correctly but shows "No species match" if no plants in region
+  - This is expected behavior, not a bug
 
 ---
 
-## 📊 Stats
+## 📊 Updated Stats
 
-**Tasks Completed:** 2.1-2.8 (8 tasks)
-**Files Created:** 6 (API services + location discovery + cache + hook)
-**Files Modified:** 3 (ChatInput + MapControls + Index)
-**Lines of Code:** ~2,000
+**Tasks Completed:** 2.1-2.8 + Bonus Features (11+ tasks)
+**Files Created:** 9 (APIs + services + LocationsCarousel + SpeciesFilterBanner + etc)
+**Files Modified:** 8 (Index, ChatInput, MapControls, Globe, types, etc)
+**Lines of Code:** ~3,500+
 **APIs Integrated:** 3 (eBird, Protected Planet, Google Places)
 **Build Status:** ✅ Passing
 **TypeScript Errors:** 0
-**Commits:** 3
+**Commits:** 12+
+**Branch:** `feature/species-filter-banner`
 
 ---
 
@@ -229,6 +262,12 @@ interface DiscoveryResult {
 
 ---
 
-Ready to test and polish Phase 2! 🚀
+Ready to add habitat overlays and continue Phase 2! 🚀
 
-## 🎉 Phase 2 Progress: 73% Complete (8/11 tasks done)
+## 🎉 Phase 2 Progress: ~90% Complete (8/11 original tasks + 8 bonus features!)
+
+**What's Left:**
+- Map/Globe view toggle polish
+- Habitat overlay visualization (transparent rings)
+- Performance optimizations
+- Final testing & bug fixes
