@@ -270,6 +270,45 @@ const Index = () => {
           setRegionInfo(region);
           setRegionSpecies(discoveredSpecies);
           console.log('Region analysis complete:', region.regionName);
+
+          // ALSO fetch nearby locations (parks, refuges, protected areas) for Locations filter
+          const centerLat = region.centerLat;
+          const centerLng = region.centerLng;
+
+          // Fetch nearby wildlife parks and protected areas in parallel
+          const [wildlifeResult, areasResult] = await Promise.all([
+            supabase.functions.invoke('nearby-wildlife', {
+              body: {
+                lat: centerLat,
+                lng: centerLng,
+                radius: 50000
+              }
+            }),
+            supabase.functions.invoke('protected-areas', {
+              body: {
+                bounds: {
+                  sw: { lat: centerLat - 0.5, lng: centerLng - 0.5 },
+                  ne: { lat: centerLat + 0.5, lng: centerLng + 0.5 }
+                }
+              }
+            })
+          ]);
+
+          let wildlifeParks: any[] = [];
+          if (!wildlifeResult.error && wildlifeResult.data?.places) {
+            wildlifeParks = wildlifeResult.data.places;
+            console.log(`Found ${wildlifeParks.length} wildlife parks for animal search`);
+          }
+
+          let protectedAreas: any[] = [];
+          if (!areasResult.error && areasResult.data?.success) {
+            protectedAreas = areasResult.data.protectedAreas || [];
+            console.log(`Found ${protectedAreas.length} protected areas for animal search`);
+          }
+
+          setWildlifePlaces(wildlifeParks);
+          setProtectedAreas(protectedAreas);
+
         } catch (regionError) {
           console.error('Region analysis failed:', regionError);
         }

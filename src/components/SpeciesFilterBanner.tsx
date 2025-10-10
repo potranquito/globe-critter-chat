@@ -36,6 +36,31 @@ export const SpeciesFilterBanner = ({
         {/* Scrollable Filter Options */}
         <ScrollArea className="flex-1">
           <div className="flex flex-col gap-2">
+            {/* Locations Filter - Always at the top */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="relative">
+                  <Button
+                    variant={activeFilters.has('locations') ? 'default' : 'ghost'}
+                    size="icon"
+                    className={`w-full h-12 text-xl ${
+                      activeFilters.has('locations') ? 'bg-primary/20 hover:bg-primary/30' : ''
+                    }`}
+                    onClick={() => onFilterToggle('locations')}
+                  >
+                    <span>📍</span>
+                  </Button>
+                  {activeFilters.has('locations') && (
+                    <div className="absolute -right-1 -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="glass-panel">
+                <p className="font-semibold">Locations</p>
+                <p className="text-xs text-muted-foreground">Nearby parks, refuges & preserves</p>
+              </TooltipContent>
+            </Tooltip>
+
             {/* Animals Filter with Expandable Sub-menu */}
             <div className="relative">
               <Tooltip>
@@ -102,7 +127,7 @@ export const SpeciesFilterBanner = ({
             </div>
 
             {/* Other Filters */}
-            {FILTER_OPTIONS.filter(f => f.id !== 'all-animals').map((filter) => (
+            {FILTER_OPTIONS.filter(f => f.id !== 'all-animals' && f.id !== 'locations').map((filter) => (
               <Tooltip key={filter.id}>
                 <TooltipTrigger asChild>
                   <div className="relative">
