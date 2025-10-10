@@ -9,6 +9,7 @@ export type AnimalCategory =
 
 export type FilterCategory =
   | AnimalCategory
+  | 'locations'
   | 'plants'
   | 'endangered'
   | 'ecosystems'
@@ -37,6 +38,7 @@ export const ANIMAL_FILTERS: FilterOption[] = [
 ];
 
 export const FILTER_OPTIONS: FilterOption[] = [
+  { id: 'locations', label: 'Locations', emoji: '📍', category: 'other', description: 'Nearby parks, refuges & preserves' },
   { id: 'all-animals', label: 'Animals', emoji: '🦁', category: 'animals', description: 'Filter by animal types' },
   { id: 'plants', label: 'Plants', emoji: '🌿', category: 'other', description: 'Show plant species' },
   { id: 'endangered', label: 'Endangered', emoji: '⚠️', category: 'other', description: 'Show endangered species' },

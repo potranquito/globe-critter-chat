@@ -16,6 +16,7 @@ import { HabitatSpeciesList } from '@/components/HabitatSpeciesList';
 import { SearchLoader } from '@/components/SearchLoader';
 import WildlifeLocationCard from '@/components/WildlifeLocationCard';
 import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
+import { LocationsCarousel } from '@/components/LocationsCarousel';
 import { SpeciesFilterBanner } from '@/components/SpeciesFilterBanner';
 import { useToast } from '@/hooks/use-toast';
 import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
@@ -158,6 +159,7 @@ const Index = () => {
   const [currentZoomLevel, setCurrentZoomLevel] = useState(3);
   const [mapCenter, setMapCenter] = useState<{ lat: number; lng: number } | null>(null);
   const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
+  const [protectedAreas, setProtectedAreas] = useState<any[]>([]);
   const [locationName, setLocationName] = useState<string>('');
   const [currentHabitat, setCurrentHabitat] = useState<HabitatRegion | null>(null);
   const [selectedWildlifePark, setSelectedWildlifePark] = useState<any>(null);
@@ -415,6 +417,7 @@ const Index = () => {
         setSpeciesInfo(null); // Clear species info when showing habitat
         setCurrentSpecies(null); // Clear current species
         setWildlifePlaces(wildlifeParks); // Store wildlife parks for 2D map view
+        setProtectedAreas(protectedAreas); // Store protected areas for locations carousel
         setLocationName(query); // Store the search query
         // DON'T clear regionInfo/regionSpecies - keep filters and carousel visible
 
@@ -491,21 +494,20 @@ const Index = () => {
   const handleDoubleGlobeClick = (lat: number, lng: number) => {
     setHasInteracted(true);
 
-    // If a species is currently selected, don't clear the view.
-    // Treat double-click as a quick inspect without resetting cards/data.
-    if (speciesInfo) {
+    // PINS SHOULD BE PERSISTENT - Don't clear habitats/pins on globe click
+    // They stay visible until user explicitly clicks Reset button
+
+    // If a species or habitat is currently selected, just record the pin location
+    // without clearing the view
+    if (speciesInfo || currentHabitat || habitats.length > 0) {
       setPinLocation({ lat, lng });
       toast({ title: 'Location Selected', description: `${lat.toFixed(2)}, ${lng.toFixed(2)}` });
       return;
     }
-    
-    // Reset everything first when no species is selected
-    setHabitats([]);
-    setCurrentSpecies(null);
-    setSpeciesInfo(null);
-    setUserPins([]);
+
+    // Only show regional animals list if nothing is selected
     setPinLocation({ lat, lng });
-    
+
     // Determine region based on latitude
     let region;
     if (lat > 60) {
@@ -923,6 +925,7 @@ const Index = () => {
     setUserPins([]);
     setPinLocation(null);
     setWildlifePlaces([]);
+    setProtectedAreas([]);
     setLocationName('');
     setRegionInfo(null);
     setRegionSpecies([]);
@@ -937,12 +940,7 @@ const Index = () => {
     setUseGoogleMaps(false);
     setCurrentZoomLevel(3);
     setMapCenter(null);
-    setWildlifePlaces([]);
-    setLocationName('');
-    setCurrentHabitat(null);
     setSelectedWildlifePark(null);
-    setRegionInfo(null);
-    setRegionSpecies([]);
     setActiveSpeciesFilters(new Set());
     setChatHistory([]);
     setIsChatHistoryExpanded(false);
@@ -1164,8 +1162,29 @@ const Index = () => {
         </div>
       )}
 
+      {/* Locations Carousel - Left Side Vertical (when locations filter is active) */}
+      {activeSpeciesFilters.has('locations') && (wildlifePlaces.length > 0 || protectedAreas.length > 0) && regionInfo && (
+        <div className="absolute left-20 top-6 bottom-6 w-72 z-[60] pointer-events-auto">
+          <LocationsCarousel
+            wildlifePlaces={wildlifePlaces}
+            protectedAreas={protectedAreas}
+            regionName={regionInfo.regionName}
+            onLocationSelect={(location) => {
+              console.log('Selected location:', location);
+              // Pan to location
+              setMapCenter({ lat: location.location.lat, lng: location.location.lng });
+              toast({
+                title: location.name,
+                description: 'Centered on location',
+              });
+            }}
+            currentLocation={undefined}
+          />
+        </div>
+      )}
+
       {/* Region Species Carousel - Left Side Vertical (narrower, closer to filter) */}
-      {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
+      {!activeSpeciesFilters.has('locations') && regionInfo && regionSpecies.length > 0 && !currentHabitat && (
         <div className="absolute left-20 top-6 bottom-6 w-72 z-[60] pointer-events-auto">
           <RegionSpeciesCarousel
             species={regionSpecies}
