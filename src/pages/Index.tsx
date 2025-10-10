@@ -9,15 +9,18 @@ import MapControls from '@/components/MapControls';
 import FilterMenu from '@/components/FilterMenu';
 import { HabitatInfoCard } from '@/components/HabitatInfoCard';
 import { HabitatFactsCard } from '@/components/HabitatFactsCard';
+import { HabitatSpeciesList } from '@/components/HabitatSpeciesList';
 import { SearchLoader } from '@/components/SearchLoader';
 import WildlifeLocationCard from '@/components/WildlifeLocationCard';
 import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
+import { SpeciesFilterBanner } from '@/components/SpeciesFilterBanner';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { HabitatRegion } from '@/types/habitat';
 import { performRegionAnalysis } from '@/services/regionService';
 import type { RegionInfo, RegionSpecies } from '@/services/regionService';
+import type { FilterCategory } from '@/types/speciesFilter';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
@@ -156,6 +159,7 @@ const Index = () => {
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const [regionInfo, setRegionInfo] = useState<RegionInfo | null>(null);
   const [regionSpecies, setRegionSpecies] = useState<RegionSpecies[]>([]);
+  const [activeSpeciesFilters, setActiveSpeciesFilters] = useState<Set<FilterCategory>>(new Set());
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
@@ -271,13 +275,13 @@ const Index = () => {
           console.error('Error fetching habitat image:', err);
         }
 
-        // Step 3: Fetch nearby wildlife parks, protected areas, and threats in parallel
-        const [wildlifeResult, areasResult, threatsResult] = await Promise.all([
+        // Step 3: Fetch nearby wildlife parks, protected areas, threats, and species in parallel
+        const [wildlifeResult, areasResult, threatsResult, speciesResult] = await Promise.all([
           supabase.functions.invoke('nearby-wildlife', {
-            body: { 
-              lat: habitat.location.lat, 
+            body: {
+              lat: habitat.location.lat,
               lng: habitat.location.lng,
-              radius: 50000 
+              radius: 50000
             }
           }),
           supabase.functions.invoke('protected-areas', {
@@ -285,6 +289,18 @@ const Index = () => {
           }),
           supabase.functions.invoke('habitat-threats', {
             body: { bounds: habitat.bounds }
+          }),
+          supabase.functions.invoke('discover-region-species', {
+            body: {
+              bounds: {
+                minLat: habitat.bounds.sw.lat,
+                maxLat: habitat.bounds.ne.lat,
+                minLng: habitat.bounds.sw.lng,
+                maxLng: habitat.bounds.ne.lng
+              },
+              regionName: habitat.name,
+              limit: 30
+            }
           })
         ]);
         
@@ -298,6 +314,21 @@ const Index = () => {
         if (!threatsResult.error && threatsResult.data?.success) {
           threats = threatsResult.data.threats || [];
           console.log(`Found ${threats.length} threats`);
+        }
+
+        // Process species data
+        let keySpecies: any[] = [];
+        if (!speciesResult.error && speciesResult.data?.success && speciesResult.data.species) {
+          keySpecies = speciesResult.data.species.map((sp: any) => ({
+            id: sp.scientificName.toLowerCase().replace(/\s+/g, '-'),
+            name: sp.commonName || sp.scientificName,
+            scientificName: sp.scientificName,
+            conservationStatus: sp.conservationStatus || 'NE',
+            observationCount: sp.occurrenceCount || 0,
+            type: sp.animalType || 'Other',
+            imageUrl: sp.imageUrl || null
+          }));
+          console.log(`Found ${keySpecies.length} species in habitat`);
         }
         
         // Step 4: Fetch Wikipedia images for nearby wildlife parks
@@ -334,15 +365,29 @@ const Index = () => {
           imageUrl: habitatImageUrl || habitat.imageUrl,
           protectedAreas,
           threats,
-          keySpecies: []
+          keySpecies,
+          parkCount: wildlifeParks.length
         };
         
         setCurrentHabitat(enrichedHabitat);
         setSpeciesInfo(null); // Clear species info when showing habitat
         setCurrentSpecies(null); // Clear current species
-        
+        setWildlifePlaces(wildlifeParks); // Store wildlife parks for 2D map view
+        setLocationName(query); // Store the search query
+
         // Create markers for globe
         const markers: any[] = [];
+
+        // Add habitat center marker
+        markers.push({
+          lat: habitat.location.lat,
+          lng: habitat.location.lng,
+          name: habitat.name,
+          size: 1.5,
+          emoji: '📍',
+          type: 'habitat-center',
+          color: '#10b981'
+        });
 
         // Add wildlife park markers with images as thumbnails
         wildlifeParks.forEach(park => {
@@ -748,12 +793,29 @@ const Index = () => {
     await handleSearch(species.commonName);
   };
 
+  const handleSpeciesFilterToggle = (filterId: FilterCategory) => {
+    setActiveSpeciesFilters(prev => {
+      const newFilters = new Set(prev);
+      if (newFilters.has(filterId)) {
+        newFilters.delete(filterId);
+      } else {
+        newFilters.add(filterId);
+      }
+      return newFilters;
+    });
+  };
+
   const handleReset = () => {
     setHabitats([]);
     setCurrentSpecies(null);
     setSpeciesInfo(null);
+    setCurrentHabitat(null);
     setUserPins([]);
     setPinLocation(null);
+    setWildlifePlaces([]);
+    setLocationName('');
+    setRegionInfo(null);
+    setRegionSpecies([]);
     setPinImagesVisible(false);
     setHasInteracted(false);
     setRegionalAnimals(null);
@@ -771,6 +833,7 @@ const Index = () => {
     setSelectedWildlifePark(null);
     setRegionInfo(null);
     setRegionSpecies([]);
+    setActiveSpeciesFilters(new Set());
     toast({ title: 'View Reset', description: 'Showing global view' });
   };
 
@@ -804,7 +867,27 @@ const Index = () => {
 
   // Toggle between Globe and Google Maps based on interaction or zoom
   const handleToggleMapView = () => {
-    setUseGoogleMaps(prev => !prev);
+    const willUseGoogleMaps = !useGoogleMaps;
+    setUseGoogleMaps(willUseGoogleMaps);
+
+    // If switching to Google Maps and we have a habitat, center on it
+    if (willUseGoogleMaps && currentHabitat) {
+      setMapCenter({
+        lat: currentHabitat.location.lat,
+        lng: currentHabitat.location.lng
+      });
+      setCurrentZoomLevel(8); // Closer zoom for habitat view
+    }
+    // If switching to Google Maps and we have species info with habitats, center on first habitat
+    else if (willUseGoogleMaps && speciesInfo?.species && speciesData[speciesInfo.species]?.habitats?.[0]) {
+      const firstHabitat = speciesData[speciesInfo.species].habitats[0];
+      setMapCenter({
+        lat: firstHabitat.lat,
+        lng: firstHabitat.lng
+      });
+      setCurrentZoomLevel(5);
+    }
+
     toast({
       title: useGoogleMaps ? 'Switched to Globe View' : 'Switched to Satellite View',
       description: useGoogleMaps ? 'Exploring with 3D globe' : 'Exploring with Google Maps satellite imagery'
@@ -864,13 +947,30 @@ const Index = () => {
       {/* Map/Globe Toggle - Hidden (now in left controls) */}
 
       {/* Region Species Carousel - Left Side Vertical */}
-      {regionInfo && regionSpecies.length > 0 && (
+      {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
         <div className="absolute left-6 top-6 bottom-6 w-80 z-[60] pointer-events-auto">
           <RegionSpeciesCarousel
             species={regionSpecies}
             regionName={regionInfo.regionName}
             currentSpecies={speciesInfo?.scientificName}
             onSpeciesSelect={handleCarouselSpeciesSelect}
+            activeFilters={activeSpeciesFilters}
+          />
+        </div>
+      )}
+
+      {/* Habitat Species List - Left Side Vertical */}
+      {currentHabitat && currentHabitat.keySpecies && currentHabitat.keySpecies.length > 0 && (
+        <div className="absolute left-6 top-6 bottom-6 w-80 z-[60] pointer-events-auto">
+          <HabitatSpeciesList
+            species={currentHabitat.keySpecies}
+            habitatName={currentHabitat.name}
+            onSpeciesSelect={(species) => {
+              console.log('Selected species from habitat:', species);
+              // Could trigger species search here
+              handleSearch(species.name);
+            }}
+            activeFilters={activeSpeciesFilters}
           />
         </div>
       )}
@@ -905,7 +1005,7 @@ const Index = () => {
 
       {/* Right Side Card - Species with Chat Below */}
       {speciesInfo && !currentHabitat && !selectedWildlifePark && (
-        <div className="absolute right-6 top-6 w-96 z-[60] pointer-events-auto flex flex-col gap-4">
+        <div className="absolute right-28 top-6 w-96 z-[60] pointer-events-auto flex flex-col gap-4">
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -927,9 +1027,9 @@ const Index = () => {
         </div>
       )}
 
-      {/* Left Side Card - Habitat */}
-      {currentHabitat && (
-        <div className="absolute left-6 top-6 w-64 z-[60] pointer-events-auto">
+      {/* Right Side Card - Habitat with Chat Below */}
+      {currentHabitat && !speciesInfo && !selectedWildlifePark && (
+        <div className="absolute right-28 top-6 w-96 z-[60] pointer-events-auto flex flex-col gap-4">
           <HabitatFactsCard
             habitat={currentHabitat}
             imageUrl={currentHabitat.imageUrl}
@@ -940,6 +1040,15 @@ const Index = () => {
               });
             }}
           />
+
+          {/* Chat Input Below Habitat Card */}
+          <div className="glass-panel rounded-2xl p-2">
+            <ChatInput
+              onSubmit={handleSearch}
+              isLoading={isLoading}
+              placeholder={`Ask about ${currentHabitat.name}...`}
+            />
+          </div>
         </div>
       )}
 
@@ -1027,8 +1136,8 @@ const Index = () => {
               placeholder={currentSpecies ? `Inquire further about ${currentSpecies}` : undefined}
             />
           </div>
-          {(habitats.length > 0 || userPins.length > 0 || speciesInfo) && (
-            <Button 
+          {(habitats.length > 0 || userPins.length > 0 || speciesInfo || currentHabitat) && (
+            <Button
               onClick={handleReset}
               variant="secondary"
               size="icon"
@@ -1049,6 +1158,16 @@ const Index = () => {
               Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or locations like <span className="text-accent font-medium">Las Vegas</span>
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Species Filter Banner - Far Right */}
+      {(regionInfo || currentHabitat) && (
+        <div className="absolute right-6 top-6 bottom-6 w-20 z-[50] pointer-events-auto">
+          <SpeciesFilterBanner
+            activeFilters={activeSpeciesFilters}
+            onFilterToggle={handleSpeciesFilterToggle}
+          />
         </div>
       )}
 
