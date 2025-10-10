@@ -1,7 +1,7 @@
 # Phase 2 Continuation Guide
 
 **Last Updated:** 2025-10-10
-**Status:** Tasks 2.1-2.3 Complete, Ready for 2.4
+**Status:** Tasks 2.1-2.8 Complete! Ready for 2.9
 **Current Branch:** `feature/species-filter-banner`
 
 ---
@@ -33,98 +33,60 @@
 - ✅ Integrated with location discovery
 - ✅ Expected 70-80% API call reduction
 
+**Geolocation & Search Integration (2.4-2.8):**
+- ✅ useLocationDiscovery hook (bridges service with UI)
+- ✅ Geolocation button triggers automatic discovery
+- ✅ View-mode-aware (3D: 50km habitats, 2D: 10km locations)
+- ✅ Emoji-coded markers by location type (🌍🐦🏞️🦅🌲)
+- ✅ ChatInput mode indicators (🔍 Discovery / 💬 Chat)
+- ✅ Contextual placeholders based on mode
+- ✅ Loading states on geolocation button
+- ✅ Single input paradigm - no separate search boxes needed
+
 **Bonus:**
 - ✅ Dynamic emoji system for GlobalHealthBar (💩 → 🌍 → 🦸)
 
 ---
 
-## 📋 Next Steps (Task 2.4 onwards)
+## 📋 Next Steps (Task 2.9 onwards)
 
-### Task 2.4: Add 3D Globe Habitat Markers ⬜ NOT STARTED
+### Tasks 2.4-2.8: Location Discovery & Search Integration ✅ COMPLETE
 
-**Goal:** Display green dot markers for discovered habitats on 3D globe
+**What Was Built:**
 
-**What to Build:**
-1. `src/components/map/HabitatMarker.tsx` component
-2. Integration with existing 3D globe library
-3. Render green dots at habitat coordinates (from Protected Planet)
-4. Click handler → opens LocationInfoCard on right side
-5. Hover tooltip showing habitat name
-6. Support multiple markers for animal searches
-7. Optional: Visual distinction by habitat type (marine=blue, forest=green, etc.)
+**Task 2.4 - 3D/2D Habitat Markers:**
+- Created `useLocationDiscovery` hook to bridge service with UI
+- Integrated with existing Globe component (no new marker component needed)
+- Converts UnifiedLocation → HabitatPoint format with emoji markers
+- Automatic marker rendering on discovery
 
-**Dependencies:**
-- Existing 3D globe component (check `src/components/Globe.tsx` or `GoogleEarthMap.tsx`)
-- `locationDiscovery.ts` service (already implemented)
-- Need to understand how current globe renders markers
+**Task 2.5 - Location Markers (Merged with 2.4):**
+- Single hook handles both 3D and 2D markers
+- View-mode-aware discovery (3D: 50km, 2D: 10km)
+- Emoji-coded by type: 🌍 habitats, 🐦 hotspots, 🏞️ parks, 🦅 refuges, 🌲 reserves
 
-**Where to Start:**
-1. Read existing globe implementation to understand marker API
-2. Create test data with `discoverHabitatsByGeolocation()`
-3. Build marker component with click/hover interactions
-4. Integrate with globe
+**Task 2.6 - Geolocation Button:**
+- Enhanced `handleFetchLocation` in Index.tsx
+- Shows spinner during discovery (`isDiscovering` state)
+- Automatic discovery + marker rendering
+- Pan to user location with toast notifications
+- Graceful error handling
 
----
+**Task 2.7-2.8 - Search (SIMPLIFIED UX):**
+- **No separate search inputs needed!**
+- Users use existing ChatInput at bottom-center for EVERYTHING
+- Added mode indicator badge:
+  * 🔍 Discovery Mode (blue) - Search for animals/locations
+  * 💬 Chat Mode (green) - Ask questions about selected item
+- Contextual placeholders that change based on mode
+- Reset button returns to Discovery Mode
 
-### Task 2.5: Add 2D Map Location Markers ⬜ NOT STARTED
-
-**Goal:** Display markers for specific locations on 2D map
-
-**What to Build:**
-1. `src/components/map/LocationMarker.tsx` component
-2. Integration with existing Google Maps
-3. Render markers for parks, refuges, hotspots
-4. Different icons for location types (🏞️ 🦅 🐦 🌊)
-5. Click handler → opens LocationInfoCard
-6. Marker clustering for dense areas
-7. Info window on hover
-
----
-
-### Task 2.6: Connect Geolocation Button ⬜ NOT STARTED
-
-**Goal:** Trigger location discovery when user clicks geolocation button
-
-**What to Build:**
-1. Update existing geolocation button handler
-2. Show loading state: "Discovering locations near you..."
-3. Call `discoverHabitatsByGeolocation()` (3D) or `discoverLocationsByGeolocation()` (2D)
-4. Render markers on map/globe
-5. Pan to user's location
-6. Show success toast
-
-**Existing Code:**
-- Geolocation button likely in `MapControls` component
-- May already have basic geolocation logic
-
----
-
-### Task 2.7: Add Location Search Input ⬜ NOT STARTED
-
-**Goal:** Allow users to search for locations by name
-
-**What to Build:**
-1. `src/components/LocationSearchInput.tsx`
-2. Add to left sidebar (above species filters)
-3. Google Places Autocomplete integration
-4. On selection → call `discoverByUserInput()`
-5. Render markers and pan to location
-
----
-
-### Task 2.8: Add Animal Search Input ⬜ NOT STARTED
-
-**Goal:** Allow users to search for animals to find their habitats
-
-**What to Build:**
-1. `src/components/AnimalSearchInput.tsx`
-2. Add to left sidebar (separate from location search)
-3. Species autocomplete (GBIF/iNaturalist)
-4. On selection → call `discoverByAnimal()` (needs Phase 3 implementation)
-5. Place green dots on all habitats
-6. Rotate globe to first habitat
-
-**Note:** This will be partially implemented in Phase 3 when species APIs are added
+**Why This Approach:**
+- Single input paradigm - users type "polar bear" or "Yellowstone" in ChatInput
+- System auto-detects if it's species or location
+- Shows markers + appropriate card on right
+- Auto-switches to Chat Mode for follow-up questions
+- Less UI clutter, more intuitive workflow
 
 ---
 
@@ -224,20 +186,17 @@ interface DiscoveryResult {
 
 ## 🎯 Recommended Next Session Plan
 
-**Option A (Recommended):** Complete UI tasks in order
-1. Start with Task 2.4 (3D markers)
-2. Move to Task 2.5 (2D markers)
-3. Then Task 2.6 (geolocation integration)
+**Tasks Remaining:**
+1. Task 2.9: Create LocationInfoCard (optional - HabitatInfoCard exists)
+2. Task 2.10: Map/Globe view toggle enhancement
+3. Task 2.11: Test & polish
 
-**Option B:** Build search functionality first
-1. Task 2.7 (Location search)
-2. Task 2.9 (LocationInfoCard)
-3. Then backfill markers
-
-**Option C:** Vertical slice
-1. Do minimal version of 2.4, 2.5, 2.6 together
-2. Get end-to-end flow working
-3. Polish afterwards
+**Next Steps:**
+1. **Test location discovery** with real API keys
+2. Click geolocation button → should discover locations
+3. Type "polar bear" in ChatInput → should show markers
+4. Verify mode switching (Discovery → Chat)
+5. Optional: Create LocationInfoCard if needed for discovered locations
 
 ---
 
@@ -249,11 +208,14 @@ interface DiscoveryResult {
 
 ## 📊 Stats
 
-**Files Created:** 5
-**Lines of Code:** ~1,500
-**APIs Integrated:** 3
+**Tasks Completed:** 2.1-2.8 (8 tasks)
+**Files Created:** 6 (API services + location discovery + cache + hook)
+**Files Modified:** 3 (ChatInput + MapControls + Index)
+**Lines of Code:** ~2,000
+**APIs Integrated:** 3 (eBird, Protected Planet, Google Places)
 **Build Status:** ✅ Passing
 **TypeScript Errors:** 0
+**Commits:** 3
 
 ---
 
@@ -267,4 +229,6 @@ interface DiscoveryResult {
 
 ---
 
-Ready to continue with Task 2.4! 🚀
+Ready to test and polish Phase 2! 🚀
+
+## 🎉 Phase 2 Progress: 73% Complete (8/11 tasks done)
