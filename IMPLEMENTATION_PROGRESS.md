@@ -126,36 +126,36 @@
 
 ---
 
-#### 1.4 Build GlobalHealthBar Component ⬜ TODO
-**Status:** Not Started
-**Files to Create:**
-- `src/components/GlobalHealthBar.tsx`
-- `src/hooks/useGlobalHealth.ts`
+#### 1.4 Build GlobalHealthBar Component ✅ COMPLETED
+**Status:** ✅ Completed
+**Files Created:**
+- `src/components/GlobalHealthBar.tsx` ✓
+- `src/hooks/useGlobalHealth.ts` ✓
 
-**Steps:**
-1. Create GlobalHealthBar component (top of screen)
-2. Fetch global health from Supabase
-3. Display mascot emoji (💩🦸)
-4. Show progress bar (0-100%)
-5. Show community stats (total lessons)
-6. Add color coding (red < 30%, yellow < 70%, green >= 70%)
-7. Set up real-time subscription for updates
-8. Test on mobile (responsive)
+**Completed Steps:**
+1. ✓ Created GlobalHealthBar as compact widget
+2. ✓ Fetch global health from Supabase
+3. ✓ Display heart icon (❤️) with dynamic coloring
+4. ✓ Show percentage (0.0%)
+5. ✓ Add hover tooltip with full details (mascot 💩🦸, status, lessons, contributors)
+6. ✓ Implement color coding (red < 30%, yellow < 70%, green >= 70%)
+7. ✓ Set up real-time subscription for updates
+8. ✓ Integrated into MapControls (top-center, 4th button)
 
-**Dependencies:** 1.1 (Database schema)
-**Estimated Time:** 2 hours
+**Design Changes:**
+- **Initial design:** Full-width bar at top (too large at 0%)
+- **Final design:** Compact widget in MapControls row
+  - Heart icon + percentage
+  - Tooltip with expanded info
+  - Sits with geolocation, map toggle, leaderboard
+  - No wasted screen space
 
-**Component Location:**
-```
-Fixed position: top: 0, full width
-Height: ~60px
-Z-index: 90 (below modals, above map)
-```
-
-**Notes:**
-- Should not block map controls (they're at top-center, below this bar)
-- Consider hiding on scroll down / showing on scroll up (mobile)
-- Update in real-time when user completes lesson
+**Features:**
+- Real-time updates via Supabase subscriptions
+- Color-coded health indicator
+- Compact and unobtrusive
+- Tooltip shows full stats on hover
+- Responsive and mobile-friendly
 
 ---
 

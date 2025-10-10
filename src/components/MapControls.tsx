@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { MapPin, Map, Trophy } from "lucide-react";
+import { GlobalHealthBar } from "@/components/GlobalHealthBar";
 
 interface MapControlsProps {
   useGoogleMaps: boolean;
@@ -40,6 +41,9 @@ const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onLeaderboar
       >
         <Trophy className="h-5 w-5" />
       </Button>
+
+      {/* Global Health Widget */}
+      <GlobalHealthBar />
     </div>
   );
 };

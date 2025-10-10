@@ -4,6 +4,7 @@ import GoogleEarthMap from '@/components/GoogleEarthMap';
 import ChatInput, { ChatContext } from '@/components/ChatInput';
 import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
 import { UserProfile } from '@/components/UserProfile';
+import { GlobalHealthBar } from '@/components/GlobalHealthBar';
 import FastFactsCard from '@/components/FastFactsCard';
 import RegionSpeciesCard from '@/components/RegionSpeciesCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
