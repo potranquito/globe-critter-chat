@@ -348,33 +348,42 @@ threats: 1 hour       // Disasters/threats
 
 ---
 
-#### 2.4 Add 3D Globe Habitat Markers
-**Status:** ⬜ Not Started
+#### 2.4 Add 3D Globe Habitat Markers ✅ COMPLETED
+**Status:** ✅ Completed
 **Goal:** Display green dot markers for discovered habitats on 3D globe
 
-**Tasks:**
-- [ ] Create `src/components/map/HabitatMarker.tsx` component
-- [ ] Integrate with existing 3D globe library
-- [ ] Render green dots at habitat coordinates (from Protected Planet)
-- [ ] Add click handler:
-  - Fetch habitat details from database
-  - Open LocationInfoCard on right side
-  - Highlight selected marker
-- [ ] Add hover tooltip showing habitat name
-- [ ] Support multiple markers for animal searches
-- [ ] Add visual distinction for different habitat types (optional):
-  - Marine (blue dot)
-  - Forest (green dot)
-  - Arctic (white dot)
-  - Desert (tan dot)
-- [ ] Style markers to match glass-panel aesthetic
-- [ ] Optimize rendering for many markers (clustering?)
+**Completed Steps:**
+- ✅ Created `src/hooks/useLocationDiscovery.ts` hook (bridge between service and UI)
+- ✅ Integrated with existing Globe component (no new component needed)
+- ✅ Converted UnifiedLocation to HabitatPoint format with emoji markers
+- ✅ Implemented automatic location discovery on geolocation button click
+- ✅ Added view-mode-aware discovery (3D: 50km habitats, 2D: 10km specific locations)
+- ✅ Added visual distinction by location type with emojis:
+  - 🌍 Protected habitat regions
+  - 🐦 eBird hotspots
+  - 🏞️ National parks
+  - 🦅 Wildlife refuges
+  - 🌲 Nature reserves
+  - 📍 Generic locations
+- ✅ Implemented automatic map panning to discovered locations
+- ✅ Added toast notifications with discovery results
+- ✅ Graceful error handling (shows user location even if discovery fails)
 
-**Deliverables:**
-- `HabitatMarker.tsx` component
-- Integration with 3D globe
-- Click and hover interactions
-- Visual styling
+**Design Decision:**
+- Used existing Globe component's HabitatPoint system instead of creating new marker component
+- Created useLocationDiscovery hook to convert data format and manage state
+- Reused existing emoji-based markers (no clustering needed yet)
+
+**Files Created:**
+- `src/hooks/useLocationDiscovery.ts` ✓
+- Updated `src/pages/Index.tsx` with integration ✓
+
+**Features Implemented:**
+- Automatic discovery on geolocation button click
+- Different behavior for 3D vs 2D view modes
+- Emoji-coded markers by location type
+- Seamless integration with existing UI
+- Cache-aware (uses location discovery service)
 
 ---
 
