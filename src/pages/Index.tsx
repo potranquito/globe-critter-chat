@@ -309,6 +309,9 @@ const Index = () => {
           setWildlifePlaces(wildlifeParks);
           setProtectedAreas(protectedAreas);
 
+          // AUTO-ACTIVATE Locations filter to show locations carousel first
+          setActiveSpeciesFilters(new Set(['locations']));
+
         } catch (regionError) {
           console.error('Region analysis failed:', regionError);
         }
@@ -493,6 +496,9 @@ const Index = () => {
 
             setRegionInfo(locationRegionInfo);
             setRegionSpecies(keySpecies);
+
+            // AUTO-ACTIVATE Locations filter to show locations carousel first
+            setActiveSpeciesFilters(new Set(['locations']));
 
             console.log(`Region analysis complete: ${keySpecies.length} species discovered in ${habitat.name}`);
           } catch (regionError) {
