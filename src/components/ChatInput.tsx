@@ -60,23 +60,24 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-none justify-center">
-      <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full" style={{ maxWidth: '712px' }}>
-        {/* Mode Indicator Badge */}
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg shrink-0 ${
+      <div
+        className={`glass-panel rounded-2xl p-2 flex gap-2 items-center w-full transition-all duration-300 ${
           isDiscoveryMode
-            ? 'bg-blue-500/20 text-blue-300'
-            : 'bg-green-500/20 text-green-300'
+            ? 'ring-2 ring-blue-500/40'
+            : 'ring-2 ring-green-500/40'
+        }`}
+        style={{ maxWidth: '712px' }}
+      >
+        {/* Mode Indicator Icon Only */}
+        <div className={`flex items-center justify-center w-10 h-10 rounded-lg shrink-0 transition-colors ${
+          isDiscoveryMode
+            ? 'bg-blue-500/20 text-blue-400'
+            : 'bg-green-500/20 text-green-400'
         }`}>
           {isDiscoveryMode ? (
-            <>
-              <Search className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Discovery</span>
-            </>
+            <Search className="h-4 w-4" />
           ) : (
-            <>
-              <MessageCircle className="h-3.5 w-3.5" />
-              <span className="text-xs font-medium">Chat</span>
-            </>
+            <MessageCircle className="h-4 w-4" />
           )}
         </div>
 

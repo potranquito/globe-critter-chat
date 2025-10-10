@@ -416,60 +416,20 @@ const Index = () => {
         setCurrentSpecies(null); // Clear current species
         setWildlifePlaces(wildlifeParks); // Store wildlife parks for 2D map view
         setLocationName(query); // Store the search query
+        // DON'T clear regionInfo/regionSpecies - keep filters and carousel visible
 
-        // Create markers for globe
+        // Create markers for globe - ONLY the location pin
         const markers: any[] = [];
 
-        // Add habitat center marker
+        // Add ONLY the location pin - no other markers
         markers.push({
           lat: habitat.location.lat,
           lng: habitat.location.lng,
           name: habitat.name,
-          size: 1.5,
+          size: 1.2,
           emoji: '📍',
-          type: 'habitat-center',
-          color: '#10b981'
-        });
-
-        // Add wildlife park markers with images as thumbnails
-        wildlifeParks.forEach(park => {
-          if (park.imageUrl) {
-            markers.push({
-              lat: park.lat,
-              lng: park.lng,
-              name: park.name,
-              size: 1.2,
-              type: 'wildlife-park',
-              imageUrl: park.imageUrl,
-              info: {
-                name: park.name,
-                address: park.address,
-                rating: park.rating
-              }
-            });
-          } else {
-            // Fallback to emoji if no image found
-            markers.push({
-              lat: park.lat,
-              lng: park.lng,
-              name: park.name,
-              size: 1,
-              emoji: '🌳',
-              type: 'wildlife-park'
-            });
-          }
-        });
-
-        // Add threat markers
-        threats.forEach(threat => {
-          markers.push({
-            lat: threat.location.lat,
-            lng: threat.location.lng,
-            name: threat.title,
-            size: 1,
-            emoji: threat.emoji,
-            type: 'threat'
-          });
+          type: 'location-pin',
+          color: '#ef4444' // Red pin for searched location
         });
 
         setHabitats(markers);
@@ -669,6 +629,7 @@ const Index = () => {
           setCurrentHabitat(enrichedHabitat);
           setSpeciesInfo(null);
           setCurrentSpecies(null);
+          // DON'T clear regionInfo/regionSpecies - keep filters and carousel visible
           
           // Create markers for nearby habitats and protected areas
           const getHabitatEmoji = (climate: string) => {
