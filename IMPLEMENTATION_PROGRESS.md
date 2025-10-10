@@ -94,38 +94,35 @@
 
 ---
 
-#### 1.3 Build UserProfile Component ⬜ TODO
-**Status:** Not Started
-**Files to Create:**
-- `src/components/UserProfile.tsx`
-- `src/components/UserProfileDropdown.tsx`
+#### 1.3 Build UserProfile Component ✅ COMPLETED
+**Status:** ✅ Completed
+**Files Created:**
+- `src/components/UserProfile.tsx` ✓
 
-**Steps:**
-1. Create UserProfile button component (top-right)
-2. Show avatar, username, health points
-3. Create dropdown menu with:
-   - View Profile
-   - My Badges
-   - Leaderboard
-   - Sign Out
-4. Fetch user stats from Supabase
-5. Add loading states
-6. Style with glass-panel effect
-7. Test responsive design
+**Completed Steps:**
+1. ✓ Created UserProfile component (top-right corner)
+2. ✓ Display avatar with fallback (first letter of username)
+3. ✓ Show username and health points
+4. ✓ Created dropdown menu with:
+   - User stats header (avatar, email, health progress)
+   - Quick stats grid (lessons, badges)
+   - View Profile option
+   - My Badges option
+   - Progress option
+   - Sign Out option
+5. ✓ Added health progress bar showing progress to next milestone
+6. ✓ Implemented loading state
+7. ✓ Added sign-in button for unauthenticated users
+8. ✓ Styled with glass-panel effect
+9. ✓ Added to Index page
 
-**Dependencies:** 1.2 (Auth must work)
-**Estimated Time:** 3 hours
-
-**Component Location:**
-```
-Fixed position: top-right (top: 2rem, right: 2rem)
-Z-index: 100 (above everything except modals)
-```
-
-**Notes:**
-- Should not interfere with existing top-center controls
-- Use existing glass-panel styling for consistency
-- Show "Sign In" button when not authenticated
+**Features:**
+- Fixed position top-right (z-index: 100)
+- Glass-panel styling for consistency
+- Progress bar to next health milestone (every 100 points)
+- Avatar with Google profile picture support
+- Dropdown menu with comprehensive user info
+- Does not interfere with existing UI elements
 
 ---
 

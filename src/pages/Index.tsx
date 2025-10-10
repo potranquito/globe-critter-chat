@@ -3,6 +3,7 @@ import GlobeComponent from '@/components/Globe';
 import GoogleEarthMap from '@/components/GoogleEarthMap';
 import ChatInput, { ChatContext } from '@/components/ChatInput';
 import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
+import { UserProfile } from '@/components/UserProfile';
 import FastFactsCard from '@/components/FastFactsCard';
 import RegionSpeciesCard from '@/components/RegionSpeciesCard';
 import ExpandedImageView from '@/components/ExpandedImageView';
@@ -1079,6 +1080,9 @@ const Index = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
+      {/* User Profile (Top-Right) */}
+      <UserProfile />
+
       {/* Globe or Google Maps */}
       <div className="absolute inset-0">
         {useGoogleMaps ? (
