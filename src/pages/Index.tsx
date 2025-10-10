@@ -433,13 +433,34 @@ const Index = () => {
         });
 
         setHabitats(markers);
-        
+
         // Set target location for globe to zoom to
         setMapCenter({ lat: habitat.location.lat, lng: habitat.location.lng });
-        
+
+        // UNIFIED UX: Trigger region species analysis
+        // This will populate the filter banner and carousel!
+        if (keySpecies.length > 0) {
+          try {
+            // Create a simple region info for this location
+            const locationRegionInfo: RegionInfo = {
+              regionName: habitat.name,
+              centerLat: habitat.location.lat,
+              centerLng: habitat.location.lng,
+              description: `Species found in and around ${habitat.name}`
+            };
+
+            setRegionInfo(locationRegionInfo);
+            setRegionSpecies(keySpecies);
+
+            console.log(`Region analysis complete: ${keySpecies.length} species discovered in ${habitat.name}`);
+          } catch (regionError) {
+            console.error('Region species setup failed:', regionError);
+          }
+        }
+
         toast({
           title: `${habitat.name} Discovered`,
-          description: `${wildlifeParks.length} wildlife parks, ${threats.length} active threats`,
+          description: `${keySpecies.length} species found nearby`,
         });
         setIsLoading(false);
       } catch (err) {
