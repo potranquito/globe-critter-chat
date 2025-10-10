@@ -18,6 +18,7 @@ import WildlifeLocationCard from '@/components/WildlifeLocationCard';
 import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
 import { SpeciesFilterBanner } from '@/components/SpeciesFilterBanner';
 import { useToast } from '@/hooks/use-toast';
+import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { HabitatRegion } from '@/types/habitat';
@@ -137,6 +138,7 @@ const speciesData: any = {
 
 const Index = () => {
   const { toast } = useToast();
+  const locationDiscovery = useLocationDiscovery();
   const [habitats, setHabitats] = useState<any[]>([]);
   const [currentSpecies, setCurrentSpecies] = useState<string | null>(null);
   const [speciesInfo, setSpeciesInfo] = useState<any>(null);
@@ -970,21 +972,57 @@ const Index = () => {
 
   const handleFetchLocation = async () => {
     try {
+      // Step 1: Get user's location via IP geolocation
       const response = await fetch('https://ipapi.co/json/');
       const data = await response.json();
-      
+
       if (data.latitude && data.longitude) {
         const location = {
           lat: data.latitude,
           lng: data.longitude,
           name: data.city ? `${data.city}, ${data.country_name}` : data.country_name
         };
-        
+
+        // Add user location pin
         setUserPins([location]);
-        toast({
-          title: "Location Found",
-          description: `Showing ${location.name}`,
-        });
+
+        // Step 2: Discover nearby locations based on view mode
+        try {
+          if (useGoogleMaps) {
+            // 2D mode - discover specific locations (parks, refuges, hotspots)
+            await locationDiscovery.discoverNearbyLocations(
+              data.latitude,
+              data.longitude,
+              10 // 10km radius for detailed view
+            );
+          } else {
+            // 3D mode - discover habitat regions
+            await locationDiscovery.discoverNearbyHabitats(
+              data.latitude,
+              data.longitude,
+              50 // 50km radius for broad view
+            );
+          }
+
+          // Step 3: Add discovered markers to globe/map
+          const discoveredMarkers = locationDiscovery.getHabitatPoints();
+          setHabitats(prev => [...prev, ...discoveredMarkers]);
+
+          // Step 4: Pan to user's location
+          setMapCenter({ lat: data.latitude, lng: data.longitude });
+
+          toast({
+            title: "Location Found",
+            description: `Showing ${location.name} with ${discoveredMarkers.length} nearby locations`,
+          });
+        } catch (discoveryError) {
+          console.error('Error discovering locations:', discoveryError);
+          // Still show user location even if discovery fails
+          toast({
+            title: "Location Found",
+            description: `Showing ${location.name}`,
+          });
+        }
       }
     } catch (error) {
       console.error('Error fetching location:', error);
