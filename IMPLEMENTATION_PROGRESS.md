@@ -61,36 +61,36 @@
 
 ---
 
-#### 1.2 Set Up Google OAuth Authentication ⬜ TODO
-**Status:** Not Started
-**Files to Create/Modify:**
-- `src/lib/auth.ts` (auth helper functions)
-- `src/components/AuthProvider.tsx` (context provider)
-- `src/hooks/useAuth.ts` (custom auth hook)
+#### 1.2 Set Up Google OAuth Authentication ✅ COMPLETED
+**Status:** ✅ Completed
+**Files Created/Modified:**
+- `src/lib/auth.ts` ✓ (auth helper functions)
+- `src/components/AuthProvider.tsx` ✓ (context provider)
+- `src/hooks/useAuth.ts` ✓ (custom auth hook)
+- `src/pages/auth/callback.tsx` ✓ (OAuth callback handler)
+- `src/main.tsx` ✓ (wrapped app with AuthProvider)
+- `src/App.tsx` ✓ (added auth callback route)
 
-**Steps:**
-1. Enable Google OAuth in Supabase dashboard
-2. Get Google OAuth credentials (Client ID, Secret)
-3. Configure redirect URLs
-4. Create auth helper functions
-5. Create AuthProvider context
-6. Wrap app with AuthProvider
-7. Create useAuth hook for components
-8. Test sign in/sign out flow
+**Completed Steps:**
+1. ✓ Created auth helper functions (signIn, signOut, getUserProfile, upsertUserProfile)
+2. ✓ Created AuthProvider context with auth state management
+3. ✓ Wrapped app with AuthProvider in main.tsx
+4. ✓ Created useAuth hook for components
+5. ✓ Added OAuth callback route and handler
+6. ✓ Implemented automatic user profile creation on first sign-in
+7. ✓ Added toast notifications for auth events
 
-**Dependencies:** 1.1 (Database schema must exist)
-**Estimated Time:** 2 hours
+**Features Implemented:**
+- Google OAuth sign-in/sign-out
+- Automatic user profile creation with unique usernames
+- Session persistence across page reloads
+- Real-time auth state updates
+- Welcome/goodbye toast notifications
+- Last active timestamp tracking
 
-**Notes:**
-- Supabase handles OAuth flow automatically
-- Need to handle auth state persistence
-- Check if user exists in `users` table, create if not
-
-**Environment Variables Needed:**
-```env
-VITE_SUPABASE_URL=your-project-url
-VITE_SUPABASE_ANON_KEY=your-anon-key
-```
+**Next Steps:**
+- Configure Google OAuth in Supabase dashboard (manual step)
+- Test authentication flow once OAuth is configured
 
 ---
 
