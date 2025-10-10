@@ -1486,6 +1486,7 @@ const Index = () => {
           useGoogleMaps={useGoogleMaps}
           onToggleMap={handleToggleMapView}
           onFetchLocation={handleFetchLocation}
+          isDiscovering={locationDiscovery.isDiscovering}
           onLeaderboardClick={() => {
             toast({
               title: 'Leaderboard Coming Soon',

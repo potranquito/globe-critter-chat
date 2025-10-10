@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Send } from 'lucide-react';
+import { Send, Search, MessageCircle } from 'lucide-react';
 
 export interface ChatContext {
   type: 'species' | 'habitat' | 'wildlife-park' | 'threat' | 'ecosystem' | 'region-species' | 'default';
@@ -29,12 +29,15 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
     }
   };
 
+  // Determine if in discovery mode or chat mode
+  const isDiscoveryMode = !context || context.type === 'default';
+
   // Generate contextual placeholder based on what's showing on the right
   const getContextualPlaceholder = () => {
     if (placeholder) return placeholder; // Allow override
 
-    if (!context || context.type === 'default') {
-      return "Enter an animal species or location to begin";
+    if (isDiscoveryMode) {
+      return "Search for animals (e.g., polar bear) or locations (e.g., Yellowstone)...";
     }
 
     switch (context.type) {
@@ -58,6 +61,25 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
   return (
     <form onSubmit={handleSubmit} className="flex flex-none justify-center">
       <div className="glass-panel rounded-2xl p-2 flex gap-2 items-center w-full" style={{ maxWidth: '712px' }}>
+        {/* Mode Indicator Badge */}
+        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg shrink-0 ${
+          isDiscoveryMode
+            ? 'bg-blue-500/20 text-blue-300'
+            : 'bg-green-500/20 text-green-300'
+        }`}>
+          {isDiscoveryMode ? (
+            <>
+              <Search className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">Discovery</span>
+            </>
+          ) : (
+            <>
+              <MessageCircle className="h-3.5 w-3.5" />
+              <span className="text-xs font-medium">Chat</span>
+            </>
+          )}
+        </div>
+
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}

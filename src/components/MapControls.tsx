@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Map, Trophy } from "lucide-react";
+import { MapPin, Map, Trophy, Loader2 } from "lucide-react";
 import { GlobalHealthBar } from "@/components/GlobalHealthBar";
 
 interface MapControlsProps {
@@ -7,9 +7,10 @@ interface MapControlsProps {
   onToggleMap: () => void;
   onFetchLocation: () => void;
   onLeaderboardClick: () => void;
+  isDiscovering?: boolean;
 }
 
-const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onLeaderboardClick }: MapControlsProps) => {
+const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onLeaderboardClick, isDiscovering = false }: MapControlsProps) => {
   return (
     <div className="flex flex-row gap-2">
       <Button
@@ -17,9 +18,14 @@ const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onLeaderboar
         size="icon"
         variant="outline"
         className="glass-panel hover:bg-accent rounded-xl h-12 w-12"
-        title="Find My Location"
+        title={isDiscovering ? "Discovering locations..." : "Find My Location"}
+        disabled={isDiscovering}
       >
-        <MapPin className="h-5 w-5" />
+        {isDiscovering ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <MapPin className="h-5 w-5" />
+        )}
       </Button>
 
       <Button
