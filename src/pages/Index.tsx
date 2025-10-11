@@ -1348,9 +1348,9 @@ const Index = () => {
             );
           }
 
-          // Step 3: Add discovered markers to globe/map
+          // Step 3: Add discovered markers to globe/map (replace, don't append!)
           const discoveredMarkers = locationDiscovery.getHabitatPoints();
-          setHabitats(prev => [...prev, ...discoveredMarkers]);
+          setHabitats(discoveredMarkers); // ✅ FIXED: Replace instead of append to prevent accumulation
 
           // Step 4: Pan to user's location
           setMapCenter({ lat: data.latitude, lng: data.longitude });

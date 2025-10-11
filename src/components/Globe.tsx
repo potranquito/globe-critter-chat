@@ -67,10 +67,29 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const validHabitats = habitats.filter(h => 
     h && typeof h.lat === 'number' && typeof h.lng === 'number'
   );
-  const emojiMarkers = validHabitats.filter(h => h.emoji);
-  const imageMarkers = validHabitats.filter(h => h.imageUrl && h.type === 'species');
-  const habitatImageMarkers = validHabitats.filter(h => h.imageUrl && h.type === 'habitat');
-  const regularPoints = validHabitats.filter(h => !h.emoji && !h.imageUrl);
+  
+  // ✅ DEDUPLICATE: Remove duplicate pins at same coordinates (prevents random pins bug)
+  const deduplicatedHabitats = validHabitats.reduce((acc: HabitatPoint[], current) => {
+    // Check if this coordinate already exists (within 0.001 degrees tolerance)
+    const exists = acc.some(h => 
+      Math.abs(h.lat - current.lat) < 0.001 && 
+      Math.abs(h.lng - current.lng) < 0.001
+    );
+    if (!exists) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+  
+  // Log deduplication stats (helps debug random pins)
+  if (validHabitats.length !== deduplicatedHabitats.length) {
+    console.warn(`🔧 Removed ${validHabitats.length - deduplicatedHabitats.length} duplicate pins (${validHabitats.length} → ${deduplicatedHabitats.length})`);
+  }
+  
+  const emojiMarkers = deduplicatedHabitats.filter(h => h.emoji);
+  const imageMarkers = deduplicatedHabitats.filter(h => h.imageUrl && h.type === 'species');
+  const habitatImageMarkers = deduplicatedHabitats.filter(h => h.imageUrl && h.type === 'habitat');
+  const regularPoints = deduplicatedHabitats.filter(h => !h.emoji && !h.imageUrl);
 
   // Convert habitat zones to polygon data for Globe.gl
   // Filter out any invalid zones first
