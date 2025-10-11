@@ -193,6 +193,11 @@ const Index = () => {
     // Create new AbortController for this search
     const newController = new AbortController();
     setAbortController(newController);
+    
+    // ✅ CRITICAL: Clear ALL pin-related arrays to prevent old pins from previous searches
+    setUserPins([]);
+    setImageMarkers([]);
+    setConservationLayers([]);
 
     // Check if this is a follow-up question (deep dive mode)
     // Deep dive mode activates when a species or habitat is already selected
