@@ -76,14 +76,20 @@ export async function resolveSpeciesToEcoregions(
     // 2. Query LLM for ecoregion IDs
     console.log(`🤖 Asking LLM for ecoregion IDs for "${speciesName}"...`);
     
+    // ✅ DETECT MARINE SPECIES: Check species name FIRST before asking LLM
+    const marineKeywords = ['shark', 'whale', 'dolphin', 'seal', 'orca', 'tuna', 'marlin', 'ray', 'squid', 'octopus', 'jellyfish', 'coral', 'barracuda', 'sea turtle', 'sea lion'];
+    const isMarineSpecies = marineKeywords.some(keyword => speciesName.toLowerCase().includes(keyword));
+    
     const prompt = `You are an expert biogeographer. Given a species name, identify the WWF ecoregion IDs where this species naturally occurs.
 
 Species: ${speciesName}
 
+${isMarineSpecies ? '⚠️ THIS IS A MARINE SPECIES - habitat MUST be "marine"!' : ''}
+
 Return ONLY a JSON object (no markdown, no explanations):
 {
   "ecoregionIds": ["ID1", "ID2", "ID3"],
-  "habitat": "terrestrial" or "marine" or "freshwater" or "mixed",
+  "habitat": "${isMarineSpecies ? 'marine' : 'terrestrial or marine or freshwater or mixed'}",
   "confidence": "high" or "medium" or "low"
 }
 
@@ -93,10 +99,12 @@ Guidelines:
 - WWF ecoregion IDs are numeric (e.g., "61404", "20192")
 - Use your knowledge of biogeography to infer the correct ecoregion IDs
 - If uncertain, return fewer IDs with "low" confidence
+- MARINE SPECIES: sharks, whales, dolphins, seals = "marine" habitat ONLY!
 
 Examples:
 - Polar bears: terrestrial Arctic tundra ecoregions
 - Blue whales: marine ocean ecoregions  
+- Great white sharks: marine ocean ecoregions
 - Desert tortoises: terrestrial desert ecoregions`;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -126,7 +134,13 @@ Examples:
 
     // Parse LLM response
     const llmResponse = JSON.parse(content.trim());
-    const { ecoregionIds, habitat, confidence } = llmResponse;
+    let { ecoregionIds, habitat, confidence } = llmResponse;
+    
+    // ✅ FORCE CORRECTION: If marine keywords detected but LLM said terrestrial, override
+    if (isMarineSpecies && habitat !== 'marine') {
+      console.warn(`⚠️ LLM returned "${habitat}" for marine species "${speciesName}", forcing to "marine"`);
+      habitat = 'marine';
+    }
 
     if (!ecoregionIds || ecoregionIds.length === 0) {
       throw new Error('No ecoregion IDs returned from LLM');

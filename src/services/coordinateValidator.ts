@@ -10,42 +10,67 @@ export interface CoordinateValidation {
 }
 
 /**
+ * Check if coordinates are likely on LAND (not water)
+ * Returns TRUE for landmasses, FALSE for oceans
+ */
+export function isLikelyLand(lat: number, lng: number): boolean {
+  // Major landmasses - these are definitely LAND
+  
+  // Africa (huge landmass, easy to detect)
+  if (lat > -35 && lat < 40 && lng > -20 && lng < 55) {
+    return true; // Africa
+  }
+  
+  // Europe
+  if (lat > 35 && lat < 72 && lng > -10 && lng < 70) {
+    return true; // Europe
+  }
+  
+  // Asia
+  if (lat > -10 && lat < 75 && lng > 60 && lng < 180) {
+    return true; // Asia
+  }
+  
+  // North America
+  if (lat > 15 && lat < 85 && lng > -170 && lng < -50) {
+    return true; // North America
+  }
+  
+  // South America
+  if (lat > -60 && lat < 15 && lng > -85 && lng < -30) {
+    return true; // South America
+  }
+  
+  // Australia
+  if (lat > -45 && lat < -10 && lng > 110 && lng < 155) {
+    return true; // Australia
+  }
+  
+  // Greenland
+  if (lat > 59 && lat < 84 && lng > -75 && lng < -10) {
+    return true; // Greenland
+  }
+  
+  // Antarctica (land, not ocean)
+  if (lat < -60) {
+    return true; // Antarctica continent
+  }
+  
+  return false; // Assume water if not in major landmasses
+}
+
+/**
  * Simple heuristic to check if coordinates are likely in water
  * This is a rough approximation - not perfect but catches obvious issues
  */
 export function isLikelyWater(lat: number, lng: number): boolean {
-  // Check for obviously oceanic regions (large ocean areas with no land)
-  
-  // Pacific Ocean - vast areas with no land
-  if (lat > -60 && lat < 60 && lng > -180 && lng < -100 && lat > -30 && lat < 30) {
-    // Central Pacific (exception: islands)
-    if (Math.abs(lat) < 20 && lng > -160 && lng < -110) {
-      return true; // Open Pacific
-    }
+  // If it's on a known landmass, it's NOT water
+  if (isLikelyLand(lat, lng)) {
+    return false;
   }
   
-  // Mid-Atlantic (between Americas and Africa/Europe)
-  if (lat > -40 && lat < 60 && lng > -40 && lng < -10) {
-    // Central Atlantic
-    if (lat > 0 && lat < 50 && lng > -35 && lng < -15) {
-      return true; // Open Atlantic
-    }
-  }
-  
-  // Indian Ocean (between Africa and Australia)
-  if (lat > -60 && lat < 30 && lng > 40 && lng < 110) {
-    // Central Indian Ocean
-    if (lat > -30 && lat < 10 && lng > 50 && lng < 90) {
-      return true; // Open Indian Ocean
-    }
-  }
-  
-  // Southern Ocean (Antarctica surrounding)
-  if (lat < -65) {
-    return true; // Mostly water/ice
-  }
-  
-  return false;
+  // Otherwise, assume it's water (oceans, seas, etc.)
+  return true;
 }
 
 /**
@@ -90,7 +115,18 @@ export function validateCoordinates(
       return {
         isValid: false,
         reason: `Terrestrial habitat in water (${lat.toFixed(2)}, ${lng.toFixed(2)})`,
-        confidence: 'medium'
+        confidence: 'high'
+      };
+    }
+  }
+  
+  // ✅ NEW: For marine animals, check if coordinates are on LAND (inverse check!)
+  if (habitatType === 'marine') {
+    if (isLikelyLand(lat, lng)) {
+      return {
+        isValid: false,
+        reason: `Marine habitat on land (${lat.toFixed(2)}, ${lng.toFixed(2)}) - ${ecoregionName || 'unknown'}`,
+        confidence: 'high'
       };
     }
   }
@@ -106,7 +142,6 @@ export function validateCoordinates(
     }
   }
   
-  // Marine animals CAN be in water (that's correct)
   // Mixed habitat animals can be anywhere
   
   return {
