@@ -2,8 +2,8 @@
 -- Created: 2025-10-10
 -- Description: Core tables for user authentication, locations, species, lessons, and gamification
 
--- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+-- Note: gen_random_uuid() is available by default in Postgres 13+
+-- No UUID extension needed
 
 -- ============================================================================
 -- USERS & AUTHENTICATION
@@ -46,7 +46,7 @@ CREATE POLICY "Public profiles are viewable by everyone"
 
 -- Regions (mid-level: Las Vegas, Death Valley, etc.)
 CREATE TABLE public.regions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   center_lat FLOAT NOT NULL CHECK (center_lat >= -90 AND center_lat <= 90),
   center_lng FLOAT NOT NULL CHECK (center_lng >= -180 AND center_lng <= 180),
@@ -80,7 +80,7 @@ CREATE POLICY "Regions are viewable by everyone"
 
 -- Locations (specific parks, refuges, preserves)
 CREATE TABLE public.locations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   region_id UUID REFERENCES public.regions(id) ON DELETE CASCADE,
 
   -- Basic info
@@ -131,7 +131,7 @@ CREATE POLICY "Locations are viewable by everyone"
 
 -- Species master list
 CREATE TABLE public.species (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   common_name TEXT,
   scientific_name TEXT UNIQUE NOT NULL,
   species_type TEXT, -- "bird", "mammal", "plant", "insect", etc.
@@ -166,7 +166,7 @@ CREATE POLICY "Species are viewable by everyone"
 
 -- Location-Species relationship (what lives where)
 CREATE TABLE public.location_species (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   location_id UUID REFERENCES public.locations(id) ON DELETE CASCADE,
   species_id UUID REFERENCES public.species(id) ON DELETE CASCADE,
   observation_count INTEGER DEFAULT 1 CHECK (observation_count > 0),
@@ -195,7 +195,7 @@ CREATE POLICY "Location species are viewable by everyone"
 
 -- Threats (wildfires, earthquakes, deforestation, etc.)
 CREATE TABLE public.threats (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   location_id UUID REFERENCES public.locations(id) ON DELETE CASCADE,
   threat_type TEXT NOT NULL, -- "wildfire", "earthquake", "deforestation", "drought", "pollution", "habitat_loss"
   severity TEXT NOT NULL DEFAULT 'medium' CHECK (severity IN ('low', 'medium', 'high', 'critical')),
@@ -228,7 +228,7 @@ CREATE POLICY "Threats are viewable by everyone"
 
 -- Generated lessons (cached for 7 days)
 CREATE TABLE public.lessons (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   location_id UUID REFERENCES public.locations(id) ON DELETE CASCADE,
 
   -- Content
@@ -272,7 +272,7 @@ CREATE POLICY "Lessons are viewable by everyone"
 
 -- User lesson completions
 CREATE TABLE public.user_completions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   lesson_id UUID REFERENCES public.lessons(id) ON DELETE CASCADE,
   location_id UUID REFERENCES public.locations(id) ON DELETE CASCADE,
@@ -312,7 +312,7 @@ CREATE POLICY "Completion stats are viewable by everyone"
 
 -- User badges (species badges & achievements)
 CREATE TABLE public.user_badges (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
   badge_type TEXT NOT NULL CHECK (badge_type IN ('species', 'achievement', 'milestone')),
 
@@ -389,7 +389,7 @@ CREATE POLICY "Global health is viewable by everyone"
 
 -- API response cache (reduce duplicate API calls)
 CREATE TABLE public.api_cache (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   cache_key TEXT UNIQUE NOT NULL,
   cache_value JSONB NOT NULL,
   expires_at TIMESTAMP WITH TIME ZONE NOT NULL,

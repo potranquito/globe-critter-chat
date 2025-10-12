@@ -45,37 +45,11 @@ ON CONFLICT (id) DO NOTHING;
 -- - health_hero_1000: Contribute 1000 health points
 
 -- ============================================================================
--- EXAMPLE SPECIES (Common wildlife - more added through API calls)
+-- SPECIES DATA
 -- ============================================================================
 
--- Example: Iconic endangered species
-INSERT INTO public.species (scientific_name, common_name, species_type, conservation_status, badge_icon, badge_rarity, description)
-VALUES
-  -- Mammals
-  ('Ursus maritimus', 'Polar Bear', 'mammal', 'VU', '🐻‍❄️', 'epic', 'The polar bear is a hypercarnivorous bear whose native range lies largely within the Arctic Circle.'),
-  ('Panthera tigris', 'Tiger', 'mammal', 'EN', '🐯', 'legendary', 'The tiger is the largest living cat species and a member of the genus Panthera.'),
-  ('Loxodonta africana', 'African Elephant', 'mammal', 'EN', '🐘', 'legendary', 'The African elephant is the largest living terrestrial animal.'),
-  ('Pongo abelii', 'Sumatran Orangutan', 'mammal', 'CR', '🦧', 'legendary', 'The Sumatran orangutan is one of the three species of orangutans, critically endangered.'),
-  ('Gorilla beringei', 'Eastern Gorilla', 'mammal', 'CR', '🦍', 'legendary', 'The eastern gorilla is a critically endangered species of the genus Gorilla.'),
-
-  -- Birds
-  ('Haliaeetus leucocephalus', 'Bald Eagle', 'bird', 'LC', '🦅', 'rare', 'The bald eagle is a bird of prey found in North America, once endangered but now recovered.'),
-  ('Aptenodytes forsteri', 'Emperor Penguin', 'bird', 'NT', '🐧', 'epic', 'The emperor penguin is the tallest and heaviest of all living penguin species.'),
-  ('Strix occidentalis', 'Spotted Owl', 'bird', 'NT', '🦉', 'rare', 'The spotted owl is a species of owl found in old-growth forests of western North America.'),
-  ('Gymnogyps californianus', 'California Condor', 'bird', 'CR', '🦅', 'legendary', 'The California condor is a New World vulture, the largest North American land bird.'),
-
-  -- Reptiles & Amphibians
-  ('Gopherus agassizii', 'Desert Tortoise', 'reptile', 'VU', '🐢', 'epic', 'The desert tortoise is a species of tortoise native to the Mojave and Sonoran Deserts.'),
-  ('Alligator mississippiensis', 'American Alligator', 'reptile', 'LC', '🐊', 'uncommon', 'The American alligator is a large crocodilian reptile found in the southeastern United States.'),
-
-  -- Marine Life
-  ('Balaenoptera musculus', 'Blue Whale', 'mammal', 'EN', '🐋', 'legendary', 'The blue whale is a marine mammal and the largest animal known to have ever existed.'),
-  ('Chelonia mydas', 'Green Sea Turtle', 'reptile', 'EN', '🐢', 'epic', 'The green sea turtle is a large sea turtle of the family Cheloniidae.'),
-
-  -- Plants (examples)
-  ('Sequoiadendron giganteum', 'Giant Sequoia', 'plant', 'EN', '🌲', 'rare', 'The giant sequoia is the world''s largest tree by volume, native to California.'),
-  ('Yucca brevifolia', 'Joshua Tree', 'plant', 'VU', '🌵', 'uncommon', 'The Joshua tree is a plant species native to the Mojave Desert.')
-ON CONFLICT (scientific_name) DO NOTHING;
+-- Note: Species data will be imported from IUCN Red List shapefiles
+-- via the processIUCNShapefiles.ts script (50,000+ species with geographic ranges)
 
 -- ============================================================================
 -- EXAMPLE REGIONS & LOCATIONS (Will be dynamically created via API)
@@ -162,7 +136,7 @@ FROM public.regions r
 LEFT JOIN public.locations l ON r.id = l.region_id
 LEFT JOIN public.user_completions uc ON l.id = uc.location_id
 GROUP BY r.id, r.name, r.center_lat, r.center_lng, r.total_locations, r.completed_locations, r.completion_percentage
-ORDER BY r.completion_percentage DESC, r.total_completions DESC;
+ORDER BY r.completion_percentage DESC, COUNT(DISTINCT uc.id) DESC;
 
 -- View: Popular species
 CREATE OR REPLACE VIEW public.popular_species AS
