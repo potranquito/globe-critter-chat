@@ -191,10 +191,10 @@ def process_shapefile_features(shp_path: Path) -> List[Dict]:
                         'is_freshwater': props.get('freshwater') in ('true', '1', True),
 
                         # Subspecies and population variants
-                        'subspecies': props.get('subspecies') if props.get('subspecies') not in ('None', '0', 0) else None,
-                        'subpopulation': props.get('subpop') if props.get('subpop') not in ('None', '0', 0) else None,
-                        'presence': props.get('presence'),
-                        'seasonal': props.get('seasonal'),
+                        'subspecies': props.get('subspecies') if props.get('subspecies') not in ('None', '0', 0, None) else '',
+                        'subpopulation': props.get('subpop') if props.get('subpop') not in ('None', '0', 0, None) else '',
+                        'presence': props.get('presence') if props.get('presence') not in (None, '') else 0,
+                        'seasonal': props.get('seasonal') if props.get('seasonal') not in (None, '') else 0,
                         'source': props.get('source'),
                         'distribution_comments': props.get('dist_comm'),
 
@@ -231,7 +231,13 @@ def process_shapefile_features(shp_path: Path) -> List[Dict]:
 
 def insert_species(supabase: Client, records: List[Dict]) -> Tuple[int, int]:
     """Insert species records into Supabase in batches"""
-    print(f"  ↳ Inserting {len(records)} species records (including variants) into database...")
+
+    # NOTE: We do NOT deduplicate records with the same variant key anymore!
+    # Each record represents a different geographic polygon, and we want to capture
+    # sample points from ALL polygons to get better geographic coverage for
+    # accurate species-to-park matching in the game.
+
+    print(f"  ↳ Inserting {len(records)} species records (all geographic regions) into database...")
 
     inserted_count = 0
     error_count = 0
@@ -240,11 +246,11 @@ def insert_species(supabase: Client, records: List[Dict]) -> Tuple[int, int]:
         batch = records[i:i + BATCH_SIZE]
 
         try:
-            # Use upsert with the composite key (iucn_id, subspecies, subpopulation, presence, seasonal)
-            # This allows multiple variants of the same species
-            response = supabase.table('species').upsert(
-                batch,
-                ignore_duplicates=False
+            # Insert all records - each polygon gets its own database entry
+            # We'll use the UUID 'id' as primary key, allowing multiple entries
+            # with the same (iucn_id, subspecies, subpopulation, presence, seasonal)
+            response = supabase.table('species').insert(
+                batch
             ).execute()
 
             inserted_count += len(batch)
