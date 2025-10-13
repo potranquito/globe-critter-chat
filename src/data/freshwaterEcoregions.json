@@ -1,0 +1,4052 @@
+{
+  "F0000": {
+    "id": "F0000",
+    "name": "Alaskan Coastal",
+    "type": "freshwater",
+    "centerLat": 57.16,
+    "centerLng": -136.59,
+    "radiusKm": 56,
+    "polygonCount": 362
+  },
+  "F0001": {
+    "id": "F0001",
+    "name": "Amatolo - Winterberg Highlands",
+    "type": "freshwater",
+    "centerLat": -32.69,
+    "centerLng": 26.79,
+    "radiusKm": 75,
+    "polygonCount": 2
+  },
+  "F0002": {
+    "id": "F0002",
+    "name": "Amazonas Guiana Shield",
+    "type": "freshwater",
+    "centerLat": 1.41,
+    "centerLng": -58.69,
+    "radiusKm": 466,
+    "polygonCount": 2
+  },
+  "F0003": {
+    "id": "F0003",
+    "name": "Amazonas High Andes",
+    "type": "freshwater",
+    "centerLat": -10.05,
+    "centerLng": -73.69,
+    "radiusKm": 878,
+    "polygonCount": 2
+  },
+  "F0004": {
+    "id": "F0004",
+    "name": "Andaman Islands",
+    "type": "freshwater",
+    "centerLat": 12.33,
+    "centerLng": 92.88,
+    "radiusKm": 50,
+    "polygonCount": 108
+  },
+  "F0005": {
+    "id": "F0005",
+    "name": "Appalachian Piedmont",
+    "type": "freshwater",
+    "centerLat": 34.66,
+    "centerLng": -77.29,
+    "radiusKm": 67,
+    "polygonCount": 40
+  },
+  "F0006": {
+    "id": "F0006",
+    "name": "Ashanti",
+    "type": "freshwater",
+    "centerLat": 5.67,
+    "centerLng": -2.01,
+    "radiusKm": 156,
+    "polygonCount": 2
+  },
+  "F0007": {
+    "id": "F0007",
+    "name": "Atacama",
+    "type": "freshwater",
+    "centerLat": -21.44,
+    "centerLng": -69.81,
+    "radiusKm": 260,
+    "polygonCount": 2
+  },
+  "F0008": {
+    "id": "F0008",
+    "name": "Balkash - Alakul",
+    "type": "freshwater",
+    "centerLat": 45.64,
+    "centerLng": 78.93,
+    "radiusKm": 455,
+    "polygonCount": 2
+  },
+  "F0009": {
+    "id": "F0009",
+    "name": "Cantabric Coast - Languedoc",
+    "type": "freshwater",
+    "centerLat": 43.07,
+    "centerLng": -1.61,
+    "radiusKm": 97,
+    "polygonCount": 24
+  },
+  "F0010": {
+    "id": "F0010",
+    "name": "Caspian Marine",
+    "type": "freshwater",
+    "centerLat": 42.54,
+    "centerLng": 50.91,
+    "radiusKm": 190,
+    "polygonCount": 4
+  },
+  "F0011": {
+    "id": "F0011",
+    "name": "Central Anatolia",
+    "type": "freshwater",
+    "centerLat": 38.07,
+    "centerLng": 32.39,
+    "radiusKm": 215,
+    "polygonCount": 2
+  },
+  "F0012": {
+    "id": "F0012",
+    "name": "Central Arctic Coastal",
+    "type": "freshwater",
+    "centerLat": 68.08,
+    "centerLng": -107.13,
+    "radiusKm": 60,
+    "polygonCount": 186
+  },
+  "F0013": {
+    "id": "F0013",
+    "name": "Central Caroline Islands",
+    "type": "freshwater",
+    "centerLat": 7.32,
+    "centerLng": 149.99,
+    "radiusKm": 50,
+    "polygonCount": 56
+  },
+  "F0014": {
+    "id": "F0014",
+    "name": "Central Prairie",
+    "type": "freshwater",
+    "centerLat": 37.48,
+    "centerLng": -94.05,
+    "radiusKm": 253,
+    "polygonCount": 2
+  },
+  "F0015": {
+    "id": "F0015",
+    "name": "Chagos",
+    "type": "freshwater",
+    "centerLat": -5.91,
+    "centerLng": 71.81,
+    "radiusKm": 50,
+    "polygonCount": 54
+  },
+  "F0016": {
+    "id": "F0016",
+    "name": "Chagres",
+    "type": "freshwater",
+    "centerLat": 9.39,
+    "centerLng": -78.79,
+    "radiusKm": 57,
+    "polygonCount": 26
+  },
+  "F0017": {
+    "id": "F0017",
+    "name": "Christmas Island",
+    "type": "freshwater",
+    "centerLat": -10.49,
+    "centerLng": 105.64,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0018": {
+    "id": "F0018",
+    "name": "Chuya",
+    "type": "freshwater",
+    "centerLat": 50.05,
+    "centerLng": 88.33,
+    "radiusKm": 122,
+    "polygonCount": 2
+  },
+  "F0019": {
+    "id": "F0019",
+    "name": "Coastal Amur",
+    "type": "freshwater",
+    "centerLat": 54.32,
+    "centerLng": 138.34,
+    "radiusKm": 80,
+    "polygonCount": 28
+  },
+  "F0020": {
+    "id": "F0020",
+    "name": "Coastal Fujian - Zeijang",
+    "type": "freshwater",
+    "centerLat": 27.95,
+    "centerLng": 120.9,
+    "radiusKm": 52,
+    "polygonCount": 232
+  },
+  "F0021": {
+    "id": "F0021",
+    "name": "Coatzacoalcos",
+    "type": "freshwater",
+    "centerLat": 17.26,
+    "centerLng": -94.74,
+    "radiusKm": 82,
+    "polygonCount": 2
+  },
+  "F0022": {
+    "id": "F0022",
+    "name": "Colorado",
+    "type": "freshwater",
+    "centerLat": 33.56,
+    "centerLng": -113.44,
+    "radiusKm": 172,
+    "polygonCount": 6
+  },
+  "F0023": {
+    "id": "F0023",
+    "name": "Columbia Glaciated",
+    "type": "freshwater",
+    "centerLat": 49.62,
+    "centerLng": -117.62,
+    "radiusKm": 342,
+    "polygonCount": 2
+  },
+  "F0024": {
+    "id": "F0024",
+    "name": "Cook Islands",
+    "type": "freshwater",
+    "centerLat": -19.84,
+    "centerLng": -158.99,
+    "radiusKm": 50,
+    "polygonCount": 20
+  },
+  "F0025": {
+    "id": "F0025",
+    "name": "Cuanza",
+    "type": "freshwater",
+    "centerLat": -10.0,
+    "centerLng": 13.69,
+    "radiusKm": 187,
+    "polygonCount": 4
+  },
+  "F0026": {
+    "id": "F0026",
+    "name": "Cuba - Cayman Islands",
+    "type": "freshwater",
+    "centerLat": 22.04,
+    "centerLng": -80.11,
+    "radiusKm": 53,
+    "polygonCount": 188
+  },
+  "F0027": {
+    "id": "F0027",
+    "name": "Dniester - Lower Danube",
+    "type": "freshwater",
+    "centerLat": 45.24,
+    "centerLng": 24.43,
+    "radiusKm": 680,
+    "polygonCount": 2
+  },
+  "F0028": {
+    "id": "F0028",
+    "name": "East Caroline Islands",
+    "type": "freshwater",
+    "centerLat": 6.62,
+    "centerLng": 157.85,
+    "radiusKm": 50,
+    "polygonCount": 20
+  },
+  "F0029": {
+    "id": "F0029",
+    "name": "Eastern Gulf of Thailand Drainages",
+    "type": "freshwater",
+    "centerLat": 10.74,
+    "centerLng": 103.27,
+    "radiusKm": 52,
+    "polygonCount": 82
+  },
+  "F0030": {
+    "id": "F0030",
+    "name": "Eastern Hudson Bay - Ungava",
+    "type": "freshwater",
+    "centerLat": 56.38,
+    "centerLng": -66.66,
+    "radiusKm": 52,
+    "polygonCount": 664
+  },
+  "F0031": {
+    "id": "F0031",
+    "name": "Eastern Taiwan",
+    "type": "freshwater",
+    "centerLat": 22.76,
+    "centerLng": 121.45,
+    "radiusKm": 70,
+    "polygonCount": 6
+  },
+  "F0032": {
+    "id": "F0032",
+    "name": "Eastern Yellow Sea Drainages",
+    "type": "freshwater",
+    "centerLat": 37.64,
+    "centerLng": 125.85,
+    "radiusKm": 53,
+    "polygonCount": 122
+  },
+  "F0033": {
+    "id": "F0033",
+    "name": "Estero Real - Tempisque",
+    "type": "freshwater",
+    "centerLat": 10.37,
+    "centerLng": -85.39,
+    "radiusKm": 57,
+    "polygonCount": 32
+  },
+  "F0034": {
+    "id": "F0034",
+    "name": "Galapagos Islands",
+    "type": "freshwater",
+    "centerLat": -0.31,
+    "centerLng": -90.67,
+    "radiusKm": 50,
+    "polygonCount": 50
+  },
+  "F0035": {
+    "id": "F0035",
+    "name": "Gambier Islands",
+    "type": "freshwater",
+    "centerLat": -23.15,
+    "centerLng": -134.98,
+    "radiusKm": 50,
+    "polygonCount": 6
+  },
+  "F0036": {
+    "id": "F0036",
+    "name": "Guzman - Samalayuca",
+    "type": "freshwater",
+    "centerLat": 30.7,
+    "centerLng": -107.25,
+    "radiusKm": 194,
+    "polygonCount": 2
+  },
+  "F0037": {
+    "id": "F0037",
+    "name": "Helmand - Sistan",
+    "type": "freshwater",
+    "centerLat": 32.2,
+    "centerLng": 64.63,
+    "radiusKm": 337,
+    "polygonCount": 2
+  },
+  "F0038": {
+    "id": "F0038",
+    "name": "Honshu - Shikoku - Kyushu",
+    "type": "freshwater",
+    "centerLat": 31.89,
+    "centerLng": 131.56,
+    "radiusKm": 52,
+    "polygonCount": 376
+  },
+  "F0039": {
+    "id": "F0039",
+    "name": "Horn of Africa",
+    "type": "freshwater",
+    "centerLat": 11.33,
+    "centerLng": 43.97,
+    "radiusKm": 88,
+    "polygonCount": 16
+  },
+  "F0040": {
+    "id": "F0040",
+    "name": "Iceland - Jan Mayen",
+    "type": "freshwater",
+    "centerLat": 65.02,
+    "centerLng": -18.75,
+    "radiusKm": 60,
+    "polygonCount": 66
+  },
+  "F0041": {
+    "id": "F0041",
+    "name": "Inner Mongolia Endorheic Basins",
+    "type": "freshwater",
+    "centerLat": 43.29,
+    "centerLng": 108.62,
+    "radiusKm": 782,
+    "polygonCount": 2
+  },
+  "F0042": {
+    "id": "F0042",
+    "name": "Ionian Drainages",
+    "type": "freshwater",
+    "centerLat": 38.18,
+    "centerLng": 21.04,
+    "radiusKm": 53,
+    "polygonCount": 52
+  },
+  "F0043": {
+    "id": "F0043",
+    "name": "Karstveld Sink Holes",
+    "type": "freshwater",
+    "centerLat": -19.48,
+    "centerLng": 16.35,
+    "radiusKm": 149,
+    "polygonCount": 2
+  },
+  "F0044": {
+    "id": "F0044",
+    "name": "Kimberley",
+    "type": "freshwater",
+    "centerLat": -14.83,
+    "centerLng": 125.15,
+    "radiusKm": 62,
+    "polygonCount": 36
+  },
+  "F0045": {
+    "id": "F0045",
+    "name": "Kolyma",
+    "type": "freshwater",
+    "centerLat": 70.32,
+    "centerLng": 159.02,
+    "radiusKm": 84,
+    "polygonCount": 58
+  },
+  "F0046": {
+    "id": "F0046",
+    "name": "Lahontan",
+    "type": "freshwater",
+    "centerLat": 39.86,
+    "centerLng": -117.91,
+    "radiusKm": 283,
+    "polygonCount": 2
+  },
+  "F0047": {
+    "id": "F0047",
+    "name": "Lake Lanao",
+    "type": "freshwater",
+    "centerLat": 7.89,
+    "centerLng": 124.21,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0048": {
+    "id": "F0048",
+    "name": "Lake Malawi",
+    "type": "freshwater",
+    "centerLat": -12.34,
+    "centerLng": 34.2,
+    "radiusKm": 216,
+    "polygonCount": 2
+  },
+  "F0049": {
+    "id": "F0049",
+    "name": "Lake Tana",
+    "type": "freshwater",
+    "centerLat": 11.83,
+    "centerLng": 37.42,
+    "radiusKm": 79,
+    "polygonCount": 2
+  },
+  "F0050": {
+    "id": "F0050",
+    "name": "Laurentian Great Lakes",
+    "type": "freshwater",
+    "centerLat": 46.25,
+    "centerLng": -84.23,
+    "radiusKm": 597,
+    "polygonCount": 2
+  },
+  "F0051": {
+    "id": "F0051",
+    "name": "Lower & Middle Indus",
+    "type": "freshwater",
+    "centerLat": 23.25,
+    "centerLng": 69.11,
+    "radiusKm": 84,
+    "polygonCount": 32
+  },
+  "F0052": {
+    "id": "F0052",
+    "name": "Lower & Middle Salween",
+    "type": "freshwater",
+    "centerLat": 11.4,
+    "centerLng": 98.19,
+    "radiusKm": 53,
+    "polygonCount": 268
+  },
+  "F0053": {
+    "id": "F0053",
+    "name": "Lower Congo Rapids",
+    "type": "freshwater",
+    "centerLat": -4.89,
+    "centerLng": 14.13,
+    "radiusKm": 104,
+    "polygonCount": 2
+  },
+  "F0054": {
+    "id": "F0054",
+    "name": "Lower Mississippi",
+    "type": "freshwater",
+    "centerLat": 29.67,
+    "centerLng": -89.71,
+    "radiusKm": 59,
+    "polygonCount": 76
+  },
+  "F0055": {
+    "id": "F0055",
+    "name": "Lower Uruguay",
+    "type": "freshwater",
+    "centerLat": -30.73,
+    "centerLng": -56.11,
+    "radiusKm": 272,
+    "polygonCount": 2
+  },
+  "F0056": {
+    "id": "F0056",
+    "name": "Madagascar Eastern Lowlands",
+    "type": "freshwater",
+    "centerLat": -15.66,
+    "centerLng": 49.68,
+    "radiusKm": 113,
+    "polygonCount": 12
+  },
+  "F0057": {
+    "id": "F0057",
+    "name": "Madeira Archipelago",
+    "type": "freshwater",
+    "centerLat": 32.74,
+    "centerLng": -16.56,
+    "radiusKm": 50,
+    "polygonCount": 14
+  },
+  "F0058": {
+    "id": "F0058",
+    "name": "Madeira Brazilian Shield",
+    "type": "freshwater",
+    "centerLat": -9.79,
+    "centerLng": -61.4,
+    "radiusKm": 460,
+    "polygonCount": 2
+  },
+  "F0059": {
+    "id": "F0059",
+    "name": "Malukku",
+    "type": "freshwater",
+    "centerLat": -3.56,
+    "centerLng": 129.17,
+    "radiusKm": 51,
+    "polygonCount": 278
+  },
+  "F0060": {
+    "id": "F0060",
+    "name": "Maracaibo",
+    "type": "freshwater",
+    "centerLat": 9.37,
+    "centerLng": -71.87,
+    "radiusKm": 167,
+    "polygonCount": 2
+  },
+  "F0061": {
+    "id": "F0061",
+    "name": "Marshall Islands",
+    "type": "freshwater",
+    "centerLat": 8.47,
+    "centerLng": 170.94,
+    "radiusKm": 50,
+    "polygonCount": 28
+  },
+  "F0062": {
+    "id": "F0062",
+    "name": "Mayran - Viesca",
+    "type": "freshwater",
+    "centerLat": 25.59,
+    "centerLng": -103.16,
+    "radiusKm": 254,
+    "polygonCount": 2
+  },
+  "F0063": {
+    "id": "F0063",
+    "name": "Middle Amu Darya",
+    "type": "freshwater",
+    "centerLat": 39.27,
+    "centerLng": 62.56,
+    "radiusKm": 424,
+    "polygonCount": 2
+  },
+  "F0064": {
+    "id": "F0064",
+    "name": "Middle Brahmaputra",
+    "type": "freshwater",
+    "centerLat": 27.57,
+    "centerLng": 93.27,
+    "radiusKm": 313,
+    "polygonCount": 2
+  },
+  "F0065": {
+    "id": "F0065",
+    "name": "Middle Saskatchewan",
+    "type": "freshwater",
+    "centerLat": 53.03,
+    "centerLng": -107.23,
+    "radiusKm": 380,
+    "polygonCount": 2
+  },
+  "F0066": {
+    "id": "F0066",
+    "name": "Murray - Darling",
+    "type": "freshwater",
+    "centerLat": -34.42,
+    "centerLng": 139.36,
+    "radiusKm": 285,
+    "polygonCount": 6
+  },
+  "F0067": {
+    "id": "F0067",
+    "name": "Namak",
+    "type": "freshwater",
+    "centerLat": 34.92,
+    "centerLng": 50.74,
+    "radiusKm": 179,
+    "polygonCount": 2
+  },
+  "F0068": {
+    "id": "F0068",
+    "name": "New Guinea Central Mountains",
+    "type": "freshwater",
+    "centerLat": -5.24,
+    "centerLng": 141.66,
+    "radiusKm": 433,
+    "polygonCount": 2
+  },
+  "F0069": {
+    "id": "F0069",
+    "name": "New Zealand",
+    "type": "freshwater",
+    "centerLat": -41.96,
+    "centerLng": 166.09,
+    "radiusKm": 57,
+    "polygonCount": 126
+  },
+  "F0070": {
+    "id": "F0070",
+    "name": "Niger Delta",
+    "type": "freshwater",
+    "centerLat": 4.57,
+    "centerLng": 7.29,
+    "radiusKm": 61,
+    "polygonCount": 14
+  },
+  "F0071": {
+    "id": "F0071",
+    "name": "Northeastern Borneo",
+    "type": "freshwater",
+    "centerLat": 5.73,
+    "centerLng": 117.59,
+    "radiusKm": 51,
+    "polygonCount": 170
+  },
+  "F0072": {
+    "id": "F0072",
+    "name": "Northern Baltic Drainages",
+    "type": "freshwater",
+    "centerLat": 60.22,
+    "centerLng": 19.24,
+    "radiusKm": 52,
+    "polygonCount": 756
+  },
+  "F0073": {
+    "id": "F0073",
+    "name": "Northern Deccan Plateau",
+    "type": "freshwater",
+    "centerLat": 19.26,
+    "centerLng": 84.84,
+    "radiusKm": 89,
+    "polygonCount": 26
+  },
+  "F0074": {
+    "id": "F0074",
+    "name": "Oman Mountains",
+    "type": "freshwater",
+    "centerLat": 24.65,
+    "centerLng": 54.91,
+    "radiusKm": 53,
+    "polygonCount": 110
+  },
+  "F0075": {
+    "id": "F0075",
+    "name": "Oregon & Northern California Coastal",
+    "type": "freshwater",
+    "centerLat": 40.14,
+    "centerLng": -122.85,
+    "radiusKm": 95,
+    "polygonCount": 10
+  },
+  "F0076": {
+    "id": "F0076",
+    "name": "Orinoco Llanos",
+    "type": "freshwater",
+    "centerLat": 6.3,
+    "centerLng": -68.32,
+    "radiusKm": 385,
+    "polygonCount": 2
+  },
+  "F0077": {
+    "id": "F0077",
+    "name": "Orontes",
+    "type": "freshwater",
+    "centerLat": 35.48,
+    "centerLng": 36.67,
+    "radiusKm": 133,
+    "polygonCount": 2
+  },
+  "F0078": {
+    "id": "F0078",
+    "name": "Orumiyeh",
+    "type": "freshwater",
+    "centerLat": 37.34,
+    "centerLng": 46.05,
+    "radiusKm": 133,
+    "polygonCount": 2
+  },
+  "F0079": {
+    "id": "F0079",
+    "name": "Panuco",
+    "type": "freshwater",
+    "centerLat": 21.99,
+    "centerLng": -97.72,
+    "radiusKm": 70,
+    "polygonCount": 14
+  },
+  "F0080": {
+    "id": "F0080",
+    "name": "Paraguay",
+    "type": "freshwater",
+    "centerLat": -19.77,
+    "centerLng": -56.64,
+    "radiusKm": 415,
+    "polygonCount": 2
+  },
+  "F0081": {
+    "id": "F0081",
+    "name": "Paraiba do Sul",
+    "type": "freshwater",
+    "centerLat": -22.1,
+    "centerLng": -43.23,
+    "radiusKm": 221,
+    "polygonCount": 2
+  },
+  "F0082": {
+    "id": "F0082",
+    "name": "Parnaiba",
+    "type": "freshwater",
+    "centerLat": -2.68,
+    "centerLng": -43.1,
+    "radiusKm": 60,
+    "polygonCount": 66
+  },
+  "F0083": {
+    "id": "F0083",
+    "name": "Patagonia",
+    "type": "freshwater",
+    "centerLat": -50.14,
+    "centerLng": -72.49,
+    "radiusKm": 53,
+    "polygonCount": 670
+  },
+  "F0084": {
+    "id": "F0084",
+    "name": "Pecos",
+    "type": "freshwater",
+    "centerLat": 32.66,
+    "centerLng": -103.98,
+    "radiusKm": 252,
+    "polygonCount": 2
+  },
+  "F0085": {
+    "id": "F0085",
+    "name": "Puerto Rico - Virgin Islands",
+    "type": "freshwater",
+    "centerLat": 18.34,
+    "centerLng": -65.19,
+    "radiusKm": 50,
+    "polygonCount": 50
+  },
+  "F0086": {
+    "id": "F0086",
+    "name": "Rapa",
+    "type": "freshwater",
+    "centerLat": -27.13,
+    "centerLng": -109.34,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0087": {
+    "id": "F0087",
+    "name": "Rio Balsas",
+    "type": "freshwater",
+    "centerLat": 18.56,
+    "centerLng": -100.72,
+    "radiusKm": 244,
+    "polygonCount": 2
+  },
+  "F0088": {
+    "id": "F0088",
+    "name": "Sahara",
+    "type": "freshwater",
+    "centerLat": 28.71,
+    "centerLng": 9.82,
+    "radiusKm": 1025,
+    "polygonCount": 2
+  },
+  "F0089": {
+    "id": "F0089",
+    "name": "Scotia - Fundy",
+    "type": "freshwater",
+    "centerLat": 44.55,
+    "centerLng": -63.55,
+    "radiusKm": 54,
+    "polygonCount": 72
+  },
+  "F0090": {
+    "id": "F0090",
+    "name": "Shilka (Amur)",
+    "type": "freshwater",
+    "centerLat": 50.98,
+    "centerLng": 114.77,
+    "radiusKm": 423,
+    "polygonCount": 2
+  },
+  "F0091": {
+    "id": "F0091",
+    "name": "Sinai",
+    "type": "freshwater",
+    "centerLat": 30.63,
+    "centerLng": 33.36,
+    "radiusKm": 59,
+    "polygonCount": 18
+  },
+  "F0092": {
+    "id": "F0092",
+    "name": "Song Hong",
+    "type": "freshwater",
+    "centerLat": 20.94,
+    "centerLng": 106.8,
+    "radiusKm": 69,
+    "polygonCount": 34
+  },
+  "F0093": {
+    "id": "F0093",
+    "name": "Southeastern Borneo",
+    "type": "freshwater",
+    "centerLat": -3.88,
+    "centerLng": 115.09,
+    "radiusKm": 61,
+    "polygonCount": 32
+  },
+  "F0094": {
+    "id": "F0094",
+    "name": "Southeastern Mata Atlantica",
+    "type": "freshwater",
+    "centerLat": -26.07,
+    "centerLng": -48.5,
+    "radiusKm": 63,
+    "polygonCount": 14
+  },
+  "F0095": {
+    "id": "F0095",
+    "name": "Southern Annam",
+    "type": "freshwater",
+    "centerLat": 12.92,
+    "centerLng": 108.56,
+    "radiusKm": 57,
+    "polygonCount": 60
+  },
+  "F0096": {
+    "id": "F0096",
+    "name": "Southern Central Sumatra",
+    "type": "freshwater",
+    "centerLat": 0.64,
+    "centerLng": 103.85,
+    "radiusKm": 51,
+    "polygonCount": 236
+  },
+  "F0097": {
+    "id": "F0097",
+    "name": "Southern Eastern Rift",
+    "type": "freshwater",
+    "centerLat": -3.41,
+    "centerLng": 35.18,
+    "radiusKm": 261,
+    "polygonCount": 2
+  },
+  "F0098": {
+    "id": "F0098",
+    "name": "Southern Gulf of Guinea Drainages",
+    "type": "freshwater",
+    "centerLat": 1.7,
+    "centerLng": 9.81,
+    "radiusKm": 92,
+    "polygonCount": 10
+  },
+  "F0099": {
+    "id": "F0099",
+    "name": "Sri Lanka Dry Zone",
+    "type": "freshwater",
+    "centerLat": 9.02,
+    "centerLng": 80.21,
+    "radiusKm": 58,
+    "polygonCount": 26
+  },
+  "F0100": {
+    "id": "F0100",
+    "name": "Taimyr",
+    "type": "freshwater",
+    "centerLat": 76.27,
+    "centerLng": 93.48,
+    "radiusKm": 60,
+    "polygonCount": 310
+  },
+  "F0101": {
+    "id": "F0101",
+    "name": "Tumba",
+    "type": "freshwater",
+    "centerLat": -0.77,
+    "centerLng": 18.13,
+    "radiusKm": 69,
+    "polygonCount": 2
+  },
+  "F0102": {
+    "id": "F0102",
+    "name": "Upper Congo",
+    "type": "freshwater",
+    "centerLat": -3.66,
+    "centerLng": 26.22,
+    "radiusKm": 358,
+    "polygonCount": 2
+  },
+  "F0103": {
+    "id": "F0103",
+    "name": "Upper Indus",
+    "type": "freshwater",
+    "centerLat": 33.23,
+    "centerLng": 78.98,
+    "radiusKm": 274,
+    "polygonCount": 2
+  },
+  "F0104": {
+    "id": "F0104",
+    "name": "Upper Niger",
+    "type": "freshwater",
+    "centerLat": 11.36,
+    "centerLng": -7.78,
+    "radiusKm": 280,
+    "polygonCount": 2
+  },
+  "F0105": {
+    "id": "F0105",
+    "name": "Upper Nile",
+    "type": "freshwater",
+    "centerLat": 8.7,
+    "centerLng": 29.77,
+    "radiusKm": 496,
+    "polygonCount": 2
+  },
+  "F0106": {
+    "id": "F0106",
+    "name": "Upper Usumacinta",
+    "type": "freshwater",
+    "centerLat": 16.54,
+    "centerLng": -90.88,
+    "radiusKm": 128,
+    "polygonCount": 2
+  },
+  "F0107": {
+    "id": "F0107",
+    "name": "Upper Yangtze",
+    "type": "freshwater",
+    "centerLat": 32.25,
+    "centerLng": 98.66,
+    "radiusKm": 535,
+    "polygonCount": 2
+  },
+  "F0108": {
+    "id": "F0108",
+    "name": "Upper Zambezi Floodplains",
+    "type": "freshwater",
+    "centerLat": -16.3,
+    "centerLng": 23.04,
+    "radiusKm": 261,
+    "polygonCount": 2
+  },
+  "F0109": {
+    "id": "F0109",
+    "name": "Vanuatu",
+    "type": "freshwater",
+    "centerLat": -16.99,
+    "centerLng": 168.36,
+    "radiusKm": 50,
+    "polygonCount": 78
+  },
+  "F0110": {
+    "id": "F0110",
+    "name": "Volga - Ural",
+    "type": "freshwater",
+    "centerLat": 45.77,
+    "centerLng": 50.22,
+    "radiusKm": 73,
+    "polygonCount": 84
+  },
+  "F0111": {
+    "id": "F0111",
+    "name": "Wake Island",
+    "type": "freshwater",
+    "centerLat": 19.3,
+    "centerLng": 166.64,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0112": {
+    "id": "F0112",
+    "name": "Wallis - Futuna",
+    "type": "freshwater",
+    "centerLat": -13.97,
+    "centerLng": -177.44,
+    "radiusKm": 50,
+    "polygonCount": 6
+  },
+  "F0113": {
+    "id": "F0113",
+    "name": "West Florida Gulf",
+    "type": "freshwater",
+    "centerLat": 30.59,
+    "centerLng": -86.74,
+    "radiusKm": 92,
+    "polygonCount": 4
+  },
+  "F0114": {
+    "id": "F0114",
+    "name": "West Texas Gulf",
+    "type": "freshwater",
+    "centerLat": 27.57,
+    "centerLng": -97.44,
+    "radiusKm": 101,
+    "polygonCount": 8
+  },
+  "F0115": {
+    "id": "F0115",
+    "name": "Western Madagascar",
+    "type": "freshwater",
+    "centerLat": -21.15,
+    "centerLng": 44.12,
+    "radiusKm": 167,
+    "polygonCount": 4
+  },
+  "F0116": {
+    "id": "F0116",
+    "name": "Western Orange",
+    "type": "freshwater",
+    "centerLat": -28.6,
+    "centerLng": 19.36,
+    "radiusKm": 302,
+    "polygonCount": 2
+  },
+  "F0117": {
+    "id": "F0117",
+    "name": "Western Transcaucasia",
+    "type": "freshwater",
+    "centerLat": 41.97,
+    "centerLng": 40.28,
+    "radiusKm": 257,
+    "polygonCount": 2
+  },
+  "F0118": {
+    "id": "F0118",
+    "name": "Zambezian Lowveld",
+    "type": "freshwater",
+    "centerLat": -23.23,
+    "centerLng": 34.09,
+    "radiusKm": 95,
+    "polygonCount": 20
+  },
+  "F0119": {
+    "id": "F0119",
+    "name": "Aceh",
+    "type": "freshwater",
+    "centerLat": 5.33,
+    "centerLng": 95.49,
+    "radiusKm": 71,
+    "polygonCount": 12
+  },
+  "F0120": {
+    "id": "F0120",
+    "name": "Albertine Highlands",
+    "type": "freshwater",
+    "centerLat": -2.7,
+    "centerLng": 28.52,
+    "radiusKm": 230,
+    "polygonCount": 2
+  },
+  "F0121": {
+    "id": "F0121",
+    "name": "Aral Sea Drainages",
+    "type": "freshwater",
+    "centerLat": 44.84,
+    "centerLng": 60.66,
+    "radiusKm": 392,
+    "polygonCount": 2
+  },
+  "F0122": {
+    "id": "F0122",
+    "name": "Bangweulu - Mweru",
+    "type": "freshwater",
+    "centerLat": -10.73,
+    "centerLng": 29.98,
+    "radiusKm": 221,
+    "polygonCount": 2
+  },
+  "F0123": {
+    "id": "F0123",
+    "name": "Biwa Ko",
+    "type": "freshwater",
+    "centerLat": 35.23,
+    "centerLng": 136.07,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0124": {
+    "id": "F0124",
+    "name": "Bonneville",
+    "type": "freshwater",
+    "centerLat": 40.02,
+    "centerLng": -112.81,
+    "radiusKm": 221,
+    "polygonCount": 2
+  },
+  "F0125": {
+    "id": "F0125",
+    "name": "Canadian Arctic Archipelago",
+    "type": "freshwater",
+    "centerLat": 69.06,
+    "centerLng": -81.64,
+    "radiusKm": 59,
+    "polygonCount": 1210
+  },
+  "F0126": {
+    "id": "F0126",
+    "name": "Chin Hills - Arakan Coast",
+    "type": "freshwater",
+    "centerLat": 19.63,
+    "centerLng": 93.54,
+    "radiusKm": 59,
+    "polygonCount": 64
+  },
+  "F0127": {
+    "id": "F0127",
+    "name": "Chiriqui",
+    "type": "freshwater",
+    "centerLat": 8.14,
+    "centerLng": -82.15,
+    "radiusKm": 54,
+    "polygonCount": 38
+  },
+  "F0128": {
+    "id": "F0128",
+    "name": "Columbia Unglaciated",
+    "type": "freshwater",
+    "centerLat": 45.98,
+    "centerLng": -122.44,
+    "radiusKm": 120,
+    "polygonCount": 10
+  },
+  "F0129": {
+    "id": "F0129",
+    "name": "Comoros - Mayotte",
+    "type": "freshwater",
+    "centerLat": -12.41,
+    "centerLng": 44.49,
+    "radiusKm": 50,
+    "polygonCount": 12
+  },
+  "F0130": {
+    "id": "F0130",
+    "name": "Cuatro Cienegas",
+    "type": "freshwater",
+    "centerLat": 26.86,
+    "centerLng": -102.36,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0131": {
+    "id": "F0131",
+    "name": "Death Valley",
+    "type": "freshwater",
+    "centerLat": 36.0,
+    "centerLng": -117.11,
+    "radiusKm": 190,
+    "polygonCount": 2
+  },
+  "F0132": {
+    "id": "F0132",
+    "name": "Don",
+    "type": "freshwater",
+    "centerLat": 46.47,
+    "centerLng": 37.26,
+    "radiusKm": 83,
+    "polygonCount": 30
+  },
+  "F0133": {
+    "id": "F0133",
+    "name": "Dry Sahel",
+    "type": "freshwater",
+    "centerLat": 19.96,
+    "centerLng": -13.69,
+    "radiusKm": 171,
+    "polygonCount": 16
+  },
+  "F0134": {
+    "id": "F0134",
+    "name": "Dzungaria",
+    "type": "freshwater",
+    "centerLat": 44.2,
+    "centerLng": 91.22,
+    "radiusKm": 652,
+    "polygonCount": 2
+  },
+  "F0135": {
+    "id": "F0135",
+    "name": "East Chukotka",
+    "type": "freshwater",
+    "centerLat": 67.15,
+    "centerLng": -98.17,
+    "radiusKm": 87,
+    "polygonCount": 28
+  },
+  "F0136": {
+    "id": "F0136",
+    "name": "Eastern Borneo",
+    "type": "freshwater",
+    "centerLat": 1.0,
+    "centerLng": 117.89,
+    "radiusKm": 58,
+    "polygonCount": 30
+  },
+  "F0137": {
+    "id": "F0137",
+    "name": "Florida Peninsula",
+    "type": "freshwater",
+    "centerLat": 25.96,
+    "centerLng": -81.5,
+    "radiusKm": 53,
+    "polygonCount": 126
+  },
+  "F0138": {
+    "id": "F0138",
+    "name": "Gila",
+    "type": "freshwater",
+    "centerLat": 33.33,
+    "centerLng": -111.23,
+    "radiusKm": 222,
+    "polygonCount": 2
+  },
+  "F0139": {
+    "id": "F0139",
+    "name": "Grijalva - Usumacinta",
+    "type": "freshwater",
+    "centerLat": 18.27,
+    "centerLng": -91.85,
+    "radiusKm": 124,
+    "polygonCount": 4
+  },
+  "F0140": {
+    "id": "F0140",
+    "name": "Guianas",
+    "type": "freshwater",
+    "centerLat": 5.43,
+    "centerLng": -55.76,
+    "radiusKm": 93,
+    "polygonCount": 12
+  },
+  "F0141": {
+    "id": "F0141",
+    "name": "Gulf of Venice Drainages",
+    "type": "freshwater",
+    "centerLat": 45.43,
+    "centerLng": 12.33,
+    "radiusKm": 105,
+    "polygonCount": 10
+  },
+  "F0142": {
+    "id": "F0142",
+    "name": "Hamgyong - Sanmaek",
+    "type": "freshwater",
+    "centerLat": 40.19,
+    "centerLng": 128.29,
+    "radiusKm": 81,
+    "polygonCount": 12
+  },
+  "F0143": {
+    "id": "F0143",
+    "name": "Hawaiian Islands",
+    "type": "freshwater",
+    "centerLat": 21.21,
+    "centerLng": -158.05,
+    "radiusKm": 51,
+    "polygonCount": 22
+  },
+  "F0144": {
+    "id": "F0144",
+    "name": "Indus Himalayan Foothills",
+    "type": "freshwater",
+    "centerLat": 34.75,
+    "centerLng": 73.07,
+    "radiusKm": 402,
+    "polygonCount": 2
+  },
+  "F0145": {
+    "id": "F0145",
+    "name": "Inle Lake",
+    "type": "freshwater",
+    "centerLat": 20.45,
+    "centerLng": 96.93,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0146": {
+    "id": "F0146",
+    "name": "Jamaica",
+    "type": "freshwater",
+    "centerLat": 17.96,
+    "centerLng": -77.14,
+    "radiusKm": 62,
+    "polygonCount": 6
+  },
+  "F0147": {
+    "id": "F0147",
+    "name": "Jordan River",
+    "type": "freshwater",
+    "centerLat": 31.52,
+    "centerLng": 35.64,
+    "radiusKm": 152,
+    "polygonCount": 2
+  },
+  "F0148": {
+    "id": "F0148",
+    "name": "Kafue",
+    "type": "freshwater",
+    "centerLat": -14.94,
+    "centerLng": 26.98,
+    "radiusKm": 154,
+    "polygonCount": 2
+  },
+  "F0149": {
+    "id": "F0149",
+    "name": "Kasai",
+    "type": "freshwater",
+    "centerLat": -7.02,
+    "centerLng": 20.45,
+    "radiusKm": 399,
+    "polygonCount": 2
+  },
+  "F0150": {
+    "id": "F0150",
+    "name": "Kavir & Lut Deserts",
+    "type": "freshwater",
+    "centerLat": 33.02,
+    "centerLng": 55.77,
+    "radiusKm": 320,
+    "polygonCount": 2
+  },
+  "F0151": {
+    "id": "F0151",
+    "name": "Khorat Plateau (Mekong)",
+    "type": "freshwater",
+    "centerLat": 16.34,
+    "centerLng": 103.88,
+    "radiusKm": 204,
+    "polygonCount": 2
+  },
+  "F0152": {
+    "id": "F0152",
+    "name": "Kura - South Caspian Drainages",
+    "type": "freshwater",
+    "centerLat": 39.44,
+    "centerLng": 47.29,
+    "radiusKm": 422,
+    "polygonCount": 2
+  },
+  "F0153": {
+    "id": "F0153",
+    "name": "Lake Baikal",
+    "type": "freshwater",
+    "centerLat": 51.13,
+    "centerLng": 106.09,
+    "radiusKm": 616,
+    "polygonCount": 2
+  },
+  "F0154": {
+    "id": "F0154",
+    "name": "Lake Eyre Basin",
+    "type": "freshwater",
+    "centerLat": -24.75,
+    "centerLng": 138.16,
+    "radiusKm": 590,
+    "polygonCount": 2
+  },
+  "F0155": {
+    "id": "F0155",
+    "name": "Lake Turkana",
+    "type": "freshwater",
+    "centerLat": 4.93,
+    "centerLng": 36.3,
+    "radiusKm": 272,
+    "polygonCount": 2
+  },
+  "F0156": {
+    "id": "F0156",
+    "name": "Lerma - Chapala",
+    "type": "freshwater",
+    "centerLat": 20.09,
+    "centerLng": -100.46,
+    "radiusKm": 222,
+    "polygonCount": 2
+  },
+  "F0157": {
+    "id": "F0157",
+    "name": "Lesser Sunda Islands",
+    "type": "freshwater",
+    "centerLat": -8.72,
+    "centerLng": 121.25,
+    "radiusKm": 52,
+    "polygonCount": 192
+  },
+  "F0158": {
+    "id": "F0158",
+    "name": "Liao He",
+    "type": "freshwater",
+    "centerLat": 39.48,
+    "centerLng": 122.47,
+    "radiusKm": 70,
+    "polygonCount": 28
+  },
+  "F0159": {
+    "id": "F0159",
+    "name": "Lower Rio Grande - Bravo",
+    "type": "freshwater",
+    "centerLat": 26.96,
+    "centerLng": -98.89,
+    "radiusKm": 193,
+    "polygonCount": 4
+  },
+  "F0160": {
+    "id": "F0160",
+    "name": "Lower Tigris & Euphrates",
+    "type": "freshwater",
+    "centerLat": 30.39,
+    "centerLng": 48.12,
+    "radiusKm": 90,
+    "polygonCount": 22
+  },
+  "F0161": {
+    "id": "F0161",
+    "name": "Mae Khlong",
+    "type": "freshwater",
+    "centerLat": 14.02,
+    "centerLng": 99.41,
+    "radiusKm": 167,
+    "polygonCount": 2
+  },
+  "F0162": {
+    "id": "F0162",
+    "name": "Malagarasi - Moyowosi",
+    "type": "freshwater",
+    "centerLat": -4.93,
+    "centerLng": 31.84,
+    "radiusKm": 176,
+    "polygonCount": 2
+  },
+  "F0163": {
+    "id": "F0163",
+    "name": "Mamore - Madre de Dios Piedmont",
+    "type": "freshwater",
+    "centerLat": -14.18,
+    "centerLng": -66.12,
+    "radiusKm": 461,
+    "polygonCount": 2
+  },
+  "F0164": {
+    "id": "F0164",
+    "name": "Mar Chiquita - Salinas Grandes",
+    "type": "freshwater",
+    "centerLat": -33.92,
+    "centerLng": -65.96,
+    "radiusKm": 287,
+    "polygonCount": 4
+  },
+  "F0165": {
+    "id": "F0165",
+    "name": "Matano - Southern Malili Lakes",
+    "type": "freshwater",
+    "centerLat": -2.69,
+    "centerLng": 121.44,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0166": {
+    "id": "F0166",
+    "name": "Mediterranean Northwest Africa",
+    "type": "freshwater",
+    "centerLat": 35.52,
+    "centerLng": 9.51,
+    "radiusKm": 136,
+    "polygonCount": 12
+  },
+  "F0167": {
+    "id": "F0167",
+    "name": "Middle Amur",
+    "type": "freshwater",
+    "centerLat": 52.54,
+    "centerLng": 128.04,
+    "radiusKm": 504,
+    "polygonCount": 2
+  },
+  "F0168": {
+    "id": "F0168",
+    "name": "Middle Missouri",
+    "type": "freshwater",
+    "centerLat": 41.88,
+    "centerLng": -100.38,
+    "radiusKm": 520,
+    "polygonCount": 2
+  },
+  "F0169": {
+    "id": "F0169",
+    "name": "Mosquitia",
+    "type": "freshwater",
+    "centerLat": 15.2,
+    "centerLng": -84.73,
+    "radiusKm": 155,
+    "polygonCount": 4
+  },
+  "F0170": {
+    "id": "F0170",
+    "name": "Mount Nimba",
+    "type": "freshwater",
+    "centerLat": 8.12,
+    "centerLng": -8.33,
+    "radiusKm": 58,
+    "polygonCount": 2
+  },
+  "F0171": {
+    "id": "F0171",
+    "name": "Mulanje",
+    "type": "freshwater",
+    "centerLat": -16.22,
+    "centerLng": 35.4,
+    "radiusKm": 64,
+    "polygonCount": 2
+  },
+  "F0172": {
+    "id": "F0172",
+    "name": "Namib",
+    "type": "freshwater",
+    "centerLat": -19.2,
+    "centerLng": 13.12,
+    "radiusKm": 226,
+    "polygonCount": 4
+  },
+  "F0173": {
+    "id": "F0173",
+    "name": "Namuda - Tapi",
+    "type": "freshwater",
+    "centerLat": 21.57,
+    "centerLng": 72.71,
+    "radiusKm": 83,
+    "polygonCount": 26
+  },
+  "F0174": {
+    "id": "F0174",
+    "name": "New Guinea North Coast",
+    "type": "freshwater",
+    "centerLat": -2.21,
+    "centerLng": 140.4,
+    "radiusKm": 56,
+    "polygonCount": 118
+  },
+  "F0175": {
+    "id": "F0175",
+    "name": "Norfolk Island",
+    "type": "freshwater",
+    "centerLat": -29.04,
+    "centerLng": 167.95,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0176": {
+    "id": "F0176",
+    "name": "North Andean Pacific Slopes - Rio Atrato",
+    "type": "freshwater",
+    "centerLat": 1.82,
+    "centerLng": -78.54,
+    "radiusKm": 57,
+    "polygonCount": 110
+  },
+  "F0177": {
+    "id": "F0177",
+    "name": "Northeast US & Southeast Canada Atlantic Drainages",
+    "type": "freshwater",
+    "centerLat": 43.63,
+    "centerLng": -69.03,
+    "radiusKm": 55,
+    "polygonCount": 176
+  },
+  "F0178": {
+    "id": "F0178",
+    "name": "Northeastern Caatinga & Coastal Drainages",
+    "type": "freshwater",
+    "centerLat": -6.89,
+    "centerLng": -36.69,
+    "radiusKm": 86,
+    "polygonCount": 14
+  },
+  "F0179": {
+    "id": "F0179",
+    "name": "Northern British Isles",
+    "type": "freshwater",
+    "centerLat": 56.86,
+    "centerLng": -6.35,
+    "radiusKm": 52,
+    "polygonCount": 390
+  },
+  "F0180": {
+    "id": "F0180",
+    "name": "Northern Central Asian Highlands",
+    "type": "freshwater",
+    "centerLat": 41.61,
+    "centerLng": 72.06,
+    "radiusKm": 412,
+    "polygonCount": 2
+  },
+  "F0181": {
+    "id": "F0181",
+    "name": "Northern Gulf of Guinea Drainages - Bioko",
+    "type": "freshwater",
+    "centerLat": 4.31,
+    "centerLng": 8.99,
+    "radiusKm": 77,
+    "polygonCount": 10
+  },
+  "F0182": {
+    "id": "F0182",
+    "name": "Northern Philippine Islands",
+    "type": "freshwater",
+    "centerLat": 11.9,
+    "centerLng": 123.62,
+    "radiusKm": 50,
+    "polygonCount": 1174
+  },
+  "F0183": {
+    "id": "F0183",
+    "name": "Northern Upper Guinea",
+    "type": "freshwater",
+    "centerLat": 10.34,
+    "centerLng": -14.96,
+    "radiusKm": 56,
+    "polygonCount": 70
+  },
+  "F0184": {
+    "id": "F0184",
+    "name": "Northwestern Borneo",
+    "type": "freshwater",
+    "centerLat": 3.15,
+    "centerLng": 109.02,
+    "radiusKm": 60,
+    "polygonCount": 40
+  },
+  "F0185": {
+    "id": "F0185",
+    "name": "Ob",
+    "type": "freshwater",
+    "centerLat": 69.12,
+    "centerLng": 69.99,
+    "radiusKm": 106,
+    "polygonCount": 36
+  },
+  "F0186": {
+    "id": "F0186",
+    "name": "Okavango",
+    "type": "freshwater",
+    "centerLat": -18.25,
+    "centerLng": 21.01,
+    "radiusKm": 308,
+    "polygonCount": 2
+  },
+  "F0187": {
+    "id": "F0187",
+    "name": "Okhotsk Coast",
+    "type": "freshwater",
+    "centerLat": 58.68,
+    "centerLng": 148.93,
+    "radiusKm": 149,
+    "polygonCount": 16
+  },
+  "F0188": {
+    "id": "F0188",
+    "name": "Orinoco Guiana Shield",
+    "type": "freshwater",
+    "centerLat": 4.92,
+    "centerLng": -64.45,
+    "radiusKm": 247,
+    "polygonCount": 2
+  },
+  "F0189": {
+    "id": "F0189",
+    "name": "Ozark Highlands",
+    "type": "freshwater",
+    "centerLat": 36.33,
+    "centerLng": -92.32,
+    "radiusKm": 163,
+    "polygonCount": 2
+  },
+  "F0190": {
+    "id": "F0190",
+    "name": "Pilbara",
+    "type": "freshwater",
+    "centerLat": -22.49,
+    "centerLng": 115.45,
+    "radiusKm": 72,
+    "polygonCount": 32
+  },
+  "F0191": {
+    "id": "F0191",
+    "name": "Qaidan",
+    "type": "freshwater",
+    "centerLat": 37.0,
+    "centerLng": 94.22,
+    "radiusKm": 378,
+    "polygonCount": 2
+  },
+  "F0192": {
+    "id": "F0192",
+    "name": "Sabine - Galveston",
+    "type": "freshwater",
+    "centerLat": 30.32,
+    "centerLng": -95.28,
+    "radiusKm": 160,
+    "polygonCount": 4
+  },
+  "F0193": {
+    "id": "F0193",
+    "name": "Sangha",
+    "type": "freshwater",
+    "centerLat": 1.52,
+    "centerLng": 15.16,
+    "radiusKm": 350,
+    "polygonCount": 2
+  },
+  "F0194": {
+    "id": "F0194",
+    "name": "Sierra Madre del Sur",
+    "type": "freshwater",
+    "centerLat": 16.73,
+    "centerLng": -98.33,
+    "radiusKm": 251,
+    "polygonCount": 2
+  },
+  "F0195": {
+    "id": "F0195",
+    "name": "Sinaloa",
+    "type": "freshwater",
+    "centerLat": 25.3,
+    "centerLng": -108.38,
+    "radiusKm": 98,
+    "polygonCount": 8
+  },
+  "F0196": {
+    "id": "F0196",
+    "name": "Society Islands",
+    "type": "freshwater",
+    "centerLat": -16.9,
+    "centerLng": -150.65,
+    "radiusKm": 50,
+    "polygonCount": 32
+  },
+  "F0197": {
+    "id": "F0197",
+    "name": "Socotra",
+    "type": "freshwater",
+    "centerLat": 12.25,
+    "centerLng": 53.13,
+    "radiusKm": 52,
+    "polygonCount": 8
+  },
+  "F0198": {
+    "id": "F0198",
+    "name": "Solomon Islands",
+    "type": "freshwater",
+    "centerLat": -7.87,
+    "centerLng": 158.53,
+    "radiusKm": 50,
+    "polygonCount": 306
+  },
+  "F0199": {
+    "id": "F0199",
+    "name": "South America Caribbean Drainages - Trinidad",
+    "type": "freshwater",
+    "centerLat": 11.37,
+    "centerLng": -66.42,
+    "radiusKm": 56,
+    "polygonCount": 104
+  },
+  "F0200": {
+    "id": "F0200",
+    "name": "Southeast Adriatic Drainages",
+    "type": "freshwater",
+    "centerLat": 40.93,
+    "centerLng": 19.61,
+    "radiusKm": 96,
+    "polygonCount": 4
+  },
+  "F0201": {
+    "id": "F0201",
+    "name": "Southeastern Ghats",
+    "type": "freshwater",
+    "centerLat": 12.99,
+    "centerLng": 79.84,
+    "radiusKm": 97,
+    "polygonCount": 8
+  },
+  "F0202": {
+    "id": "F0202",
+    "name": "Southern Anatolia",
+    "type": "freshwater",
+    "centerLat": 36.23,
+    "centerLng": 30.68,
+    "radiusKm": 79,
+    "polygonCount": 20
+  },
+  "F0203": {
+    "id": "F0203",
+    "name": "Southern Baltic Lowlands",
+    "type": "freshwater",
+    "centerLat": 59.28,
+    "centerLng": 25.3,
+    "radiusKm": 69,
+    "polygonCount": 54
+  },
+  "F0204": {
+    "id": "F0204",
+    "name": "Southern Hudson Bay",
+    "type": "freshwater",
+    "centerLat": 52.33,
+    "centerLng": -82.05,
+    "radiusKm": 188,
+    "polygonCount": 12
+  },
+  "F0205": {
+    "id": "F0205",
+    "name": "Southern Madagascar",
+    "type": "freshwater",
+    "centerLat": -24.64,
+    "centerLng": 45.0,
+    "radiusKm": 149,
+    "polygonCount": 2
+  },
+  "F0206": {
+    "id": "F0206",
+    "name": "Southern Sumatra - Western Java",
+    "type": "freshwater",
+    "centerLat": -3.56,
+    "centerLng": 107.02,
+    "radiusKm": 58,
+    "polygonCount": 60
+  },
+  "F0207": {
+    "id": "F0207",
+    "name": "Southern Tasmania",
+    "type": "freshwater",
+    "centerLat": -42.84,
+    "centerLng": 147.53,
+    "radiusKm": 71,
+    "polygonCount": 10
+  },
+  "F0208": {
+    "id": "F0208",
+    "name": "Southern Temperate Highveld",
+    "type": "freshwater",
+    "centerLat": -30.12,
+    "centerLng": 27.52,
+    "radiusKm": 503,
+    "polygonCount": 2
+  },
+  "F0209": {
+    "id": "F0209",
+    "name": "Tana, Athi & Coastal Drainages",
+    "type": "freshwater",
+    "centerLat": -4.26,
+    "centerLng": 39.26,
+    "radiusKm": 88,
+    "polygonCount": 10
+  },
+  "F0210": {
+    "id": "F0210",
+    "name": "Tennessee",
+    "type": "freshwater",
+    "centerLat": 35.81,
+    "centerLng": -85.35,
+    "radiusKm": 267,
+    "polygonCount": 2
+  },
+  "F0211": {
+    "id": "F0211",
+    "name": "Thrace",
+    "type": "freshwater",
+    "centerLat": 40.41,
+    "centerLng": 26.58,
+    "radiusKm": 66,
+    "polygonCount": 36
+  },
+  "F0212": {
+    "id": "F0212",
+    "name": "Uele",
+    "type": "freshwater",
+    "centerLat": 3.73,
+    "centerLng": 26.94,
+    "radiusKm": 337,
+    "polygonCount": 2
+  },
+  "F0213": {
+    "id": "F0213",
+    "name": "Upper Brahmaputra",
+    "type": "freshwater",
+    "centerLat": 29.63,
+    "centerLng": 89.42,
+    "radiusKm": 461,
+    "polygonCount": 2
+  },
+  "F0214": {
+    "id": "F0214",
+    "name": "Upper Huang He Corridor",
+    "type": "freshwater",
+    "centerLat": 36.24,
+    "centerLng": 102.69,
+    "radiusKm": 252,
+    "polygonCount": 2
+  },
+  "F0215": {
+    "id": "F0215",
+    "name": "Upper Lancang (Mekong)",
+    "type": "freshwater",
+    "centerLat": 29.14,
+    "centerLng": 97.83,
+    "radiusKm": 429,
+    "polygonCount": 2
+  },
+  "F0216": {
+    "id": "F0216",
+    "name": "Upper Mackenzie",
+    "type": "freshwater",
+    "centerLat": 57.07,
+    "centerLng": -116.7,
+    "radiusKm": 616,
+    "polygonCount": 2
+  },
+  "F0217": {
+    "id": "F0217",
+    "name": "Upper Parana",
+    "type": "freshwater",
+    "centerLat": -21.1,
+    "centerLng": -50.23,
+    "radiusKm": 426,
+    "polygonCount": 2
+  },
+  "F0218": {
+    "id": "F0218",
+    "name": "Upper Uruguay",
+    "type": "freshwater",
+    "centerLat": -27.56,
+    "centerLng": -51.6,
+    "radiusKm": 191,
+    "polygonCount": 2
+  },
+  "F0219": {
+    "id": "F0219",
+    "name": "Upper Yukon",
+    "type": "freshwater",
+    "centerLat": 64.04,
+    "centerLng": -137.81,
+    "radiusKm": 940,
+    "polygonCount": 2
+  },
+  "F0220": {
+    "id": "F0220",
+    "name": "Valdivian Lakes",
+    "type": "freshwater",
+    "centerLat": -42.16,
+    "centerLng": -73.37,
+    "radiusKm": 69,
+    "polygonCount": 14
+  },
+  "F0221": {
+    "id": "F0221",
+    "name": "Volta",
+    "type": "freshwater",
+    "centerLat": 9.81,
+    "centerLng": -1.2,
+    "radiusKm": 364,
+    "polygonCount": 2
+  },
+  "F0222": {
+    "id": "F0222",
+    "name": "Western Amazon Piedmont",
+    "type": "freshwater",
+    "centerLat": -2.04,
+    "centerLng": -75.66,
+    "radiusKm": 444,
+    "polygonCount": 2
+  },
+  "F0223": {
+    "id": "F0223",
+    "name": "Western Iberia",
+    "type": "freshwater",
+    "centerLat": 37.95,
+    "centerLng": -8.14,
+    "radiusKm": 75,
+    "polygonCount": 26
+  },
+  "F0224": {
+    "id": "F0224",
+    "name": "Western Red Sea Drainages",
+    "type": "freshwater",
+    "centerLat": 17.59,
+    "centerLng": 39.32,
+    "radiusKm": 55,
+    "polygonCount": 220
+  },
+  "F0225": {
+    "id": "F0225",
+    "name": "Xi Yiang",
+    "type": "freshwater",
+    "centerLat": 21.69,
+    "centerLng": 110.8,
+    "radiusKm": 53,
+    "polygonCount": 228
+  },
+  "F0226": {
+    "id": "F0226",
+    "name": "Xingu",
+    "type": "freshwater",
+    "centerLat": -8.68,
+    "centerLng": -53.39,
+    "radiusKm": 373,
+    "polygonCount": 2
+  },
+  "F0227": {
+    "id": "F0227",
+    "name": "Zambezian Highveld",
+    "type": "freshwater",
+    "centerLat": -19.24,
+    "centerLng": 30.16,
+    "radiusKm": 229,
+    "polygonCount": 2
+  },
+  "F0228": {
+    "id": "F0228",
+    "name": "Aegean Drainages",
+    "type": "freshwater",
+    "centerLat": 37.59,
+    "centerLng": 24.66,
+    "radiusKm": 51,
+    "polygonCount": 140
+  },
+  "F0229": {
+    "id": "F0229",
+    "name": "Alaska & Canada Pacific Coastal",
+    "type": "freshwater",
+    "centerLat": 54.73,
+    "centerLng": -133.83,
+    "radiusKm": 53,
+    "polygonCount": 766
+  },
+  "F0230": {
+    "id": "F0230",
+    "name": "Amazonas Lowlands",
+    "type": "freshwater",
+    "centerLat": -4.22,
+    "centerLng": -69.82,
+    "radiusKm": 1025,
+    "polygonCount": 2
+  },
+  "F0231": {
+    "id": "F0231",
+    "name": "Anadyr",
+    "type": "freshwater",
+    "centerLat": 64.79,
+    "centerLng": 57.77,
+    "radiusKm": 232,
+    "polygonCount": 6
+  },
+  "F0232": {
+    "id": "F0232",
+    "name": "Arabian Interior",
+    "type": "freshwater",
+    "centerLat": 26.47,
+    "centerLng": 50.38,
+    "radiusKm": 66,
+    "polygonCount": 96
+  },
+  "F0233": {
+    "id": "F0233",
+    "name": "Arafura - Carpentaria",
+    "type": "freshwater",
+    "centerLat": -12.86,
+    "centerLng": 137.04,
+    "radiusKm": 60,
+    "polygonCount": 124
+  },
+  "F0234": {
+    "id": "F0234",
+    "name": "Argun",
+    "type": "freshwater",
+    "centerLat": 49.05,
+    "centerLng": 116.54,
+    "radiusKm": 496,
+    "polygonCount": 2
+  },
+  "F0235": {
+    "id": "F0235",
+    "name": "Atlantic Northwest Africa",
+    "type": "freshwater",
+    "centerLat": 30.93,
+    "centerLng": -8.32,
+    "radiusKm": 497,
+    "polygonCount": 2
+  },
+  "F0236": {
+    "id": "F0236",
+    "name": "Azores",
+    "type": "freshwater",
+    "centerLat": 38.59,
+    "centerLng": -28.13,
+    "radiusKm": 50,
+    "polygonCount": 18
+  },
+  "F0237": {
+    "id": "F0237",
+    "name": "Bass Strait Drainages",
+    "type": "freshwater",
+    "centerLat": -39.8,
+    "centerLng": 146.01,
+    "radiusKm": 72,
+    "polygonCount": 26
+  },
+  "F0238": {
+    "id": "F0238",
+    "name": "Bermuda",
+    "type": "freshwater",
+    "centerLat": 32.32,
+    "centerLng": -64.76,
+    "radiusKm": 50,
+    "polygonCount": 6
+  },
+  "F0239": {
+    "id": "F0239",
+    "name": "Bight Drainages",
+    "type": "freshwater",
+    "centerLat": 7.2,
+    "centerLng": 3.04,
+    "radiusKm": 226,
+    "polygonCount": 2
+  },
+  "F0240": {
+    "id": "F0240",
+    "name": "Borneo Highlands",
+    "type": "freshwater",
+    "centerLat": 1.94,
+    "centerLng": 114.87,
+    "radiusKm": 301,
+    "polygonCount": 2
+  },
+  "F0241": {
+    "id": "F0241",
+    "name": "Cape Fold",
+    "type": "freshwater",
+    "centerLat": -33.47,
+    "centerLng": 18.84,
+    "radiusKm": 116,
+    "polygonCount": 8
+  },
+  "F0242": {
+    "id": "F0242",
+    "name": "Cape Verde",
+    "type": "freshwater",
+    "centerLat": 16.12,
+    "centerLng": -24.18,
+    "radiusKm": 50,
+    "polygonCount": 24
+  },
+  "F0243": {
+    "id": "F0243",
+    "name": "Caspian Highlands",
+    "type": "freshwater",
+    "centerLat": 36.4,
+    "centerLng": 49.38,
+    "radiusKm": 256,
+    "polygonCount": 2
+  },
+  "F0244": {
+    "id": "F0244",
+    "name": "Chesapeake Bay",
+    "type": "freshwater",
+    "centerLat": 37.86,
+    "centerLng": -76.08,
+    "radiusKm": 74,
+    "polygonCount": 20
+  },
+  "F0245": {
+    "id": "F0245",
+    "name": "Coastal East Africa",
+    "type": "freshwater",
+    "centerLat": -10.13,
+    "centerLng": 39.86,
+    "radiusKm": 64,
+    "polygonCount": 56
+  },
+  "F0246": {
+    "id": "F0246",
+    "name": "Cumberland",
+    "type": "freshwater",
+    "centerLat": 36.34,
+    "centerLng": -85.66,
+    "radiusKm": 192,
+    "polygonCount": 2
+  },
+  "F0247": {
+    "id": "F0247",
+    "name": "Cuvette Centrale",
+    "type": "freshwater",
+    "centerLat": 0.91,
+    "centerLng": 23.9,
+    "radiusKm": 387,
+    "polygonCount": 2
+  },
+  "F0248": {
+    "id": "F0248",
+    "name": "Dalmatia",
+    "type": "freshwater",
+    "centerLat": 43.91,
+    "centerLng": 15.49,
+    "radiusKm": 52,
+    "polygonCount": 142
+  },
+  "F0249": {
+    "id": "F0249",
+    "name": "Dnieper - South Bug",
+    "type": "freshwater",
+    "centerLat": 46.71,
+    "centerLng": 32.22,
+    "radiusKm": 88,
+    "polygonCount": 22
+  },
+  "F0250": {
+    "id": "F0250",
+    "name": "East Texas Gulf",
+    "type": "freshwater",
+    "centerLat": 29.38,
+    "centerLng": -97.04,
+    "radiusKm": 182,
+    "polygonCount": 6
+  },
+  "F0251": {
+    "id": "F0251",
+    "name": "Eastern Iberia",
+    "type": "freshwater",
+    "centerLat": 39.4,
+    "centerLng": 2.21,
+    "radiusKm": 72,
+    "polygonCount": 24
+  },
+  "F0252": {
+    "id": "F0252",
+    "name": "Eastern Zimbabwe Highlands",
+    "type": "freshwater",
+    "centerLat": -18.73,
+    "centerLng": 32.98,
+    "radiusKm": 129,
+    "polygonCount": 2
+  },
+  "F0253": {
+    "id": "F0253",
+    "name": "Er Hai",
+    "type": "freshwater",
+    "centerLat": 26.08,
+    "centerLng": 100.06,
+    "radiusKm": 69,
+    "polygonCount": 2
+  },
+  "F0254": {
+    "id": "F0254",
+    "name": "Esfahan",
+    "type": "freshwater",
+    "centerLat": 32.53,
+    "centerLng": 51.52,
+    "radiusKm": 130,
+    "polygonCount": 2
+  },
+  "F0255": {
+    "id": "F0255",
+    "name": "Ethiopian Highlands",
+    "type": "freshwater",
+    "centerLat": 9.03,
+    "centerLng": 39.05,
+    "radiusKm": 280,
+    "polygonCount": 4
+  },
+  "F0256": {
+    "id": "F0256",
+    "name": "Etosha",
+    "type": "freshwater",
+    "centerLat": -17.54,
+    "centerLng": 16.14,
+    "radiusKm": 187,
+    "polygonCount": 2
+  },
+  "F0257": {
+    "id": "F0257",
+    "name": "Fiji",
+    "type": "freshwater",
+    "centerLat": -17.65,
+    "centerLng": 29.08,
+    "radiusKm": 50,
+    "polygonCount": 158
+  },
+  "F0258": {
+    "id": "F0258",
+    "name": "Fouta - Djalon",
+    "type": "freshwater",
+    "centerLat": 11.22,
+    "centerLng": -11.91,
+    "radiusKm": 88,
+    "polygonCount": 2
+  },
+  "F0259": {
+    "id": "F0259",
+    "name": "Ganges Delta & Plain",
+    "type": "freshwater",
+    "centerLat": 22.27,
+    "centerLng": 90.3,
+    "radiusKm": 63,
+    "polygonCount": 120
+  },
+  "F0260": {
+    "id": "F0260",
+    "name": "Guapore - Itenez",
+    "type": "freshwater",
+    "centerLat": -15.0,
+    "centerLng": -62.55,
+    "radiusKm": 340,
+    "polygonCount": 2
+  },
+  "F0261": {
+    "id": "F0261",
+    "name": "Gulf of St.Lawrence Coastal Drainages",
+    "type": "freshwater",
+    "centerLat": 50.26,
+    "centerLng": -64.54,
+    "radiusKm": 77,
+    "polygonCount": 34
+  },
+  "F0262": {
+    "id": "F0262",
+    "name": "Hainan",
+    "type": "freshwater",
+    "centerLat": 19.25,
+    "centerLng": 110.34,
+    "radiusKm": 60,
+    "polygonCount": 10
+  },
+  "F0263": {
+    "id": "F0263",
+    "name": "Hispaniola",
+    "type": "freshwater",
+    "centerLat": 18.44,
+    "centerLng": -72.02,
+    "radiusKm": 64,
+    "polygonCount": 22
+  },
+  "F0264": {
+    "id": "F0264",
+    "name": "Huang He Great Bend",
+    "type": "freshwater",
+    "centerLat": 39.41,
+    "centerLng": 108.44,
+    "radiusKm": 285,
+    "polygonCount": 2
+  },
+  "F0265": {
+    "id": "F0265",
+    "name": "Indian Ocean Slope of Sumatra & Java",
+    "type": "freshwater",
+    "centerLat": -1.6,
+    "centerLng": 100.06,
+    "radiusKm": 57,
+    "polygonCount": 148
+  },
+  "F0266": {
+    "id": "F0266",
+    "name": "Inner Niger Delta",
+    "type": "freshwater",
+    "centerLat": 15.34,
+    "centerLng": -4.22,
+    "radiusKm": 171,
+    "polygonCount": 2
+  },
+  "F0267": {
+    "id": "F0267",
+    "name": "Irgyz -Turgai",
+    "type": "freshwater",
+    "centerLat": 49.38,
+    "centerLng": 62.7,
+    "radiusKm": 295,
+    "polygonCount": 2
+  },
+  "F0268": {
+    "id": "F0268",
+    "name": "Kamchatka & Northern Kurils",
+    "type": "freshwater",
+    "centerLat": 49.89,
+    "centerLng": 155.65,
+    "radiusKm": 63,
+    "polygonCount": 38
+  },
+  "F0269": {
+    "id": "F0269",
+    "name": "Kuban",
+    "type": "freshwater",
+    "centerLat": 44.7,
+    "centerLng": 39.44,
+    "radiusKm": 257,
+    "polygonCount": 2
+  },
+  "F0270": {
+    "id": "F0270",
+    "name": "Lake Chad",
+    "type": "freshwater",
+    "centerLat": 10.82,
+    "centerLng": 16.66,
+    "radiusKm": 527,
+    "polygonCount": 2
+  },
+  "F0271": {
+    "id": "F0271",
+    "name": "Lake Issyk Kul - Upper Chu",
+    "type": "freshwater",
+    "centerLat": 42.48,
+    "centerLng": 75.81,
+    "radiusKm": 239,
+    "polygonCount": 2
+  },
+  "F0272": {
+    "id": "F0272",
+    "name": "Lake Onega - Lake Ladoga",
+    "type": "freshwater",
+    "centerLat": 61.27,
+    "centerLng": 33.37,
+    "radiusKm": 289,
+    "polygonCount": 2
+  },
+  "F0273": {
+    "id": "F0273",
+    "name": "Lake Poso",
+    "type": "freshwater",
+    "centerLat": -1.92,
+    "centerLng": 120.62,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0274": {
+    "id": "F0274",
+    "name": "Lake Tanganyika",
+    "type": "freshwater",
+    "centerLat": -6.47,
+    "centerLng": 30.11,
+    "radiusKm": 236,
+    "polygonCount": 2
+  },
+  "F0275": {
+    "id": "F0275",
+    "name": "Lake Van",
+    "type": "freshwater",
+    "centerLat": 38.68,
+    "centerLng": 43.39,
+    "radiusKm": 95,
+    "polygonCount": 2
+  },
+  "F0276": {
+    "id": "F0276",
+    "name": "Lord Howe Island",
+    "type": "freshwater",
+    "centerLat": -31.55,
+    "centerLng": 159.07,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0277": {
+    "id": "F0277",
+    "name": "Lower Amur",
+    "type": "freshwater",
+    "centerLat": 48.8,
+    "centerLng": 135.53,
+    "radiusKm": 443,
+    "polygonCount": 2
+  },
+  "F0278": {
+    "id": "F0278",
+    "name": "Lower Lancang (Mekong)",
+    "type": "freshwater",
+    "centerLat": 20.0,
+    "centerLng": 101.71,
+    "radiusKm": 262,
+    "polygonCount": 2
+  },
+  "F0279": {
+    "id": "F0279",
+    "name": "Lower Parana",
+    "type": "freshwater",
+    "centerLat": -29.76,
+    "centerLng": -60.28,
+    "radiusKm": 499,
+    "polygonCount": 2
+  },
+  "F0280": {
+    "id": "F0280",
+    "name": "Lower Yangtze",
+    "type": "freshwater",
+    "centerLat": 31.94,
+    "centerLng": 119.82,
+    "radiusKm": 86,
+    "polygonCount": 32
+  },
+  "F0281": {
+    "id": "F0281",
+    "name": "Madagascar Eastern Highlands",
+    "type": "freshwater",
+    "centerLat": -13.33,
+    "centerLng": 49.39,
+    "radiusKm": 125,
+    "polygonCount": 12
+  },
+  "F0282": {
+    "id": "F0282",
+    "name": "Magdalena - Sinu",
+    "type": "freshwater",
+    "centerLat": 9.45,
+    "centerLng": -75.43,
+    "radiusKm": 177,
+    "polygonCount": 6
+  },
+  "F0283": {
+    "id": "F0283",
+    "name": "Mai Ndombe",
+    "type": "freshwater",
+    "centerLat": -1.98,
+    "centerLng": 18.36,
+    "radiusKm": 81,
+    "polygonCount": 2
+  },
+  "F0284": {
+    "id": "F0284",
+    "name": "Malay Peninsula Eastern Slope",
+    "type": "freshwater",
+    "centerLat": 4.46,
+    "centerLng": 103.75,
+    "radiusKm": 54,
+    "polygonCount": 126
+  },
+  "F0285": {
+    "id": "F0285",
+    "name": "Maldives - Lakshadweep",
+    "type": "freshwater",
+    "centerLat": 4.48,
+    "centerLng": 73.18,
+    "radiusKm": 50,
+    "polygonCount": 258
+  },
+  "F0286": {
+    "id": "F0286",
+    "name": "Malebo Pool",
+    "type": "freshwater",
+    "centerLat": -4.17,
+    "centerLng": 15.52,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0287": {
+    "id": "F0287",
+    "name": "Mariana Islands",
+    "type": "freshwater",
+    "centerLat": 16.98,
+    "centerLng": 145.51,
+    "radiusKm": 50,
+    "polygonCount": 28
+  },
+  "F0288": {
+    "id": "F0288",
+    "name": "Marquesas Islands",
+    "type": "freshwater",
+    "centerLat": -9.2,
+    "centerLng": -139.62,
+    "radiusKm": 50,
+    "polygonCount": 26
+  },
+  "F0289": {
+    "id": "F0289",
+    "name": "Mekong Delta",
+    "type": "freshwater",
+    "centerLat": 9.68,
+    "centerLng": 106.06,
+    "radiusKm": 57,
+    "polygonCount": 68
+  },
+  "F0290": {
+    "id": "F0290",
+    "name": "Middle Zambezi - Luangwa",
+    "type": "freshwater",
+    "centerLat": -14.34,
+    "centerLng": 30.38,
+    "radiusKm": 395,
+    "polygonCount": 2
+  },
+  "F0291": {
+    "id": "F0291",
+    "name": "Mindanao",
+    "type": "freshwater",
+    "centerLat": 6.59,
+    "centerLng": 121.82,
+    "radiusKm": 50,
+    "polygonCount": 824
+  },
+  "F0292": {
+    "id": "F0292",
+    "name": "Mobile Bay",
+    "type": "freshwater",
+    "centerLat": 33.09,
+    "centerLng": -86.88,
+    "radiusKm": 202,
+    "polygonCount": 2
+  },
+  "F0293": {
+    "id": "F0293",
+    "name": "Nile Delta",
+    "type": "freshwater",
+    "centerLat": 31.29,
+    "centerLng": 31.79,
+    "radiusKm": 51,
+    "polygonCount": 110
+  },
+  "F0294": {
+    "id": "F0294",
+    "name": "Northeastern Mata Atlantica",
+    "type": "freshwater",
+    "centerLat": -13.29,
+    "centerLng": -38.65,
+    "radiusKm": 75,
+    "polygonCount": 32
+  },
+  "F0295": {
+    "id": "F0295",
+    "name": "Northern Anatolia",
+    "type": "freshwater",
+    "centerLat": 40.4,
+    "centerLng": 33.92,
+    "radiusKm": 350,
+    "polygonCount": 2
+  },
+  "F0296": {
+    "id": "F0296",
+    "name": "Northern Hormuz Drainages",
+    "type": "freshwater",
+    "centerLat": 26.71,
+    "centerLng": 55.43,
+    "radiusKm": 57,
+    "polygonCount": 40
+  },
+  "F0297": {
+    "id": "F0297",
+    "name": "Norwegian Sea Drainages",
+    "type": "freshwater",
+    "centerLat": 63.8,
+    "centerLng": 9.77,
+    "radiusKm": 52,
+    "polygonCount": 632
+  },
+  "F0298": {
+    "id": "F0298",
+    "name": "Ogooue - Nyanga - Kouilou - Niari",
+    "type": "freshwater",
+    "centerLat": -1.46,
+    "centerLng": 9.47,
+    "radiusKm": 69,
+    "polygonCount": 28
+  },
+  "F0299": {
+    "id": "F0299",
+    "name": "Orinoco Delta & Coastal Drainages",
+    "type": "freshwater",
+    "centerLat": 9.44,
+    "centerLng": -61.53,
+    "radiusKm": 104,
+    "polygonCount": 6
+  },
+  "F0300": {
+    "id": "F0300",
+    "name": "Orinoco Piedmont",
+    "type": "freshwater",
+    "centerLat": 6.69,
+    "centerLng": -71.21,
+    "radiusKm": 365,
+    "polygonCount": 2
+  },
+  "F0301": {
+    "id": "F0301",
+    "name": "Ouachita Highlands",
+    "type": "freshwater",
+    "centerLat": 33.25,
+    "centerLng": -94.06,
+    "radiusKm": 200,
+    "polygonCount": 2
+  },
+  "F0302": {
+    "id": "F0302",
+    "name": "Papaloapan",
+    "type": "freshwater",
+    "centerLat": 18.79,
+    "centerLng": -96.08,
+    "radiusKm": 90,
+    "polygonCount": 4
+  },
+  "F0303": {
+    "id": "F0303",
+    "name": "Papuan Peninsula",
+    "type": "freshwater",
+    "centerLat": -9.88,
+    "centerLng": 151.41,
+    "radiusKm": 51,
+    "polygonCount": 226
+  },
+  "F0304": {
+    "id": "F0304",
+    "name": "Quintana Roo - Motagua",
+    "type": "freshwater",
+    "centerLat": 17.87,
+    "centerLng": -87.8,
+    "radiusKm": 55,
+    "polygonCount": 74
+  },
+  "F0305": {
+    "id": "F0305",
+    "name": "Ribeira de Iguape",
+    "type": "freshwater",
+    "centerLat": -24.52,
+    "centerLng": -47.21,
+    "radiusKm": 101,
+    "polygonCount": 8
+  },
+  "F0306": {
+    "id": "F0306",
+    "name": "Rio San Juan (Mexico)",
+    "type": "freshwater",
+    "centerLat": 25.76,
+    "centerLng": -100.33,
+    "radiusKm": 123,
+    "polygonCount": 2
+  },
+  "F0307": {
+    "id": "F0307",
+    "name": "Rio Santiago",
+    "type": "freshwater",
+    "centerLat": 21.61,
+    "centerLng": -105.98,
+    "radiusKm": 79,
+    "polygonCount": 10
+  },
+  "F0308": {
+    "id": "F0308",
+    "name": "Sacramento - San Joaquin",
+    "type": "freshwater",
+    "centerLat": 38.17,
+    "centerLng": -121.66,
+    "radiusKm": 108,
+    "polygonCount": 8
+  },
+  "F0309": {
+    "id": "F0309",
+    "name": "Samoas",
+    "type": "freshwater",
+    "centerLat": -14.11,
+    "centerLng": -170.61,
+    "radiusKm": 50,
+    "polygonCount": 14
+  },
+  "F0310": {
+    "id": "F0310",
+    "name": "San Juan (Nicaragua/Costa Rica)",
+    "type": "freshwater",
+    "centerLat": 11.9,
+    "centerLng": -84.02,
+    "radiusKm": 117,
+    "polygonCount": 4
+  },
+  "F0311": {
+    "id": "F0311",
+    "name": "Santa Maria",
+    "type": "freshwater",
+    "centerLat": 7.83,
+    "centerLng": -81.03,
+    "radiusKm": 51,
+    "polygonCount": 40
+  },
+  "F0312": {
+    "id": "F0312",
+    "name": "Seychelles",
+    "type": "freshwater",
+    "centerLat": -4.42,
+    "centerLng": 55.61,
+    "radiusKm": 50,
+    "polygonCount": 10
+  },
+  "F0313": {
+    "id": "F0313",
+    "name": "Sitang - Irawaddy",
+    "type": "freshwater",
+    "centerLat": 17.22,
+    "centerLng": 94.97,
+    "radiusKm": 183,
+    "polygonCount": 8
+  },
+  "F0314": {
+    "id": "F0314",
+    "name": "Sonora",
+    "type": "freshwater",
+    "centerLat": 28.32,
+    "centerLng": -111.34,
+    "radiusKm": 94,
+    "polygonCount": 10
+  },
+  "F0315": {
+    "id": "F0315",
+    "name": "South Andean Pacific Slopes",
+    "type": "freshwater",
+    "centerLat": -31.98,
+    "centerLng": -71.19,
+    "radiusKm": 432,
+    "polygonCount": 2
+  },
+  "F0316": {
+    "id": "F0316",
+    "name": "Southeastern Korean Peninsula",
+    "type": "freshwater",
+    "centerLat": 34.6,
+    "centerLng": 127.02,
+    "radiusKm": 51,
+    "polygonCount": 196
+  },
+  "F0317": {
+    "id": "F0317",
+    "name": "Southern Deccan Plateau",
+    "type": "freshwater",
+    "centerLat": 15.7,
+    "centerLng": 80.29,
+    "radiusKm": 114,
+    "polygonCount": 10
+  },
+  "F0318": {
+    "id": "F0318",
+    "name": "Southern Kalahari",
+    "type": "freshwater",
+    "centerLat": -25.76,
+    "centerLng": 19.68,
+    "radiusKm": 409,
+    "polygonCount": 2
+  },
+  "F0319": {
+    "id": "F0319",
+    "name": "Southern Upper Guinea",
+    "type": "freshwater",
+    "centerLat": 5.96,
+    "centerLng": -9.0,
+    "radiusKm": 209,
+    "polygonCount": 2
+  },
+  "F0320": {
+    "id": "F0320",
+    "name": "Southwestern Australia",
+    "type": "freshwater",
+    "centerLat": -33.79,
+    "centerLng": 119.47,
+    "radiusKm": 104,
+    "polygonCount": 10
+  },
+  "F0321": {
+    "id": "F0321",
+    "name": "Sri Lanka Wet Zone",
+    "type": "freshwater",
+    "centerLat": 6.75,
+    "centerLng": 80.39,
+    "radiusKm": 103,
+    "polygonCount": 2
+  },
+  "F0322": {
+    "id": "F0322",
+    "name": "Tibetan Plateau Endorheic Drainages",
+    "type": "freshwater",
+    "centerLat": 32.92,
+    "centerLng": 86.01,
+    "radiusKm": 446,
+    "polygonCount": 2
+  },
+  "F0323": {
+    "id": "F0323",
+    "name": "Titicaca",
+    "type": "freshwater",
+    "centerLat": -18.54,
+    "centerLng": -68.37,
+    "radiusKm": 317,
+    "polygonCount": 2
+  },
+  "F0324": {
+    "id": "F0324",
+    "name": "Tocantins - Araguaia",
+    "type": "freshwater",
+    "centerLat": -11.82,
+    "centerLng": -49.45,
+    "radiusKm": 488,
+    "polygonCount": 2
+  },
+  "F0325": {
+    "id": "F0325",
+    "name": "Tramandai - Mampituba",
+    "type": "freshwater",
+    "centerLat": -29.51,
+    "centerLng": -49.91,
+    "radiusKm": 63,
+    "polygonCount": 4
+  },
+  "F0326": {
+    "id": "F0326",
+    "name": "Upper Amu Darya",
+    "type": "freshwater",
+    "centerLat": 36.75,
+    "centerLng": 67.59,
+    "radiusKm": 601,
+    "polygonCount": 2
+  },
+  "F0327": {
+    "id": "F0327",
+    "name": "Upper Danube",
+    "type": "freshwater",
+    "centerLat": 47.88,
+    "centerLng": 14.86,
+    "radiusKm": 347,
+    "polygonCount": 2
+  },
+  "F0328": {
+    "id": "F0328",
+    "name": "Upper Huang He",
+    "type": "freshwater",
+    "centerLat": 35.24,
+    "centerLng": 99.53,
+    "radiusKm": 293,
+    "polygonCount": 2
+  },
+  "F0329": {
+    "id": "F0329",
+    "name": "Upper Irtysh",
+    "type": "freshwater",
+    "centerLat": 47.53,
+    "centerLng": 86.93,
+    "radiusKm": 478,
+    "polygonCount": 2
+  },
+  "F0330": {
+    "id": "F0330",
+    "name": "Upper Lualaba",
+    "type": "freshwater",
+    "centerLat": -9.91,
+    "centerLng": 26.04,
+    "radiusKm": 217,
+    "polygonCount": 2
+  },
+  "F0331": {
+    "id": "F0331",
+    "name": "Upper Mississippi",
+    "type": "freshwater",
+    "centerLat": 42.94,
+    "centerLng": -91.57,
+    "radiusKm": 392,
+    "polygonCount": 2
+  },
+  "F0332": {
+    "id": "F0332",
+    "name": "Upper Missouri",
+    "type": "freshwater",
+    "centerLat": 47.03,
+    "centerLng": -106.97,
+    "radiusKm": 609,
+    "polygonCount": 2
+  },
+  "F0333": {
+    "id": "F0333",
+    "name": "Upper Rio Grande - Bravo",
+    "type": "freshwater",
+    "centerLat": 34.16,
+    "centerLng": -106.36,
+    "radiusKm": 285,
+    "polygonCount": 2
+  },
+  "F0334": {
+    "id": "F0334",
+    "name": "Vogelkop - Bomberai",
+    "type": "freshwater",
+    "centerLat": -1.52,
+    "centerLng": 131.56,
+    "radiusKm": 51,
+    "polygonCount": 206
+  },
+  "F0335": {
+    "id": "F0335",
+    "name": "Volga Delta - Northern Caspian Drainages",
+    "type": "freshwater",
+    "centerLat": 45.67,
+    "centerLng": 49.85,
+    "radiusKm": 228,
+    "polygonCount": 2
+  },
+  "F0336": {
+    "id": "F0336",
+    "name": "Western Equatorial Crater Lakes",
+    "type": "freshwater",
+    "centerLat": 4.69,
+    "centerLng": 9.59,
+    "radiusKm": 62,
+    "polygonCount": 2
+  },
+  "F0337": {
+    "id": "F0337",
+    "name": "Western Hudson Bay",
+    "type": "freshwater",
+    "centerLat": 63.14,
+    "centerLng": -84.95,
+    "radiusKm": 55,
+    "polygonCount": 420
+  },
+  "F0338": {
+    "id": "F0338",
+    "name": "Yaghistan",
+    "type": "freshwater",
+    "centerLat": 32.05,
+    "centerLng": 69.05,
+    "radiusKm": 167,
+    "polygonCount": 2
+  },
+  "F0339": {
+    "id": "F0339",
+    "name": "Yenisei",
+    "type": "freshwater",
+    "centerLat": 71.05,
+    "centerLng": 81.44,
+    "radiusKm": 97,
+    "polygonCount": 42
+  },
+  "F0340": {
+    "id": "F0340",
+    "name": "Yunnan Lakes",
+    "type": "freshwater",
+    "centerLat": 24.43,
+    "centerLng": 102.75,
+    "radiusKm": 50,
+    "polygonCount": 8
+  },
+  "F0341": {
+    "id": "F0341",
+    "name": "Amazonas Estuary & Coastal Drainages",
+    "type": "freshwater",
+    "centerLat": -1.15,
+    "centerLng": -46.16,
+    "radiusKm": 58,
+    "polygonCount": 94
+  },
+  "F0342": {
+    "id": "F0342",
+    "name": "Ameca - Manantlan",
+    "type": "freshwater",
+    "centerLat": 19.73,
+    "centerLng": -104.4,
+    "radiusKm": 117,
+    "polygonCount": 2
+  },
+  "F0343": {
+    "id": "F0343",
+    "name": "Apalachicola",
+    "type": "freshwater",
+    "centerLat": 30.17,
+    "centerLng": -85.04,
+    "radiusKm": 89,
+    "polygonCount": 10
+  },
+  "F0344": {
+    "id": "F0344",
+    "name": "Bahama Archipelago",
+    "type": "freshwater",
+    "centerLat": 23.9,
+    "centerLng": -75.42,
+    "radiusKm": 50,
+    "polygonCount": 186
+  },
+  "F0345": {
+    "id": "F0345",
+    "name": "Baluchistan",
+    "type": "freshwater",
+    "centerLat": 26.14,
+    "centerLng": 60.2,
+    "radiusKm": 125,
+    "polygonCount": 10
+  },
+  "F0346": {
+    "id": "F0346",
+    "name": "Barents Sea Drainages",
+    "type": "freshwater",
+    "centerLat": 74.94,
+    "centerLng": 38.56,
+    "radiusKm": 65,
+    "polygonCount": 450
+  },
+  "F0347": {
+    "id": "F0347",
+    "name": "Bismarck Archipelago",
+    "type": "freshwater",
+    "centerLat": -3.59,
+    "centerLng": 150.03,
+    "radiusKm": 52,
+    "polygonCount": 114
+  },
+  "F0348": {
+    "id": "F0348",
+    "name": "Bonaerensean Drainages",
+    "type": "freshwater",
+    "centerLat": -38.32,
+    "centerLng": -61.43,
+    "radiusKm": 127,
+    "polygonCount": 6
+  },
+  "F0349": {
+    "id": "F0349",
+    "name": "Canadian Atlantic Islands",
+    "type": "freshwater",
+    "centerLat": 49.01,
+    "centerLng": -57.02,
+    "radiusKm": 52,
+    "polygonCount": 276
+  },
+  "F0350": {
+    "id": "F0350",
+    "name": "Canary Islands",
+    "type": "freshwater",
+    "centerLat": 28.91,
+    "centerLng": -15.51,
+    "radiusKm": 50,
+    "polygonCount": 26
+  },
+  "F0351": {
+    "id": "F0351",
+    "name": "Central & Eastern Java",
+    "type": "freshwater",
+    "centerLat": -6.89,
+    "centerLng": 114.37,
+    "radiusKm": 56,
+    "polygonCount": 58
+  },
+  "F0352": {
+    "id": "F0352",
+    "name": "Central & Western Europe",
+    "type": "freshwater",
+    "centerLat": 53.05,
+    "centerLng": 5.92,
+    "radiusKm": 59,
+    "polygonCount": 268
+  },
+  "F0353": {
+    "id": "F0353",
+    "name": "Central Andean Pacific Slopes",
+    "type": "freshwater",
+    "centerLat": -10.51,
+    "centerLng": -78.09,
+    "radiusKm": 112,
+    "polygonCount": 14
+  },
+  "F0354": {
+    "id": "F0354",
+    "name": "Chaco",
+    "type": "freshwater",
+    "centerLat": -20.59,
+    "centerLng": -62.72,
+    "radiusKm": 218,
+    "polygonCount": 4
+  },
+  "F0355": {
+    "id": "F0355",
+    "name": "Chao Phraya",
+    "type": "freshwater",
+    "centerLat": 13.38,
+    "centerLng": 100.73,
+    "radiusKm": 89,
+    "polygonCount": 12
+  },
+  "F0356": {
+    "id": "F0356",
+    "name": "Chiapas - Fonseca",
+    "type": "freshwater",
+    "centerLat": 13.46,
+    "centerLng": -88.16,
+    "radiusKm": 84,
+    "polygonCount": 16
+  },
+  "F0357": {
+    "id": "F0357",
+    "name": "Coastal Levant",
+    "type": "freshwater",
+    "centerLat": 33.36,
+    "centerLng": 35.37,
+    "radiusKm": 209,
+    "polygonCount": 2
+  },
+  "F0358": {
+    "id": "F0358",
+    "name": "Cocos Island (Costa Rica)",
+    "type": "freshwater",
+    "centerLat": 5.53,
+    "centerLng": -87.06,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0359": {
+    "id": "F0359",
+    "name": "Cocos Islands",
+    "type": "freshwater",
+    "centerLat": -12.07,
+    "centerLng": 96.86,
+    "radiusKm": 50,
+    "polygonCount": 8
+  },
+  "F0360": {
+    "id": "F0360",
+    "name": "Crimea Peninsula",
+    "type": "freshwater",
+    "centerLat": 45.82,
+    "centerLng": 34.36,
+    "radiusKm": 80,
+    "polygonCount": 6
+  },
+  "F0361": {
+    "id": "F0361",
+    "name": "Cuyan - Desaguadero",
+    "type": "freshwater",
+    "centerLat": -33.28,
+    "centerLng": -68.2,
+    "radiusKm": 347,
+    "polygonCount": 2
+  },
+  "F0362": {
+    "id": "F0362",
+    "name": "Drakensberg - Maloti Highlands",
+    "type": "freshwater",
+    "centerLat": -29.89,
+    "centerLng": 28.21,
+    "radiusKm": 116,
+    "polygonCount": 2
+  },
+  "F0363": {
+    "id": "F0363",
+    "name": "Eastern Coastal Australia",
+    "type": "freshwater",
+    "centerLat": -24.53,
+    "centerLng": 150.32,
+    "radiusKm": 78,
+    "polygonCount": 44
+  },
+  "F0364": {
+    "id": "F0364",
+    "name": "Eburneo",
+    "type": "freshwater",
+    "centerLat": 6.61,
+    "centerLng": -4.96,
+    "radiusKm": 322,
+    "polygonCount": 2
+  },
+  "F0365": {
+    "id": "F0365",
+    "name": "English - Winnipeg Lakes",
+    "type": "freshwater",
+    "centerLat": 51.21,
+    "centerLng": -98.82,
+    "radiusKm": 581,
+    "polygonCount": 2
+  },
+  "F0366": {
+    "id": "F0366",
+    "name": "Essequibo",
+    "type": "freshwater",
+    "centerLat": 6.73,
+    "centerLng": -58.64,
+    "radiusKm": 74,
+    "polygonCount": 18
+  },
+  "F0367": {
+    "id": "F0367",
+    "name": "Fluminense",
+    "type": "freshwater",
+    "centerLat": -22.7,
+    "centerLng": -42.72,
+    "radiusKm": 95,
+    "polygonCount": 2
+  },
+  "F0368": {
+    "id": "F0368",
+    "name": "Ganges Himalayan Foothills",
+    "type": "freshwater",
+    "centerLat": 29.36,
+    "centerLng": 82.26,
+    "radiusKm": 389,
+    "polygonCount": 2
+  },
+  "F0369": {
+    "id": "F0369",
+    "name": "Iguassu",
+    "type": "freshwater",
+    "centerLat": -25.88,
+    "centerLng": -51.51,
+    "radiusKm": 206,
+    "polygonCount": 2
+  },
+  "F0370": {
+    "id": "F0370",
+    "name": "Isthmus Caribbean",
+    "type": "freshwater",
+    "centerLat": 9.23,
+    "centerLng": -82.13,
+    "radiusKm": 53,
+    "polygonCount": 28
+  },
+  "F0371": {
+    "id": "F0371",
+    "name": "Italian Peninsula & Islands",
+    "type": "freshwater",
+    "centerLat": 40.15,
+    "centerLng": 11.91,
+    "radiusKm": 61,
+    "polygonCount": 88
+  },
+  "F0372": {
+    "id": "F0372",
+    "name": "Juan Fernandez Island",
+    "type": "freshwater",
+    "centerLat": -30.73,
+    "centerLng": -79.72,
+    "radiusKm": 50,
+    "polygonCount": 10
+  },
+  "F0373": {
+    "id": "F0373",
+    "name": "Kalahari",
+    "type": "freshwater",
+    "centerLat": -21.39,
+    "centerLng": 23.05,
+    "radiusKm": 416,
+    "polygonCount": 2
+  },
+  "F0374": {
+    "id": "F0374",
+    "name": "Kapuas",
+    "type": "freshwater",
+    "centerLat": -0.1,
+    "centerLng": 108.81,
+    "radiusKm": 56,
+    "polygonCount": 48
+  },
+  "F0375": {
+    "id": "F0375",
+    "name": "Karoo",
+    "type": "freshwater",
+    "centerLat": -30.55,
+    "centerLng": 19.38,
+    "radiusKm": 373,
+    "polygonCount": 2
+  },
+  "F0376": {
+    "id": "F0376",
+    "name": "Koryakia",
+    "type": "freshwater",
+    "centerLat": 60.83,
+    "centerLng": 165.37,
+    "radiusKm": 138,
+    "polygonCount": 10
+  },
+  "F0377": {
+    "id": "F0377",
+    "name": "Kratie - Stung Treng (Mekong)",
+    "type": "freshwater",
+    "centerLat": 13.77,
+    "centerLng": 106.97,
+    "radiusKm": 160,
+    "polygonCount": 2
+  },
+  "F0378": {
+    "id": "F0378",
+    "name": "Laguna dos Patos",
+    "type": "freshwater",
+    "centerLat": -31.65,
+    "centerLng": -52.33,
+    "radiusKm": 165,
+    "polygonCount": 4
+  },
+  "F0379": {
+    "id": "F0379",
+    "name": "Lake Rukwa",
+    "type": "freshwater",
+    "centerLat": -7.86,
+    "centerLng": 32.45,
+    "radiusKm": 131,
+    "polygonCount": 2
+  },
+  "F0380": {
+    "id": "F0380",
+    "name": "Lake Victoria Basin",
+    "type": "freshwater",
+    "centerLat": -0.77,
+    "centerLng": 32.43,
+    "radiusKm": 295,
+    "polygonCount": 2
+  },
+  "F0381": {
+    "id": "F0381",
+    "name": "Lena",
+    "type": "freshwater",
+    "centerLat": 73.08,
+    "centerLng": 128.73,
+    "radiusKm": 65,
+    "polygonCount": 234
+  },
+  "F0382": {
+    "id": "F0382",
+    "name": "Llanos El Salado",
+    "type": "freshwater",
+    "centerLat": 23.15,
+    "centerLng": -101.03,
+    "radiusKm": 145,
+    "polygonCount": 2
+  },
+  "F0383": {
+    "id": "F0383",
+    "name": "Lower & Middle Syr Darya",
+    "type": "freshwater",
+    "centerLat": 45.03,
+    "centerLng": 67.68,
+    "radiusKm": 532,
+    "polygonCount": 2
+  },
+  "F0384": {
+    "id": "F0384",
+    "name": "Lower Congo",
+    "type": "freshwater",
+    "centerLat": -5.95,
+    "centerLng": 12.85,
+    "radiusKm": 60,
+    "polygonCount": 24
+  },
+  "F0385": {
+    "id": "F0385",
+    "name": "Lower Huang He",
+    "type": "freshwater",
+    "centerLat": 37.75,
+    "centerLng": 120.47,
+    "radiusKm": 113,
+    "polygonCount": 22
+  },
+  "F0386": {
+    "id": "F0386",
+    "name": "Lower Mackenzie",
+    "type": "freshwater",
+    "centerLat": 69.19,
+    "centerLng": -133.53,
+    "radiusKm": 73,
+    "polygonCount": 86
+  },
+  "F0387": {
+    "id": "F0387",
+    "name": "Lower Niger - Benue",
+    "type": "freshwater",
+    "centerLat": 10.09,
+    "centerLng": 7.17,
+    "radiusKm": 793,
+    "polygonCount": 2
+  },
+  "F0388": {
+    "id": "F0388",
+    "name": "Lower Nile",
+    "type": "freshwater",
+    "centerLat": 19.84,
+    "centerLng": 32.33,
+    "radiusKm": 649,
+    "polygonCount": 2
+  },
+  "F0389": {
+    "id": "F0389",
+    "name": "Lower Zambezi",
+    "type": "freshwater",
+    "centerLat": -17.73,
+    "centerLng": 35.29,
+    "radiusKm": 151,
+    "polygonCount": 4
+  },
+  "F0390": {
+    "id": "F0390",
+    "name": "Mascarenes",
+    "type": "freshwater",
+    "centerLat": -20.29,
+    "centerLng": 58.56,
+    "radiusKm": 50,
+    "polygonCount": 8
+  },
+  "F0391": {
+    "id": "F0391",
+    "name": "Middle Yangtze",
+    "type": "freshwater",
+    "centerLat": 28.69,
+    "centerLng": 105.12,
+    "radiusKm": 440,
+    "polygonCount": 2
+  },
+  "F0392": {
+    "id": "F0392",
+    "name": "New Caledonia",
+    "type": "freshwater",
+    "centerLat": -21.01,
+    "centerLng": 165.42,
+    "radiusKm": 52,
+    "polygonCount": 64
+  },
+  "F0393": {
+    "id": "F0393",
+    "name": "Nicobar Islands",
+    "type": "freshwater",
+    "centerLat": 7.89,
+    "centerLng": 93.48,
+    "radiusKm": 50,
+    "polygonCount": 36
+  },
+  "F0394": {
+    "id": "F0394",
+    "name": "Northern Annam",
+    "type": "freshwater",
+    "centerLat": 18.4,
+    "centerLng": 106.19,
+    "radiusKm": 66,
+    "polygonCount": 16
+  },
+  "F0395": {
+    "id": "F0395",
+    "name": "Northern Central Sumatra - Western Malaysia",
+    "type": "freshwater",
+    "centerLat": 6.19,
+    "centerLng": 99.74,
+    "radiusKm": 56,
+    "polygonCount": 90
+  },
+  "F0396": {
+    "id": "F0396",
+    "name": "Northern Eastern Rift",
+    "type": "freshwater",
+    "centerLat": 10.74,
+    "centerLng": 40.42,
+    "radiusKm": 260,
+    "polygonCount": 2
+  },
+  "F0397": {
+    "id": "F0397",
+    "name": "Northwestern Madagascar",
+    "type": "freshwater",
+    "centerLat": -13.66,
+    "centerLng": 48.13,
+    "radiusKm": 64,
+    "polygonCount": 34
+  },
+  "F0398": {
+    "id": "F0398",
+    "name": "Ogasarawa Islands - Kazan Archipelago",
+    "type": "freshwater",
+    "centerLat": 26.69,
+    "centerLng": 142.85,
+    "radiusKm": 50,
+    "polygonCount": 26
+  },
+  "F0399": {
+    "id": "F0399",
+    "name": "Oregon Lakes",
+    "type": "freshwater",
+    "centerLat": 42.27,
+    "centerLng": -119.75,
+    "radiusKm": 173,
+    "polygonCount": 2
+  },
+  "F0400": {
+    "id": "F0400",
+    "name": "Orinoco High Andes",
+    "type": "freshwater",
+    "centerLat": 6.56,
+    "centerLng": -72.12,
+    "radiusKm": 327,
+    "polygonCount": 2
+  },
+  "F0401": {
+    "id": "F0401",
+    "name": "Palawan - Busuanga - Mindoro",
+    "type": "freshwater",
+    "centerLat": 10.86,
+    "centerLng": 119.63,
+    "radiusKm": 50,
+    "polygonCount": 652
+  },
+  "F0402": {
+    "id": "F0402",
+    "name": "Paleo",
+    "type": "freshwater",
+    "centerLat": -33.39,
+    "centerLng": 134.43,
+    "radiusKm": 162,
+    "polygonCount": 14
+  },
+  "F0403": {
+    "id": "F0403",
+    "name": "Pangani",
+    "type": "freshwater",
+    "centerLat": -4.94,
+    "centerLng": 38.67,
+    "radiusKm": 79,
+    "polygonCount": 6
+  },
+  "F0404": {
+    "id": "F0404",
+    "name": "Pitcairn Island",
+    "type": "freshwater",
+    "centerLat": -24.37,
+    "centerLng": -128.31,
+    "radiusKm": 50,
+    "polygonCount": 2
+  },
+  "F0405": {
+    "id": "F0405",
+    "name": "Rio Conchos",
+    "type": "freshwater",
+    "centerLat": 28.04,
+    "centerLng": -105.88,
+    "radiusKm": 149,
+    "polygonCount": 2
+  },
+  "F0406": {
+    "id": "F0406",
+    "name": "Rio Negro",
+    "type": "freshwater",
+    "centerLat": 0.37,
+    "centerLng": -65.87,
+    "radiusKm": 446,
+    "polygonCount": 2
+  },
+  "F0407": {
+    "id": "F0407",
+    "name": "Rio Salado",
+    "type": "freshwater",
+    "centerLat": 27.31,
+    "centerLng": -101.38,
+    "radiusKm": 146,
+    "polygonCount": 2
+  },
+  "F0408": {
+    "id": "F0408",
+    "name": "Rio Tuira",
+    "type": "freshwater",
+    "centerLat": 8.51,
+    "centerLng": -78.91,
+    "radiusKm": 52,
+    "polygonCount": 46
+  },
+  "F0409": {
+    "id": "F0409",
+    "name": "S. Francisco",
+    "type": "freshwater",
+    "centerLat": -13.34,
+    "centerLng": -42.99,
+    "radiusKm": 479,
+    "polygonCount": 2
+  },
+  "F0410": {
+    "id": "F0410",
+    "name": "S. Tome & Principe - Annobon",
+    "type": "freshwater",
+    "centerLat": 0.35,
+    "centerLng": 6.7,
+    "radiusKm": 50,
+    "polygonCount": 10
+  },
+  "F0411": {
+    "id": "F0411",
+    "name": "Sakhalin, Hokkaido, & Sikhote - Alin Coast",
+    "type": "freshwater",
+    "centerLat": 45.55,
+    "centerLng": 141.72,
+    "radiusKm": 73,
+    "polygonCount": 74
+  },
+  "F0412": {
+    "id": "F0412",
+    "name": "Senegal - Gambia",
+    "type": "freshwater",
+    "centerLat": 12.53,
+    "centerLng": -15.84,
+    "radiusKm": 127,
+    "polygonCount": 12
+  },
+  "F0413": {
+    "id": "F0413",
+    "name": "Shebelle - Juba",
+    "type": "freshwater",
+    "centerLat": -1.28,
+    "centerLng": 41.66,
+    "radiusKm": 78,
+    "polygonCount": 32
+  },
+  "F0414": {
+    "id": "F0414",
+    "name": "Songhua Jiang",
+    "type": "freshwater",
+    "centerLat": 46.68,
+    "centerLng": 125.66,
+    "radiusKm": 398,
+    "polygonCount": 2
+  },
+  "F0415": {
+    "id": "F0415",
+    "name": "Southern California Coastal - Baja California",
+    "type": "freshwater",
+    "centerLat": 28.27,
+    "centerLng": -113.88,
+    "radiusKm": 64,
+    "polygonCount": 80
+  },
+  "F0416": {
+    "id": "F0416",
+    "name": "Southern Iberia",
+    "type": "freshwater",
+    "centerLat": 36.94,
+    "centerLng": -4.79,
+    "radiusKm": 114,
+    "polygonCount": 6
+  },
+  "F0417": {
+    "id": "F0417",
+    "name": "Southwest New Guinea - Trans-Fly Lowland",
+    "type": "freshwater",
+    "centerLat": -7.62,
+    "centerLng": 139.18,
+    "radiusKm": 53,
+    "polygonCount": 190
+  },
+  "F0418": {
+    "id": "F0418",
+    "name": "Southwestern Arabian Coast",
+    "type": "freshwater",
+    "centerLat": 20.66,
+    "centerLng": 41.16,
+    "radiusKm": 57,
+    "polygonCount": 220
+  },
+  "F0419": {
+    "id": "F0419",
+    "name": "St.Lawrence",
+    "type": "freshwater",
+    "centerLat": 47.84,
+    "centerLng": -74.4,
+    "radiusKm": 406,
+    "polygonCount": 2
+  },
+  "F0420": {
+    "id": "F0420",
+    "name": "Sudanic Congo - Oubangi",
+    "type": "freshwater",
+    "centerLat": 4.01,
+    "centerLng": 20.05,
+    "radiusKm": 521,
+    "polygonCount": 2
+  },
+  "F0421": {
+    "id": "F0421",
+    "name": "Sulawesi",
+    "type": "freshwater",
+    "centerLat": -3.33,
+    "centerLng": 122.21,
+    "radiusKm": 52,
+    "polygonCount": 218
+  },
+  "F0422": {
+    "id": "F0422",
+    "name": "Tapajos - Juruena",
+    "type": "freshwater",
+    "centerLat": -10.45,
+    "centerLng": -56.89,
+    "radiusKm": 374,
+    "polygonCount": 2
+  },
+  "F0423": {
+    "id": "F0423",
+    "name": "Tarim",
+    "type": "freshwater",
+    "centerLat": 39.02,
+    "centerLng": 85.06,
+    "radiusKm": 751,
+    "polygonCount": 2
+  },
+  "F0424": {
+    "id": "F0424",
+    "name": "Teays - Old Ohio",
+    "type": "freshwater",
+    "centerLat": 38.86,
+    "centerLng": -83.21,
+    "radiusKm": 388,
+    "polygonCount": 2
+  },
+  "F0425": {
+    "id": "F0425",
+    "name": "Tonga",
+    "type": "freshwater",
+    "centerLat": -19.15,
+    "centerLng": -174.53,
+    "radiusKm": 50,
+    "polygonCount": 32
+  },
+  "F0426": {
+    "id": "F0426",
+    "name": "Tuamotu Islands",
+    "type": "freshwater",
+    "centerLat": 2.45,
+    "centerLng": -159.31,
+    "radiusKm": 50,
+    "polygonCount": 14
+  },
+  "F0427": {
+    "id": "F0427",
+    "name": "Tubuai Islands",
+    "type": "freshwater",
+    "centerLat": -25.1,
+    "centerLng": -147.53,
+    "radiusKm": 50,
+    "polygonCount": 14
+  },
+  "F0428": {
+    "id": "F0428",
+    "name": "Turan Plain",
+    "type": "freshwater",
+    "centerLat": 39.86,
+    "centerLng": 53.69,
+    "radiusKm": 93,
+    "polygonCount": 16
+  },
+  "F0429": {
+    "id": "F0429",
+    "name": "Ucayali - Urubamba Piedmont",
+    "type": "freshwater",
+    "centerLat": -9.68,
+    "centerLng": -74.34,
+    "radiusKm": 231,
+    "polygonCount": 2
+  },
+  "F0430": {
+    "id": "F0430",
+    "name": "Upper Congo Rapids",
+    "type": "freshwater",
+    "centerLat": 0.51,
+    "centerLng": 24.94,
+    "radiusKm": 83,
+    "polygonCount": 2
+  },
+  "F0431": {
+    "id": "F0431",
+    "name": "Upper Salween",
+    "type": "freshwater",
+    "centerLat": 29.34,
+    "centerLng": 95.87,
+    "radiusKm": 401,
+    "polygonCount": 2
+  },
+  "F0432": {
+    "id": "F0432",
+    "name": "Upper Saskatchewan",
+    "type": "freshwater",
+    "centerLat": 51.88,
+    "centerLng": -112.43,
+    "radiusKm": 318,
+    "polygonCount": 2
+  },
+  "F0433": {
+    "id": "F0433",
+    "name": "Upper Snake",
+    "type": "freshwater",
+    "centerLat": 43.19,
+    "centerLng": -112.62,
+    "radiusKm": 202,
+    "polygonCount": 2
+  },
+  "F0434": {
+    "id": "F0434",
+    "name": "Upper Tigris & Euphrates",
+    "type": "freshwater",
+    "centerLat": 29.87,
+    "centerLng": 49.6,
+    "radiusKm": 117,
+    "polygonCount": 18
+  },
+  "F0435": {
+    "id": "F0435",
+    "name": "US Southern Plains",
+    "type": "freshwater",
+    "centerLat": 36.33,
+    "centerLng": -100.56,
+    "radiusKm": 404,
+    "polygonCount": 2
+  },
+  "F0436": {
+    "id": "F0436",
+    "name": "Vardar",
+    "type": "freshwater",
+    "centerLat": 40.8,
+    "centerLng": 22.02,
+    "radiusKm": 127,
+    "polygonCount": 2
+  },
+  "F0437": {
+    "id": "F0437",
+    "name": "Vegas - Virgin",
+    "type": "freshwater",
+    "centerLat": 37.37,
+    "centerLng": -114.48,
+    "radiusKm": 135,
+    "polygonCount": 2
+  },
+  "F0438": {
+    "id": "F0438",
+    "name": "West Caroline Islands",
+    "type": "freshwater",
+    "centerLat": 7.51,
+    "centerLng": 134.98,
+    "radiusKm": 50,
+    "polygonCount": 18
+  },
+  "F0439": {
+    "id": "F0439",
+    "name": "Western Anatolia",
+    "type": "freshwater",
+    "centerLat": 37.61,
+    "centerLng": 26.83,
+    "radiusKm": 53,
+    "polygonCount": 76
+  },
+  "F0440": {
+    "id": "F0440",
+    "name": "Western Caspian Drainages",
+    "type": "freshwater",
+    "centerLat": 42.97,
+    "centerLng": 48.29,
+    "radiusKm": 92,
+    "polygonCount": 14
+  },
+  "F0441": {
+    "id": "F0441",
+    "name": "Western Ghats",
+    "type": "freshwater",
+    "centerLat": 13.04,
+    "centerLng": 75.1,
+    "radiusKm": 124,
+    "polygonCount": 10
+  },
+  "F0442": {
+    "id": "F0442",
+    "name": "Western Mongolia",
+    "type": "freshwater",
+    "centerLat": 47.44,
+    "centerLng": 97.13,
+    "radiusKm": 581,
+    "polygonCount": 2
+  },
+  "F0443": {
+    "id": "F0443",
+    "name": "Western Taiwan",
+    "type": "freshwater",
+    "centerLat": 23.54,
+    "centerLng": 120.08,
+    "radiusKm": 59,
+    "polygonCount": 16
+  },
+  "F0444": {
+    "id": "F0444",
+    "name": "Windward & Leeward Islands",
+    "type": "freshwater",
+    "centerLat": 15.02,
+    "centerLng": -61.76,
+    "radiusKm": 50,
+    "polygonCount": 74
+  },
+  "F0445": {
+    "id": "F0445",
+    "name": "Yucatan",
+    "type": "freshwater",
+    "centerLat": 20.96,
+    "centerLng": -87.29,
+    "radiusKm": 80,
+    "polygonCount": 8
+  },
+  "F0446": {
+    "id": "F0446",
+    "name": "Zambezian Headwaters",
+    "type": "freshwater",
+    "centerLat": -13.55,
+    "centerLng": 20.88,
+    "radiusKm": 483,
+    "polygonCount": 2
+  },
+  "F0447": {
+    "id": "F0447",
+    "name": "<Null>",
+    "type": "freshwater",
+    "centerLat": -33.45,
+    "centerLng": -80.02,
+    "radiusKm": 381,
+    "polygonCount": 1
+  },
+  "F0448": {
+    "id": "F0448",
+    "name": "Greenland",
+    "type": "freshwater",
+    "centerLat": 69.11,
+    "centerLng": -43.1,
+    "radiusKm": 53,
+    "polygonCount": 1084
+  },
+  "F0449": {
+    "id": "F0449",
+    "name": "Unassigned",
+    "type": "freshwater",
+    "centerLat": -32.58,
+    "centerLng": 14.03,
+    "radiusKm": 56,
+    "polygonCount": 1026
+  }
+}

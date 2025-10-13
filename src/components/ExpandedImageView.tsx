@@ -1,8 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { X, Volume2, ChevronLeft, ChevronRight } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { MapPin, AlertTriangle, Leaf } from 'lucide-react';
 
 interface ExpandedImageViewProps {
   imageUrl: string;
@@ -13,161 +9,86 @@ interface ExpandedImageViewProps {
   onNext?: () => void;
   onPrevious?: () => void;
   externalMessage?: string;
+  description?: string;
+  location?: string;
+  severity?: string;
+  affectedSpecies?: number;
 }
 
-const ExpandedImageView = ({ imageUrl, type, context, title, onClose, onNext, onPrevious, externalMessage }: ExpandedImageViewProps) => {
-  const [messages, setMessages] = useState<Array<{role: string; content: string; isStreaming?: boolean}>>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [streamingText, setStreamingText] = useState('');
-  const { toast } = useToast();
+const ExpandedImageView = ({
+  imageUrl,
+  type,
+  context,
+  title,
+  onClose,
+  onNext,
+  onPrevious,
+  description,
+  location,
+  severity,
+  affectedSpecies
+}: ExpandedImageViewProps) => {
 
-  const streamTextWithTyping = useCallback((text: string, index: number) => {
-    let currentIndex = 0;
-    const words = text.split(' ');
-    const interval = setInterval(() => {
-      if (currentIndex < words.length) {
-        setMessages(prev => prev.map((msg, i) => 
-          i === index ? { ...msg, content: words.slice(0, currentIndex + 1).join(' ') } : msg
-        ));
-        currentIndex++;
-      } else {
-        clearInterval(interval);
-        setMessages(prev => prev.map((msg, i) => 
-          i === index ? { ...msg, isStreaming: false } : msg
-        ));
-      }
-    }, 100);
-  }, []);
+  const getTypeIcon = () => {
+    if (type === 'threat') return '⚠️';
+    return '🌿';
+  };
 
-  const playAudio = useCallback(async (text: string) => {
-    try {
-      const { data, error } = await supabase.functions.invoke('text-to-speech', {
-        body: { text }
-      });
-
-      if (error) throw error;
-
-      const audioBlob = new Blob([data], { type: 'audio/mpeg' });
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play();
-    } catch (error) {
-      console.error('Error playing audio:', error);
-    }
-  }, []);
-
-  const sendMessage = useCallback(async (messageText: string, isInitial = false) => {
-    if (!messageText.trim() && !isInitial) return;
-
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase.functions.invoke('species-chat', {
-        body: { 
-          message: messageText,
-          context,
-          type: isInitial ? 'threat' : 'chat'
-        }
-      });
-
-      if (error) throw error;
-
-      const aiResponse = data.message;
-      const newMessages = [
-        ...messages,
-        { role: 'user', content: messageText },
-        { role: 'assistant', content: '', isStreaming: true }
-      ];
-      setMessages(newMessages);
-      
-      const assistantIndex = newMessages.length - 1;
-      
-      // Start text streaming and audio simultaneously
-      streamTextWithTyping(aiResponse, assistantIndex);
-      await playAudio(aiResponse);
-      
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to get response. Please try again.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [context, playAudio, toast]);
-
-  // Initialize with threat message
-  useEffect(() => {
-    if (!isInitialized && type === 'threat') {
-      setIsInitialized(true);
-      sendMessage(`Tell me about this threat to ${context}`, true);
-    }
-  }, [isInitialized, type, context, sendMessage]);
-
-  // Handle external messages from bottom input
-  useEffect(() => {
-    if (externalMessage) {
-      sendMessage(externalMessage);
-    }
-  }, [externalMessage, sendMessage]);
+  const getTypeLabel = () => {
+    if (type === 'threat') return 'Environmental Threat';
+    return 'Ecosystem Connection';
+  };
 
   return (
-    <div className="absolute right-6 top-6 w-80 max-h-[calc(100vh-10rem)] glass-panel rounded-2xl p-4 animate-fade-in overflow-hidden flex flex-col">
-      {/* Close button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={onClose}
-        className="absolute top-2 right-2 h-8 w-8 z-10"
-      >
-        <X className="h-4 w-4" />
-      </Button>
+    <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in">
+      {/* Image */}
+      <div className="w-full">
+        <img
+          src={imageUrl}
+          alt={title}
+          className="w-full h-64 object-cover"
+        />
+      </div>
 
-      <div className="flex-1 overflow-y-auto mb-4 space-y-3">
-        <div className="mb-4">
-          <div className="rounded-xl overflow-hidden mb-2">
-            <img 
-              src={imageUrl} 
-              alt={type}
-              className="w-full h-48 object-cover"
-            />
-          </div>
-          <h3 className="text-base font-bold text-foreground">{title}</h3>
+      {/* Fast Facts */}
+      <div className="p-4">
+        <h3 className="text-xl font-bold text-foreground mb-1">{title}</h3>
+        <p className="text-sm text-primary mb-4">{getTypeLabel()}</p>
+
+        <div className="mb-3">
+          <p className="text-xs text-muted-foreground">Type</p>
+          <p className="text-base font-semibold text-primary">
+            {type === 'threat' ? 'Environmental Threat' : 'Ecosystem Element'}
+          </p>
         </div>
 
-        {messages.map((msg, idx) => (
-          <div 
-            key={idx}
-            className={`p-3 rounded-lg ${
-              msg.role === 'assistant' 
-                ? 'bg-accent/20 text-foreground' 
-                : 'bg-primary/20 text-foreground ml-8'
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <p className="text-sm">
-                {msg.content}
-                {msg.isStreaming && <span className="inline-block w-1 h-4 bg-foreground ml-1 animate-pulse" />}
-              </p>
-              {msg.role === 'assistant' && !msg.isStreaming && msg.content && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6 ml-2 shrink-0"
-                  onClick={() => playAudio(msg.content)}
-                >
-                  <Volume2 className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
+        {severity && (
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground">Severity Level</p>
+            <p className={`text-base font-semibold ${
+              severity.toLowerCase().includes('critical') ? 'text-red-500' :
+              severity.toLowerCase().includes('high') ? 'text-orange-500' :
+              severity.toLowerCase().includes('moderate') ? 'text-yellow-500' :
+              'text-green-500'
+            }`}>
+              {severity}
+            </p>
           </div>
-        ))}
-        {isLoading && (
-          <div className="p-3 rounded-lg bg-accent/20 text-sm text-muted-foreground">
-            Thinking...
+        )}
+
+        {affectedSpecies !== undefined && (
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground">Affected Species</p>
+            <p className="text-base font-semibold text-accent">
+              {affectedSpecies} species impacted
+            </p>
+          </div>
+        )}
+
+        {location && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 pt-3 border-t border-border">
+            <MapPin className="h-3 w-3" />
+            <span>{location}</span>
           </div>
         )}
       </div>

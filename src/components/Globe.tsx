@@ -14,15 +14,44 @@ interface HabitatPoint {
   title?: string;
 }
 
+interface HabitatZoneOverlay {
+  lat: number;
+  lng: number;
+  radiusKm: number;
+  color?: string;
+  name?: string;
+}
+
 interface GlobeComponentProps {
   habitats: HabitatPoint[];
   onPointClick?: (point: HabitatPoint) => void;
   onDoubleGlobeClick?: (lat: number, lng: number) => void;
   onImageMarkerClick?: (marker: any) => void;
   targetLocation?: { lat: number; lng: number } | null;
+  habitatZones?: HabitatZoneOverlay[]; // NEW: Transparent circular overlays
 }
 
-const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick, targetLocation }: GlobeComponentProps) => {
+// Helper function to generate circle polygon coordinates
+const generateCirclePolygon = (lat: number, lng: number, radiusKm: number, numPoints: number = 64) => {
+  const coordinates: [number, number][] = [];
+  const earthRadiusKm = 6371;
+  const radiusRad = radiusKm / earthRadiusKm;
+
+  for (let i = 0; i <= numPoints; i++) {
+    const angle = (i / numPoints) * 2 * Math.PI;
+    const dx = radiusRad * Math.cos(angle);
+    const dy = radiusRad * Math.sin(angle);
+
+    const pointLat = lat + (dy * 180) / Math.PI;
+    const pointLng = lng + (dx * 180) / (Math.PI * Math.cos((lat * Math.PI) / 180));
+
+    coordinates.push([pointLng, pointLat]);
+  }
+
+  return coordinates;
+};
+
+const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick, targetLocation, habitatZones = [] }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
   const MIN_ALT = 0.8;
   const MAX_ALT = 3.0;
@@ -34,10 +63,47 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   const interactionRef = useRef(false);
 
   // Separate markers by type
-  const emojiMarkers = habitats.filter(h => h.emoji);
-  const imageMarkers = habitats.filter(h => h.imageUrl && h.type === 'species');
-  const habitatImageMarkers = habitats.filter(h => h.imageUrl && h.type === 'habitat');
-  const regularPoints = habitats.filter(h => !h.emoji && !h.imageUrl);
+  // Filter out any invalid/undefined entries first
+  const validHabitats = habitats.filter(h => 
+    h && typeof h.lat === 'number' && typeof h.lng === 'number'
+  );
+  
+  // ✅ DEDUPLICATE: Remove duplicate pins at same coordinates (prevents random pins bug)
+  const deduplicatedHabitats = validHabitats.reduce((acc: HabitatPoint[], current) => {
+    // Check if this coordinate already exists (within 0.001 degrees tolerance)
+    const exists = acc.some(h => 
+      Math.abs(h.lat - current.lat) < 0.001 && 
+      Math.abs(h.lng - current.lng) < 0.001
+    );
+    if (!exists) {
+      acc.push(current);
+    }
+    return acc;
+  }, []);
+  
+  // Log deduplication stats (helps debug random pins)
+  if (validHabitats.length !== deduplicatedHabitats.length) {
+    console.warn(`🔧 Removed ${validHabitats.length - deduplicatedHabitats.length} duplicate pins (${validHabitats.length} → ${deduplicatedHabitats.length})`);
+  }
+  
+  const emojiMarkers = deduplicatedHabitats.filter(h => h.emoji);
+  const imageMarkers = deduplicatedHabitats.filter(h => h.imageUrl && h.type === 'species');
+  const habitatImageMarkers = deduplicatedHabitats.filter(h => h.imageUrl && h.type === 'habitat');
+  const regularPoints = deduplicatedHabitats.filter(h => !h.emoji && !h.imageUrl);
+
+  // Convert habitat zones to polygon data for Globe.gl
+  // Filter out any invalid zones first
+  const validZones = habitatZones.filter(zone => 
+    zone && 
+    typeof zone.lat === 'number' && 
+    typeof zone.lng === 'number' && 
+    typeof zone.radiusKm === 'number'
+  );
+  const zonePolygons = validZones.map(zone => ({
+    coordinates: [generateCirclePolygon(zone.lat, zone.lng, zone.radiusKm)],
+    color: zone.color || 'rgba(16, 185, 129, 0.2)', // Default green with transparency
+    name: zone.name || 'Habitat Zone'
+  }));
 
   // Enable full zoom and interaction controls - only run once when globe is ready
   useEffect(() => {
@@ -199,13 +265,24 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         atmosphereColor="rgb(22, 163, 74)"
         atmosphereAltitude={0.25}
         enablePointerInteraction={true}
+
+        // Habitat zone overlays (transparent green circles)
+        polygonsData={zonePolygons}
+        polygonCapColor={(d: any) => d.color}
+        polygonSideColor={(d: any) => d.color}
+        polygonStrokeColor={() => '#10B981'}
+        polygonAltitude={0.005}
+        polygonsTransitionDuration={0}
+        polygonLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.name}</strong></div>`}
+
         pointsData={regularPoints}
         pointLat="lat"
         pointLng="lng"
         pointColor="color"
-        pointAltitude={0.01}
+        pointAltitude={0.015}
         pointRadius="size"
         pointLabel={(d: any) => `<div class="glass-panel px-3 py-2 rounded-lg"><strong>${d.species || d.name}</strong><br/>Location: ${d.lat.toFixed(2)}, ${d.lng.toFixed(2)}<br/><em>Click to view</em></div>`}
+        pointsTransitionDuration={0}
         onPointClick={(d: any) => {
           if (globeEl.current) {
             globeEl.current.pointOfView(
@@ -219,17 +296,26 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         htmlElementsData={[...emojiMarkers, ...imageMarkers, ...habitatImageMarkers]}
         htmlLat="lat"
         htmlLng="lng"
-        htmlAltitude={0.01}
+        htmlAltitude={0.015}
+        htmlTransitionDuration={0}
         htmlElement={(d: any) => {
           const el = document.createElement('div');
           el.className = 'cursor-pointer hover:scale-125 transition-transform';
           el.style.pointerEvents = 'auto';
           
-          // If it's an emoji marker, render emoji directly
+          // If it's an emoji marker, render emoji with pulsing ring for green pins
           if (d.emoji) {
+            const isGreenPin = d.emoji === '🟢';
             el.innerHTML = `
-              <div class="text-4xl drop-shadow-lg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-                ${d.emoji}
+              <div class="relative flex items-center justify-center">
+                ${isGreenPin ? `
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="habitat-pulse-ring"></div>
+                  </div>
+                ` : ''}
+                <div class="text-4xl drop-shadow-lg relative z-10" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+                  ${d.emoji}
+                </div>
               </div>
             `;
           }
@@ -328,4 +414,4 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
 };
 
 export default GlobeComponent;
-export type { HabitatPoint, GlobeComponentProps };
+export type { HabitatPoint, GlobeComponentProps, HabitatZoneOverlay };

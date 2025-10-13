@@ -1,0 +1,2090 @@
+{
+  "20192.0": {
+    "id": "20192.0",
+    "name": "Agulhas Bank",
+    "province": "Agulhas",
+    "realm": "Temperate Southern Africa",
+    "centerLat": -34.3,
+    "centerLng": 22.21,
+    "radiusKm": 807
+  },
+  "20053.0": {
+    "id": "20053.0",
+    "name": "Aleutian Islands",
+    "province": "Cold Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 52.08,
+    "centerLng": 0.0,
+    "radiusKm": 2000
+  },
+  "20072.0": {
+    "id": "20072.0",
+    "name": "Amazonia",
+    "province": "North Brazil Shelf",
+    "realm": "Tropical Atlantic",
+    "centerLat": 0.12,
+    "centerLng": -48.22,
+    "radiusKm": 1150
+  },
+  "20194.0": {
+    "id": "20194.0",
+    "name": "Amsterdam-St Paul",
+    "province": "Amsterdam-St Paul",
+    "realm": "Temperate Southern Africa",
+    "centerLat": -38.31,
+    "centerLng": 77.54,
+    "radiusKm": 564
+  },
+  "20228.0": {
+    "id": "20228.0",
+    "name": "Amundsen/Bellingshausen Sea",
+    "province": "Continental High Antarctic",
+    "realm": "Southern Ocean",
+    "centerLat": -73.27,
+    "centerLng": -107.48,
+    "radiusKm": 2000
+  },
+  "20109.0": {
+    "id": "20109.0",
+    "name": "Andaman and Nicobar Islands",
+    "province": "Andaman",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 10.04,
+    "centerLng": 92.54,
+    "radiusKm": 796
+  },
+  "20110.0": {
+    "id": "20110.0",
+    "name": "Andaman Sea Coral Coast",
+    "province": "Andaman",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 10.07,
+    "centerLng": 98.1,
+    "radiusKm": 564
+  },
+  "20223.0": {
+    "id": "20223.0",
+    "name": "Antarctic Peninsula",
+    "province": "Scotia Sea",
+    "realm": "Southern Ocean",
+    "centerLat": -68.21,
+    "centerLng": -64.86,
+    "radiusKm": 1631
+  },
+  "20090.0": {
+    "id": "20090.0",
+    "name": "Arabian (Persian) Gulf",
+    "province": "Somali/Arabian",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 27.54,
+    "centerLng": 52.14,
+    "radiusKm": 1112
+  },
+  "20178.0": {
+    "id": "20178.0",
+    "name": "Araucanian",
+    "province": "Warm Temperate Southeastern Pacific",
+    "realm": "Temperate South America",
+    "centerLat": -37.25,
+    "centerLng": -72.75,
+    "radiusKm": 697
+  },
+  "20140.0": {
+    "id": "20140.0",
+    "name": "Arnhem Coast to Gulf of Carpenteria",
+    "province": "Sahul Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -14.6,
+    "centerLng": 137.27,
+    "radiusKm": 1005
+  },
+  "20139.0": {
+    "id": "20139.0",
+    "name": "Arafura Sea",
+    "province": "Sahul Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -7.2,
+    "centerLng": 137.38,
+    "radiusKm": 683
+  },
+  "20232.0": {
+    "id": "20232.0",
+    "name": "Auckland Island",
+    "province": "Subantarctic New Zealand",
+    "realm": "Southern Ocean",
+    "centerLat": -51.51,
+    "centerLng": 165.65,
+    "radiusKm": 461
+  },
+  "20029.0": {
+    "id": "20029.0",
+    "name": "Azores Canaries Madeira",
+    "province": "Lusitanian",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 33.77,
+    "centerLng": -23.33,
+    "radiusKm": 1620
+  },
+  "25007.0": {
+    "id": "25007.0",
+    "name": "Baffin Bay - Davis Strait",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 72.49,
+    "centerLng": -70.43,
+    "radiusKm": 1527
+  },
+  "20063.0": {
+    "id": "20063.0",
+    "name": "Bahamian",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 24.44,
+    "centerLng": -73.26,
+    "radiusKm": 1111
+  },
+  "20024.0": {
+    "id": "20024.0",
+    "name": "Baltic Sea",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 59.67,
+    "centerLng": 22.45,
+    "radiusKm": 1475
+  },
+  "20131.0": {
+    "id": "20131.0",
+    "name": "Banda Sea",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -4.23,
+    "centerLng": 126.64,
+    "radiusKm": 980
+  },
+  "20205.0": {
+    "id": "20205.0",
+    "name": "Bassian",
+    "province": "Southeast Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -40.79,
+    "centerLng": 146.67,
+    "radiusKm": 895
+  },
+  "20011.0": {
+    "id": "20011.0",
+    "name": "Beaufort-Amundsen-Viscount Melville-Queen Maud",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 70.19,
+    "centerLng": -110.68,
+    "radiusKm": 2000
+  },
+  "20012.0": {
+    "id": "20012.0",
+    "name": "Beaufort Sea - continental coast and shelf",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 69.87,
+    "centerLng": -142.21,
+    "radiusKm": 1748
+  },
+  "20062.0": {
+    "id": "20062.0",
+    "name": "Bermuda",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 32.29,
+    "centerLng": -64.76,
+    "radiusKm": 537
+  },
+  "20134.0": {
+    "id": "20134.0",
+    "name": "Bismarck Sea",
+    "province": "Eastern Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -2.27,
+    "centerLng": 146.85,
+    "radiusKm": 831
+  },
+  "20044.0": {
+    "id": "20044.0",
+    "name": "Black Sea",
+    "province": "Black Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 43.75,
+    "centerLng": 34.84,
+    "radiusKm": 1230
+  },
+  "20141.0": {
+    "id": "20141.0",
+    "name": "Bonaparte Coast",
+    "province": "Sahul Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -14.83,
+    "centerLng": 127.64,
+    "radiusKm": 865
+  },
+  "25230.0": {
+    "id": "25230.0",
+    "name": "Bounty and Antipodes Islands",
+    "province": "Subantarctic New Zealand",
+    "realm": "Southern Ocean",
+    "centerLat": -48.73,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20217.0": {
+    "id": "20217.0",
+    "name": "Bouvet Island",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -54.46,
+    "centerLng": 3.41,
+    "radiusKm": 531
+  },
+  "20231.0": {
+    "id": "20231.0",
+    "name": "Campbell Island",
+    "province": "Subantarctic New Zealand",
+    "realm": "Southern Ocean",
+    "centerLat": -52.79,
+    "centerLng": 169.36,
+    "radiusKm": 498
+  },
+  "20204.0": {
+    "id": "20204.0",
+    "name": "Cape Howe",
+    "province": "Southeast Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -37.14,
+    "centerLng": 150.08,
+    "radiusKm": 598
+  },
+  "20079.0": {
+    "id": "20079.0",
+    "name": "Cape Verde",
+    "province": "West African Transition",
+    "realm": "Tropical Atlantic",
+    "centerLat": 15.96,
+    "centerLng": -24.17,
+    "radiusKm": 709
+  },
+  "20097.0": {
+    "id": "20097.0",
+    "name": "Cargados Carajos/Tromelin Island",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -12.96,
+    "centerLng": 57.97,
+    "radiusKm": 754
+  },
+  "25042.0": {
+    "id": "25042.0",
+    "name": "Carolinian",
+    "province": "Warm Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 32.51,
+    "centerLng": -78.13,
+    "radiusKm": 802
+  },
+  "20026.0": {
+    "id": "20026.0",
+    "name": "Celtic Seas",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 54.25,
+    "centerLng": -8.12,
+    "radiusKm": 1078
+  },
+  "20177.0": {
+    "id": "20177.0",
+    "name": "Central Chile",
+    "province": "Warm Temperate Southeastern Pacific",
+    "realm": "Temperate South America",
+    "centerLat": -29.16,
+    "centerLng": -71.1,
+    "radiusKm": 639
+  },
+  "20051.0": {
+    "id": "20051.0",
+    "name": "Central Kuroshio Current",
+    "province": "Warm Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 32.37,
+    "centerLng": 136.15,
+    "radiusKm": 964
+  },
+  "25199.0": {
+    "id": "25199.0",
+    "name": "Central New Zealand",
+    "province": "Southern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -41.07,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20175.0": {
+    "id": "20175.0",
+    "name": "Central Peru",
+    "province": "Warm Temperate Southeastern Pacific",
+    "realm": "Temperate South America",
+    "centerLat": -8.73,
+    "centerLng": -78.78,
+    "radiusKm": 759
+  },
+  "20093.0": {
+    "id": "20093.0",
+    "name": "Central Somali Coast",
+    "province": "Somali/Arabian",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 6.11,
+    "centerLng": 48.41,
+    "radiusKm": 884
+  },
+  "20106.0": {
+    "id": "20106.0",
+    "name": "Chagos",
+    "province": "Central Indian Ocean Islands",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -6.56,
+    "centerLng": 71.88,
+    "radiusKm": 642
+  },
+  "20187.0": {
+    "id": "20187.0",
+    "name": "Channels and Fjords of Southern Chile",
+    "province": "Magellanic",
+    "realm": "Temperate South America",
+    "centerLat": -52.85,
+    "centerLng": -69.14,
+    "radiusKm": 1315
+  },
+  "25198.0": {
+    "id": "25198.0",
+    "name": "Chatham Island",
+    "province": "Southern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -44.06,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20167.0": {
+    "id": "20167.0",
+    "name": "Chiapas-Nicaragua",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 13.67,
+    "centerLng": -90.68,
+    "radiusKm": 762
+  },
+  "20188.0": {
+    "id": "20188.0",
+    "name": "Chiloense",
+    "province": "Magellanic",
+    "realm": "Temperate South America",
+    "centerLat": -43.28,
+    "centerLng": -74.0,
+    "radiusKm": 696
+  },
+  "20013.0": {
+    "id": "20013.0",
+    "name": "Chukchi Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 70.38,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20165.0": {
+    "id": "20165.0",
+    "name": "Clipperton",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 10.37,
+    "centerLng": -109.17,
+    "radiusKm": 529
+  },
+  "20120.0": {
+    "id": "20120.0",
+    "name": "Cocos-Keeling/Christmas Island",
+    "province": "Java Transitional",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -11.85,
+    "centerLng": 101.14,
+    "radiusKm": 943
+  },
+  "20169.0": {
+    "id": "20169.0",
+    "name": "Cocos Islands",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 5.32,
+    "centerLng": -87.14,
+    "radiusKm": 508
+  },
+  "20150.0": {
+    "id": "20150.0",
+    "name": "Coral Sea",
+    "province": "Tropical Southwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -18.76,
+    "centerLng": 151.65,
+    "radiusKm": 923
+  },
+  "20060.0": {
+    "id": "20060.0",
+    "name": "Cortezian",
+    "province": "Warm Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 28.0,
+    "centerLng": -108.83,
+    "radiusKm": 1164
+  },
+  "20215.0": {
+    "id": "20215.0",
+    "name": "Crozet Islands",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -46.24,
+    "centerLng": 51.24,
+    "radiusKm": 630
+  },
+  "20102.0": {
+    "id": "20102.0",
+    "name": "Delagoa",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -25.58,
+    "centerLng": 34.04,
+    "radiusKm": 710
+  },
+  "20124.0": {
+    "id": "20124.0",
+    "name": "East Caroline Islands",
+    "province": "Tropical Northwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 6.62,
+    "centerLng": 152.86,
+    "radiusKm": 1586
+  },
+  "20225.0": {
+    "id": "20225.0",
+    "name": "East Antarctic Enderby Land",
+    "province": "Continental High Antarctic",
+    "realm": "Southern Ocean",
+    "centerLat": -66.92,
+    "centerLng": 51.26,
+    "radiusKm": 847
+  },
+  "20224.0": {
+    "id": "20224.0",
+    "name": "East Antarctic Wilkes Land",
+    "province": "Continental High Antarctic",
+    "realm": "Southern Ocean",
+    "centerLat": -68.71,
+    "centerLng": 113.75,
+    "radiusKm": 2000
+  },
+  "20226.0": {
+    "id": "20226.0",
+    "name": "East Antarctic Dronning Maud Land",
+    "province": "Continental High Antarctic",
+    "realm": "Southern Ocean",
+    "centerLat": -69.64,
+    "centerLng": 22.51,
+    "radiusKm": 2000
+  },
+  "20052.0": {
+    "id": "20052.0",
+    "name": "East China Sea",
+    "province": "Warm Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 29.36,
+    "centerLng": 122.11,
+    "radiusKm": 1214
+  },
+  "20003.0": {
+    "id": "20003.0",
+    "name": "East Greenland Shelf",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 67.0,
+    "centerLng": -28.88,
+    "radiusKm": 2000
+  },
+  "20015.0": {
+    "id": "20015.0",
+    "name": "East Siberian Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 72.79,
+    "centerLng": 160.76,
+    "radiusKm": 2000
+  },
+  "20163.0": {
+    "id": "20163.0",
+    "name": "Easter Island",
+    "province": "Easter Island",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -26.86,
+    "centerLng": -107.45,
+    "radiusKm": 720
+  },
+  "25014.0": {
+    "id": "25014.0",
+    "name": "Eastern Bering Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 60.79,
+    "centerLng": 0.0,
+    "radiusKm": 2000
+  },
+  "20076.0": {
+    "id": "20076.0",
+    "name": "Eastern Brazil",
+    "province": "Tropical Southwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": -17.85,
+    "centerLng": -38.37,
+    "radiusKm": 1026
+  },
+  "20064.0": {
+    "id": "20064.0",
+    "name": "Eastern Caribbean",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 16.36,
+    "centerLng": -61.34,
+    "radiusKm": 858
+  },
+  "20173.0": {
+    "id": "20173.0",
+    "name": "Eastern Galapagos Islands",
+    "province": "Galapagos",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": -0.66,
+    "centerLng": -88.69,
+    "radiusKm": 550
+  },
+  "20107.0": {
+    "id": "20107.0",
+    "name": "Eastern India",
+    "province": "Bay of Bengal",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 16.31,
+    "centerLng": 82.66,
+    "radiusKm": 875
+  },
+  "20127.0": {
+    "id": "20127.0",
+    "name": "Eastern Philippines",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 11.51,
+    "centerLng": 124.55,
+    "radiusKm": 999
+  },
+  "20144.0": {
+    "id": "20144.0",
+    "name": "Exmouth to Broome",
+    "province": "Northwest Australian Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -17.71,
+    "centerLng": 119.01,
+    "radiusKm": 1023
+  },
+  "20021.0": {
+    "id": "20021.0",
+    "name": "Faroe Plateau",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 62.84,
+    "centerLng": -7.1,
+    "radiusKm": 545
+  },
+  "20074.0": {
+    "id": "20074.0",
+    "name": "Fernando de Naronha and Atoll das Rocas",
+    "province": "Tropical Southwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": -3.89,
+    "centerLng": -32.08,
+    "radiusKm": 488
+  },
+  "25147.0": {
+    "id": "25147.0",
+    "name": "Fiji Islands",
+    "province": "Tropical Southwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -19.02,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20070.0": {
+    "id": "20070.0",
+    "name": "Floridian",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 26.53,
+    "centerLng": -82.8,
+    "radiusKm": 425
+  },
+  "25154.0": {
+    "id": "25154.0",
+    "name": "Gilbert/Ellis Islands",
+    "province": "Marshall, Gilbert and Ellis Islands",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -4.59,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20208.0": {
+    "id": "20208.0",
+    "name": "Great Australian Bight",
+    "province": "Southwest Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -32.27,
+    "centerLng": 128.91,
+    "radiusKm": 887
+  },
+  "20171.0": {
+    "id": "20171.0",
+    "name": "Guayaquil",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": -3.16,
+    "centerLng": -80.54,
+    "radiusKm": 556
+  },
+  "20071.0": {
+    "id": "20071.0",
+    "name": "Guianan",
+    "province": "North Brazil Shelf",
+    "realm": "Tropical Atlantic",
+    "centerLat": 6.27,
+    "centerLng": -56.92,
+    "radiusKm": 973
+  },
+  "20089.0": {
+    "id": "20089.0",
+    "name": "Gulf of Aden",
+    "province": "Red Sea and Gulf of Aden",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 11.61,
+    "centerLng": 48.5,
+    "radiusKm": 1155
+  },
+  "20054.0": {
+    "id": "20054.0",
+    "name": "Gulf of Alaska",
+    "province": "Cold Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 57.87,
+    "centerLng": -150.87,
+    "radiusKm": 1736
+  },
+  "20083.0": {
+    "id": "20083.0",
+    "name": "Gulf of Guinea Central",
+    "province": "Gulf of Guinea",
+    "realm": "Tropical Atlantic",
+    "centerLat": 4.41,
+    "centerLng": 6.17,
+    "radiusKm": 1004
+  },
+  "20084.0": {
+    "id": "20084.0",
+    "name": "Gulf of Guinea Islands",
+    "province": "Gulf of Guinea",
+    "realm": "Tropical Atlantic",
+    "centerLat": -1.16,
+    "centerLng": 5.39,
+    "radiusKm": 534
+  },
+  "20082.0": {
+    "id": "20082.0",
+    "name": "Gulf of Guinea Upwelling",
+    "province": "Gulf of Guinea",
+    "realm": "Tropical Atlantic",
+    "centerLat": 5.07,
+    "centerLng": -3.58,
+    "radiusKm": 672
+  },
+  "25081.0": {
+    "id": "25081.0",
+    "name": "Gulf of Guinea West",
+    "province": "Gulf of Guinea",
+    "realm": "Tropical Atlantic",
+    "centerLat": 7.17,
+    "centerLng": -13.75,
+    "radiusKm": 979
+  },
+  "25040.0": {
+    "id": "25040.0",
+    "name": "Gulf of Maine/Bay of Fundy",
+    "province": "Cold Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 42.74,
+    "centerLng": -68.33,
+    "radiusKm": 745
+  },
+  "20091.0": {
+    "id": "20091.0",
+    "name": "Gulf of Oman",
+    "province": "Somali/Arabian",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 25.5,
+    "centerLng": 60.14,
+    "radiusKm": 747
+  },
+  "20138.0": {
+    "id": "20138.0",
+    "name": "Gulf of Papua",
+    "province": "Sahul Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -8.12,
+    "centerLng": 144.28,
+    "radiusKm": 400
+  },
+  "20037.0": {
+    "id": "20037.0",
+    "name": "Gulf of St. Lawrence - Eastern Scotian Shelf",
+    "province": "Cold Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 47.51,
+    "centerLng": -63.26,
+    "radiusKm": 1432
+  },
+  "20115.0": {
+    "id": "20115.0",
+    "name": "Gulf of Thailand",
+    "province": "Sunda Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 12.11,
+    "centerLng": 102.26,
+    "radiusKm": 810
+  },
+  "20112.0": {
+    "id": "20112.0",
+    "name": "Gulf of Tonkin",
+    "province": "South China Sea",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 20.28,
+    "centerLng": 105.98,
+    "radiusKm": 1034
+  },
+  "20129.0": {
+    "id": "20129.0",
+    "name": "Halmahera",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 1.17,
+    "centerLng": 128.17,
+    "radiusKm": 472
+  },
+  "25152.0": {
+    "id": "25152.0",
+    "name": "Hawaii",
+    "province": "Hawaii",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": 22.44,
+    "centerLng": 0.0,
+    "radiusKm": 2000
+  },
+  "20213.0": {
+    "id": "20213.0",
+    "name": "Heard and Macdonald Islands",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -53.15,
+    "centerLng": 73.53,
+    "radiusKm": 554
+  },
+  "20211.0": {
+    "id": "20211.0",
+    "name": "Houtman",
+    "province": "West Central Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -29.71,
+    "centerLng": 114.61,
+    "radiusKm": 540
+  },
+  "20008.0": {
+    "id": "20008.0",
+    "name": "Hudson Complex",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 59.32,
+    "centerLng": -81.5,
+    "radiusKm": 2000
+  },
+  "20176.0": {
+    "id": "20176.0",
+    "name": "Humboldtian",
+    "province": "Warm Temperate Southeastern Pacific",
+    "realm": "Temperate South America",
+    "centerLat": -18.54,
+    "centerLng": -73.88,
+    "radiusKm": 1086
+  },
+  "20179.0": {
+    "id": "20179.0",
+    "name": "Juan Fernandez and Desventuradas",
+    "province": "Juan Fernandez and Desventuradas",
+    "realm": "Temperate South America",
+    "centerLat": -30.05,
+    "centerLng": -79.77,
+    "radiusKm": 922
+  },
+  "25046.0": {
+    "id": "25046.0",
+    "name": "Kamchatka Shelf and Coast",
+    "province": "Cold Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 56.94,
+    "centerLng": 0.0,
+    "radiusKm": 2000
+  },
+  "20017.0": {
+    "id": "20017.0",
+    "name": "Kara Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 73.92,
+    "centerLng": 81.64,
+    "radiusKm": 2000
+  },
+  "20214.0": {
+    "id": "20214.0",
+    "name": "Kerguelen Islands",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -49.18,
+    "centerLng": 69.59,
+    "radiusKm": 646
+  },
+  "25195.0": {
+    "id": "25195.0",
+    "name": "Kermadec Island",
+    "province": "Northern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -30.37,
+    "centerLng": 0.0,
+    "radiusKm": 2000
+  },
+  "25009.0": {
+    "id": "25009.0",
+    "name": "Lancaster Sound",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 71.9,
+    "centerLng": -90.4,
+    "radiusKm": 1476
+  },
+  "20016.0": {
+    "id": "20016.0",
+    "name": "Laptev Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 74.0,
+    "centerLng": 121.96,
+    "radiusKm": 2000
+  },
+  "20209.0": {
+    "id": "20209.0",
+    "name": "Leeuwin",
+    "province": "Southwest Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -34.51,
+    "centerLng": 118.74,
+    "radiusKm": 905
+  },
+  "20132.0": {
+    "id": "20132.0",
+    "name": "Lesser Sunda",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -10.51,
+    "centerLng": 121.17,
+    "radiusKm": 847
+  },
+  "20155.0": {
+    "id": "20155.0",
+    "name": "Line Islands",
+    "province": "Central Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": 0.05,
+    "centerLng": -157.68,
+    "radiusKm": 1112
+  },
+  "20151.0": {
+    "id": "20151.0",
+    "name": "Lord Howe and Norfolk Islands",
+    "province": "Lord Howe and Norfolk Islands",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -30.4,
+    "centerLng": 163.66,
+    "radiusKm": 991
+  },
+  "20212.0": {
+    "id": "20212.0",
+    "name": "Macquarie Island",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -54.65,
+    "centerLng": 158.9,
+    "radiusKm": 538
+  },
+  "20061.0": {
+    "id": "20061.0",
+    "name": "Magdalena Transition",
+    "province": "Warm Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 24.62,
+    "centerLng": -112.8,
+    "radiusKm": 462
+  },
+  "20118.0": {
+    "id": "20118.0",
+    "name": "Malacca Strait",
+    "province": "Sunda Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 3.51,
+    "centerLng": 100.63,
+    "radiusKm": 686
+  },
+  "20105.0": {
+    "id": "20105.0",
+    "name": "Maldives",
+    "province": "Central Indian Ocean Islands",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 5.46,
+    "centerLng": 72.92,
+    "radiusKm": 1097
+  },
+  "20186.0": {
+    "id": "20186.0",
+    "name": "Malvinas/Falklands",
+    "province": "Magellanic",
+    "realm": "Temperate South America",
+    "centerLat": -51.8,
+    "centerLng": -59.28,
+    "radiusKm": 700
+  },
+  "20203.0": {
+    "id": "20203.0",
+    "name": "Manning-Hawkesbury",
+    "province": "East Central Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -33.02,
+    "centerLng": 152.13,
+    "radiusKm": 575
+  },
+  "20123.0": {
+    "id": "20123.0",
+    "name": "Mariana Islands",
+    "province": "Tropical Northwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 17.16,
+    "centerLng": 145.25,
+    "radiusKm": 862
+  },
+  "20158.0": {
+    "id": "20158.0",
+    "name": "Tuamotus",
+    "province": "Southeast Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -16.58,
+    "centerLng": -143.83,
+    "radiusKm": 1737
+  },
+  "20153.0": {
+    "id": "20153.0",
+    "name": "Marshall Islands",
+    "province": "Marshall, Gilbert and Ellis Islands",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": 12.47,
+    "centerLng": 167.21,
+    "radiusKm": 1449
+  },
+  "20098.0": {
+    "id": "20098.0",
+    "name": "Mascarene Islands",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -20.56,
+    "centerLng": 59.37,
+    "radiusKm": 949
+  },
+  "20166.0": {
+    "id": "20166.0",
+    "name": "Mexican Tropical Pacific",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 17.56,
+    "centerLng": -104.33,
+    "radiusKm": 1191
+  },
+  "20191.0": {
+    "id": "20191.0",
+    "name": "Namaqua",
+    "province": "Benguela",
+    "realm": "Temperate Southern Africa",
+    "centerLat": -30.91,
+    "centerLng": 16.29,
+    "radiusKm": 850
+  },
+  "25190.0": {
+    "id": "25190.0",
+    "name": "Namib",
+    "province": "Benguela",
+    "realm": "Temperate Southern Africa",
+    "centerLat": -19.92,
+    "centerLng": 13.26,
+    "radiusKm": 798
+  },
+  "20193.0": {
+    "id": "20193.0",
+    "name": "Natal",
+    "province": "Agulhas",
+    "realm": "Temperate Southern Africa",
+    "centerLat": -31.72,
+    "centerLng": 30.69,
+    "radiusKm": 765
+  },
+  "20149.0": {
+    "id": "20149.0",
+    "name": "New Caledonia",
+    "province": "Tropical Southwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -21.06,
+    "centerLng": 163.22,
+    "radiusKm": 986
+  },
+  "20168.0": {
+    "id": "20168.0",
+    "name": "Nicoya",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 7.22,
+    "centerLng": -84.92,
+    "radiusKm": 629
+  },
+  "20145.0": {
+    "id": "20145.0",
+    "name": "Ningaloo",
+    "province": "Northwest Australian Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -21.62,
+    "centerLng": 113.69,
+    "radiusKm": 496
+  },
+  "25055.0": {
+    "id": "25055.0",
+    "name": "North American Pacific Fijordland",
+    "province": "Cold Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 55.82,
+    "centerLng": -129.96,
+    "radiusKm": 1275
+  },
+  "20001.0": {
+    "id": "20001.0",
+    "name": "North Greenland",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 80.26,
+    "centerLng": -40.38,
+    "radiusKm": 2000
+  },
+  "25184.0": {
+    "id": "25184.0",
+    "name": "North Patagonian Gulfs",
+    "province": "Magellanic",
+    "realm": "Temperate South America",
+    "centerLat": -42.51,
+    "centerLng": -64.19,
+    "radiusKm": 948
+  },
+  "20133.0": {
+    "id": "20133.0",
+    "name": "Northeast Sulawesi",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -0.78,
+    "centerLng": 122.16,
+    "radiusKm": 313
+  },
+  "20075.0": {
+    "id": "20075.0",
+    "name": "Northeastern Brazil",
+    "province": "Tropical Southwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": -7.19,
+    "centerLng": -36.99,
+    "radiusKm": 1050
+  },
+  "20048.0": {
+    "id": "20048.0",
+    "name": "Northeastern Honshu",
+    "province": "Cold Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 38.71,
+    "centerLng": 142.51,
+    "radiusKm": 596
+  },
+  "25196.0": {
+    "id": "25196.0",
+    "name": "Northeastern New Zealand",
+    "province": "Northern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -36.27,
+    "centerLng": -0.0,
+    "radiusKm": 2000
+  },
+  "20087.0": {
+    "id": "20087.0",
+    "name": "Northern and Central Red Sea",
+    "province": "Red Sea and Gulf of Aden",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 24.98,
+    "centerLng": 36.02,
+    "radiusKm": 1008
+  },
+  "20108.0": {
+    "id": "20108.0",
+    "name": "Northern Bay of Bengal",
+    "province": "Bay of Bengal",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 19.96,
+    "centerLng": 93.32,
+    "radiusKm": 1127
+  },
+  "25058.0": {
+    "id": "25058.0",
+    "name": "Northern California",
+    "province": "Cold Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 36.46,
+    "centerLng": -122.28,
+    "radiusKm": 805
+  },
+  "20172.0": {
+    "id": "20172.0",
+    "name": "Northern Galapagos Islands",
+    "province": "Galapagos",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 2.58,
+    "centerLng": -92.07,
+    "radiusKm": 430
+  },
+  "20005.0": {
+    "id": "20005.0",
+    "name": "Northern Grand Banks - Southern Labrador",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 52.02,
+    "centerLng": -56.81,
+    "radiusKm": 1038
+  },
+  "20043.0": {
+    "id": "20043.0",
+    "name": "Northern Gulf of Mexico",
+    "province": "Warm Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 28.81,
+    "centerLng": -91.56,
+    "radiusKm": 1211
+  },
+  "20006.0": {
+    "id": "20006.0",
+    "name": "Northern Labrador",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 60.6,
+    "centerLng": -63.39,
+    "radiusKm": 1124
+  },
+  "20122.0": {
+    "id": "20122.0",
+    "name": "Ogasawara Islands",
+    "province": "Tropical Northwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 26.38,
+    "centerLng": 147.14,
+    "radiusKm": 1280
+  },
+  "25057.0": {
+    "id": "25057.0",
+    "name": "Oregon, Washington, Vancouver Coast and Shelf",
+    "province": "Cold Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 45.41,
+    "centerLng": -125.81,
+    "radiusKm": 921
+  },
+  "20047.0": {
+    "id": "20047.0",
+    "name": "Oyashio Current",
+    "province": "Cold Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 46.19,
+    "centerLng": 151.62,
+    "radiusKm": 1253
+  },
+  "20126.0": {
+    "id": "20126.0",
+    "name": "Palawan/North Borneo",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 6.9,
+    "centerLng": 117.25,
+    "radiusKm": 969
+  },
+  "20170.0": {
+    "id": "20170.0",
+    "name": "Panama Bight",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 3.98,
+    "centerLng": -79.23,
+    "radiusKm": 840
+  },
+  "20130.0": {
+    "id": "20130.0",
+    "name": "Papua",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -1.43,
+    "centerLng": 135.42,
+    "radiusKm": 839
+  },
+  "25185.0": {
+    "id": "25185.0",
+    "name": "Patagonian Shelf",
+    "province": "Magellanic",
+    "realm": "Temperate South America",
+    "centerLat": -47.99,
+    "centerLng": -63.65,
+    "radiusKm": 1115
+  },
+  "20218.0": {
+    "id": "20218.0",
+    "name": "Peter the First Island",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -68.06,
+    "centerLng": -90.61,
+    "radiusKm": 480
+  },
+  "20156.0": {
+    "id": "20156.0",
+    "name": "Phoenix/Tokelau/Northern Cook Islands",
+    "province": "Central Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -5.4,
+    "centerLng": -167.74,
+    "radiusKm": 1720
+  },
+  "20216.0": {
+    "id": "20216.0",
+    "name": "Prince Edward Islands",
+    "province": "Subantarctic Islands",
+    "realm": "Southern Ocean",
+    "centerLat": -46.82,
+    "centerLng": 37.78,
+    "radiusKm": 553
+  },
+  "25056.0": {
+    "id": "25056.0",
+    "name": "Puget Trough/Georgia Basin",
+    "province": "Cold Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 49.04,
+    "centerLng": -122.33,
+    "radiusKm": 508
+  },
+  "20159.0": {
+    "id": "20159.0",
+    "name": "Rapa-Pitcairn",
+    "province": "Southeast Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -26.16,
+    "centerLng": -134.56,
+    "radiusKm": 1563
+  },
+  "20164.0": {
+    "id": "20164.0",
+    "name": "Revillagigedos",
+    "province": "Tropical East Pacific",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": 18.34,
+    "centerLng": -112.97,
+    "radiusKm": 685
+  },
+  "20182.0": {
+    "id": "20182.0",
+    "name": "Rio de la Plata",
+    "province": "Warm Temperate Southwestern Atlantic",
+    "realm": "Temperate South America",
+    "centerLat": -32.85,
+    "centerLng": -58.42,
+    "radiusKm": 563
+  },
+  "20181.0": {
+    "id": "20181.0",
+    "name": "Rio Grande",
+    "province": "Warm Temperate Southwestern Atlantic",
+    "realm": "Temperate South America",
+    "centerLat": -31.24,
+    "centerLng": -50.61,
+    "radiusKm": 721
+  },
+  "20229.0": {
+    "id": "20229.0",
+    "name": "Ross Sea",
+    "province": "Continental High Antarctic",
+    "realm": "Southern Ocean",
+    "centerLat": -78.94,
+    "centerLng": 0.0,
+    "radiusKm": 2000
+  },
+  "20028.0": {
+    "id": "20028.0",
+    "name": "Saharan Upwelling",
+    "province": "Lusitanian",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 27.95,
+    "centerLng": -12.4,
+    "radiusKm": 1303
+  },
+  "20157.0": {
+    "id": "20157.0",
+    "name": "Samoa Islands",
+    "province": "Central Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -13.58,
+    "centerLng": -172.95,
+    "radiusKm": 852
+  },
+  "20073.0": {
+    "id": "20073.0",
+    "name": "Sao Pedro and Sao Paulo Islands",
+    "province": "Tropical Southwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 0.18,
+    "centerLng": -30.0,
+    "radiusKm": 526
+  },
+  "20039.0": {
+    "id": "20039.0",
+    "name": "Scotian Shelf",
+    "province": "Cold Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 42.84,
+    "centerLng": -62.27,
+    "radiusKm": 592
+  },
+  "20049.0": {
+    "id": "20049.0",
+    "name": "Sea of Japan/East Sea",
+    "province": "Cold Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 43.54,
+    "centerLng": 134.15,
+    "radiusKm": 1464
+  },
+  "20045.0": {
+    "id": "20045.0",
+    "name": "Sea of Okhotsk",
+    "province": "Cold Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 54.85,
+    "centerLng": 150.03,
+    "radiusKm": 2000
+  },
+  "20096.0": {
+    "id": "20096.0",
+    "name": "Seychelles",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -6.86,
+    "centerLng": 51.28,
+    "radiusKm": 1132
+  },
+  "20210.0": {
+    "id": "20210.0",
+    "name": "Shark Bay",
+    "province": "West Central Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -25.71,
+    "centerLng": 113.62,
+    "radiusKm": 519
+  },
+  "20201.0": {
+    "id": "20201.0",
+    "name": "Snares Island",
+    "province": "Southern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -48.19,
+    "centerLng": 167.04,
+    "radiusKm": 461
+  },
+  "20161.0": {
+    "id": "20161.0",
+    "name": "Society Islands",
+    "province": "Southeast Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -17.24,
+    "centerLng": -150.96,
+    "radiusKm": 641
+  },
+  "20135.0": {
+    "id": "20135.0",
+    "name": "Solomon Archipelago",
+    "province": "Eastern Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -6.64,
+    "centerLng": 156.7,
+    "radiusKm": 1378
+  },
+  "20136.0": {
+    "id": "20136.0",
+    "name": "Solomon Sea",
+    "province": "Eastern Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -9.86,
+    "centerLng": 151.13,
+    "radiusKm": 927
+  },
+  "20207.0": {
+    "id": "20207.0",
+    "name": "South Australian Gulfs",
+    "province": "Southwest Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -33.59,
+    "centerLng": 136.6,
+    "radiusKm": 715
+  },
+  "20114.0": {
+    "id": "20114.0",
+    "name": "South China Sea Oceanic Islands",
+    "province": "South China Sea",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 13.58,
+    "centerLng": 114.23,
+    "radiusKm": 1081
+  },
+  "20027.0": {
+    "id": "20027.0",
+    "name": "South European Atlantic Shelf",
+    "province": "Lusitanian",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 41.62,
+    "centerLng": -5.08,
+    "radiusKm": 1134
+  },
+  "20220.0": {
+    "id": "20220.0",
+    "name": "South Georgia",
+    "province": "Scotia Sea",
+    "realm": "Southern Ocean",
+    "centerLat": -54.46,
+    "centerLng": -37.51,
+    "radiusKm": 703
+  },
+  "20104.0": {
+    "id": "20104.0",
+    "name": "South India and Sri Lanka",
+    "province": "West and South Indian Shelf",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 7.22,
+    "centerLng": 80.24,
+    "radiusKm": 757
+  },
+  "20121.0": {
+    "id": "20121.0",
+    "name": "South Kuroshio",
+    "province": "South Kuroshio",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 23.55,
+    "centerLng": 126.84,
+    "radiusKm": 1054
+  },
+  "20221.0": {
+    "id": "20221.0",
+    "name": "South Orkney Islands",
+    "province": "Scotia Sea",
+    "realm": "Southern Ocean",
+    "centerLat": -60.67,
+    "centerLng": -45.25,
+    "radiusKm": 601
+  },
+  "20219.0": {
+    "id": "20219.0",
+    "name": "South Sandwich Islands",
+    "province": "Scotia Sea",
+    "realm": "Southern Ocean",
+    "centerLat": -57.91,
+    "centerLng": -26.93,
+    "radiusKm": 705
+  },
+  "20222.0": {
+    "id": "20222.0",
+    "name": "South Shetland Islands",
+    "province": "Scotia Sea",
+    "realm": "Southern Ocean",
+    "centerLat": -60.84,
+    "centerLng": -57.9,
+    "radiusKm": 929
+  },
+  "20099.0": {
+    "id": "20099.0",
+    "name": "Southeast Madagascar",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -23.31,
+    "centerLng": 48.95,
+    "radiusKm": 747
+  },
+  "20137.0": {
+    "id": "20137.0",
+    "name": "Southeast Papua New Guinea",
+    "province": "Eastern Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -11.32,
+    "centerLng": 148.14,
+    "radiusKm": 504
+  },
+  "20180.0": {
+    "id": "20180.0",
+    "name": "Southeastern Brazil",
+    "province": "Warm Temperate Southwestern Atlantic",
+    "realm": "Temperate South America",
+    "centerLat": -24.81,
+    "centerLng": -45.86,
+    "radiusKm": 914
+  },
+  "25059.0": {
+    "id": "25059.0",
+    "name": "Southern California Bight",
+    "province": "Warm Temperate Northeast Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 30.51,
+    "centerLng": -118.14,
+    "radiusKm": 874
+  },
+  "20066.0": {
+    "id": "20066.0",
+    "name": "Southern Caribbean",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 10.53,
+    "centerLng": -66.03,
+    "radiusKm": 1124
+  },
+  "20113.0": {
+    "id": "20113.0",
+    "name": "Southern China",
+    "province": "South China Sea",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 23.27,
+    "centerLng": 114.37,
+    "radiusKm": 887
+  },
+  "20038.0": {
+    "id": "20038.0",
+    "name": "Southern Grand Banks - South Newfoundland",
+    "province": "Cold Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 45.85,
+    "centerLng": -51.03,
+    "radiusKm": 972
+  },
+  "20069.0": {
+    "id": "20069.0",
+    "name": "Southern Gulf of Mexico",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 21.33,
+    "centerLng": -92.56,
+    "radiusKm": 1125
+  },
+  "20200.0": {
+    "id": "20200.0",
+    "name": "South New Zealand",
+    "province": "Southern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -45.87,
+    "centerLng": 168.35,
+    "radiusKm": 717
+  },
+  "20088.0": {
+    "id": "20088.0",
+    "name": "Southern Red Sea",
+    "province": "Red Sea and Gulf of Aden",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 16.76,
+    "centerLng": 40.89,
+    "radiusKm": 939
+  },
+  "20116.0": {
+    "id": "20116.0",
+    "name": "Southern Vietnam",
+    "province": "Sunda Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 10.86,
+    "centerLng": 107.64,
+    "radiusKm": 545
+  },
+  "20067.0": {
+    "id": "20067.0",
+    "name": "Southwestern Caribbean",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 11.9,
+    "centerLng": -79.79,
+    "radiusKm": 1005
+  },
+  "20078.0": {
+    "id": "20078.0",
+    "name": "St. Helena and Ascension Islands",
+    "province": "St. Helena and Ascension Islands",
+    "realm": "Tropical Atlantic",
+    "centerLat": -11.99,
+    "centerLng": -10.03,
+    "radiusKm": 1186
+  },
+  "20128.0": {
+    "id": "20128.0",
+    "name": "Sulawesi Sea/Makassar Strait",
+    "province": "Western Coral Triangle",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -0.66,
+    "centerLng": 121.1,
+    "radiusKm": 1081
+  },
+  "20095.0": {
+    "id": "20095.0",
+    "name": "East African Coral Coast",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -8.76,
+    "centerLng": 39.54,
+    "radiusKm": 996
+  },
+  "20094.0": {
+    "id": "20094.0",
+    "name": "Northern Monsoon Current Coast",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -0.16,
+    "centerLng": 43.37,
+    "radiusKm": 801
+  },
+  "20101.0": {
+    "id": "20101.0",
+    "name": "Bight of Sofala/Swamp Coast",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -17.82,
+    "centerLng": 36.58,
+    "radiusKm": 730
+  },
+  "20197.0": {
+    "id": "20197.0",
+    "name": "Three Kings-North Cape",
+    "province": "Northern New Zealand",
+    "realm": "Temperate Australasia",
+    "centerLat": -33.84,
+    "centerLng": 172.21,
+    "radiusKm": 502
+  },
+  "20146.0": {
+    "id": "20146.0",
+    "name": "Tonga Islands",
+    "province": "Tropical Southwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -20.69,
+    "centerLng": -171.94,
+    "radiusKm": 761
+  },
+  "20077.0": {
+    "id": "20077.0",
+    "name": "Trindade and Martin Vaz Islands",
+    "province": "Tropical Southwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": -20.54,
+    "centerLng": -30.09,
+    "radiusKm": 544
+  },
+  "20189.0": {
+    "id": "20189.0",
+    "name": "Tristan Gough",
+    "province": "Tristan Gough",
+    "realm": "Temperate South America",
+    "centerLat": -39.11,
+    "centerLng": -7.07,
+    "radiusKm": 1156
+  },
+  "20162.0": {
+    "id": "20162.0",
+    "name": "Marquesas",
+    "province": "Marquesas",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -9.23,
+    "centerLng": -139.57,
+    "radiusKm": 719
+  },
+  "20202.0": {
+    "id": "20202.0",
+    "name": "Tweed-Moreton",
+    "province": "East Central Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -27.18,
+    "centerLng": 153.07,
+    "radiusKm": 559
+  },
+  "20183.0": {
+    "id": "20183.0",
+    "name": "Uruguay-Buenos Aires Shelf",
+    "province": "Warm Temperate Southwestern Atlantic",
+    "realm": "Temperate South America",
+    "centerLat": -36.02,
+    "centerLng": -57.9,
+    "radiusKm": 1017
+  },
+  "20148.0": {
+    "id": "20148.0",
+    "name": "Vanuatu",
+    "province": "Tropical Southwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -16.12,
+    "centerLng": 170.52,
+    "radiusKm": 1338
+  },
+  "20041.0": {
+    "id": "20041.0",
+    "name": "Virginian",
+    "province": "Cold Temperate Northwest Atlantic",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 39.58,
+    "centerLng": -74.15,
+    "radiusKm": 914
+  },
+  "20125.0": {
+    "id": "20125.0",
+    "name": "West Caroline Islands",
+    "province": "Tropical Northwestern Pacific",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 7.18,
+    "centerLng": 135.65,
+    "radiusKm": 916
+  },
+  "20227.0": {
+    "id": "20227.0",
+    "name": "Weddell Sea",
+    "province": "Continental High Antarctic",
+    "realm": "Southern Ocean",
+    "centerLat": -75.65,
+    "centerLng": -43.71,
+    "radiusKm": 2000
+  },
+  "20004.0": {
+    "id": "20004.0",
+    "name": "West Greenland Shelf",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 67.22,
+    "centerLng": -55.88,
+    "radiusKm": 1835
+  },
+  "20100.0": {
+    "id": "20100.0",
+    "name": "Western and Northern Madagascar",
+    "province": "Western Indian Ocean",
+    "realm": "Western Indo-Pacific",
+    "centerLat": -19.29,
+    "centerLng": 46.62,
+    "radiusKm": 1330
+  },
+  "20092.0": {
+    "id": "20092.0",
+    "name": "Western Arabian Sea",
+    "province": "Somali/Arabian",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 18.16,
+    "centerLng": 55.43,
+    "radiusKm": 990
+  },
+  "20206.0": {
+    "id": "20206.0",
+    "name": "Western Bassian",
+    "province": "Southeast Australian Shelf",
+    "realm": "Temperate Australasia",
+    "centerLat": -37.65,
+    "centerLng": 139.37,
+    "radiusKm": 813
+  },
+  "20068.0": {
+    "id": "20068.0",
+    "name": "Western Caribbean",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 18.29,
+    "centerLng": -86.82,
+    "radiusKm": 681
+  },
+  "20174.0": {
+    "id": "20174.0",
+    "name": "Western Galapagos Islands",
+    "province": "Galapagos",
+    "realm": "Tropical Eastern Pacific",
+    "centerLat": -0.88,
+    "centerLng": -93.17,
+    "radiusKm": 474
+  },
+  "20103.0": {
+    "id": "20103.0",
+    "name": "Western India",
+    "province": "West and South Indian Shelf",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 18.77,
+    "centerLng": 71.0,
+    "radiusKm": 1366
+  },
+  "20050.0": {
+    "id": "20050.0",
+    "name": "Yellow Sea",
+    "province": "Cold Temperate Northwest Pacific",
+    "realm": "Temperate Northern Pacific",
+    "centerLat": 37.79,
+    "centerLng": 120.53,
+    "radiusKm": 1070
+  },
+  "20119.0": {
+    "id": "20119.0",
+    "name": "Southern Java",
+    "province": "Java Transitional",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -7.55,
+    "centerLng": 107.57,
+    "radiusKm": 1062
+  },
+  "20111.0": {
+    "id": "20111.0",
+    "name": "Western Sumatra",
+    "province": "Andaman",
+    "realm": "Western Indo-Pacific",
+    "centerLat": 0.34,
+    "centerLng": 97.74,
+    "radiusKm": 1028
+  },
+  "20142.0": {
+    "id": "20142.0",
+    "name": "Torres Strait Northern Great Barrier Reef",
+    "province": "Northeast Australian Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -12.99,
+    "centerLng": 143.59,
+    "radiusKm": 522
+  },
+  "20143.0": {
+    "id": "20143.0",
+    "name": "Central and Southern Great Barrier Reef",
+    "province": "Northeast Australian Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": -20.95,
+    "centerLng": 148.55,
+    "radiusKm": 863
+  },
+  "20117.0": {
+    "id": "20117.0",
+    "name": "Sunda Shelf/Java Sea",
+    "province": "Sunda Shelf",
+    "realm": "Central Indo-Pacific",
+    "centerLat": 0.49,
+    "centerLng": 108.44,
+    "radiusKm": 1272
+  },
+  "20002.0": {
+    "id": "20002.0",
+    "name": "North and East Iceland",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 69.47,
+    "centerLng": -15.5,
+    "radiusKm": 1331
+  },
+  "20020.0": {
+    "id": "20020.0",
+    "name": "South and West Iceland",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 63.47,
+    "centerLng": -19.04,
+    "radiusKm": 1051
+  },
+  "20025.0": {
+    "id": "20025.0",
+    "name": "North Sea",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 55.45,
+    "centerLng": 4.76,
+    "radiusKm": 1439
+  },
+  "20022.0": {
+    "id": "20022.0",
+    "name": "Southern Norway",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 62.98,
+    "centerLng": 8.98,
+    "radiusKm": 1074
+  },
+  "20023.0": {
+    "id": "20023.0",
+    "name": "Northern Norway and Finnmark",
+    "province": "Northern European Seas",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 69.1,
+    "centerLng": 24.87,
+    "radiusKm": 1759
+  },
+  "20018.0": {
+    "id": "20018.0",
+    "name": "North and East Barents Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 74.85,
+    "centerLng": 39.16,
+    "radiusKm": 2000
+  },
+  "20019.0": {
+    "id": "20019.0",
+    "name": "White Sea",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 65.71,
+    "centerLng": 37.08,
+    "radiusKm": 991
+  },
+  "20065.0": {
+    "id": "20065.0",
+    "name": "Greater Antilles",
+    "province": "Tropical Northwestern Atlantic",
+    "realm": "Tropical Atlantic",
+    "centerLat": 19.69,
+    "centerLng": -75.36,
+    "radiusKm": 1318
+  },
+  "20160.0": {
+    "id": "20160.0",
+    "name": "Southern Cook/Austral Islands",
+    "province": "Southeast Polynesia",
+    "realm": "Eastern Indo-Pacific",
+    "centerLat": -21.01,
+    "centerLng": -155.41,
+    "radiusKm": 1413
+  },
+  "25085.0": {
+    "id": "25085.0",
+    "name": "Gulf of Guinea South",
+    "province": "Gulf of Guinea",
+    "realm": "Tropical Atlantic",
+    "centerLat": -3.91,
+    "centerLng": 11.78,
+    "radiusKm": 628
+  },
+  "25086.0": {
+    "id": "25086.0",
+    "name": "Angolan",
+    "province": "Gulf of Guinea",
+    "realm": "Tropical Atlantic",
+    "centerLat": -11.21,
+    "centerLng": 12.9,
+    "radiusKm": 722
+  },
+  "25080.0": {
+    "id": "25080.0",
+    "name": "Sahelian Upwelling",
+    "province": "West African Transition",
+    "realm": "Tropical Atlantic",
+    "centerLat": 16.69,
+    "centerLng": -16.2,
+    "radiusKm": 714
+  },
+  "20030.0": {
+    "id": "20030.0",
+    "name": "Adriatic Sea",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 43.66,
+    "centerLng": 16.23,
+    "radiusKm": 650
+  },
+  "25032.0": {
+    "id": "25032.0",
+    "name": "Levantine Sea",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 33.36,
+    "centerLng": 31.37,
+    "radiusKm": 1160
+  },
+  "25033.0": {
+    "id": "25033.0",
+    "name": "Tunisian Plateau/Gulf of Sidra",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 32.07,
+    "centerLng": 14.76,
+    "radiusKm": 1061
+  },
+  "25034.0": {
+    "id": "25034.0",
+    "name": "Ionian Sea",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 37.52,
+    "centerLng": 17.45,
+    "radiusKm": 757
+  },
+  "25031.0": {
+    "id": "25031.0",
+    "name": "Aegean Sea",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 38.3,
+    "centerLng": 26.48,
+    "radiusKm": 775
+  },
+  "25036.0": {
+    "id": "25036.0",
+    "name": "Alboran Sea",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 35.49,
+    "centerLng": -2.71,
+    "radiusKm": 539
+  },
+  "25035.0": {
+    "id": "25035.0",
+    "name": "Western Mediterranean",
+    "province": "Mediterranean Sea",
+    "realm": "Temperate Northern Atlantic",
+    "centerLat": 38.94,
+    "centerLng": 7.23,
+    "radiusKm": 1261
+  },
+  "25010.0": {
+    "id": "25010.0",
+    "name": "High Arctic Archipelago",
+    "province": "Arctic",
+    "realm": "Arctic",
+    "centerLat": 80.73,
+    "centerLng": -90.61,
+    "radiusKm": 2000
+  }
+}

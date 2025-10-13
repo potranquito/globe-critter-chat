@@ -1,14 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { MapPin, Map } from "lucide-react";
+import { MapPin, Map, Trophy, Loader2 } from "lucide-react";
+import { GlobalHealthBar } from "@/components/GlobalHealthBar";
 
 interface MapControlsProps {
   useGoogleMaps: boolean;
   onToggleMap: () => void;
   onFetchLocation: () => void;
-  onFilterClick: () => void;
+  onLeaderboardClick: () => void;
+  isDiscovering?: boolean;
 }
 
-const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onFilterClick }: MapControlsProps) => {
+const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onLeaderboardClick, isDiscovering = false }: MapControlsProps) => {
   return (
     <div className="flex flex-row gap-2">
       <Button
@@ -16,9 +18,14 @@ const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onFilterClic
         size="icon"
         variant="outline"
         className="glass-panel hover:bg-accent rounded-xl h-12 w-12"
-        title="Find My Location"
+        title={isDiscovering ? "Discovering locations..." : "Find My Location"}
+        disabled={isDiscovering}
       >
-        <MapPin className="h-5 w-5" />
+        {isDiscovering ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : (
+          <MapPin className="h-5 w-5" />
+        )}
       </Button>
 
       <Button
@@ -32,16 +39,17 @@ const MapControls = ({ useGoogleMaps, onToggleMap, onFetchLocation, onFilterClic
       </Button>
 
       <Button
-        onClick={onFilterClick}
+        onClick={onLeaderboardClick}
         size="icon"
         variant="outline"
         className="glass-panel hover:bg-accent rounded-xl h-12 w-12"
-        title="Filters"
+        title="Leaderboard"
       >
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-        </svg>
+        <Trophy className="h-5 w-5" />
       </Button>
+
+      {/* Global Health Widget */}
+      <GlobalHealthBar />
     </div>
   );
 };

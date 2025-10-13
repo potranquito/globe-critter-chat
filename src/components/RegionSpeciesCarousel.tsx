@@ -1,6 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { FilterCategory } from '@/types/speciesFilter';
 
 interface RegionSpecies {
   scientificName: string;
@@ -16,14 +17,50 @@ interface RegionSpeciesCarouselProps {
   regionName: string;
   currentSpecies?: string;
   onSpeciesSelect: (species: RegionSpecies) => void;
+  activeFilters?: Set<FilterCategory>;
 }
 
 export const RegionSpeciesCarousel = ({
   species,
   regionName,
   currentSpecies,
-  onSpeciesSelect
+  onSpeciesSelect,
+  activeFilters = new Set()
 }: RegionSpeciesCarouselProps) => {
+
+  // Filter species based on active filters
+  const filterSpecies = (speciesList: RegionSpecies[]) => {
+    if (activeFilters.size === 0) return speciesList;
+
+    return speciesList.filter(sp => {
+      // Check if any filter matches
+      for (const filter of activeFilters) {
+        // Animal type filters
+        if (filter === 'all-animals') {
+          const animalTypes = ['mammal', 'bird', 'fish', 'reptile', 'amphibian', 'insect'];
+          if (animalTypes.includes(sp.animalType?.toLowerCase() || '')) return true;
+        }
+        if (filter === 'mammals' && sp.animalType?.toLowerCase() === 'mammal') return true;
+        if (filter === 'birds' && sp.animalType?.toLowerCase() === 'bird') return true;
+        if (filter === 'fish' && sp.animalType?.toLowerCase() === 'fish') return true;
+        if (filter === 'reptiles' && sp.animalType?.toLowerCase() === 'reptile') return true;
+        if (filter === 'amphibians' && sp.animalType?.toLowerCase() === 'amphibian') return true;
+        if (filter === 'insects' && sp.animalType?.toLowerCase() === 'insect') return true;
+
+        // Plant filter
+        if (filter === 'plants' && sp.animalType?.toLowerCase() === 'plant') return true;
+
+        // Endangered filter
+        if (filter === 'endangered') {
+          const endangeredStatuses = ['CR', 'EN', 'VU'];
+          if (endangeredStatuses.includes(sp.conservationStatus?.toUpperCase() || '')) return true;
+        }
+      }
+      return false;
+    });
+  };
+
+  const filteredSpecies = filterSpecies(species);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -65,21 +102,27 @@ export const RegionSpeciesCarousel = ({
   if (species.length === 0) return null;
 
   return (
-    <div className="glass-panel rounded-2xl p-4 h-full flex flex-col animate-fade-in">
+    <div className="glass-panel rounded-2xl p-4 flex flex-col animate-fade-in" style={{height: 'calc(100vh - 48px)'}}>
       {/* Header */}
       <div className="mb-3">
         <h3 className="text-lg font-bold">
           🌍 {regionName} Ecosystem
         </h3>
         <p className="text-sm text-muted-foreground">
-          {species.length} species found
+          {filteredSpecies.length} of {species.length} species
+          {activeFilters.size > 0 && <span className="text-primary"> • {activeFilters.size} filter{activeFilters.size > 1 ? 's' : ''} active</span>}
         </p>
       </div>
 
       {/* Scrollable Species List */}
       <ScrollArea className="flex-1">
-        <div className="space-y-2 pr-4">
-          {species.map((sp) => (
+        {filteredSpecies.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No species match the selected filters</p>
+          </div>
+        ) : (
+          <div className="space-y-2 pr-1">
+            {filteredSpecies.map((sp) => (
             <Card
               key={sp.scientificName}
               className={`cursor-pointer transition-all hover:scale-[1.02] hover:shadow-lg ${
@@ -124,8 +167,9 @@ export const RegionSpeciesCarousel = ({
                 </div>
               </div>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </ScrollArea>
     </div>
   );
