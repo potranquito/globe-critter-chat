@@ -29,6 +29,7 @@ interface GlobeComponentProps {
   onImageMarkerClick?: (marker: any) => void;
   targetLocation?: { lat: number; lng: number } | null;
   habitatZones?: HabitatZoneOverlay[]; // NEW: Transparent circular overlays
+  resetView?: boolean; // Trigger to reset globe to default view
 }
 
 // Helper function to generate circle polygon coordinates
@@ -51,7 +52,7 @@ const generateCirclePolygon = (lat: number, lng: number, radiusKm: number, numPo
   return coordinates;
 };
 
-const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick, targetLocation, habitatZones = [] }: GlobeComponentProps) => {
+const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlobeClick, onImageMarkerClick, targetLocation, habitatZones = [], resetView = false }: GlobeComponentProps) => {
   const globeEl = useRef<any>();
   const MIN_ALT = 0.8;
   const MAX_ALT = 3.0;
@@ -135,9 +136,18 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     
-    // Pause auto-rotate during user interaction
+    // Pause auto-rotate during user interaction, resume after
     controls.addEventListener('start', () => {
       controls.autoRotate = false;
+    });
+
+    controls.addEventListener('end', () => {
+      // Resume auto-rotation after user stops interacting
+      setTimeout(() => {
+        if (controls) {
+          controls.autoRotate = true;
+        }
+      }, 2000); // Wait 2 seconds after interaction ends
     });
 
     // Ensure the canvas actually receives pointer events
@@ -194,13 +204,13 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
   // Effect to fly to target location when searching
   useEffect(() => {
     if (!globeEl.current || !globeReady || !targetLocation) return;
-    
+
     // Stop auto-rotation when flying to a location
     const controls = globeEl.current.controls();
     if (controls) {
       controls.autoRotate = false;
     }
-    
+
     // Animate to target location with much closer zoom (0.5 instead of 1.0)
     globeEl.current.pointOfView(
       { lat: targetLocation.lat, lng: targetLocation.lng, altitude: 0.5 },
@@ -208,6 +218,28 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     );
     setCurrentAltitude(0.5);
   }, [targetLocation, globeReady]);
+
+  // Effect to reset view to default when user clicks "Back to Globe"
+  useEffect(() => {
+    if (!globeEl.current || !globeReady || !resetView) return;
+
+    console.log('🔄 Resetting globe view to altitude:', INITIAL_ALT);
+    // Reset to same zoomed out view as initial page load
+    globeEl.current.pointOfView(
+      { lat: 20, lng: 0, altitude: INITIAL_ALT },
+      1500
+    );
+    setCurrentAltitude(INITIAL_ALT);
+
+    // Resume auto-rotation after a short delay to ensure it takes effect
+    setTimeout(() => {
+      const controls = globeEl.current?.controls();
+      if (controls) {
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 0.3;
+      }
+    }, 200);
+  }, [resetView, globeReady]);
 
   // Zoom control handlers
   const handleZoomIn = () => {

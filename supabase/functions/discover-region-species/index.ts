@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,10 +18,140 @@ serve(async (req) => {
     console.log('Bounds:', bounds);
     console.log('Excluding:', excludeSpecies);
 
-    // Strategy 1: GBIF bounding box search (fast, real data)
-    const gbifUrl = `https://api.gbif.org/v1/occurrence/search?hasCoordinate=true&decimalLatitude=${bounds.minLat},${bounds.maxLat}&decimalLongitude=${bounds.minLng},${bounds.maxLng}&limit=1000`;
+    // Initialize Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
-    console.log('Fetching from GBIF:', gbifUrl);
+    // Strategy 1: Query IUCN species data directly from database using sample_points
+    console.log('Querying IUCN species database...');
+
+    // First, find the ecoregion by name or bounds
+    let ecoregionId: string | null = null;
+
+    // Try to find ecoregion by name first
+    if (regionName && regionName !== 'Unknown Region') {
+      const { data: ecoregionData } = await supabase
+        .from('ecoregions')
+        .select('id')
+        .ilike('name', `%${regionName}%`)
+        .limit(1)
+        .single();
+
+      if (ecoregionData) {
+        ecoregionId = ecoregionData.id;
+        console.log(`Found ecoregion by name: ${ecoregionId}`);
+      }
+    }
+
+    // If we found an ecoregion, use the balanced species function (fastest and most diverse)
+    if (ecoregionId) {
+      const speciesPerClass = Math.max(2, Math.floor(limit / 6)); // Distribute across ~6 taxonomic groups
+
+      const { data: speciesData, error } = await supabase.rpc(
+        'get_balanced_ecoregion_species',
+        {
+          p_ecoregion_id: ecoregionId,
+          p_species_per_class: speciesPerClass,
+          p_exclude_species: excludeSpecies
+        }
+      );
+
+      if (error) {
+        console.warn('Error querying balanced species:', error);
+      } else if (speciesData && speciesData.length > 0) {
+        const topSpecies = speciesData.map((item: any) => ({
+          scientificName: item.scientific_name,
+          commonName: item.common_name,
+          animalType: item.class,
+          kingdom: item.kingdom,
+          conservationStatus: item.conservation_status,
+          imageUrl: item.image_url,
+          occurrenceCount: Math.round(item.overlap_percentage || 50),
+          taxonomicGroup: item.taxonomic_group
+        }));
+
+        console.log(`Found ${topSpecies.length} balanced species from IUCN database`);
+
+        // Log diversity breakdown
+        const groupCounts = topSpecies.reduce((acc: any, s: any) => {
+          acc[s.taxonomicGroup] = (acc[s.taxonomicGroup] || 0) + 1;
+          return acc;
+        }, {});
+        console.log('Taxonomic diversity:', groupCounts);
+
+        if (topSpecies.length > 0) {
+          return new Response(JSON.stringify({
+            success: true,
+            species: topSpecies,
+            count: topSpecies.length,
+            region: regionName,
+            source: 'iucn_database',
+            diversity: groupCounts
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+      }
+    }
+
+    // Strategy 2: Direct spatial query using balanced selection (if junction table is empty)
+    console.log('Trying balanced spatial query...');
+
+    const speciesPerClass = Math.max(2, Math.floor(limit / 6)); // Distribute across ~6 taxonomic groups
+
+    const { data: spatialSpecies, error: spatialError } = await supabase.rpc(
+      'get_balanced_spatial_species',
+      {
+        p_region_lat: bounds.centerLat,
+        p_region_lng: bounds.centerLng,
+        p_radius_degrees: Math.max(
+          Math.abs(bounds.maxLat - bounds.minLat),
+          Math.abs(bounds.maxLng - bounds.minLng)
+        ) / 2,
+        p_species_per_class: speciesPerClass,
+        p_exclude_species: excludeSpecies
+      }
+    );
+
+    if (!spatialError && spatialSpecies && spatialSpecies.length > 0) {
+      const topSpecies = spatialSpecies.map((s: any) => ({
+        scientificName: s.scientific_name,
+        commonName: s.common_name,
+        animalType: s.class,
+        kingdom: s.kingdom,
+        conservationStatus: s.conservation_status,
+        imageUrl: s.image_url,
+        occurrenceCount: 10, // Default since we don't have count
+        taxonomicGroup: s.taxonomic_group
+      }));
+
+      console.log(`Found ${topSpecies.length} balanced species from spatial query`);
+
+      // Log diversity breakdown
+      const groupCounts = topSpecies.reduce((acc: any, s: any) => {
+        acc[s.taxonomicGroup] = (acc[s.taxonomicGroup] || 0) + 1;
+        return acc;
+      }, {});
+      console.log('Taxonomic diversity:', groupCounts);
+
+      if (topSpecies.length > 0) {
+        return new Response(JSON.stringify({
+          success: true,
+          species: topSpecies,
+          count: topSpecies.length,
+          region: regionName,
+          source: 'iucn_spatial',
+          diversity: groupCounts
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
+    // Strategy 3: Fallback to GBIF if IUCN data is not available
+    console.log('Falling back to GBIF API...');
+    const gbifUrl = `https://api.gbif.org/v1/occurrence/search?hasCoordinate=true&decimalLatitude=${bounds.minLat},${bounds.maxLat}&decimalLongitude=${bounds.minLng},${bounds.maxLng}&limit=1000`;
 
     const gbifResponse = await fetch(gbifUrl);
 
@@ -52,7 +183,7 @@ serve(async (req) => {
 
     console.log(`Found ${topSpecies.length} unique species via GBIF`);
 
-    // Strategy 2: Use LLM to enrich with common names and types
+    // Strategy 4: Use LLM to enrich GBIF data with common names and types
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
 
     if (!OPENAI_API_KEY) {

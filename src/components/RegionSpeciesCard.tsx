@@ -7,7 +7,8 @@ interface RegionSpeciesCardProps {
   conservationStatus: string;
   occurrenceCount: number;
   regionName: string;
-  regionImageUrl?: string;
+  regionImageUrl?: string;  // Legacy - for backward compatibility
+  speciesImageUrl?: string;  // NEW - species-specific image
   onChatClick?: () => void;
 }
 
@@ -19,8 +20,12 @@ const RegionSpeciesCard = ({
   occurrenceCount,
   regionName,
   regionImageUrl,
+  speciesImageUrl,
   onChatClick
 }: RegionSpeciesCardProps) => {
+
+  // Use species image first, fallback to region image
+  const displayImageUrl = speciesImageUrl || regionImageUrl;
 
   const getAnimalEmoji = (type: string) => {
     const lowerType = type?.toLowerCase() || '';
@@ -50,9 +55,9 @@ const RegionSpeciesCard = ({
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in">
       {/* Animal Image or Placeholder */}
       <div className="w-full">
-        {regionImageUrl ? (
+        {displayImageUrl ? (
           <img
-            src={regionImageUrl}
+            src={displayImageUrl}
             alt={commonName}
             className="w-full h-64 object-cover"
           />

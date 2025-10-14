@@ -39,6 +39,10 @@ export interface Species {
   lastSeen?: string;
   imageUrl?: string;
   type: string;
+  taxonomicGroup?: string;
+  kingdom?: string;
+  animalType?: string;
+  commonName?: string;
 }
 
 export interface Threat {

@@ -9,6 +9,10 @@ interface WildlifeLocationCardProps {
   types?: string[];
   location: { lat: number; lng: number };
   onClose: () => void;
+  designation?: string;
+  iucnCategory?: string;
+  area?: number;
+  type?: string;
 }
 
 const WildlifeLocationCard = ({
@@ -19,7 +23,11 @@ const WildlifeLocationCard = ({
   photoReference,
   types,
   location,
-  onClose
+  onClose,
+  designation,
+  iucnCategory,
+  area,
+  type
 }: WildlifeLocationCardProps) => {
 
   const displayImageUrl = imageUrl || (photoReference
@@ -28,10 +36,15 @@ const WildlifeLocationCard = ({
 
   // Format location type for display
   const getLocationType = () => {
+    if (type === 'protected-area') {
+      if (designation) return designation;
+      if (iucnCategory) return `IUCN Category ${iucnCategory}`;
+      return 'Protected Area';
+    }
     if (!types || types.length === 0) return 'Wildlife Location';
 
-    const type = types[0].replace(/_/g, ' ');
-    return type.charAt(0).toUpperCase() + type.slice(1);
+    const typeStr = types[0].replace(/_/g, ' ');
+    return typeStr.charAt(0).toUpperCase() + typeStr.slice(1);
   };
 
   return (
@@ -42,10 +55,10 @@ const WildlifeLocationCard = ({
           <img
             src={displayImageUrl}
             alt={name}
-            className="w-full h-64 object-cover"
+            className="w-full h-48 object-cover"
           />
         ) : (
-          <div className="w-full h-64 bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center">
+          <div className="w-full h-48 bg-gradient-to-br from-green-500/20 to-blue-500/20 flex items-center justify-center">
             <div className="text-center">
               <div className="text-6xl mb-2">🌳</div>
               <p className="text-sm text-muted-foreground">Wildlife Park</p>
@@ -69,12 +82,23 @@ const WildlifeLocationCard = ({
           </div>
         )}
 
-        <div className="mb-3">
-          <p className="text-xs text-muted-foreground">Coordinates</p>
-          <p className="text-base font-semibold text-primary">
-            {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-          </p>
-        </div>
+        {area && area > 0 && (
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground">Protected Area</p>
+            <p className="text-base font-semibold text-primary">
+              {area >= 1000 ? `${(area / 1000).toFixed(1)}k km²` : `${area.toFixed(0)} km²`}
+            </p>
+          </div>
+        )}
+
+        {location && location.lat && location.lng && (
+          <div className="mb-3">
+            <p className="text-xs text-muted-foreground">Coordinates</p>
+            <p className="text-base font-semibold text-primary">
+              {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+            </p>
+          </div>
+        )}
 
         {address && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground mt-4 pt-3 border-t border-border">

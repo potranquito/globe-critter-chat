@@ -18,6 +18,8 @@ export interface RegionInfo {
   threatFactors: string[];
   bounds: HabitatBounds;
   analyzedFor: string;
+  imageUrl?: string;
+  imageAttribution?: string;
 }
 
 export interface RegionSpecies {
