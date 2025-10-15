@@ -1,4 +1,6 @@
 import { Minus, MapPin } from 'lucide-react';
+import { classifySpecies } from '@/utils/speciesClassification';
+import { BirdCallPlayer } from './BirdCallPlayer';
 
 interface RegionSpeciesCardProps {
   commonName: string;
@@ -9,6 +11,8 @@ interface RegionSpeciesCardProps {
   regionName: string;
   regionImageUrl?: string;  // Legacy - for backward compatibility
   speciesImageUrl?: string;  // NEW - species-specific image
+  description?: string; // Optional for better trophic role classification
+  habitatType?: string; // Optional for better trophic role classification
   onChatClick?: () => void;
 }
 
@@ -21,11 +25,32 @@ const RegionSpeciesCard = ({
   regionName,
   regionImageUrl,
   speciesImageUrl,
+  description,
+  habitatType,
   onChatClick
 }: RegionSpeciesCardProps) => {
 
   // Use species image first, fallback to region image
   const displayImageUrl = speciesImageUrl || regionImageUrl;
+
+  // Use backend classification if available, otherwise classify on frontend
+  const classification = classifySpecies({
+    commonName,
+    scientificName,
+    animalType,
+    class: animalType,
+    description,
+    habitatType
+  });
+
+  // Override with backend data if available (will be populated after migration)
+  const finalClassification = {
+    speciesType: classification.speciesType, // Use classified type, not raw animalType
+    uiGroup: classification.uiGroup,
+    trophicRole: classification.trophicRole,
+    trophicRoleEmoji: classification.trophicRoleEmoji,
+    trophicRoleLabel: classification.trophicRoleLabel
+  };
 
   const getAnimalEmoji = (type: string) => {
     const lowerType = type?.toLowerCase() || '';
@@ -51,6 +76,20 @@ const RegionSpeciesCard = ({
     return type || 'Unknown';
   };
 
+  const formatConservationStatus = (status: string) => {
+    const statusUpper = status?.toUpperCase() || '';
+    switch (statusUpper) {
+      case 'CR': return 'Critically Endangered';
+      case 'EN': return 'Endangered';
+      case 'VU': return 'Vulnerable';
+      case 'NT': return 'Near Threatened';
+      case 'LC': return 'Least Concern';
+      case 'DD': return 'Data Deficient';
+      case 'NE': return 'Not Evaluated';
+      default: return status;
+    }
+  };
+
   return (
     <div className="glass-panel rounded-2xl overflow-hidden animate-fade-in">
       {/* Animal Image or Placeholder */}
@@ -74,20 +113,28 @@ const RegionSpeciesCard = ({
       {/* Fast Facts - Match Polar Bear Card exactly */}
       <div className="p-4">
         <h3 className="text-xl font-bold text-foreground mb-1">{commonName}</h3>
-        <p className="text-sm text-primary mb-4">{formatAnimalType(animalType)}</p>
+        <p className="text-sm text-primary mb-4">{finalClassification.speciesType}</p>
 
         <div className="mb-3">
           <p className="text-xs text-muted-foreground">Conservation Status</p>
-          <p className="text-base font-semibold text-accent">{conservationStatus}</p>
+          <p className="text-base font-semibold text-accent">{formatConservationStatus(conservationStatus)}</p>
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground">Population</p>
+          <p className="text-xs text-muted-foreground">Ecological Role</p>
           <div className="flex items-center gap-2">
+            <span className="text-xl">{finalClassification.trophicRoleEmoji}</span>
             <p className="text-base font-semibold text-primary">
-              {occurrenceCount.toLocaleString()} observations
+              {finalClassification.trophicRoleLabel}
             </p>
-            <Minus className="h-4 w-4 text-muted-foreground" />
+            {/* Bird call player - only for birds */}
+            {finalClassification.speciesType === 'Bird' && (
+              <BirdCallPlayer
+                scientificName={scientificName}
+                commonName={commonName}
+                size="sm"
+              />
+            )}
           </div>
         </div>
       </div>

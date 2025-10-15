@@ -16,6 +16,7 @@ import WildlifeLocationCard from '@/components/WildlifeLocationCard';
 import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
 import { LocationsCarousel } from '@/components/LocationsCarousel';
 import { EcoRegionCard } from '@/components/EcoRegionCard';
+import { SpeciesTypeFilter, type SpeciesTypeFilter as SpeciesTypeFilterType } from '@/components/SpeciesTypeFilter';
 import { useToast } from '@/hooks/use-toast';
 import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
 import { Button } from '@/components/ui/button';
@@ -25,6 +26,7 @@ import type { HabitatRegion } from '@/types/habitat';
 import { performRegionAnalysis } from '@/services/regionService';
 import type { RegionInfo, RegionSpecies } from '@/services/regionService';
 import type { FilterCategory } from '@/types/speciesFilter';
+import { sendEducationMessage, type EducationContext } from '@/services/educationAgent';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
@@ -166,6 +168,7 @@ const Index = () => {
   const [regionInfo, setRegionInfo] = useState<RegionInfo | null>(null);
   const [regionSpecies, setRegionSpecies] = useState<RegionSpecies[]>([]);
   const [activeSpeciesFilters, setActiveSpeciesFilters] = useState<Set<FilterCategory>>(new Set());
+  const [speciesTypeFilter, setSpeciesTypeFilter] = useState<SpeciesTypeFilterType>('all');
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isChatHistoryExpanded, setIsChatHistoryExpanded] = useState(false);
   const [isDeepDiveMode, setIsDeepDiveMode] = useState(false);
@@ -181,6 +184,9 @@ const Index = () => {
 
   // ✅ NEW: Separate loading state for background fetches (wildlife, protected areas)
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
+
+  // ✅ NEW: Education context tracks the current card for context-aware chat
+  const [educationContext, setEducationContext] = useState<EducationContext | null>(null);
 
   // 🌍 Load WWF ecoregions from database on mount
   useEffect(() => {
@@ -219,6 +225,70 @@ const Index = () => {
 
     loadEcoRegions();
   }, []);
+
+  // 📚 Update education context whenever the right-side card changes
+  useEffect(() => {
+    console.log('🔍 Education context update check:', {
+      selectedCarouselSpecies: selectedCarouselSpecies?.commonName,
+      selectedWildlifePark: selectedWildlifePark?.name,
+      isViewingEcoRegion,
+      regionInfo: regionInfo?.regionName,
+      useGoogleMaps
+    });
+
+    // Priority 1: Carousel Species Card
+    if (selectedCarouselSpecies && regionInfo) {
+      console.log('✅ Setting education context: SPECIES', selectedCarouselSpecies.commonName);
+      setEducationContext({
+        type: 'species',
+        displayName: selectedCarouselSpecies.commonName,
+        data: {
+          commonName: selectedCarouselSpecies.commonName,
+          scientificName: selectedCarouselSpecies.scientificName,
+          animalType: selectedCarouselSpecies.animalType,
+          conservationStatus: selectedCarouselSpecies.conservationStatus,
+          regionName: regionInfo.regionName,
+          occurrenceCount: selectedCarouselSpecies.occurrenceCount,
+        },
+      });
+      return;
+    }
+
+    // Priority 2: Wildlife Park/Protected Area Card
+    if (selectedWildlifePark) {
+      console.log('✅ Setting education context: PARK', selectedWildlifePark.name);
+      setEducationContext({
+        type: 'park',
+        displayName: selectedWildlifePark.name,
+        data: {
+          name: selectedWildlifePark.name,
+          location: selectedWildlifePark.location || selectedWildlifePark,
+          designation: selectedWildlifePark.designation,
+          description: selectedWildlifePark.description,
+        },
+      });
+      return;
+    }
+
+    // Priority 3: Eco-Region Card
+    if (isViewingEcoRegion && regionInfo) {
+      console.log('✅ Setting education context: ECOREGION', regionInfo.regionName);
+      setEducationContext({
+        type: 'ecoregion',
+        displayName: regionInfo.regionName,
+        data: {
+          regionName: regionInfo.regionName,
+          description: regionInfo.description,
+          speciesCount: regionSpecies.length,
+        },
+      });
+      return;
+    }
+
+    // No card showing - clear education context
+    console.log('❌ Clearing education context');
+    setEducationContext(null);
+  }, [selectedCarouselSpecies, selectedWildlifePark, isViewingEcoRegion, regionInfo, regionSpecies, useGoogleMaps]);
 
   // 🎯 HANDLE ECO-REGION CLICK: Switch to 2D map view centered on region
   const handleEcoRegionClick = async (point: any) => {
@@ -725,15 +795,14 @@ const Index = () => {
         console.log(`  Parks to display:`, parks.map(p => p.name));
       }
 
-      // Step 3: Get BALANCED species using database function
-      // This automatically returns diverse species across taxonomic groups
-      const speciesPerClass = 3; // Get 3 species per taxonomic group for diversity
+      // Step 3: Get CURATED species using database function
+      // This returns only manually curated species with high-quality images
+      const speciesPerClass = 10; // Get 10 species per taxonomic group for diversity (ensures min 25 total)
       const { data: balancedSpecies, error: speciesError } = await supabase.rpc(
-        'get_balanced_ecoregion_species',
+        'get_curated_species_by_ecoregion_balanced',
         {
-          p_ecoregion_id: ecoregionData.id,
-          p_species_per_class: speciesPerClass,
-          p_exclude_species: []
+          ecoregion_uuid: ecoregionData.id,
+          max_per_class: speciesPerClass
         }
       );
 
@@ -747,15 +816,22 @@ const Index = () => {
       // Use already declared isMarine, isTerrestrial from park filtering section above
       console.log(`🌊 Ecoregion habitat type: ${ecoregionData.name} - Marine: ${isMarine}, Terrestrial: ${isTerrestrial}`);
 
-      // STRICT FILTERING: Remove inappropriate habitat types
-      if (isMarine) {
-        // Coral Triangle: ONLY marine species
+      // HABITAT FILTERING: Apply selective filtering based on ecoregion type
+      // Some ecoregions like Arctic have BOTH marine and terrestrial species (coast + ocean + tundra)
+      const mixedHabitatEcoregions = ['Arctic', 'Madagascar']; // Ecoregions with diverse habitats
+      const isMixedHabitat = mixedHabitatEcoregions.some(name => ecoregionData.name.includes(name));
+
+      if (isMarine && !isMixedHabitat) {
+        // Pure marine ecoregions (Coral Triangle): ONLY marine species
         filteredSpecies = filteredSpecies.filter((item: any) => item.is_marine);
         console.log(`  🐟 Strict marine filtering: ${filteredSpecies.length} marine species`);
-      } else if (isTerrestrial) {
-        // Borneo/Amazon/Congo: NO marine species (terrestrial + freshwater OK)
+      } else if (isTerrestrial && !isMixedHabitat) {
+        // Pure terrestrial ecoregions (Borneo/Amazon/Congo): NO marine species (terrestrial + freshwater OK)
         filteredSpecies = filteredSpecies.filter((item: any) => !item.is_marine);
         console.log(`  🌳 Excluding marine species: ${filteredSpecies.length} non-marine species`);
+      } else if (isMixedHabitat) {
+        // Mixed habitat ecoregions: Keep all species (marine, terrestrial, freshwater)
+        console.log(`  🌍 Mixed habitat ecoregion: ${filteredSpecies.length} species (all habitats)`);
       }
 
       // Log diversity breakdown
@@ -858,7 +934,79 @@ const Index = () => {
     setIsLoading(true);
     setHasInteracted(true);
 
-    // ✅ Clear eco-region view flag when performing a search
+    // Check if this is an education mode question (2D mode with a card showing)
+    const isEducationMode = useGoogleMaps && educationContext !== null;
+    console.log('🎓 Education mode check:', { useGoogleMaps, educationContext, isEducationMode });
+
+    if (isEducationMode) {
+      console.log('📚 Entering education mode for:', educationContext.displayName);
+      // Add user message to chat history
+      const userMessage: ChatMessage = {
+        id: Date.now().toString(),
+        role: 'user',
+        content: query,
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, userMessage]);
+
+      // Expand chat history for education conversations
+      setIsChatHistoryExpanded(true);
+
+      // Create a placeholder assistant message that will be updated with streaming response
+      const assistantMessageId = (Date.now() + 1).toString();
+      const assistantMessage: ChatMessage = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, assistantMessage]);
+
+      // Call education agent with streaming
+      let fullResponse = '';
+      sendEducationMessage(
+        query,
+        educationContext,
+        (chunk: string) => {
+          // Update the assistant message with each chunk
+          fullResponse += chunk;
+          setChatHistory(prev =>
+            prev.map(msg =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: fullResponse }
+                : msg
+            )
+          );
+        },
+        () => {
+          // On complete
+          setIsLoading(false);
+          console.log('✅ Education response complete');
+        },
+        (error: Error) => {
+          // On error
+          console.error('Education agent error:', error);
+          setChatHistory(prev =>
+            prev.map(msg =>
+              msg.id === assistantMessageId
+                ? { ...msg, content: `Sorry, I encountered an error: ${error.message}` }
+                : msg
+            )
+          );
+          setIsLoading(false);
+          toast({
+            title: 'Error',
+            description: error.message,
+            variant: 'destructive'
+          });
+        }
+      );
+
+      return;
+    }
+
+    // ✅ Only clear state when doing a NEW discovery search (not education chat)
+    // Clear eco-region view flag when performing a search
     setIsViewingEcoRegion(false);
 
     // ✅ Cancel any previous ongoing requests
@@ -1907,10 +2055,13 @@ const Index = () => {
         if (filter === 'amphibians' && animalType === 'amphibian') return true;
         if (filter === 'insects' && animalType === 'insect') return true;
         if (filter === 'plants' && animalType === 'plant') return true;
-        if (filter === 'endangered') {
-          const endangeredStatuses = ['CR', 'EN', 'VU'];
-          if (endangeredStatuses.includes(conservationStatus)) return true;
-        }
+
+        // Conservation status filters
+        if (filter === 'critically-endangered' && conservationStatus === 'CR') return true;
+        if (filter === 'endangered' && conservationStatus === 'EN') return true;
+        if (filter === 'vulnerable' && conservationStatus === 'VU') return true;
+        if (filter === 'near-threatened' && conservationStatus === 'NT') return true;
+        if (filter === 'least-concern' && conservationStatus === 'LC') return true;
       }
       return false;
     });
@@ -2232,15 +2383,27 @@ const Index = () => {
 
       {/* Map/Globe Toggle - Hidden (now in left controls) */}
 
-      {/* Region Species Carousel - Pinned to Left Edge */}
+      {/* Species Type Filter - Pinned to Left Edge */}
       {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
-        <div className="absolute left-4 top-24 bottom-6 w-80 z-[60] pointer-events-auto">
+        <div className="absolute left-4 top-24 bottom-6 w-14 z-[60] pointer-events-auto">
+          <SpeciesTypeFilter
+            activeFilter={speciesTypeFilter}
+            onFilterChange={setSpeciesTypeFilter}
+            showCorals={regionInfo.biome?.toLowerCase().includes('marine') || regionInfo.ecosystemType?.toLowerCase().includes('marine')}
+          />
+        </div>
+      )}
+
+      {/* Region Species Carousel - Next to Filter */}
+      {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
+        <div className="absolute left-20 top-24 bottom-6 w-64 z-[60] pointer-events-auto">
           <RegionSpeciesCarousel
             species={regionSpecies}
             regionName={regionInfo.regionName}
             currentSpecies={selectedCarouselSpecies?.scientificName || speciesInfo?.scientificName}
             onSpeciesSelect={handleCarouselSpeciesSelect}
             activeFilters={activeSpeciesFilters}
+            speciesTypeFilter={speciesTypeFilter}
           />
         </div>
       )}
@@ -2529,6 +2692,34 @@ const Index = () => {
             variant="secondary"
           >
             Generate Lesson Plan
+          </Button>
+
+          {/* Back to Globe Button */}
+          <Button
+            onClick={() => {
+              // Reset everything to go back to 3D globe
+              setSelectedCarouselSpecies(null);
+              setRegionInfo(null);
+              setRegionSpecies([]);
+              setCurrentHabitat(null);
+              setHabitats([]);
+              setHabitatZones([]);
+              setIsViewingEcoRegion(false);
+              setSearchType(null);
+              setMapCenter(null);
+              setUseGoogleMaps(false);
+              setResetGlobeView(true);
+              setTimeout(() => setResetGlobeView(false), 100);
+
+              toast({
+                title: 'Back to Globe 🌍',
+                description: 'Returning to world view...',
+              });
+            }}
+            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+            variant="outline"
+          >
+            Back to Globe
           </Button>
         </div>
       ) : speciesInfo ? (

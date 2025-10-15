@@ -68,7 +68,11 @@ serve(async (req) => {
           conservationStatus: item.conservation_status,
           imageUrl: item.image_url,
           occurrenceCount: Math.round(item.overlap_percentage || 50),
-          taxonomicGroup: item.taxonomic_group
+          taxonomicGroup: item.taxonomic_group,
+          // New classification fields
+          speciesType: item.species_type,
+          uiGroup: item.ui_group,
+          trophicRole: item.trophic_role
         }));
 
         console.log(`Found ${topSpecies.length} balanced species from IUCN database`);
@@ -123,7 +127,11 @@ serve(async (req) => {
         conservationStatus: s.conservation_status,
         imageUrl: s.image_url,
         occurrenceCount: 10, // Default since we don't have count
-        taxonomicGroup: s.taxonomic_group
+        taxonomicGroup: s.taxonomic_group,
+        // New classification fields
+        speciesType: s.species_type,
+        uiGroup: s.ui_group,
+        trophicRole: s.trophic_role
       }));
 
       console.log(`Found ${topSpecies.length} balanced species from spatial query`);

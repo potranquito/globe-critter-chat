@@ -2,6 +2,8 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { FilterCategory } from '@/types/speciesFilter';
+import type { SpeciesTypeFilter } from './SpeciesTypeFilter';
+import { getSpeciesType, getUIGroup } from '@/utils/speciesClassification';
 import { useEffect, useRef } from 'react';
 
 interface RegionSpecies {
@@ -21,6 +23,7 @@ interface RegionSpeciesCarouselProps {
   currentSpecies?: string;
   onSpeciesSelect: (species: RegionSpecies) => void;
   activeFilters?: Set<FilterCategory>;
+  speciesTypeFilter?: SpeciesTypeFilter; // New simplified filter
 }
 
 export const RegionSpeciesCarousel = ({
@@ -28,14 +31,36 @@ export const RegionSpeciesCarousel = ({
   regionName,
   currentSpecies,
   onSpeciesSelect,
-  activeFilters = new Set()
+  activeFilters = new Set(),
+  speciesTypeFilter = 'all'
 }: RegionSpeciesCarouselProps) => {
 
-  // Filter species based on active filters
+  // Filter species based on active filters and species type filter
   const filterSpecies = (speciesList: RegionSpecies[]) => {
-    if (activeFilters.size === 0) return speciesList;
+    let filtered = speciesList;
 
-    return speciesList.filter(sp => {
+    // Apply species type filter first (new simplified filter)
+    if (speciesTypeFilter !== 'all') {
+      filtered = filtered.filter(sp => {
+        const speciesType = getSpeciesType({
+          class: sp.animalType,
+          animalType: sp.animalType,
+          commonName: sp.commonName,
+          scientificName: sp.scientificName
+        });
+        const uiGroup = getUIGroup(speciesType);
+
+        if (speciesTypeFilter === 'animals') return uiGroup === 'Animals';
+        if (speciesTypeFilter === 'birds') return uiGroup === 'Birds';
+        if (speciesTypeFilter === 'plants-corals') return uiGroup === 'Plants & Corals';
+        return true;
+      });
+    }
+
+    // Apply legacy filters if any (for backward compatibility)
+    if (activeFilters.size === 0) return filtered;
+
+    return filtered.filter(sp => {
       // Normalize the animal type for comparison (handles both "MAMMALIA" and "mammal")
       const animalType = sp.animalType?.toLowerCase() || '';
       const taxonomicGroup = sp.taxonomicGroup?.toLowerCase() || '';
@@ -57,11 +82,12 @@ export const RegionSpeciesCarousel = ({
         // Plant filter
         if (filter === 'plants' && (animalType === 'plant' || animalType === 'plantae' || taxonomicGroup.includes('plant'))) return true;
 
-        // Endangered filter
-        if (filter === 'endangered') {
-          const endangeredStatuses = ['CR', 'EN', 'VU'];
-          if (endangeredStatuses.includes(sp.conservationStatus?.toUpperCase() || '')) return true;
-        }
+        // Conservation status filters
+        if (filter === 'critically-endangered' && sp.conservationStatus?.toUpperCase() === 'CR') return true;
+        if (filter === 'endangered' && sp.conservationStatus?.toUpperCase() === 'EN') return true;
+        if (filter === 'vulnerable' && sp.conservationStatus?.toUpperCase() === 'VU') return true;
+        if (filter === 'near-threatened' && sp.conservationStatus?.toUpperCase() === 'NT') return true;
+        if (filter === 'least-concern' && sp.conservationStatus?.toUpperCase() === 'LC') return true;
       }
       return false;
     });
@@ -185,7 +211,7 @@ export const RegionSpeciesCarousel = ({
         </h3>
         <p className="text-sm text-muted-foreground">
           {filteredSpecies.length} of {species.length} species
-          {activeFilters.size > 0 && <span className="text-primary"> • {activeFilters.size} filter{activeFilters.size > 1 ? 's' : ''} active</span>}
+          {(activeFilters.size > 0 || speciesTypeFilter !== 'all') && <span className="text-primary"> • filtered</span>}
         </p>
       </div>
 

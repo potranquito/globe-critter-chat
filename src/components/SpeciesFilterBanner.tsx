@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { ChevronRight, ChevronDown } from 'lucide-react';
-import { FILTER_OPTIONS, ANIMAL_FILTERS, type FilterCategory } from '@/types/speciesFilter';
+import { UI_GROUP_FILTERS, CONSERVATION_FILTERS, type FilterCategory } from '@/types/speciesFilter';
 
 interface SpeciesFilterBannerProps {
   activeFilters: Set<FilterCategory>;
@@ -19,10 +19,14 @@ export const SpeciesFilterBanner = ({
   activeFilters,
   onFilterToggle,
 }: SpeciesFilterBannerProps) => {
-  const [isAnimalsExpanded, setIsAnimalsExpanded] = useState(false);
+  const [isConservationExpanded, setIsConservationExpanded] = useState(false);
 
-  const isAnimalFilterActive = () => {
-    return ANIMAL_FILTERS.some(filter => activeFilters.has(filter.id));
+  const isUIGroupFilterActive = () => {
+    return UI_GROUP_FILTERS.some(filter => activeFilters.has(filter.id));
+  };
+
+  const isConservationFilterActive = () => {
+    return CONSERVATION_FILTERS.some(filter => activeFilters.has(filter.id));
   };
 
   return (
@@ -36,69 +40,73 @@ export const SpeciesFilterBanner = ({
         {/* Scrollable Filter Options */}
         <ScrollArea className="flex-1">
           <div className="flex flex-col gap-2">
-            {/* Locations Filter - Always at the top */}
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="relative">
-                  <Button
-                    variant={activeFilters.has('locations') ? 'default' : 'ghost'}
-                    size="icon"
-                    className={`w-full h-12 text-xl ${
-                      activeFilters.has('locations') ? 'bg-primary/20 hover:bg-primary/30' : ''
-                    }`}
-                    onClick={() => onFilterToggle('locations')}
-                  >
-                    <span>📍</span>
-                  </Button>
-                  {activeFilters.has('locations') && (
-                    <div className="absolute -right-1 -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
-                  )}
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="glass-panel">
-                <p className="font-semibold">Locations</p>
-                <p className="text-xs text-muted-foreground">Nearby parks, refuges & preserves</p>
-              </TooltipContent>
-            </Tooltip>
+            {/* UI Group Filters - Animals, Birds, Plants & Corals */}
+            {UI_GROUP_FILTERS.map((filter) => (
+              <Tooltip key={filter.id}>
+                <TooltipTrigger asChild>
+                  <div className="relative">
+                    <Button
+                      variant={activeFilters.has(filter.id) ? 'default' : 'ghost'}
+                      size="icon"
+                      className={`w-full h-12 text-xl ${
+                        activeFilters.has(filter.id) ? 'bg-primary/20 hover:bg-primary/30' : ''
+                      }`}
+                      onClick={() => onFilterToggle(filter.id)}
+                    >
+                      <span>{filter.emoji}</span>
+                    </Button>
+                    {activeFilters.has(filter.id) && (
+                      <div className="absolute -right-1 -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
+                    )}
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="glass-panel">
+                  <p className="font-semibold">{filter.label}</p>
+                </TooltipContent>
+              </Tooltip>
+            ))}
 
-            {/* Animals Filter with Expandable Sub-menu */}
+            {/* Divider */}
+            <div className="my-1 border-t border-border/50" />
+
+            {/* Conservation Status Filter with Expandable Sub-menu */}
             <div className="relative">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="relative">
                     <Button
-                      variant={isAnimalFilterActive() ? 'default' : 'ghost'}
+                      variant={isConservationFilterActive() ? 'default' : 'ghost'}
                       size="icon"
                       className={`w-full h-12 text-xl relative ${
-                        isAnimalFilterActive() ? 'bg-primary/20 hover:bg-primary/30' : ''
+                        isConservationFilterActive() ? 'bg-primary/20 hover:bg-primary/30' : ''
                       }`}
-                      onClick={() => setIsAnimalsExpanded(!isAnimalsExpanded)}
+                      onClick={() => setIsConservationExpanded(!isConservationExpanded)}
                     >
-                      <span>🦁</span>
+                      <span>⚠️</span>
                       {/* Expansion indicator */}
                       <div className="absolute bottom-1 right-1">
-                        {isAnimalsExpanded ? (
+                        {isConservationExpanded ? (
                           <ChevronDown className="h-3 w-3" />
                         ) : (
                           <ChevronRight className="h-3 w-3" />
                         )}
                       </div>
                     </Button>
-                    {isAnimalFilterActive() && (
+                    {isConservationFilterActive() && (
                       <div className="absolute -right-1 -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
                     )}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right" className="glass-panel">
-                  <p className="font-semibold">Animals</p>
+                  <p className="font-semibold">Conservation Status</p>
                   <p className="text-xs text-muted-foreground">Click to expand categories</p>
                 </TooltipContent>
               </Tooltip>
 
-              {/* Animal Sub-categories */}
-              {isAnimalsExpanded && (
+              {/* Conservation Sub-categories */}
+              {isConservationExpanded && (
                 <div className="mt-1 ml-1 space-y-1 animate-fade-in">
-                  {ANIMAL_FILTERS.map((filter) => (
+                  {CONSERVATION_FILTERS.map((filter) => (
                     <Tooltip key={filter.id}>
                       <TooltipTrigger asChild>
                         <div className="relative">
@@ -125,35 +133,6 @@ export const SpeciesFilterBanner = ({
                 </div>
               )}
             </div>
-
-            {/* Other Filters */}
-            {FILTER_OPTIONS.filter(f => f.id !== 'all-animals' && f.id !== 'locations').map((filter) => (
-              <Tooltip key={filter.id}>
-                <TooltipTrigger asChild>
-                  <div className="relative">
-                    <Button
-                      variant={activeFilters.has(filter.id) ? 'default' : 'ghost'}
-                      size="icon"
-                      className={`w-full h-12 text-xl ${
-                        activeFilters.has(filter.id) ? 'bg-primary/20 hover:bg-primary/30' : ''
-                      }`}
-                      onClick={() => onFilterToggle(filter.id)}
-                    >
-                      <span>{filter.emoji}</span>
-                    </Button>
-                    {activeFilters.has(filter.id) && (
-                      <div className="absolute -right-1 -top-1 w-3 h-3 bg-primary rounded-full border-2 border-background" />
-                    )}
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="glass-panel">
-                  <p className="font-semibold">{filter.label}</p>
-                  {filter.description && (
-                    <p className="text-xs text-muted-foreground">{filter.description}</p>
-                  )}
-                </TooltipContent>
-              </Tooltip>
-            ))}
           </div>
         </ScrollArea>
 

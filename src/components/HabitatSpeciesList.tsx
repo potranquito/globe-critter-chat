@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { Species } from '@/types/habitat';
 import type { FilterCategory } from '@/types/speciesFilter';
+import { getSpeciesType, getUIGroup } from '@/utils/speciesClassification';
 
 interface HabitatSpeciesListProps {
   species: Species[];
@@ -23,9 +24,24 @@ export const HabitatSpeciesList = ({
     if (activeFilters.size === 0) return speciesList;
 
     return speciesList.filter(sp => {
+      // Classify the species
+      const speciesType = getSpeciesType({
+        class: sp.type,
+        animalType: sp.type,
+        commonName: sp.name,
+        scientificName: sp.scientificName,
+        kingdom: sp.kingdom
+      });
+      const uiGroup = getUIGroup(speciesType);
+
       // Check if any filter matches
       for (const filter of activeFilters) {
-        // Animal type filters
+        // New UI Group filters (primary)
+        if (filter === 'animals' && uiGroup === 'Animals') return true;
+        if (filter === 'birds' && uiGroup === 'Birds') return true;
+        if (filter === 'plants-corals' && uiGroup === 'Plants & Corals') return true;
+
+        // Legacy animal type filters (backward compatibility)
         if (filter === 'all-animals') {
           const animalTypes = ['mammal', 'bird', 'fish', 'reptile', 'amphibian', 'insect'];
           if (animalTypes.includes(sp.type?.toLowerCase() || '')) return true;
@@ -40,12 +56,13 @@ export const HabitatSpeciesList = ({
         // Plant filter
         if (filter === 'plants' && sp.type?.toLowerCase() === 'plant') return true;
 
-        // Endangered filter
-        if (filter === 'endangered') {
-          const endangeredStatuses = ['CR', 'EN', 'VU', 'critically endangered', 'endangered', 'vulnerable'];
-          if (endangeredStatuses.includes(sp.conservationStatus?.toUpperCase() || '') ||
-              endangeredStatuses.includes(sp.conservationStatus?.toLowerCase() || '')) return true;
-        }
+        // Conservation status filters
+        const statusUpper = sp.conservationStatus?.toUpperCase() || '';
+        if (filter === 'critically-endangered' && statusUpper === 'CR') return true;
+        if (filter === 'endangered' && statusUpper === 'EN') return true;
+        if (filter === 'vulnerable' && statusUpper === 'VU') return true;
+        if (filter === 'near-threatened' && statusUpper === 'NT') return true;
+        if (filter === 'least-concern' && statusUpper === 'LC') return true;
       }
       return false;
     });
