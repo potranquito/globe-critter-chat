@@ -112,8 +112,8 @@ serve(async (req) => {
       // Search by English name - API v3 requires separate en: tags for each word
       // Convert "African grey parrot" -> "en:african en:grey en:parrot"
       // Don't add quality/length filters here - will filter client-side
-      const nameWords = scientificName.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-      query = nameWords.map(w => `en:${w}`).join(' ');
+      const nameWords = scientificName.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+      query = nameWords.map((w: string) => `en:${w}`).join(' ');
       xenoCantoUrl = `https://xeno-canto.org/api/3/recordings?query=${encodeURIComponent(query)}&key=${XENO_CANTO_API_KEY}`;
 
       console.log(`Trying common name search: ${query}`);
@@ -136,8 +136,8 @@ serve(async (req) => {
 
         for (const variation of variations) {
           console.log(`  Trying variation: "${variation}"`);
-          const varWords = variation.toLowerCase().split(/\s+/).filter(w => w.length > 2);
-          query = varWords.map(w => `en:${w}`).join(' ');
+          const varWords = variation.toLowerCase().split(/\s+/).filter((w: string) => w.length > 2);
+          query = varWords.map((w: string) => `en:${w}`).join(' ');
           xenoCantoUrl = `https://xeno-canto.org/api/3/recordings?query=${encodeURIComponent(query)}&key=${XENO_CANTO_API_KEY}`;
 
           xenoResponse = await fetch(xenoCantoUrl);
