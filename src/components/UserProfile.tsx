@@ -23,7 +23,7 @@ export function UserProfile() {
   // Show loading state
   if (loading) {
     return (
-      <div className="fixed top-8 right-8 z-[100] pointer-events-auto">
+      <div className="fixed top-4 right-8 z-[100] pointer-events-auto">
         <Button
           variant="outline"
           className="glass-panel rounded-xl h-12 px-4"
@@ -38,7 +38,7 @@ export function UserProfile() {
   // Show sign in button if not authenticated
   if (!user) {
     return (
-      <div className="fixed top-8 right-8 z-[100] pointer-events-auto">
+      <div className="fixed top-4 right-8 z-[100] pointer-events-auto">
         <Button
           onClick={signIn}
           className="glass-panel rounded-xl h-12 px-6 bg-primary/90 hover:bg-primary text-primary-foreground"
@@ -58,7 +58,7 @@ export function UserProfile() {
   const progressToNextMilestone = ((user.health_contributed - currentMilestone) / 100) * 100;
 
   return (
-    <div className="fixed top-8 right-8 z-[100] pointer-events-auto">
+    <div className="fixed top-4 right-8 z-[100] pointer-events-auto">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

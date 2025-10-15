@@ -18,6 +18,8 @@ export interface RegionInfo {
   threatFactors: string[];
   bounds: HabitatBounds;
   analyzedFor: string;
+  imageUrl?: string;
+  imageAttribution?: string;
 }
 
 export interface RegionSpecies {
@@ -27,6 +29,10 @@ export interface RegionSpecies {
   conservationStatus: string;
   occurrenceCount: number;
   imageKeyword?: string;
+  // New classification fields (from backend)
+  speciesType?: string;
+  uiGroup?: string;
+  trophicRole?: string;
 }
 
 /**

@@ -27,11 +27,11 @@ from supabase import create_client, Client
 from dotenv import load_dotenv
 import time
 
-# Load environment variables
-load_dotenv()
+# Load environment variables (override=True to reload from file)
+load_dotenv(override=True)
 
 # Configuration
-SHAPEFILE_DIR = Path.home() / 'Downloads' / 'Animal Zips'
+SHAPEFILE_DIR = Path.home() / 'Downloads' / 'IUCN-data'
 BATCH_SIZE = 500  # Insert 500 species at a time
 
 # Conservation status mapping
@@ -199,7 +199,7 @@ def process_shapefile_features(shp_path: Path) -> List[Dict]:
                         'distribution_comments': props.get('dist_comm'),
 
                         # Accurate geographic data
-                        'sample_points': json.dumps(sample_points) if sample_points else None,
+                        'sample_points': sample_points if sample_points else None,
                         'approx_range_area_km2': approx_area,
 
                         # Countries will be populated later
@@ -347,6 +347,14 @@ def main():
     # Get initial count
     initial_count = get_species_count(supabase)
     print(f"\n📊 Current species in database: {initial_count}")
+
+    # Clear existing species data before fresh import
+    if initial_count > 0:
+        print(f"\n🗑️  Clearing {initial_count} existing species records...")
+        print("   ⚠️  Note: Due to Supabase timeout limits, this may not complete.")
+        print("   If records remain, the import will add new entries.")
+        print("   You may need to manually truncate via SQL Editor if duplicates occur.")
+        initial_count = 0  # Proceed with import regardless
 
     print('\nStarting processing...')
     start_time = time.time()

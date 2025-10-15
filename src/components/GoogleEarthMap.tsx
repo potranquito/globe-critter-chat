@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 import { MapPin } from 'lucide-react';
 import { useGoogleMapsApi } from '@/hooks/useGoogleMapsApi';
-import ZoomControls from './ZoomControls';
+// ZoomControls removed per user request
 import UsageIndicator from './UsageIndicator';
 import ImageMarker from './ImageMarker';
 import GlobeComponent from './Globe';
@@ -30,6 +30,7 @@ interface GoogleEarthMapProps {
   center?: { lat: number; lng: number } | null;
   zoom?: number;
   wildlifePlaces?: any[];
+  protectedAreas?: any[];
   locationName?: string;
 }
 
@@ -58,14 +59,15 @@ const MapEventHandler = ({
   return null;
 };
 
-const GoogleEarthMap = ({ 
-  habitats, 
-  onPointClick, 
+const GoogleEarthMap = ({
+  habitats,
+  onPointClick,
   onDoubleGlobeClick,
   onImageMarkerClick,
   center,
   zoom = 3,
   wildlifePlaces = [],
+  protectedAreas = [],
   locationName
 }: GoogleEarthMapProps) => {
   const { apiKey, loading, usage, error } = useGoogleMapsApi();
@@ -238,7 +240,7 @@ const GoogleEarthMap = ({
           {/* Wildlife location markers with thumbnails */}
           {wildlifePlaces.map((place, idx) => {
             const apiKey = 'AIzaSyC4205XHgzRi8VswW7zqdFVanY-HoEDTIg';
-            const photoUrl = place.photoReference 
+            const photoUrl = place.photoReference
               ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photoReference}&key=${apiKey}`
               : null;
 
@@ -262,8 +264,8 @@ const GoogleEarthMap = ({
                 <div className="cursor-pointer hover:scale-110 transition-transform group">
                   {photoUrl || place.imageUrl ? (
                     <div className="relative">
-                      <img 
-                        src={photoUrl || place.imageUrl} 
+                      <img
+                        src={photoUrl || place.imageUrl}
                         alt={place.name}
                         className="w-16 h-16 rounded-lg border-2 border-emerald-400 shadow-lg object-cover"
                       />
@@ -280,15 +282,44 @@ const GoogleEarthMap = ({
               </AdvancedMarker>
             );
           })}
+
+          {/* Protected areas as green dots */}
+          {protectedAreas.slice(0, 3).map((area, idx) => (
+            <AdvancedMarker
+              key={`protected-${idx}`}
+              position={{ lat: area.location?.lat || area.lat, lng: area.location?.lng || area.lng }}
+              onClick={() => {
+                // Don't zoom - just show the park info card
+                onPointClick?.({
+                  ...area,
+                  lat: area.location?.lat || area.lat,
+                  lng: area.location?.lng || area.lng,
+                  type: 'protected'
+                });
+              }}
+            >
+              <div
+                className="cursor-pointer hover:scale-125 transition-transform relative group"
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  backgroundColor: '#22c55e',
+                  borderRadius: '50%',
+                  border: '3px solid white',
+                  boxShadow: '0 2px 10px rgba(34, 197, 94, 0.5)',
+                }}
+              >
+                {/* Tooltip on hover */}
+                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10 min-w-max">
+                  <div className="font-semibold">{area.name}</div>
+                  {area.designation && <div className="text-muted-foreground text-[10px]">{area.designation}</div>}
+                </div>
+              </div>
+            </AdvancedMarker>
+          ))}
         </Map>
 
-        {/* UI Overlays */}
-        <ZoomControls
-          onZoomIn={handleZoomIn}
-          onZoomOut={handleZoomOut}
-          onReset={handleResetView}
-          zoomLevel={getZoomLevel()}
-        />
+        {/* UI Overlays - Zoom controls removed per user request */}
 
         {usage && (
           <UsageIndicator
