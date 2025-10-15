@@ -37,9 +37,9 @@ export const HabitatSpeciesList = ({
       // Check if any filter matches
       for (const filter of activeFilters) {
         // New UI Group filters (primary)
-        if (filter === 'animals' && uiGroup === 'Animals') return true;
-        if (filter === 'birds' && uiGroup === 'Birds') return true;
-        if (filter === 'plants-corals' && uiGroup === 'Plants & Corals') return true;
+        if (filter === 'animals' && uiGroup === 'animals') return true;
+        if (filter === 'birds' && uiGroup === 'birds') return true;
+        if (filter === 'plants-corals' && uiGroup === 'plants-corals') return true;
 
         // Legacy animal type filters (backward compatibility)
         if (filter === 'all-animals') {

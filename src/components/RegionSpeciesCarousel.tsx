@@ -50,9 +50,9 @@ export const RegionSpeciesCarousel = ({
         });
         const uiGroup = getUIGroup(speciesType);
 
-        if (speciesTypeFilter === 'animals') return uiGroup === 'Animals';
-        if (speciesTypeFilter === 'birds') return uiGroup === 'Birds';
-        if (speciesTypeFilter === 'plants-corals') return uiGroup === 'Plants & Corals';
+        if (speciesTypeFilter === 'animals') return uiGroup === 'animals';
+        if (speciesTypeFilter === 'birds') return uiGroup === 'birds';
+        if (speciesTypeFilter === 'plants-corals') return uiGroup === 'plants-corals';
         return true;
       });
     }
