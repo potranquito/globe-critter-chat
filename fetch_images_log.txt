@@ -1,0 +1,1352 @@
+🖼️  Fetching Images for Database Species
+
+Target: 200 species per ecoregion
+Total expected: 1200 species
+
+
+======================================================================
+📍 Amazon and Guianas
+======================================================================
+
+
+   🚨 CR species (target: 30)...
+      Found 119 species without images, fetching 30...
+      [1/30] Trying: Microkayla saltator... ✗
+      [1/30] Trying: Aromobates walterarpi... ✓
+      [2/30] Trying: Pristimantis spilogaster... ✓
+      [3/30] Trying: Gastrotheca christiani... ✓
+      [4/30] Trying: Gastrotheca christiani... ✓
+      [5/30] Trying: Strabomantis necerus... ✓
+      [6/30] Trying: Strabomantis necerus... ✓
+      [7/30] Trying: Atelopus petriruizi... ✓
+      [8/30] Trying: Pristimantis mallii... ✓
+      [9/30] Trying: Leucostethus bilsa... ✓
+      [10/30] Trying: Diasporus majeensis... ✗
+      [10/30] Trying: Atelopus longirostris... ✓
+      [11/30] Trying: Atelopus longirostris... ✓
+      [12/30] Trying: Atelopus longirostris... ✓
+      [13/30] Trying: Telmatobius niger... ✗
+      [13/30] Trying: Hyloxalus anthracinus... ✓
+      [14/30] Trying: Hyloxalus anthracinus... ✓
+      [15/30] Trying: Phrynopus juninensis... ✓
+      [16/30] Trying: Atelopus halihelos... ✓
+      [17/30] Trying: Pristimantis mars... ✓
+      [18/30] Trying: Telmatobius mendelsoni... ✓
+      [19/30] Trying: Atelopus petersi... ✓
+      [20/30] Trying: Minyobates steyermarki... ✗
+      [20/30] Trying: Pristimantis xylochobates... ✓
+      [21/30] Trying: Bolitoglossa chucantiensis... ✓
+      [22/30] Trying: Hyloxalus abditaurantius... ✓
+      [23/30] Trying: Hyloxalus abditaurantius... ✓
+      [24/30] Trying: Atelopus palmatus... ✓
+      [25/30] Trying: Rhaebo olallai... ✗
+      [25/30] Trying: Rhaebo olallai... ✗
+      ✅ Fetched 24 images for CR species
+
+   🚨 EN species (target: 40)...
+      Found 165 species without images, fetching 40...
+      [1/40] Trying: species of frog in the family Strabomantidae... ✗
+      [1/40] Trying: Pristimantis simoteriscus... ✗
+      [1/40] Trying: species of frog in the family Strabomantidae... ✗
+      [1/40] Trying: Pristimantis simoteriscus... ✗
+      [1/40] Trying: Nesorohyla kanaima... ✗
+      [1/40] Trying: Pristimantis vidua... ✓
+      [2/40] Trying: Tepuihyla obscura... ✓
+      [3/40] Trying: Centrolene lynchi... ✗
+      [3/40] Trying: Serranobatrachus carmelitae... ✓
+      [4/40] Trying: Osornophryne antisana... ✓
+      [5/40] Trying: Pristimantis mazar... ✗
+      [5/40] Trying: Pristimantis incanus... ✓
+      [6/40] Trying: Ctenophryne barbatula... ✗
+      [6/40] Trying: Boana ericae... ✓
+      [7/40] Trying: Boana ericae... ✓
+      [8/40] Trying: Phrynopus daemon... ✗
+      [8/40] Trying: Pristimantis ocellatus... ✓
+      [9/40] Trying: Gastrotheca trachyceps... ✗
+      [9/40] Trying: Gastrotheca trachyceps... ✗
+      [9/40] Trying: Centrolene ballux... ✓
+      [10/40] Trying: Pristimantis roni... ✗
+      [10/40] Trying: Dendropsophus yaracuyanus... ✗
+      [10/40] Trying: Agalychnis medinae... ✓
+      [11/40] Trying: Agalychnis medinae... ✓
+      [12/40] Trying: Centrolene condor... ✗
+      [12/40] Trying: Excidobates mysteriosus... ✓
+      [13/40] Trying: Phrynopus barthlenae... ✓
+      [14/40] Trying: Pristimantis lividus... ✓
+      [15/40] Trying: Pristimantis mutabilis... ✗
+      [15/40] Trying: Colostethus imbricolus... ✓
+      [16/40] Trying: Nymphargus buenaventura... ✗
+      [16/40] Trying: Hyloxalus fuliginosus... ✓
+      [17/40] Trying: Phyllobates bicolor... ✓
+      [18/40] Trying: Phyllobates bicolor... ✓
+      [19/40] Trying: Oreobates lundbergi... ✗
+      [19/40] Trying: Pristimantis dorado... ✓
+      [20/40] Trying: Rhinella arborescandens... ✓
+      [21/40] Trying: Pristimantis myops... ✗
+      [21/40] Trying: Pristimantis myops... ✗
+      [21/40] Trying: Atelopus seminiferus... ✓
+      [22/40] Trying: Pristimantis vanadise... ✓
+      [23/40] Trying: Pristimantis pinguis... ✓
+      ✅ Fetched 23 images for EN species
+
+   🚨 VU species (target: 50)...
+      Found 103 species without images, fetching 50...
+      [1/50] Trying: species of frog in the subfamily Phyllomedusinae... ✗
+      [1/50] Trying: Pithecopus centralis... ✓
+      [2/50] Trying: species of frog in the subfamily Phyllomedusinae... ✗
+      [2/50] Trying: Pithecopus centralis... ✓
+      [3/50] Trying: species of frog in the subfamily Phyllomedusinae... ✗
+      [3/50] Trying: Pithecopus centralis... ✓
+      [4/50] Trying: species of frog in the family Strabomantidae... ✗
+      [4/50] Trying: Pristimantis xeniolum... ✓
+      [5/50] Trying: species of toads in the family Bufonidae... ✗
+      [5/50] Trying: Oreophrynella weiassipuensis... ✗
+      [5/50] Trying: species of toads in the family Bufonidae... ✗
+      [5/50] Trying: Oreophrynella weiassipuensis... ✗
+      [5/50] Trying: species of toad in the family Bufonidae... ✗
+      [5/50] Trying: Oreophrynella vasquezi... ✓
+      [6/50] Trying: Bolitoglossa hiemalis... ✗
+      [6/50] Trying: Nymphargus prasinus... ✗
+      [6/50] Trying: Gastrotheca riobambae... ✓
+      [7/50] Trying: Pristimantis schultei... ✓
+      [8/50] Trying: Pristimantis leopardus... ✗
+      [8/50] Trying: Pristimantis pedimontanus... ✓
+      [9/50] Trying: species of frog in the subfamily Phyllomedusinae... ✗
+      [9/50] Trying: Pithecopus centralis... ✓
+      [10/50] Trying: species of frog in the subfamily Phyllomedusinae... ✗
+      [10/50] Trying: Pithecopus centralis... ✓
+      [11/50] Trying: Microkayla melanocheira... ✗
+      [11/50] Trying: Pristimantis merostictus... ✓
+      [12/50] Trying: Rhinella macrorhina... ✓
+      [13/50] Trying: Rhinella macrorhina... ✓
+      [14/50] Trying: Pristimantis anolirex... ✓
+      [15/50] Trying: Pristimantis bicantus... ✗
+      [15/50] Trying: Pristimantis exoristus... ✓
+      [16/50] Trying: Telmatobius hintoni... ✓
+      [17/50] Trying: Rhinella quechua... ✓
+      [18/50] Trying: Pristimantis duende... ✓
+      [19/50] Trying: Pristimantis rosadoi... ✗
+      [19/50] Trying: Pristimantis rosadoi... ✗
+      [19/50] Trying: Telmatobius rubigo... ✓
+      [20/50] Trying: Pristimantis puruscafeum... ✗
+      [20/50] Trying: Pristimantis yuruaniensis... ✗
+      [20/50] Trying: Centrolene heloderma... ✗
+      [20/50] Trying: Aromobates tokuko... ✓
+      [21/50] Trying: Pristimantis yustizi... ✓
+      [22/50] Trying: Pseudopaludicola ibisoroca... ✗
+      [22/50] Trying: Pseudopaludicola ibisoroca... ✗
+      [22/50] Trying: Pristimantis celator... ✓
+      [23/50] Trying: Pristimantis appendiculatus... ✓
+      [24/50] Trying: Hyloscirtus callipeza... ✗
+      [24/50] Trying: Oreophrynella macconnelli... ✓
+      [25/50] Trying: Telmatobius huayra... ✓
+      [26/50] Trying: Pristimantis charlottevillensis... ✓
+      [27/50] Trying: Pristimantis nigrogriseus... ✓
+      [28/50] Trying: Oreophrynella huberi... ✓
+      [29/50] Trying: Pristimantis churuwiai... ✗
+      [29/50] Trying: Pristimantis churuwiai... ✗
+      [29/50] Trying: Hyloscirtus antioquia... ✓
+      [30/50] Trying: Nymphargus ruizi... ✗
+      [30/50] Trying: Rhinella ruizi... ✗
+      [30/50] Trying: Ceuthomantis aracamuni... ✓
+      [31/50] Trying: Ceuthomantis aracamuni... ✓
+      ✅ Fetched 31 images for VU species
+
+   🚨 NT species (target: 30)...
+      Found 57 species without images, fetching 30...
+      [1/30] Trying: Myersiohyla loveridgei... ✗
+      [1/30] Trying: Myersiohyla loveridgei... ✗
+      [1/30] Trying: species of toad in the family Bufonidae... ✗
+      [1/30] Trying: Oreophrynella cryptica... ✓
+      [2/30] Trying: Noblella usurpator... ✗
+      [2/30] Trying: species of frog in the family Aromobatidae... ✗
+      [2/30] Trying: Mannophryne urticans... ✓
+      [3/30] Trying: Oophaga sylvatica... ✓
+      [4/30] Trying: Gastrotheca ruizi... ✗
+      [4/30] Trying: Rulyrana spiculata... ✗
+      [4/30] Trying: Adenomera martinezi... ✗
+      [4/30] Trying: Adenomera martinezi... ✗
+      [4/30] Trying: Serranobatrachus sanctaemartae... ✓
+      [5/30] Trying: Anomaloglossus rufulus... ✓
+      [6/30] Trying: Stefania schuberti... ✓
+      [7/30] Trying: Hyloxalus lehmanni... ✗
+      [7/30] Trying: Pristimantis attenboroughi... ✓
+      [8/30] Trying: Pristimantis baiotis... ✓
+      [9/30] Trying: Pristimantis baiotis... ✓
+      [10/30] Trying: Pristimantis pirrensis... ✓
+      [11/30] Trying: Pristimantis cantitans... ✓
+      [12/30] Trying: Myersiohyla chamaeleo... ✓
+      [13/30] Trying: Myersiohyla chamaeleo... ✓
+      [14/30] Trying: Myersiohyla chamaeleo... ✓
+      [15/30] Trying: Pristimantis gryllus... ✗
+      [15/30] Trying: Pristimantis orpacobates... ✓
+      [16/30] Trying: Pristimantis orpacobates... ✓
+      [17/30] Trying: Pristimantis muscosus... ✓
+      [18/30] Trying: Pristimantis muscosus... ✓
+      [19/30] Trying: Pristimantis muscosus... ✓
+      [20/30] Trying: Stefania goini... ✓
+      [21/30] Trying: Stefania goini... ✓
+      ✅ Fetched 21 images for NT species
+
+   🚨 LC species (target: 50)...
+      Found 438 species without images, fetching 50...
+      [1/50] Trying: Leptodactylus intermedius... ✗
+      [1/50] Trying: Leptodactylus nesiotus... ✗
+      [1/50] Trying: Hamptophryne boliviana... ✓
+      [2/50] Trying: Pristimantis lirellus... ✓
+      [3/50] Trying: Oreobates madidi... ✓
+      [4/50] Trying: Pleurodema borellii... ✓
+      [5/50] Trying: Pristimantis lynchi... ✓
+      [6/50] Trying: species of frog in the family Strabomantidae... ✗
+      [6/50] Trying: Phrynopus tribulosus... ✗
+      [6/50] Trying: Allobates sumtuosus... ✓
+      [7/50] Trying: Atelopus barbotini... ✓
+      [8/50] Trying: Dendropsophus luddeckei... ✓
+      [9/50] Trying: Oreobates madidi... ✓
+      [10/50] Trying: Leptodactylus latinasus... ✓
+      [11/50] Trying: Elachistocleis piauiensis... ✓
+      [12/50] Trying: Caecilia orientalis... ✓
+      [13/50] Trying: Pristimantis leptolophus... ✓
+      [14/50] Trying: Leptodactylus nesiotus... ✗
+      [14/50] Trying: Dendropsophus garagoensis... ✗
+      [14/50] Trying: Strabomantis biporcatus... ✓
+      [15/50] Trying: Leptodactylus wagneri... ✓
+      [16/50] Trying: Rhinella cerradensis... ✓
+      [17/50] Trying: Engystomops puyango... ✗
+      [17/50] Trying: Yunganastes mercedesae... ✗
+      [17/50] Trying: Dendropsophus koechlini... ✓
+      [18/50] Trying: Pristimantis eurydactylus... ✓
+      [19/50] Trying: Oreobates chiquitanus... ✗
+      [19/50] Trying: Yunganastes mercedesae... ✗
+      [19/50] Trying: Caecilia tentaculata... ✓
+      [20/50] Trying: Epicrionops bicolor... ✓
+      [21/50] Trying: Boana maculateralis... ✓
+      [22/50] Trying: Pristimantis carvalhoi... ✓
+      [23/50] Trying: Boana maculateralis... ✓
+      [24/50] Trying: Hyalinobatrachium bergeri... ✗
+      [24/50] Trying: Rhinella acutirostris... ✓
+      [25/50] Trying: Oreobates sanctaecrucis... ✗
+      [25/50] Trying: Xenohyla eugenioi... ✓
+      [26/50] Trying: Melanophryniscus klappenbachi... ✓
+      [27/50] Trying: Lepidobatrachus asper... ✓
+      [28/50] Trying: Rhaebo ecuadorensis... ✗
+      [28/50] Trying: Pristimantis nervicus... ✓
+      [29/50] Trying: Pristimantis carvalhoi... ✓
+      [30/50] Trying: Smilisca sila... ✓
+      [31/50] Trying: Teratohyla midas... ✓
+      [32/50] Trying: Ceratophrys cornuta... ✓
+      [33/50] Trying: Adenomera diptyx... ✓
+      [34/50] Trying: Boana maculateralis... ✓
+      [35/50] Trying: Ranitomeya cyanovittata... ✓
+      [36/50] Trying: Adenomera diptyx... ✓
+      [37/50] Trying: Rhaebo ecuadorensis... ✗
+      [37/50] Trying: Itapotihyla langsdorffii... ✓
+      ✅ Fetched 37 images for LC species
+
+======================================================================
+📍 Arctic Terrestrial
+======================================================================
+
+
+   🚨 CR species (target: 30)...
+      Found 50 species without images, fetching 30...
+      [1/30] Trying: Anguilla anguilla... ✓
+      [2/30] Trying: Microcondylaea bonellii... ✓
+      [3/30] Trying: Belgrandiella austriana... ✓
+      [4/30] Trying: Belgrandiella parreyssii... ✓
+      [5/30] Trying: Belgrandiella styriaca... ✓
+      [6/30] Trying: Belgrandiella ganslmayri... ✓
+      [7/30] Trying: Belgrandiella mimula... ✓
+      [8/30] Trying: Belgrandiella pelerei... ✓
+      [9/30] Trying: Bythinella cylindrica... ✓
+      [10/30] Trying: Bythiospeum cisterciensorum... ✗
+      [10/30] Trying: Bythiospeum pfeifferi... ✗
+      [10/30] Trying: Bythiospeum tschapecki... ✗
+      [10/30] Trying: Iglica gratulabunda... ✗
+      [10/30] Trying: Pseudunio auricularius... ✗
+      [10/30] Trying: Pseudunio auricularius... ✗
+      [10/30] Trying: Graziana adlitzensis... ✗
+      [10/30] Trying: Melanopsis penchinati... ✗
+      [10/30] Trying: Tanousia zrmanjae... ✗
+      [10/30] Trying: Microcondylaea bonellii... ✓
+      [11/30] Trying: Alzoniella galaica... ✗
+      [11/30] Trying: Bythiospeum husmanni... ✗
+      [11/30] Trying: Belgrandiella kreisslorum... ✗
+      [11/30] Trying: Belgrandia varica... ✓
+      [12/30] Trying: Marstoniopsis armoricana... ✗
+      [12/30] Trying: Marstoniopsis armoricana... ✗
+      [12/30] Trying: Belgrandia moitessieri... ✗
+      [12/30] Trying: Mercuria sarahae... ✗
+      [12/30] Trying: Bythiospeum dubium... ✗
+      [12/30] Trying: Bythinella eutrepha... ✗
+      [12/30] Trying: Bythiospeum putei... ✗
+      ✅ Fetched 11 images for CR species
+
+   🚨 EN species (target: 40)...
+      Found 76 species without images, fetching 40...
+      [1/40] Trying: Rana pyrenaica... ✓
+      [2/40] Trying: Anguilla rostrata... ✓
+      [3/40] Trying: Austropotamobius pallipes... ✓
+      [4/40] Trying: Austropotamobius pallipes... ✓
+      [5/40] Trying: Belgrandiella wawrai... ✓
+      [6/40] Trying: Bythinella carinulata... ✓
+      [7/40] Trying: Bythinella bavarica... ✓
+      [8/40] Trying: Bythiospeum elseri... ✗
+      [8/40] Trying: Bythiospeum noricum... ✗
+      [8/40] Trying: Graziana klagenfurtensis... ✓
+      [9/40] Trying: Hauffenia kerschneri... ✓
+      [10/40] Trying: Hauffenia wienerwaldensis... ✓
+      [11/40] Trying: Margaritifera margaritifera... ✓
+      [12/40] Trying: Bythiospeum klemmi... ✗
+      [12/40] Trying: Theodoxus transversalis... ✗
+      [12/40] Trying: Plagigeyeria deformata... ✗
+      [12/40] Trying: Pezzolia radapalladis... ✗
+      [12/40] Trying: Bythinella zyvionteki... ✗
+      [12/40] Trying: Dalmatinella fluviatilis... ✗
+      [12/40] Trying: Bythiospeum sterkianum... ✗
+      [12/40] Trying: Belgrandia lusitanica... ✗
+      [12/40] Trying: Eupaludestrina foxianensis... ✗
+      [12/40] Trying: Bythiospeum labiatum... ✗
+      [12/40] Trying: Vinodolia fiumana... ✗
+      [12/40] Trying: Bythiospeum lamperti... ✗
+      [12/40] Trying: Alzoniella finalina... ✗
+      [12/40] Trying: Bythiospeum clessini... ✗
+      [12/40] Trying: Bythiospeum bormanni... ✗
+      [12/40] Trying: Paladilhia gloeeri... ✗
+      [12/40] Trying: Mercuria vindilica... ✗
+      [12/40] Trying: Graziana trinitatis... ✗
+      [12/40] Trying: Graziana provincialis... ✗
+      [12/40] Trying: Mercuria meridionalis... ✗
+      [12/40] Trying: Bythiospeum nocki... ✗
+      [12/40] Trying: Tarraconia rolani... ✗
+      [12/40] Trying: Graziana cezairensis... ✗
+      [12/40] Trying: Belgrandiella aulaei... ✗
+      [12/40] Trying: Bythiospeum taxisi... ✗
+      [12/40] Trying: Belgrandia conoidea... ✗
+      [12/40] Trying: Alzoniella asturica... ✗
+      ✅ Fetched 11 images for EN species
+
+   🚨 VU species (target: 50)...
+      Found 110 species without images, fetching 50...
+      [1/50] Trying: Salamandra salamandra... ✓
+      [2/50] Trying: Pelobates cultripes... ✓
+      [3/50] Trying: Umbrina cirrosa... ✓
+      [4/50] Trying: Astacus astacus... ✓
+      [5/50] Trying: Astacus astacus... ✓
+      [6/50] Trying: Heraultiella exilis... ✗
+      [6/50] Trying: Belgrandiella fuchsi... ✓
+      [7/50] Trying: Bythinella padiraci... ✓
+      [8/50] Trying: Bythiospeum acicula... ✗
+      [8/50] Trying: Bythiospeum geyeri... ✗
+      [8/50] Trying: Bythiospeum reisalpense... ✗
+      [8/50] Trying: Iglica kleinzellensis... ✗
+      [8/50] Trying: Alzoniella elliptica... ✗
+      [8/50] Trying: Hauffenia danubialis... ✗
+      [8/50] Trying: Moitessieria juvenisanguis... ✗
+      [8/50] Trying: Palacanthilhiopsis vervierii... ✗
+      [8/50] Trying: Kerkia brezicensis... ✗
+      [8/50] Trying: Mercuria bayonnensis... ✗
+      [8/50] Trying: Hadziella deminuta... ✗
+      [8/50] Trying: Belgrandiella globulosa... ✗
+      [8/50] Trying: Bythinella wawrzineki... ✗
+      [8/50] Trying: Bythinella rubiginosa... ✗
+      [8/50] Trying: Bythiospeum suevicum... ✗
+      [8/50] Trying: Bythiospeum drouetianum... ✗
+      [8/50] Trying: Palaospeum bessoni... ✗
+      [8/50] Trying: Belgrandiella hershleri... ✗
+      [8/50] Trying: Alzoniella junqua... ✓
+      [9/50] Trying: Islamia spirata... ✗
+      [9/50] Trying: Bythiospeum heldii... ✗
+      [9/50] Trying: Alzoniella cornucopia... ✓
+      [10/50] Trying: Paladilhiopsis grobbeni... ✗
+      [10/50] Trying: Bythinella cebennensis... ✗
+      [10/50] Trying: Alzoniella haicabia... ✗
+      [10/50] Trying: Paladilhia jamblussensis... ✗
+      [10/50] Trying: Bythinella rondelaudi... ✗
+      [10/50] Trying: Belgrandia gfrast... ✗
+      [10/50] Trying: Deganta azarum... ✗
+      [10/50] Trying: Guadiella arconadae... ✗
+      [10/50] Trying: Bythinella roubionensis... ✗
+      [10/50] Trying: Hauffenia wagneri... ✗
+      [10/50] Trying: Bythinella micherdzinskii... ✗
+      [10/50] Trying: Moitessieria lludrigaensis... ✗
+      [10/50] Trying: Eupaludestrina aponensis... ✗
+      [10/50] Trying: Belgrandia stochi... ✗
+      [10/50] Trying: Bythinella vimperei... ✗
+      [10/50] Trying: Bythiospeum helveticum... ✗
+      [10/50] Trying: Iglica gracilis... ✗
+      [10/50] Trying: Moitessieria foui... ✗
+      [10/50] Trying: Belgrandiella substricta... ✗
+      [10/50] Trying: Iglica tellinii... ✗
+      ✅ Fetched 9 images for VU species
+
+   🚨 NT species (target: 30)...
+      Found 76 species without images, fetching 30...
+      [1/30] Trying: Chioglossa lusitanica... ✓
+      [2/30] Trying: Sciaena umbra... ✓
+      [3/30] Trying: Potamon ibericum... ✓
+      [4/30] Trying: Alzoniella hartwigschuetti... ✓
+      [5/30] Trying: Bythinella badensis... ✓
+      [6/30] Trying: Bythiospeum diaphanum... ✗
+      [6/30] Trying: Bythiospeum alpinum... ✗
+      [6/30] Trying: Fissuria boui... ✓
+      [7/30] Trying: Spiralix vitrea... ✗
+      [7/30] Trying: Avenionia roberti... ✓
+      [8/30] Trying: Iglica pezzolii... ✗
+      [8/30] Trying: Moitessieria olleri... ✗
+      [8/30] Trying: Moitessieria olleri... ✗
+      [8/30] Trying: Belgrandia boscae... ✗
+      [8/30] Trying: Iglica luxurians... ✗
+      [8/30] Trying: Hauffenia subcarinata... ✗
+      [8/30] Trying: Bythiospeum puerkhaueri... ✗
+      [8/30] Trying: Belgrandia heussi... ✗
+      [8/30] Trying: Alzoniella montana... ✗
+      [8/30] Trying: Alzoniella rolani... ✗
+      [8/30] Trying: Iglica giustii... ✗
+      [8/30] Trying: Bythiospeum diaphanoides... ✗
+      [8/30] Trying: Phreatica bolei... ✗
+      [8/30] Trying: Bythiospeum vallei... ✗
+      [8/30] Trying: Islamia globulus... ✗
+      [8/30] Trying: Alzoniella macrostoma... ✗
+      [8/30] Trying: Fissuria planospira... ✗
+      [8/30] Trying: Alzoniella manganellii... ✗
+      [8/30] Trying: Avenionia berenguieri... ✗
+      [8/30] Trying: Moitessieria heideae... ✗
+      ✅ Fetched 7 images for NT species
+
+   🚨 LC species (target: 50)...
+      Found 588 species without images, fetching 50...
+      [1/50] Trying: Bombina variegata... ✓
+      [2/50] Trying: Derichthys serpentinus... ✓
+      [3/50] Trying: Rana italica... ✓
+      [4/50] Trying: Muraena helena... ✓
+      [5/50] Trying: Aquarana septentrionalis... ✗
+      [5/50] Trying: Ichthyosaura alpestris... ✓
+      [6/50] Trying: Pseudacris crucifer... ✓
+      [7/50] Trying: Ilyophis arx... ✓
+      [8/50] Trying: Pontastacus leptodactylus... ✓
+      [9/50] Trying: Triturus dobrogicus... ✓
+      [10/50] Trying: Dysomma brevirostre... ✓
+      [11/50] Trying: Bombina bombina... ✓
+      [12/50] Trying: Echelus myrus... ✓
+      [13/50] Trying: Orconectes limosus... ✓
+      [14/50] Trying: Eurypharynx pelecanoides... ✓
+      [15/50] Trying: Pelophylax ridibundus... ✓
+      [16/50] Trying: Conus ventricosus... ✓
+      [17/50] Trying: Gymnothorax unicolor... ✓
+      [18/50] Trying: Facciolella oxyrhyncha... ✗
+      [18/50] Trying: Bufotes boulengeri... ✓
+      [19/50] Trying: Gnathophis mystax... ✓
+      [20/50] Trying: Bombina variegata... ✓
+      [21/50] Trying: Lissotriton helveticus... ✓
+      [22/50] Trying: Umbrina canariensis... ✓
+      [23/50] Trying: Xenopus laevis... ✓
+      [24/50] Trying: Bufo spinosus... ✓
+      [25/50] Trying: Rana arvalis... ✓
+      [26/50] Trying: Anarchias longicauda... ✗
+      [26/50] Trying: Ophisurus serpens... ✓
+      [27/50] Trying: Lissotriton montandoni... ✓
+      [28/50] Trying: Orconectes immunis... ✓
+      [29/50] Trying: Nettastoma melanurum... ✓
+      [30/50] Trying: Ilyophis blachei... ✓
+      [31/50] Trying: Procambarus clarkii... ✓
+      [32/50] Trying: Conger conger... ✓
+      [33/50] Trying: Orconectes propinquus... ✓
+      [34/50] Trying: Simenchelys parasitica... ✗
+      [34/50] Trying: Lissotriton montandoni... ✓
+      [35/50] Trying: Mytilopsis leucophaeata... ✓
+      [36/50] Trying: Cambarus bartonii... ✓
+      [37/50] Trying: Saccopharynx ampullaceus... ✓
+      [38/50] Trying: Haptenchelys texis... ✓
+      [39/50] Trying: Bombina variegata... ✓
+      [40/50] Trying: Triturus cristatus... ✓
+      [41/50] Trying: Avocettina infans... ✓
+      [42/50] Trying: Rana arvalis... ✓
+      [43/50] Trying: Neocyema erythrosoma... ✗
+      [43/50] Trying: Pisodonophis semicinctus... ✓
+      [44/50] Trying: Orconectes virilis... ✓
+      [45/50] Trying: Orconectes limosus... ✓
+      ✅ Fetched 45 images for LC species
+
+======================================================================
+📍 Borneo
+======================================================================
+
+
+   🚨 CR species (target: 30)...
+      Found 39 species without images, fetching 30...
+      [1/30] Trying: Leptophryne cruentata... ✓
+      [2/30] Trying: Leptophryne cruentata... ✓
+      [3/30] Trying: Leptobrachium kantonishikawai... ✓
+      [4/30] Trying: Ansonia guibei... ✓
+      [5/30] Trying: Ansonia guibei... ✓
+      [6/30] Trying: Parathelphusa reticulata... ✗
+      [6/30] Trying: Johora singaporensis... ✓
+      [7/30] Trying: Amphicnemis madelenae... ✗
+      [7/30] Trying: Tylomelania kruimeli... ✗
+      [7/30] Trying: Tylomelania abendanoni... ✓
+      [8/30] Trying: Tylomelania bakara... ✗
+      [8/30] Trying: Tylomelania baskasti... ✓
+      [9/30] Trying: Tylomelania confusa... ✗
+      [9/30] Trying: Tylomelania hannelorae... ✓
+      [10/30] Trying: Tylomelania inconspicua... ✗
+      [10/30] Trying: Tylomelania insulaesacrae... ✗
+      [10/30] Trying: Tylomelania mahalonensis... ✓
+      [11/30] Trying: Tylomelania masapensis... ✓
+      [12/30] Trying: Tylomelania sinabartfeldi... ✓
+      [13/30] Trying: Tylomelania tominangensis... ✓
+      [14/30] Trying: Tylomelania turriformis... ✗
+      [14/30] Trying: Tylomelania wesseli... ✗
+      [14/30] Trying: Tylomelania wolterecki... ✗
+      [14/30] Trying: Tylomelania zeamais... ✓
+      [15/30] Trying: Tylomelania zeamais... ✓
+      [16/30] Trying: Sulawesidrobia perempuan... ✗
+      [16/30] Trying: Sulawesidrobia soedjatmokoi... ✗
+      [16/30] Trying: Sulawesidrobia anceps... ✗
+      [16/30] Trying: Sulawesidrobia bicolor... ✗
+      [16/30] Trying: Sulawesidrobia abreui... ✗
+      ✅ Fetched 15 images for CR species
+
+   🚨 EN species (target: 40)...
+      Found 66 species without images, fetching 40...
+      [1/40] Trying: Limnonectes sinuatodorsalis... ✓
+      [2/40] Trying: Philautus erythrophthalmus... ✓
+      [3/40] Trying: Oreophryne zimmeri... ✓
+      [4/40] Trying: Ichthyophis weberi... ✓
+      [5/40] Trying: Amolops australis... ✓
+      [6/40] Trying: Sabahphrynus maculatus... ✗
+      [6/40] Trying: Philautus everetti... ✓
+      [7/40] Trying: Leptomantis malkmusi... ✓
+      [8/40] Trying: Kurixalus absconditus... ✓
+      [9/40] Trying: Kurixalus absconditus... ✓
+      [10/40] Trying: Leptobrachella sabahmontana... ✗
+      [10/40] Trying: Leptobrachella sabahmontana... ✗
+      [10/40] Trying: Oreophryne monticola... ✓
+      [11/40] Trying: Argyrosomus japonicus... ✓
+      [12/40] Trying: Irmengardia nemestrinus... ✗
+      [12/40] Trying: Ibanum pilimanus... ✗
+      [12/40] Trying: Terrathelphusa kuchingensis... ✗
+      [12/40] Trying: Migmathelphusa olivacea... ✓
+      [13/40] Trying: Coccusa cristicervix... ✗
+      [13/40] Trying: Nautilothelphusa zimmeri... ✗
+      [13/40] Trying: Parathelphusa ferruginea... ✗
+      [13/40] Trying: Parathelphusa nagasakti... ✗
+      [13/40] Trying: Parathelphusa pantherina... ✓
+      [14/40] Trying: Lepidothelphusa cognetti... ✗
+      [14/40] Trying: Johora punicea... ✗
+      [14/40] Trying: Irmengardia didacta... ✗
+      [14/40] Trying: Parathelphusa batamensis... ✗
+      [14/40] Trying: Syntripsa flavichela... ✓
+      [15/40] Trying: Syntripsa matannensis... ✗
+      [15/40] Trying: Ctenodesma borneensis... ✗
+      [15/40] Trying: Ctenodesma borneensis... ✗
+      [15/40] Trying: Brotia pageli... ✗
+      [15/40] Trying: Corbicula possoensis... ✗
+      [15/40] Trying: Tylomelania amphiderita... ✗
+      [15/40] Trying: Tylomelania gemmifera... ✗
+      [15/40] Trying: Tylomelania gemmifera... ✗
+      [15/40] Trying: Tylomelania kristinae... ✗
+      [15/40] Trying: Tylomelania lalemae... ✓
+      [16/40] Trying: Tylomelania marwotoae... ✗
+      [16/40] Trying: Tylomelania matannensis... ✗
+      ✅ Fetched 15 images for EN species
+
+   🚨 VU species (target: 50)...
+      Found 42 species without images, fetching 42...
+      [1/50] Trying: Staurois parvus... ✓
+      [2/50] Trying: Philautus longicrus... ✓
+      [3/50] Trying: Philautus longicrus... ✓
+      [4/50] Trying: Rhacophorus monticola... ✓
+      [5/50] Trying: Oreophryne variabilis... ✓
+      [6/50] Trying: Limnonectes arathooni... ✓
+      [7/50] Trying: Occidozyga floresiana... ✓
+      [8/50] Trying: Oreophryne celebensis... ✓
+      [9/50] Trying: Anguilla borneensis... ✓
+      [10/50] Trying: Arachnothelphusa melanippe... ✗
+      [10/50] Trying: Arachnothelphusa melanippe... ✗
+      [10/50] Trying: Arachnothelphusa melanippe... ✗
+      [10/50] Trying: Parathelphusa cabayugan... ✗
+      [10/50] Trying: Isolapotamon bauense... ✗
+      [10/50] Trying: Parathelphusa balabac... ✗
+      [10/50] Trying: Parathelphusa crocea... ✗
+      [10/50] Trying: Parathelphusa maindroni... ✗
+      [10/50] Trying: Adeleana forcarti... ✗
+      [10/50] Trying: Parathelphusa ovum... ✗
+      [10/50] Trying: Parathelphusa possoensis... ✗
+      [10/50] Trying: Stygothelphusa bidiensis... ✗
+      [10/50] Trying: Malayopotamon granulatum... ✗
+      [10/50] Trying: Johora johorensis... ✗
+      [10/50] Trying: Johora counsilmani... ✗
+      [10/50] Trying: Irmengardia johnsoni... ✗
+      [10/50] Trying: Sundathelphusa minahassae... ✗
+      [10/50] Trying: Sundathelphusa rubra... ✗
+      [10/50] Trying: Podolestes coomansi... ✗
+      [10/50] Trying: Podolestes coomansi... ✗
+      [10/50] Trying: Urothemis abbotti... ✗
+      [10/50] Trying: Oligoaeschna platyura... ✗
+      [10/50] Trying: Oligoaeschna platyura... ✗
+      [10/50] Trying: Ictinogomphus acutus... ✗
+      [10/50] Trying: Ictinogomphus acutus... ✗
+      [10/50] Trying: Macromia erato... ✗
+      [10/50] Trying: Heliogomphus kelantanensis... ✗
+      [10/50] Trying: Heliogomphus kelantanensis... ✗
+      [10/50] Trying: Linaeschna polli... ✗
+      [10/50] Trying: Linaeschna polli... ✗
+      [10/50] Trying: Amphicnemis pandanicola... ✗
+      [10/50] Trying: Macromia irina... ✗
+      [10/50] Trying: Rhinocypha dorsosanguinea... ✗
+      ✅ Fetched 9 images for VU species
+
+   🚨 NT species (target: 30)...
+      Found 36 species without images, fetching 30...
+      [1/30] Trying: Leptobrachella serasanae... ✓
+      [2/30] Trying: Leptobrachella serasanae... ✓
+      [3/30] Trying: Sarawakiphrys dringi... ✗
+      [3/30] Trying: Leptobrachella itiokai... ✓
+      [4/30] Trying: Ansonia platysoma... ✓
+      [5/30] Trying: Leptobrachella brevicrus... ✓
+      [6/30] Trying: Pelophryne saravacensis... ✗
+      [6/30] Trying: Kalophrynus nubicola... ✗
+      [6/30] Trying: Philautus juliandringi... ✓
+      [7/30] Trying: Feihyla inexpectata... ✓
+      [8/30] Trying: Pelophryne api... ✗
+      [8/30] Trying: Ansonia torrentis... ✗
+      [8/30] Trying: Ichthyophis biangularis... ✗
+      [8/30] Trying: Leptomantis angulirostris... ✓
+      [9/30] Trying: Staurois nubilus... ✗
+      [9/30] Trying: Leptobrachella arayai... ✓
+      [10/30] Trying: Leptobrachella arayai... ✓
+      [11/30] Trying: Megophrys ligayae... ✓
+      [12/30] Trying: Feihyla vittiger... ✓
+      [13/30] Trying: Feihyla vittiger... ✓
+      [14/30] Trying: Anguilla bicolor... ✓
+      [15/30] Trying: Johora tiomanensis... ✗
+      [15/30] Trying: Parathelphusa sarasinorum... ✗
+      [15/30] Trying: Amphicnemis annae... ✗
+      [15/30] Trying: Mortonagrion indraneil... ✗
+      [15/30] Trying: Corbicula matannensis... ✗
+      [15/30] Trying: Corbicula loehensis... ✗
+      [15/30] Trying: Corbicula loehensis... ✗
+      [15/30] Trying: Tetrathemis flavescens... ✗
+      [15/30] Trying: Euphaea basalis... ✗
+      ✅ Fetched 14 images for NT species
+
+   🚨 LC species (target: 50)...
+      Found 647 species without images, fetching 50...
+      [1/50] Trying: Limnonectes kuhlii... ✓
+      [2/50] Trying: Kurixalus chaseni... ✓
+      [3/50] Trying: Philautus macroscelis... ✓
+      [4/50] Trying: Staurois natator... ✓
+      [5/50] Trying: Leptobrachium abbotti... ✓
+      [6/50] Trying: Pseudobufo subasper... ✓
+      [7/50] Trying: Leptobrachium abbotti... ✓
+      [8/50] Trying: Meristogenys orphnocnemis... ✓
+      [9/50] Trying: Platymantis guentheri... ✓
+      [10/50] Trying: Meristogenys maryatiae... ✗
+      [10/50] Trying: Pulchrana baramica... ✓
+      [11/50] Trying: Kurixalus appendiculatus... ✓
+      [12/50] Trying: Pulchrana rawa... ✗
+      [12/50] Trying: Kalophrynus punctatus... ✓
+      [13/50] Trying: Kurixalus chaseni... ✓
+      [14/50] Trying: Kurixalus chaseni... ✓
+      [15/50] Trying: Limnonectes microdiscus... ✓
+      [16/50] Trying: Kurixalus chaseni... ✓
+      [17/50] Trying: Pulchrana picturata... ✓
+      [18/50] Trying: Leptobrachella juliandringi... ✓
+      [19/50] Trying: Pulchrana moellendorffi... ✓
+      [20/50] Trying: Limnonectes malesianus... ✗
+      [20/50] Trying: Kaloula mediolineata... ✓
+      [21/50] Trying: Leptobrachium hasseltii... ✓
+      [22/50] Trying: Rhacophorus margaritifer... ✓
+      [23/50] Trying: Zhangixalus dulitensis... ✗
+      [23/50] Trying: Phrynoidis juxtasper... ✓
+      [24/50] Trying: Zhangixalus dulitensis... ✗
+      [24/50] Trying: Limnonectes leporinus... ✓
+      [25/50] Trying: Limnonectes ingeri... ✓
+      [26/50] Trying: Zhangixalus dulitensis... ✗
+      [26/50] Trying: Limnonectes ingeri... ✓
+      [27/50] Trying: Kurixalus appendiculatus... ✓
+      [28/50] Trying: Leptomantis belalongensis... ✗
+      [28/50] Trying: Metaphrynella pollicaris... ✗
+      [28/50] Trying: Limnonectes macrodon... ✓
+      [29/50] Trying: Meristogenys poecilus... ✗
+      [29/50] Trying: Pulchrana grandocula... ✓
+      [30/50] Trying: Leptobrachella juliandringi... ✓
+      [31/50] Trying: Fejervarya iskandari... ✓
+      [32/50] Trying: Aquarana catesbeianus... ✗
+      [32/50] Trying: Leptobrachella juliandringi... ✓
+      [33/50] Trying: Limnonectes kuhlii... ✓
+      [34/50] Trying: Limnonectes khasianus... ✓
+      [35/50] Trying: Kaloula conjuncta... ✓
+      [36/50] Trying: Limnonectes ingeri... ✓
+      [37/50] Trying: Rhacophorus margaritifer... ✓
+      [38/50] Trying: Microhyla palmipes... ✓
+      [39/50] Trying: Sanguirana sanguinea... ✓
+      [40/50] Trying: Pulchrana moellendorffi... ✓
+      ✅ Fetched 40 images for LC species
+
+======================================================================
+📍 Congo Basin
+======================================================================
+
+
+   🚨 CR species (target: 30)...
+      Found 56 species without images, fetching 30...
+      [1/30] Trying: Hyperolius jynx... ✓
+      [2/30] Trying: Callulina stanleyi... ✗
+      [2/30] Trying: Astylosternus nganhanus... ✗
+      [2/30] Trying: Petropedetes perreti... ✗
+      [2/30] Trying: Petropedetes perreti... ✗
+      [2/30] Trying: Cardioglossa manengouba... ✓
+      [3/30] Trying: Gabbiella depressa... ✗
+      [3/30] Trying: Arthroleptis nikeae... ✗
+      [3/30] Trying: Boulengerula spawlsi... ✗
+      [3/30] Trying: Nectophrynoides paulae... ✓
+      [4/30] Trying: Crotaphatrema lamottei... ✓
+      [5/30] Trying: Nectophrynoides poyntoni... ✓
+      [6/30] Trying: Leptodactylodon wildi... ✓
+      [7/30] Trying: Xenopus lenduensis... ✓
+      [8/30] Trying: Callulina hanseni... ✓
+      [9/30] Trying: Phrynobatrachus njiomock... ✓
+      [10/30] Trying: Arthroleptis kutogundua... ✗
+      [10/30] Trying: Wolterstorffina parvipalmata... ✓
+      [11/30] Trying: Wolterstorffina parvipalmata... ✓
+      [12/30] Trying: Wolterstorffina parvipalmata... ✓
+      [13/30] Trying: Leptodactylodon erythrogaster... ✓
+      [14/30] Trying: Phrynobatrachus steindachneri... ✗
+      [14/30] Trying: Churamiti maridadi... ✗
+      [14/30] Trying: Werneria mertensiana... ✓
+      [15/30] Trying: Werneria mertensiana... ✓
+      [16/30] Trying: Werneria mertensiana... ✓
+      [17/30] Trying: Werneria iboundji... ✓
+      [18/30] Trying: Werneria iboundji... ✓
+      [19/30] Trying: Phrynobatrachus jimzimkusi... ✓
+      [20/30] Trying: Bellamya jeffreysi... ✓
+      ✅ Fetched 20 images for CR species
+
+   🚨 EN species (target: 40)...
+      Found 65 species without images, fetching 40...
+      [1/40] Trying: Xenopus itombwensis... ✓
+      [2/40] Trying: Cardioglossa alsco... ✗
+      [2/40] Trying: Cardioglossa alsco... ✗
+      [2/40] Trying: Cardioglossa alsco... ✗
+      [2/40] Trying: Chrysobatrachus cupreonitens... ✗
+      [2/40] Trying: Werneria submontana... ✓
+      [3/40] Trying: Leptodactylodon mertensi... ✓
+      [4/40] Trying: Arthroleptis nlonakoensis... ✗
+      [4/40] Trying: Arthroleptis nlonakoensis... ✗
+      [4/40] Trying: Petropedetes juliawurstnerae... ✓
+      [5/40] Trying: Astylosternus laurenti... ✓
+      [6/40] Trying: Petropedetes euskircheni... ✗
+      [6/40] Trying: Leptodactylodon perreti... ✓
+      [7/40] Trying: Hyperolius thomensis... ✓
+      [8/40] Trying: Hyperolius kihangensis... ✓
+      [9/40] Trying: Leptopelis anebos... ✗
+      [9/40] Trying: Leptopelis anebos... ✗
+      [9/40] Trying: Phrynobatrachus schioetzi... ✗
+      [9/40] Trying: Hyperolius leleupi... ✓
+      [10/40] Trying: Probreviceps macrodactylus... ✓
+      [11/40] Trying: Werneria preussi... ✓
+      [12/40] Trying: Werneria preussi... ✓
+      [13/40] Trying: Hyperolius cystocandicans... ✓
+      [14/40] Trying: Hyperolius dintelmanni... ✗
+      [14/40] Trying: Hyperolius dintelmanni... ✗
+      [14/40] Trying: Leptodactylodon ornatus... ✓
+      [15/40] Trying: Conraua goliath... ✓
+      [16/40] Trying: Leptopelis parkeri... ✓
+      [17/40] Trying: Arthroleptis perreti... ✗
+      [17/40] Trying: Leptodactylodon blanci... ✓
+      [18/40] Trying: Hyperolius ademetzi... ✓
+      [19/40] Trying: Cardioglossa annulata... ✓
+      [20/40] Trying: Hylambates keithae... ✗
+      [20/40] Trying: Astylosternus ranoides... ✓
+      [21/40] Trying: Cardioglossa pulchra... ✗
+      [21/40] Trying: Hyperolius ukwiva... ✗
+      [21/40] Trying: Hyperolius ukwiva... ✗
+      [21/40] Trying: Probreviceps loveridgei... ✗
+      [21/40] Trying: Pseudotolithus senegalensis... ✓
+      [22/40] Trying: Louisea edeaensis... ✗
+      ✅ Fetched 21 images for EN species
+
+   🚨 VU species (target: 50)...
+      Found 45 species without images, fetching 45...
+      [1/50] Trying: Afrixalus uluguruensis... ✓
+      [2/50] Trying: Petropedetes palmipes... ✗
+      [2/50] Trying: Mertensophryne lonnbergi... ✓
+      [3/50] Trying: Boulengerula fischeri... ✓
+      [4/50] Trying: Hyperolius bopeleti... ✗
+      [4/50] Trying: Callixalus pictus... ✗
+      [4/50] Trying: Cardioglossa melanogaster... ✗
+      [4/50] Trying: Cardioglossa melanogaster... ✗
+      [4/50] Trying: Afrixalus uluguruensis... ✓
+      [5/50] Trying: Sclerophrys urunguensis... ✗
+      [5/50] Trying: Afrixalus morerei... ✓
+      [6/50] Trying: Astylosternus fallax... ✓
+      [7/50] Trying: Kassina decorata... ✓
+      [8/50] Trying: Hyperolius minutissimus... ✓
+      [9/50] Trying: Didynamipus sjostedti... ✓
+      [10/50] Trying: Sclerophrys villiersi... ✓
+      [11/50] Trying: Sclerophrys villiersi... ✓
+      [12/50] Trying: Phrynobatrachus kinangopensis... ✗
+      [12/50] Trying: Petropedetes newtonii... ✓
+      [13/50] Trying: Conus cepasi... ✓
+      [14/50] Trying: Conus xicoi... ✓
+      [15/50] Trying: Conus allaryi... ✓
+      [16/50] Trying: Pseudotolithus senegallus... ✗
+      [16/50] Trying: Potamonautes gerdalensis... ✗
+      [16/50] Trying: Potamonautes gerdalensis... ✗
+      [16/50] Trying: Potamonautes pilosus... ✗
+      [16/50] Trying: Potamonautes raybouldi... ✗
+      [16/50] Trying: Potamonautes xiphoidus... ✗
+      [16/50] Trying: Potamonautes reidi... ✗
+      [16/50] Trying: Potamonautes subukia... ✗
+      [16/50] Trying: Potamonautes subukia... ✗
+      [16/50] Trying: Gabbiella stanleyi... ✓
+      [17/50] Trying: Gabbiella stanleyi... ✓
+      [18/50] Trying: Coelatura alluaudi... ✓
+      [19/50] Trying: Coelatura alluaudi... ✓
+      [20/50] Trying: Brazzaea anceyi... ✗
+      [20/50] Trying: Bulinus permembranaceus... ✗
+      [20/50] Trying: Cleopatra obscura... ✗
+      [20/50] Trying: Lanistes nyassanus... ✓
+      [21/50] Trying: Lanistes nyassanus... ✓
+      [22/50] Trying: Aspatharia pangallensis... ✗
+      [22/50] Trying: Aspatharia pangallensis... ✗
+      [22/50] Trying: Atoconeura aethiopica... ✓
+      [23/50] Trying: Atoconeura aethiopica... ✓
+      [24/50] Trying: Agriocnemis palaeforma... ✗
+      ✅ Fetched 23 images for VU species
+
+   🚨 NT species (target: 30)...
+      Found 36 species without images, fetching 30...
+      [1/30] Trying: Phrynobatrachus uzungwensis... ✗
+      [1/30] Trying: Phrynobatrachus uzungwensis... ✗
+      [1/30] Trying: Leptopelis uluguruensis... ✓
+      [2/30] Trying: Phrynobatrachus horsti... ✗
+      [2/30] Trying: Leptodactylodon bicolor... ✓
+      [3/30] Trying: Leptodactylodon bicolor... ✓
+      [4/30] Trying: Conus nobrei... ✓
+      [5/30] Trying: Conus zebroides... ✓
+      [6/30] Trying: Pentheroscion mbizi... ✗
+      [6/30] Trying: Anguilla mossambica... ✓
+      [7/30] Trying: Anguilla bengalensis... ✓
+      [8/30] Trying: Deckenia mitis... ✓
+      [9/30] Trying: Deckenia mitis... ✓
+      [10/30] Trying: Bulinus browni... ✓
+      [11/30] Trying: Lanistes solidus... ✓
+      [12/30] Trying: Vitta rubricata... ✗
+      [12/30] Trying: Vitta rubricata... ✗
+      [12/30] Trying: Afrogyrorbis kisumiensis... ✗
+      [12/30] Trying: Burnupia stuhlmanni... ✓
+      [13/30] Trying: Burnupia stuhlmanni... ✓
+      [14/30] Trying: Burnupia stuhlmanni... ✓
+      [15/30] Trying: Potadoma freethi... ✓
+      [16/30] Trying: Potadoma freethi... ✓
+      [17/30] Trying: Mutela bourguignati... ✗
+      [17/30] Trying: Mutela bourguignati... ✗
+      [17/30] Trying: Biomphalaria stanleyi... ✓
+      [18/30] Trying: Mutela bourguignati... ✗
+      [18/30] Trying: Mutela bourguignati... ✗
+      [18/30] Trying: Biomphalaria smithi... ✗
+      [18/30] Trying: Biomphalaria smithi... ✗
+      ✅ Fetched 17 images for NT species
+
+   🚨 LC species (target: 50)...
+      Found 645 species without images, fetching 50...
+      [1/50] Trying: Pyxicephalus angusticeps... ✗
+      [1/50] Trying: Hyperolius endjami... ✓
+      [2/50] Trying: Hylarana darlingi... ✓
+      [3/50] Trying: Hyperolius kuligae... ✗
+      [3/50] Trying: Sclerophrys brauni... ✓
+      [4/50] Trying: Phrynomantis bifasciatus... ✓
+      [5/50] Trying: Hyperolius dartevellei... ✗
+      [5/50] Trying: Petropedetes vulpiae... ✓
+      [6/50] Trying: Kassinula wittei... ✗
+      [6/50] Trying: Sclerophrys brauni... ✓
+      [7/50] Trying: Hyperolius parkeri... ✓
+      [8/50] Trying: Hylarana lepus... ✓
+      [9/50] Trying: Cacosternum kinangopensis... ✗
+      [9/50] Trying: Leptopelis kivuensis... ✓
+      [10/50] Trying: Hemisus microscaphus... ✗
+      [10/50] Trying: Hyperolius nasicus... ✗
+      [10/50] Trying: Hyperolius igbettensis... ✗
+      [10/50] Trying: Amietia moyerorum... ✗
+      [10/50] Trying: Phrynobatrachus bequaerti... ✓
+      [11/50] Trying: Hyperolius rwandae... ✗
+      [11/50] Trying: Hyperolius viridiflavus... ✓
+      [12/50] Trying: Hyperolius nasicus... ✗
+      [12/50] Trying: Phrynomantis microps... ✓
+      [13/50] Trying: Sclerophrys pusilla... ✓
+      [14/50] Trying: Xenopus petersii... ✓
+      [15/50] Trying: Hyperolius castaneus... ✓
+      [16/50] Trying: Leptopelis notatus... ✗
+      [16/50] Trying: Phrynobatrachus mababiensis... ✓
+      [17/50] Trying: Arthroleptis sylvaticus... ✓
+      [18/50] Trying: Tomopterna tandyi... ✓
+      [19/50] Trying: Chiromantis xerampelina... ✓
+      [20/50] Trying: Hyperolius rwandae... ✗
+      [20/50] Trying: Aubria subsigillata... ✓
+      [21/50] Trying: Pseudagrion bernardi... ✗
+      [21/50] Trying: Stewart... ✓
+      [22/50] Trying: Urothemis assignata... ✓
+      [23/50] Trying: Hyperolius mitchelli... ✓
+      [24/50] Trying: Hyperolius cinnamomeoventris... ✓
+      [25/50] Trying: Sclerophrys fuliginata... ✗
+      [25/50] Trying: Afrixalus leucostictus... ✗
+      [25/50] Trying: Hylambates verrucosus... ✗
+      [25/50] Trying: Sclerophrys maculata... ✓
+      [26/50] Trying: Hyperolius rhodesianus... ✓
+      [27/50] Trying: Conraua crassipes... ✓
+      [28/50] Trying: Xenopus laevis... ✓
+      [29/50] Trying: Petropedetes johnstoni... ✓
+      [30/50] Trying: Hemisus guineensis... ✓
+      [31/50] Trying: Schismaderma carens... ✓
+      [32/50] Trying: Arthroleptis xenochirus... ✓
+      [33/50] Trying: Hyperolius fusciventris... ✓
+      ✅ Fetched 33 images for LC species
+
+======================================================================
+📍 Coral Triangle
+======================================================================
+
+
+   🚨 CR species (target: 30)...
+      Found 17 species without images, fetching 17...
+      [1/30] Trying: Pachytriton airobranchiatus... ✗
+      [1/30] Trying: Leptophryne cruentata... ✓
+      [2/30] Trying: Leptophryne cruentata... ✓
+      [3/30] Trying: Hypselotriton fudingensis... ✗
+      [3/30] Trying: Leptobrachella rowleyae... ✗
+      [3/30] Trying: Leptobrachella rowleyae... ✗
+      [3/30] Trying: Leptobrachium kantonishikawai... ✓
+      [4/30] Trying: Taudactylus rheophilus... ✗
+      [4/30] Trying: Kalophrynus yongi... ✓
+      [5/30] Trying: Cophixalus timidus... ✓
+      [6/30] Trying: Ansonia guibei... ✓
+      [7/30] Trying: Ansonia guibei... ✓
+      [8/30] Trying: Megophrys obesa... ✗
+      [8/30] Trying: Hynobius glacialis... ✓
+      [9/30] Trying: Megophrys insularis... ✗
+      [9/30] Trying: Andrias davidianus... ✓
+      [10/30] Trying: Cophixalus monticola... ✗
+      ✅ Fetched 9 images for CR species
+
+   🚨 EN species (target: 40)...
+      Found 57 species without images, fetching 40...
+      [1/40] Trying: Ingerophrynus kumquat... ✓
+      [2/40] Trying: Leptobrachella macrops... ✗
+      [2/40] Trying: Leptobrachella macrops... ✗
+      [2/40] Trying: Cophixalus hosmeri... ✓
+      [3/40] Trying: Philautus erythrophthalmus... ✓
+      [4/40] Trying: Oreophryne zimmeri... ✓
+      [5/40] Trying: Limnonectes sinuatodorsalis... ✓
+      [6/40] Trying: Ichthyophis weberi... ✓
+      [7/40] Trying: Leptobrachium buchardi... ✓
+      [8/40] Trying: Leptobrachium buchardi... ✓
+      [9/40] Trying: Odorrana narina... ✓
+      [10/40] Trying: Uperoleia daviesae... ✗
+      [10/40] Trying: Hypselotriton orphicus... ✗
+      [10/40] Trying: Theloderma palliatum... ✗
+      [10/40] Trying: Platymantis panayensis... ✗
+      [10/40] Trying: Limnonectes nitidus... ✓
+      [11/40] Trying: Theloderma palliatum... ✗
+      [11/40] Trying: Platymantis panayensis... ✗
+      [11/40] Trying: Hypselotriton orphicus... ✗
+      [11/40] Trying: Odorrana bolavensis... ✓
+      [12/40] Trying: Odorrana bolavensis... ✓
+      [13/40] Trying: Limnonectes nitidus... ✓
+      [14/40] Trying: Odorrana ishikawae... ✓
+      [15/40] Trying: Leptobrachella kalonensis... ✓
+      [16/40] Trying: Amolops australis... ✓
+      [17/40] Trying: Oreophryne cameroni... ✗
+      [17/40] Trying: Philautus everetti... ✓
+      [18/40] Trying: Sabahphrynus maculatus... ✗
+      [18/40] Trying: Paramesotriton yunwuensis... ✗
+      [18/40] Trying: Kalophrynus cryptophonus... ✗
+      [18/40] Trying: Oreophryne cameroni... ✗
+      [18/40] Trying: Kurixalus viridescens... ✓
+      [19/40] Trying: Nanohyla pulchella... ✗
+      [19/40] Trying: Kurixalus viridescens... ✓
+      [20/40] Trying: Megophrys brachykolos... ✓
+      [21/40] Trying: Platymantis subterrestris... ✗
+      [21/40] Trying: Megophrys brachykolos... ✓
+      [22/40] Trying: Leptomantis malkmusi... ✓
+      [23/40] Trying: Cophixalus aenigma... ✗
+      [23/40] Trying: Leptobrachella melica... ✗
+      ✅ Fetched 22 images for EN species
+
+   🚨 VU species (target: 50)...
+      Found 47 species without images, fetching 47...
+      [1/50] Trying: species of frog in the family Ceratobatrachidae... ✗
+      [1/50] Trying: Platymantis sierramadrensis... ✓
+      [2/50] Trying: Cophixalus nubicola... ✓
+      [3/50] Trying: Austrochaperina novaebritanniae... ✓
+      [4/50] Trying: Austrochaperina novaebritanniae... ✓
+      [5/50] Trying: Choerophryne alpestris... ✗
+      [5/50] Trying: Sanguirana aurantipunctata... ✗
+      [5/50] Trying: Staurois parvus... ✓
+      [6/50] Trying: Philautus longicrus... ✓
+      [7/50] Trying: Rana sauteri... ✓
+      [8/50] Trying: Philautus longicrus... ✓
+      [9/50] Trying: Zhangixalus yinggelingensis... ✗
+      [9/50] Trying: Zhangixalus taipeianus... ✗
+      [9/50] Trying: Rhacophorus marmoridorsum... ✓
+      [10/50] Trying: Platymantis montanus... ✗
+      [10/50] Trying: Cornufer nexipus... ✓
+      [11/50] Trying: Cornufer nexipus... ✓
+      [12/50] Trying: Megophrys synoria... ✗
+      [12/50] Trying: Ansonia jeetsukumarani... ✗
+      [12/50] Trying: Kalophrynus honbaensis... ✗
+      [12/50] Trying: Micryletta steinegeri... ✓
+      [13/50] Trying: Rhacophorus monticola... ✓
+      [14/50] Trying: Tylototriton notialis... ✓
+      [15/50] Trying: Rana longicrus... ✓
+      [16/50] Trying: Oreophryne variabilis... ✓
+      [17/50] Trying: Pulchrana mangyanum... ✓
+      [18/50] Trying: Pulchrana mangyanum... ✓
+      [19/50] Trying: Limnonectes arathooni... ✓
+      [20/50] Trying: Rana ulma... ✓
+      [21/50] Trying: Kaloula walteri... ✗
+      [21/50] Trying: Rhacophorus bengkuluensis... ✓
+      [22/50] Trying: Buergeria oxycephala... ✓
+      [23/50] Trying: Occidozyga floresiana... ✓
+      [24/50] Trying: Litoria rueppelli... ✗
+      [24/50] Trying: Theloderma auratum... ✓
+      [25/50] Trying: Theloderma auratum... ✓
+      [26/50] Trying: Sanguirana tipanan... ✓
+      [27/50] Trying: Oreophryne celebensis... ✓
+      [28/50] Trying: Cynops ensicauda... ✓
+      [29/50] Trying: Cynops ensicauda... ✓
+      [30/50] Trying: Leptobrachium hainanense... ✓
+      [31/50] Trying: Sanguirana igorota... ✓
+      [32/50] Trying: Oreophryne brevirostris... ✓
+      [33/50] Trying: Litoria andiirrmalin... ✗
+      [33/50] Trying: Rhacophorus spelaeus... ✓
+      [34/50] Trying: Raorchestes gryllus... ✓
+      [35/50] Trying: Raorchestes gryllus... ✓
+      [36/50] Trying: Raorchestes gryllus... ✓
+      ✅ Fetched 36 images for VU species
+
+   🚨 NT species (target: 30)...
+      Found 44 species without images, fetching 30...
+      [1/30] Trying: species of frog in the family Microhylidae... ✗
+      [1/30] Trying: Choerophryne longirostris... ✓
+      [2/30] Trying: Amolops daiyunensis... ✗
+      [2/30] Trying: Amolops daiyunensis... ✗
+      [2/30] Trying: Ansonia latiffi... ✗
+      [2/30] Trying: Leptobrachella serasanae... ✓
+      [3/30] Trying: Leptobrachella serasanae... ✓
+      [4/30] Trying: Sarawakiphrys dringi... ✗
+      [4/30] Trying: Nyctimystes calcaratus... ✓
+      [5/30] Trying: Leptobrachella itiokai... ✓
+      [6/30] Trying: Ansonia platysoma... ✓
+      [7/30] Trying: Leptobrachella brevicrus... ✓
+      [8/30] Trying: Pelophryne saravacensis... ✗
+      [8/30] Trying: Kalophrynus nubicola... ✗
+      [8/30] Trying: Philautus juliandringi... ✓
+      [9/30] Trying: Feihyla inexpectata... ✓
+      [10/30] Trying: Cornufer gilliardi... ✗
+      [10/30] Trying: Pelophryne api... ✗
+      [10/30] Trying: Ansonia torrentis... ✗
+      [10/30] Trying: Rana kobai... ✗
+      [10/30] Trying: Hynobius fucus... ✓
+      [11/30] Trying: Ichthyophis biangularis... ✗
+      [11/30] Trying: Platymantis cagayanensis... ✓
+      [12/30] Trying: Aphantophryne nana... ✓
+      [13/30] Trying: Leptomantis angulirostris... ✓
+      [14/30] Trying: Sanguirana everetti... ✓
+      [15/30] Trying: Sanguirana everetti... ✓
+      [16/30] Trying: Tylototriton asperrimus... ✓
+      [17/30] Trying: Platymantis negrosensis... ✗
+      [17/30] Trying: Sanguirana acai... ✗
+      [17/30] Trying: Austrochaperina adamantina... ✗
+      ✅ Fetched 16 images for NT species
+
+   🚨 LC species (target: 50)...
+      Found 686 species without images, fetching 50...
+      [1/50] Trying: Megophrys elfina... ✓
+      [2/50] Trying: Copiula annanoreenae... ✗
+      [2/50] Trying: Nyctimystes disruptus... ✓
+      [3/50] Trying: Meristogenys orphnocnemis... ✓
+      [4/50] Trying: Odorrana gigatympana... ✗
+      [4/50] Trying: Austrochaperina basipalmata... ✗
+      [4/50] Trying: Megophrys parallela... ✗
+      [4/50] Trying: Megophrys elfina... ✓
+      [5/50] Trying: Oreophryne insulana... ✓
+      [6/50] Trying: Pulchrana siberu... ✓
+      [7/50] Trying: Leptobrachella juliandringi... ✓
+      [8/50] Trying: Odorrana gigatympana... ✗
+      [8/50] Trying: Asterophrys turpicola... ✓
+      [9/50] Trying: Limnonectes malesianus... ✗
+      [9/50] Trying: Cophixalus wempi... ✗
+      [9/50] Trying: Leptobrachium hasseltii... ✓
+      [10/50] Trying: Hylophorbus tetraphonus... ✓
+      [11/50] Trying: Cophixalus bombiens... ✗
+      [11/50] Trying: Pulchrana siberu... ✓
+      [12/50] Trying: Hylophorbus richardsi... ✓
+      [13/50] Trying: Leptobrachella juliandringi... ✓
+      [14/50] Trying: Litoria vocivincens... ✗
+      [14/50] Trying: Leptobrachella juliandringi... ✓
+      [15/50] Trying: Austrochaperina alexanderi... ✗
+      [15/50] Trying: species of sea snail... ✗
+      [15/50] Trying: Haliotis dissona... ✓
+      [16/50] Trying: Nyctimystes intercastellus... ✓
+      [17/50] Trying: Theloderma rhododiscus... ✓
+      [18/50] Trying: Microhyla palmipes... ✓
+      [19/50] Trying: Choerophryne bisyllaba... ✗
+      [19/50] Trying: Oreophryne philosylleptoris... ✗
+      [19/50] Trying: Chirixalus nongkhorensis... ✓
+      [20/50] Trying: Limnonectes gyldenstolpei... ✓
+      [21/50] Trying: Copiula guttata... ✓
+      [22/50] Trying: Microhyla palmipes... ✓
+      [23/50] Trying: Cornufer boulengeri... ✓
+      [24/50] Trying: Leptobrachium hasseltii... ✓
+      [25/50] Trying: Limnonectes malesianus... ✗
+      [25/50] Trying: Hylophorbus tetraphonus... ✓
+      [26/50] Trying: Aphantophryne pansa... ✓
+      [27/50] Trying: Oreophryne insulana... ✓
+      [28/50] Trying: Limnonectes kuhlii... ✓
+      [29/50] Trying: Litoria becki... ✗
+      [29/50] Trying: Staurois natator... ✓
+      [30/50] Trying: Leptobrachium abbotti... ✓
+      [31/50] Trying: Amolops spinapectoralis... ✓
+      [32/50] Trying: Leptobrachium abbotti... ✓
+      [33/50] Trying: Litoria infrafrenata... ✓
+      [34/50] Trying: Austrochaperina gracilipes... ✗
+      [34/50] Trying: Platymantis guentheri... ✓
+      [35/50] Trying: Meristogenys maryatiae... ✗
+      ✅ Fetched 34 images for LC species
+
+======================================================================
+📍 Madagascar
+======================================================================
+
+
+   🚨 CR species (target: 30)...
+      Found 28 species without images, fetching 28...
+      [1/30] Trying: Stumpffia hara... ✗
+      [1/30] Trying: Boophis williamsi... ✓
+      [2/30] Trying: Boophis liami... ✓
+      [3/30] Trying: Mantidactylus pauliani... ✓
+      [4/30] Trying: Platypelis karenae... ✗
+      [4/30] Trying: Pisidium betafoense... ✗
+      [4/30] Trying: Madagasikara zazavavindrano... ✗
+      [4/30] Trying: Dypsis aquatilis... ✗
+      [4/30] Trying: Exacum conglomeratum... ✗
+      [4/30] Trying: Exacum conglomeratum... ✗
+      [4/30] Trying: Cadia rubra... REST API error for 'Cadia rubra': HTTPSConnectionPool(host='en.wikipedia.org', port=443): Read timed out. (read timeout=10)
+✗
+      [4/30] Trying: Hydrostachys monoica... ✗
+      [4/30] Trying: Aponogeton dioecus... ✗
+      [4/30] Trying: Thelethylax isalensis... ✗
+      [4/30] Trying: Lindernia natans... ✗
+      [4/30] Trying: Eulophia nervosa... ✗
+      [4/30] Trying: Pandanus ambalavaoensis... ✗
+      [4/30] Trying: Benthamia catatiana... ✗
+      [4/30] Trying: Exacum nossibeense... ✗
+      [4/30] Trying: Tylostigma filiforme... ✗
+      [4/30] Trying: Tylostigma filiforme... ✗
+      [4/30] Trying: Tylostigma filiforme... ✗
+      [4/30] Trying: Conyza mandrarensis... ✗
+      [4/30] Trying: Helichrysum coursii... ✗
+      [4/30] Trying: Indigofera ankaratrensis... ✗
+      [4/30] Trying: Hydrostachys perrieri... ✗
+      [4/30] Trying: Tylostigma herminioides... ✗
+      [4/30] Trying: Mimusops nossibeensis... ✗
+      ✅ Fetched 3 images for CR species
+
+   🚨 EN species (target: 40)...
+      Found 154 species without images, fetching 40...
+      [1/40] Trying: Boophis elenae... ✓
+      [2/40] Trying: Mantella aurantiaca... ✓
+      [3/40] Trying: Mantella aurantiaca... ✓
+      [4/40] Trying: Platypelis alticola... ✓
+      [5/40] Trying: Boophis piperatus... ✗
+      [5/40] Trying: Boophis narinsi... ✗
+      [5/40] Trying: Boophis jaegeri... ✓
+      [6/40] Trying: Boophis miadana... ✗
+      [6/40] Trying: Rhombophryne tany... ✗
+      [6/40] Trying: Spinomantis microtis... ✓
+      [7/40] Trying: Anodonthyla hutchisoni... ✓
+      [8/40] Trying: Gephyromantis eiselti... ✓
+      [9/40] Trying: Stumpffia roseifemoralis... ✓
+      [10/40] Trying: Mantidactylus madecassus... ✓
+      [11/40] Trying: Rhombophryne guentherpetersi... ✓
+      [12/40] Trying: Scaphiophryne gottlebei... ✓
+      [13/40] Trying: Boophis schuboeae... ✓
+      [14/40] Trying: Rhombophryne vaventy... ✓
+      [15/40] Trying: Aglyptodactylus australis... ✗
+      [15/40] Trying: Aglyptodactylus australis... ✗
+      [15/40] Trying: Boophis haingana... ✗
+      [15/40] Trying: Boophis sandrae... ✗
+      [15/40] Trying: Rhombophryne botabota... ✓
+      [16/40] Trying: Stumpffia be... ✗
+      [16/40] Trying: Plethodontohyla fonetana... ✗
+      [16/40] Trying: Anodonthyla rouxae... ✓
+      [17/40] Trying: Stumpffia psologlossa... ✓
+      [18/40] Trying: Rhombophryne savaka... ✗
+      [18/40] Trying: Boophis boehmei... ✓
+      [19/40] Trying: Platypelis tsaratananaensis... ✓
+      [20/40] Trying: Gephyromantis azzurrae... ✗
+      [20/40] Trying: Mantidactylus albofrenatus... ✓
+      [21/40] Trying: Mantidactylus bourgati... ✓
+      [22/40] Trying: Rhombophryne testudo... ✓
+      [23/40] Trying: Guibemantis annulatus... ✗
+      [23/40] Trying: Guibemantis annulatus... ✗
+      [23/40] Trying: Boophis feonnyala... ✓
+      [24/40] Trying: Mantella haraldmeieri... ✓
+      [25/40] Trying: Boophis haematopus... ✓
+      [26/40] Trying: Platypelis milloti... ✓
+      ✅ Fetched 26 images for EN species
+
+   🚨 VU species (target: 50)...
+      Found 120 species without images, fetching 50...
+      [1/50] Trying: Gephyromantis tandroka... ✓
+      [2/50] Trying: Gephyromantis striatus... ✓
+      [3/50] Trying: Boophis brachychir... ✓
+      [4/50] Trying: Cophyla occultans... ✓
+      [5/50] Trying: Cophyla occultans... ✓
+      [6/50] Trying: Boehmantis microtympanum... ✓
+      [7/50] Trying: Rhombophryne mangabensis... ✗
+      [7/50] Trying: Boophis spinophis... ✗
+      [7/50] Trying: Gephyromantis runewsweeki... ✗
+      [7/50] Trying: Gephyromantis rivicola... ✓
+      [8/50] Trying: Gephyromantis ambohitra... ✓
+      [9/50] Trying: Boophis blommersae... ✗
+      [9/50] Trying: Boophis popi... ✓
+      [10/50] Trying: Boophis englaenderi... ✓
+      [11/50] Trying: Stumpffia staffordi... ✗
+      [11/50] Trying: Gephyromantis tahotra... ✗
+      [11/50] Trying: Aglyptodactylus laticeps... ✓
+      [12/50] Trying: Gephyromantis silvanus... ✓
+      [13/50] Trying: Gephyromantis silvanus... ✓
+      [14/50] Trying: Mantella bernhardi... ✓
+      [15/50] Trying: Spinomantis tavaratra... ✓
+      [16/50] Trying: Gephyromantis cornutus... ✓
+      [17/50] Trying: Boophis miniatus... ✓
+      [18/50] Trying: Gephyromantis enki... ✓
+      [19/50] Trying: Profundiconus jeanmartini... ✓
+      [20/50] Trying: Astacoides crosnieri... ✓
+      [21/50] Trying: Astacoides caldwelli... ✓
+      [22/50] Trying: Astacoides betsileoensis... ✓
+      [23/50] Trying: Astacoides hobbsi... ✓
+      [24/50] Trying: Clithon madecassinum... ✗
+      [24/50] Trying: Lanistes grasseti... ✗
+      [24/50] Trying: Pisidium johnsoni... ✗
+      [24/50] Trying: Pisidium johnsoni... ✗
+      [24/50] Trying: Pseudagrion pontogenes... ✗
+      [24/50] Trying: Gynacantha comorensis... ✗
+      [24/50] Trying: Trithemis maia... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      [24/50] Trying: Plantago tanalensis... ✗
+      ✅ Fetched 23 images for VU species
+
+   🚨 NT species (target: 30)...
+      Found 104 species without images, fetching 30...
+      [1/30] Trying: Scaphiophryne madagascariensis... ✓
+      [2/30] Trying: Spinomantis bertini... ✓
+      [3/30] Trying: Rhombophryne coudreaui... ✓
+      [4/30] Trying: Blommersia transmarina... ✗
+      [4/30] Trying: Mantella pulchra... ✓
+      [5/30] Trying: Gephyromantis blanci... ✓
+      [6/30] Trying: Spinomantis elegans... ✓
+      [7/30] Trying: Boophis nauticus... ✗
+      [7/30] Trying: Aglyptodactylus chorus... ✗
+      [7/30] Trying: Aglyptodactylus chorus... ✗
+      [7/30] Trying: Boophis rufioculis... ✓
+      [8/30] Trying: Atractoscion aequidens... ✓
+      [9/30] Trying: Anguilla bengalensis... ✓
+      [10/30] Trying: Cleopatra grandidieri... ✓
+      [11/30] Trying: Cleopatra grandidieri... ✓
+      [12/30] Trying: Cleopatra colbeaui... ✗
+      [12/30] Trying: Madagasikara spinosa... ✓
+      [13/30] Trying: Proplatycnemis agrioides... ✗
+      [13/30] Trying: Proplatycnemis agrioides... ✗
+      [13/30] Trying: Proplatycnemis agrioides... ✗
+      [13/30] Trying: Orthetrum lugubre... ✗
+      [13/30] Trying: Aponogeton bernierianus... ✓
+      [14/30] Trying: Aponogeton bernierianus... ✓
+      [15/30] Trying: Aponogeton bernierianus... ✓
+      [16/30] Trying: Aponogeton bernierianus... ✓
+      [17/30] Trying: Aponogeton bernierianus... ✓
+      [18/30] Trying: Aponogeton bernierianus... ✓
+      [19/30] Trying: Aponogeton bernierianus... ✓
+      [20/30] Trying: Aponogeton bernierianus... ✓
+      [21/30] Trying: Aponogeton bernierianus... ✓
+      ✅ Fetched 21 images for NT species
+
+   🚨 LC species (target: 50)...
+      Found 481 species without images, fetching 50...
+      [1/50] Trying: Pyxicephalus angusticeps... ✗
+      [1/50] Trying: Guibemantis bicalcaratus... ✓
+      [2/50] Trying: Boophis axelmeyeri... ✓
+      [3/50] Trying: Heterixalus betsileo... ✓
+      [4/50] Trying: Gephyromantis moseri... ✓
+      [5/50] Trying: Mantidactylus biporus... ✓
+      [6/50] Trying: Heterixalus carbonei... ✓
+      [7/50] Trying: Hyperolius parkeri... ✓
+      [8/50] Trying: Boophis occidentalis... ✓
+      [9/50] Trying: Cophyla phyllodactyla... ✓
+      [10/50] Trying: Platypelis grandis... ✓
+      [11/50] Trying: Afrixalus fornasini... ✓
+      [12/50] Trying: Boophis roseipalmatus... ✗
+      [12/50] Trying: Boophis praedictus... ✗
+      [12/50] Trying: Boophis marojezensis... ✓
+      [13/50] Trying: Plethodontohyla alluaudi... ✓
+      [14/50] Trying: Scaphiophryne menabensis... ✓
+      [15/50] Trying: Heterixalus madagascariensis... ✓
+      [16/50] Trying: Boophis guibei... ✓
+      [17/50] Trying: Plethodontohyla notosticta... ✓
+      [18/50] Trying: Boophis tampoka... ✓
+      [19/50] Trying: Guibemantis timidus... ✓
+      [20/50] Trying: Stumpffia gimmeli... ✓
+      [21/50] Trying: Boophis roseipalmatus... ✗
+      [21/50] Trying: Boophis rappiodes... ✓
+      [22/50] Trying: Boophis pyrrhus... ✓
+      [23/50] Trying: Boophis roseipalmatus... ✗
+      [23/50] Trying: Boophis roseipalmatus... ✗
+      [23/50] Trying: Boophis roseipalmatus... ✗
+      [23/50] Trying: Plethodontohyla notosticta... ✓
+      [24/50] Trying: Boophis roseipalmatus... ✗
+      [24/50] Trying: Phrynobatrachus mababiensis... ✓
+      [25/50] Trying: Boophis roseipalmatus... ✗
+      [25/50] Trying: Boophis roseipalmatus... ✗
+      [25/50] Trying: Chiromantis xerampelina... ✓
+      [26/50] Trying: Gephyromantis leucomaculatus... ✓
+      [27/50] Trying: Heterixalus luteostriatus... ✓
+      [28/50] Trying: Mantella nigricans... ✓
+      [29/50] Trying: Stumpffia gimmeli... ✓
+      [30/50] Trying: Hylarana galamensis... ✓
+      [31/50] Trying: Boophis picturatus... ✓
+      [32/50] Trying: Heterixalus luteostriatus... ✓
+      [33/50] Trying: Guibemantis bicalcaratus... ✓
+      [34/50] Trying: Cophyla phyllodactyla... ✓
+      [35/50] Trying: Dyscophus insularis... ✓
+      [36/50] Trying: Boophis guibei... ✓
+      [37/50] Trying: Gephyromantis asper... ✓
+      [38/50] Trying: Guibemantis timidus... ✓
+      [39/50] Trying: Boophis roseipalmatus... ✗
+      [39/50] Trying: Plethodontohyla mihanika... ✓
+      ✅ Fetched 39 images for LC species
+
+======================================================================
+💾 Saving 655 species to database_species_with_images.csv
+======================================================================
+
+✅ Complete! Fetched images for 655 species
+
+Next steps:
+1. Review database_species_with_images.csv
+2. Update species in database with image URLs

@@ -72,7 +72,8 @@ serve(async (req) => {
           // New classification fields
           speciesType: item.species_type,
           uiGroup: item.ui_group,
-          trophicRole: item.trophic_role
+          trophicRole: item.trophic_role,
+          dietaryCategory: item.dietary_category // New dietary category field
         }));
 
         console.log(`Found ${topSpecies.length} balanced species from IUCN database`);
@@ -131,7 +132,8 @@ serve(async (req) => {
         // New classification fields
         speciesType: s.species_type,
         uiGroup: s.ui_group,
-        trophicRole: s.trophic_role
+        trophicRole: s.trophic_role,
+        dietaryCategory: s.dietary_category // New dietary category field
       }));
 
       console.log(`Found ${topSpecies.length} balanced species from spatial query`);

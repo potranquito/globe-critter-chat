@@ -1,8 +1,9 @@
-// New simplified UI Group categories
+// New dietary category system (4 groups)
 export type UIGroupCategory =
-  | 'animals'
-  | 'birds'
-  | 'plants-corals';
+  | 'carnivores'
+  | 'herbivores'
+  | 'omnivores'
+  | 'producers';
 
 export type ConservationCategory =
   | 'critically-endangered'
@@ -42,11 +43,12 @@ export interface FilterOption {
   isSubCategory?: boolean;
 }
 
-// New simplified UI Group filters (primary)
+// New dietary category filters (primary)
 export const UI_GROUP_FILTERS: FilterOption[] = [
-  { id: 'animals', label: 'Animals', emoji: '🦁', category: 'animals' },
-  { id: 'birds', label: 'Birds', emoji: '🐦', category: 'animals' },
-  { id: 'plants-corals', label: 'Plants & Corals', emoji: '🌿', category: 'other' },
+  { id: 'carnivores', label: 'Carnivores', emoji: '🥩', category: 'animals' },
+  { id: 'herbivores', label: 'Herbivores', emoji: '🌱', category: 'animals' },
+  { id: 'omnivores', label: 'Omnivores', emoji: '🍽️', category: 'animals' },
+  { id: 'producers', label: 'Producers', emoji: '☀️', category: 'other' },
 ];
 
 // Legacy animal filters (kept for backward compatibility)

@@ -62,8 +62,7 @@ export function GlobalHealthBar() {
               Status: <span className={getHealthColor()}>{getStatusText()}</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              {health?.total_lessons_completed.toLocaleString() || 0} Lessons by{' '}
-              {health?.total_users.toLocaleString() || 0} Contributors
+              {health?.total_species?.toLocaleString() || 0} Species Tracked
             </p>
             <p className="text-xs text-muted-foreground mt-2">
               💩🦸 Keep cleaning to reach 100%!

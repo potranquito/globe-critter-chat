@@ -33,6 +33,7 @@ export interface RegionSpecies {
   speciesType?: string;
   uiGroup?: string;
   trophicRole?: string;
+  dietaryCategory?: string; // New: Carnivore, Herbivore, Omnivore, Producer
 }
 
 /**

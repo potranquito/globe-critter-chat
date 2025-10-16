@@ -15,6 +15,9 @@ interface RegionSpecies {
   imageKeyword?: string;
   imageUrl?: string;
   taxonomicGroup?: string;
+  dietaryCategory?: string; // New: Carnivore, Herbivore, Omnivore, Producer
+  trophicRole?: string;
+  speciesType?: string;
 }
 
 interface RegionSpeciesCarouselProps {
@@ -24,6 +27,7 @@ interface RegionSpeciesCarouselProps {
   onSpeciesSelect: (species: RegionSpecies) => void;
   activeFilters?: Set<FilterCategory>;
   speciesTypeFilter?: SpeciesTypeFilter; // New simplified filter
+  selectedForGameSpecies?: string[]; // 🎮 NEW: Array of selected species scientific names
 }
 
 export const RegionSpeciesCarousel = ({
@@ -32,27 +36,37 @@ export const RegionSpeciesCarousel = ({
   currentSpecies,
   onSpeciesSelect,
   activeFilters = new Set(),
-  speciesTypeFilter = 'all'
+  speciesTypeFilter = 'all',
+  selectedForGameSpecies = []
 }: RegionSpeciesCarouselProps) => {
 
   // Filter species based on active filters and species type filter
   const filterSpecies = (speciesList: RegionSpecies[]) => {
     let filtered = speciesList;
 
-    // Apply species type filter first (new simplified filter)
+    // Apply species type filter first (new dietary category filter)
     if (speciesTypeFilter !== 'all') {
       filtered = filtered.filter(sp => {
-        const speciesType = getSpeciesType({
-          class: sp.animalType,
-          animalType: sp.animalType,
-          commonName: sp.commonName,
-          scientificName: sp.scientificName
-        });
-        const uiGroup = getUIGroup(speciesType);
+        // Use dietary_category from database if available, otherwise calculate
+        let dietaryCategory = sp.dietaryCategory?.toLowerCase();
 
-        if (speciesTypeFilter === 'animals') return uiGroup === 'animals';
-        if (speciesTypeFilter === 'birds') return uiGroup === 'birds';
-        if (speciesTypeFilter === 'plants-corals') return uiGroup === 'plants-corals';
+        if (!dietaryCategory) {
+          // Fallback: Calculate from available data
+          const speciesType = getSpeciesType({
+            class: sp.animalType,
+            animalType: sp.animalType,
+            commonName: sp.commonName,
+            scientificName: sp.scientificName
+          });
+          const uiGroup = getUIGroup(speciesType);
+          dietaryCategory = uiGroup;
+        }
+
+        // Match against selected dietary category
+        if (speciesTypeFilter === 'carnivores') return dietaryCategory === 'carnivore' || dietaryCategory === 'carnivores';
+        if (speciesTypeFilter === 'herbivores') return dietaryCategory === 'herbivore' || dietaryCategory === 'herbivores';
+        if (speciesTypeFilter === 'omnivores') return dietaryCategory === 'omnivore' || dietaryCategory === 'omnivores';
+        if (speciesTypeFilter === 'producers') return dietaryCategory === 'producer' || dietaryCategory === 'producers';
         return true;
       });
     }
@@ -60,24 +74,50 @@ export const RegionSpeciesCarousel = ({
     // Apply legacy filters if any (for backward compatibility)
     if (activeFilters.size === 0) return filtered;
 
-    return filtered.filter(sp => {
+    const result = filtered.filter(sp => {
       // Normalize the animal type for comparison (handles both "MAMMALIA" and "mammal")
       const animalType = sp.animalType?.toLowerCase() || '';
       const taxonomicGroup = sp.taxonomicGroup?.toLowerCase() || '';
 
       // Check if any filter matches
       for (const filter of activeFilters) {
-        // Animal type filters
+        // Dietary category filters (primary - from database dietary_category field)
+        const dietaryCat = sp.dietaryCategory?.toLowerCase();
+
+        if (filter === 'carnivores' && (dietaryCat === 'carnivore' || taxonomicGroup === 'carnivores')) {
+          return true;
+        }
+        if (filter === 'herbivores' && (dietaryCat === 'herbivore' || taxonomicGroup === 'herbivores')) {
+          return true;
+        }
+        if (filter === 'omnivores' && (dietaryCat === 'omnivore' || taxonomicGroup === 'omnivores')) {
+          return true;
+        }
+        if (filter === 'producers' && (dietaryCat === 'producer' || taxonomicGroup === 'producers' || taxonomicGroup === 'plants & corals')) {
+          return true;
+        }
+
+        // Legacy filters (backward compatibility)
+        if (filter === 'animals' && taxonomicGroup === 'animals') {
+          return true;
+        }
+        if (filter === 'birds' && taxonomicGroup === 'birds') {
+          return true;
+        }
+        if (filter === 'plants-corals' && taxonomicGroup === 'plants & corals') {
+          return true;
+        }
+
+        // Legacy animal type filters (for backward compatibility)
         if (filter === 'all-animals') {
           const animalTypes = ['mammal', 'mammalia', 'bird', 'aves', 'fish', 'actinopterygii', 'chondrichthyes', 'elasmobranchii', 'reptile', 'reptilia', 'amphibian', 'amphibia', 'insect', 'insecta'];
           if (animalTypes.includes(animalType) || taxonomicGroup.includes('mammal') || taxonomicGroup.includes('bird') || taxonomicGroup.includes('fish') || taxonomicGroup.includes('reptile') || taxonomicGroup.includes('amphibian') || taxonomicGroup.includes('insect')) return true;
         }
         if (filter === 'mammals' && (animalType === 'mammal' || animalType === 'mammalia' || taxonomicGroup.includes('mammal'))) return true;
-        if (filter === 'birds' && (animalType === 'bird' || animalType === 'aves' || taxonomicGroup.includes('bird'))) return true;
-        if (filter === 'fish' && (animalType === 'fish' || animalType.includes('fish') || taxonomicGroup.includes('fish'))) return true;
         if (filter === 'reptiles' && (animalType === 'reptile' || animalType === 'reptilia' || taxonomicGroup.includes('reptile'))) return true;
         if (filter === 'amphibians' && (animalType === 'amphibian' || animalType === 'amphibia' || taxonomicGroup.includes('amphibian'))) return true;
         if (filter === 'insects' && (animalType === 'insect' || animalType === 'insecta' || taxonomicGroup.includes('insect'))) return true;
+        if (filter === 'fish' && (animalType === 'fish' || animalType.includes('fish') || taxonomicGroup.includes('fish'))) return true;
 
         // Plant filter
         if (filter === 'plants' && (animalType === 'plant' || animalType === 'plantae' || taxonomicGroup.includes('plant'))) return true;
@@ -91,6 +131,8 @@ export const RegionSpeciesCarousel = ({
       }
       return false;
     });
+
+    return result;
   };
 
   const filteredSpecies = filterSpecies(species);
@@ -223,11 +265,15 @@ export const RegionSpeciesCarousel = ({
           </div>
         ) : (
           <div className="space-y-3 pr-1">
-            {filteredSpecies.map((sp, index) => (
+            {filteredSpecies.map((sp, index) => {
+              const isSelected = selectedForGameSpecies.includes(sp.scientificName);
+              return (
             <Card
               key={`${sp.scientificName}-${index}`}
-              className={`cursor-pointer transition-all hover:scale-105 hover:shadow-2xl overflow-hidden aspect-square ${
+              className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-2xl overflow-hidden aspect-square ${
                 currentSpecies === sp.scientificName ? 'ring-4 ring-primary shadow-2xl' : ''
+              } ${
+                isSelected ? 'ring-4 ring-green-500 shadow-green-500/50' : ''
               }`}
               onClick={() => onSpeciesSelect(sp)}
             >
@@ -248,8 +294,18 @@ export const RegionSpeciesCarousel = ({
               <div className={`w-full h-full bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center text-8xl ${sp.imageUrl ? 'hidden' : ''}`}>
                 {getAnimalEmoji(sp.animalType)}
               </div>
+
+              {/* 🎮 Selected Badge */}
+              {isSelected && (
+                <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full p-1.5 shadow-lg">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              )}
             </Card>
-            ))}
+            )}
+            )}
           </div>
         )}
       </ScrollArea>

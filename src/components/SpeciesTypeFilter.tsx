@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export type SpeciesTypeFilter = 'all' | 'animals' | 'birds' | 'plants-corals';
+export type SpeciesTypeFilter = 'all' | 'carnivores' | 'herbivores' | 'omnivores' | 'producers';
 
 interface SpeciesTypeFilterProps {
   activeFilter: SpeciesTypeFilter;
@@ -28,22 +28,28 @@ export const SpeciesTypeFilter = ({
       description: 'Show all species'
     },
     {
-      id: 'animals' as SpeciesTypeFilter,
-      label: 'Animals',
-      emoji: '🦁',
-      description: 'Mammals, fish, reptiles, amphibians, invertebrates'
+      id: 'carnivores' as SpeciesTypeFilter,
+      label: 'Carnivores',
+      emoji: '🥩',
+      description: 'Meat-eating predators and scavengers'
     },
     {
-      id: 'birds' as SpeciesTypeFilter,
-      label: 'Birds',
-      emoji: '🐦',
-      description: 'All bird species'
+      id: 'herbivores' as SpeciesTypeFilter,
+      label: 'Herbivores',
+      emoji: '🌱',
+      description: 'Plant-eating grazers and browsers'
     },
     {
-      id: 'plants-corals' as SpeciesTypeFilter,
-      label: showCorals ? 'Plants & Corals' : 'Plants',
-      emoji: showCorals ? '🪸' : '🌿',
-      description: showCorals ? 'Plants and coral species' : 'Plant species'
+      id: 'omnivores' as SpeciesTypeFilter,
+      label: 'Omnivores',
+      emoji: '🍽️',
+      description: 'Mixed diet - plants and animals'
+    },
+    {
+      id: 'producers' as SpeciesTypeFilter,
+      label: 'Producers',
+      emoji: '☀️',
+      description: 'Plants and corals (energy producers)'
     }
   ];
 

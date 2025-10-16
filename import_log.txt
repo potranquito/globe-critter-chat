@@ -1,0 +1,994 @@
+🌍 Importing Curated Species for All Ecoregions
+
+1️⃣ Loading ecoregions from database...
+   ✅ Found 6 ecoregions in database
+
+2️⃣ Reading curated_species_database_enriched.csv...
+   ✅ Found 240 species in CSV
+   📊 Species distribution:
+      - Coral Triangle: 40 species
+      - Amazon and Guianas: 40 species
+      - Congo Basin: 40 species
+      - Madagascar: 40 species
+      - Borneo: 40 species
+      - Arctic Terrestrial: 40 species
+
+3️⃣ Importing species to database...
+
+   [1/240] Whale shark (Whale shark) → Coral Triangle
+      ✅ Inserted new species (ID: 60d1e4ca...)
+      ✅ Linked to Coral Triangle
+
+   [2/240] Green sea turtle (Green sea turtle) → Coral Triangle
+      ✅ Inserted new species (ID: b25de4ae...)
+      ✅ Linked to Coral Triangle
+
+   [3/240] Hawksbill sea turtle (Hawksbill sea turtle) → Coral Triangle
+      ✅ Inserted new species (ID: 759ee2d9...)
+      ✅ Linked to Coral Triangle
+
+   [4/240] Leatherback sea turtle (Leatherback sea turtle) → Coral Triangle
+      ✅ Inserted new species (ID: 1ef32183...)
+      ✅ Linked to Coral Triangle
+
+   [5/240] Olive ridley sea turtle (Olive ridley sea turtle) → Coral Triangle
+      ✅ Inserted new species (ID: 8dbd96ee...)
+      ✅ Linked to Coral Triangle
+
+   [6/240] Giant oceanic manta ray (Giant oceanic manta ray) → Coral Triangle
+      ✅ Inserted new species (ID: b953e3e4...)
+      ✅ Linked to Coral Triangle
+
+   [7/240] Reef manta ray (Reef manta ray) → Coral Triangle
+      ✅ Inserted new species (ID: 3b64c2a7...)
+      ✅ Linked to Coral Triangle
+
+   [8/240] Dugong (Dugong) → Coral Triangle
+      ✅ Inserted new species (ID: 495d0152...)
+      ✅ Linked to Coral Triangle
+
+   [9/240] Spinner dolphin (Spinner dolphin) → Coral Triangle
+      ✅ Inserted new species (ID: 2f5a08fb...)
+      ✅ Linked to Coral Triangle
+
+   [10/240] Indo-Pacific bottlenose dolphin (Indo-Pacific bottlenose dolphin) → Coral Triangle
+      ✅ Inserted new species (ID: 0be562b4...)
+      ✅ Linked to Coral Triangle
+
+   [11/240] Irrawaddy dolphin (Irrawaddy dolphin) → Coral Triangle
+      ✅ Inserted new species (ID: 53b159b8...)
+      ✅ Linked to Coral Triangle
+
+   [12/240] Bryde's whale (Bryde's whale) → Coral Triangle
+      ✅ Inserted new species (ID: b32c92ad...)
+      ✅ Linked to Coral Triangle
+
+   [13/240] Sperm whale (Sperm whale) → Coral Triangle
+      ✅ Inserted new species (ID: 1a2d80eb...)
+      ✅ Linked to Coral Triangle
+
+   [14/240] Humphead wrasse (Humphead wrasse) → Coral Triangle
+      ✅ Inserted new species (ID: fe4f1961...)
+      ✅ Linked to Coral Triangle
+
+   [15/240] Bumphead parrotfish (Bumphead parrotfish) → Coral Triangle
+      ✅ Inserted new species (ID: 9fe0641c...)
+      ✅ Linked to Coral Triangle
+
+   [16/240] Giant clam (Giant clam) → Coral Triangle
+      ✅ Inserted new species (ID: 417d5cd4...)
+      ✅ Linked to Coral Triangle
+
+   [17/240] Crown-of-thorns starfish (Crown-of-thorns starfish) → Coral Triangle
+      ✅ Inserted new species (ID: a1bc4637...)
+      ✅ Linked to Coral Triangle
+
+   [18/240] Blue-ringed octopus (Blue-ringed octopus) → Coral Triangle
+      ✅ Inserted new species (ID: 6b71c09d...)
+      ✅ Linked to Coral Triangle
+
+   [19/240] Mandarin dragonet (Mandarin fish) → Coral Triangle
+      ✅ Inserted new species (ID: aee52e15...)
+      ✅ Linked to Coral Triangle
+
+   [20/240] Moorish idol (Moorish idol) → Coral Triangle
+      ✅ Inserted new species (ID: e490d156...)
+      ✅ Linked to Coral Triangle
+
+   [21/240] Banggai cardinalfish (Banggai cardinalfish) → Coral Triangle
+      ✅ Inserted new species (ID: cece77ac...)
+      ✅ Linked to Coral Triangle
+
+   [22/240] Clown triggerfish (Clown triggerfish) → Coral Triangle
+      ✅ Inserted new species (ID: 80b77814...)
+      ✅ Linked to Coral Triangle
+
+   [23/240] Blacktip reef shark (Blacktip reef shark) → Coral Triangle
+      ✅ Inserted new species (ID: e70601d3...)
+      ✅ Linked to Coral Triangle
+
+   [24/240] Grey reef shark (Grey reef shark) → Coral Triangle
+      ✅ Inserted new species (ID: 430e0059...)
+      ✅ Linked to Coral Triangle
+
+   [25/240] Whitetip reef shark (Whitetip reef shark) → Coral Triangle
+      ✅ Inserted new species (ID: 9d219df6...)
+      ✅ Linked to Coral Triangle
+
+   [26/240] Silvertip shark (Silvertip shark) → Coral Triangle
+      ✅ Inserted new species (ID: df6fc38e...)
+      ✅ Linked to Coral Triangle
+
+   [27/240] Tawny nurse shark (Tawny nurse shark) → Coral Triangle
+      ✅ Inserted new species (ID: f42dbb3b...)
+      ✅ Linked to Coral Triangle
+
+   [28/240] Chambered nautilus (Chambered nautilus) → Coral Triangle
+      ✅ Inserted new species (ID: 0e3e6fad...)
+      ✅ Linked to Coral Triangle
+
+   [29/240] Peacock mantis shrimp (Peacock mantis shrimp) → Coral Triangle
+      ✅ Inserted new species (ID: 77b067f1...)
+      ✅ Linked to Coral Triangle
+
+   [30/240] Harlequin shrimp (Harlequin shrimp) → Coral Triangle
+      ✅ Inserted new species (ID: b47b17be...)
+      ✅ Linked to Coral Triangle
+
+   [31/240] Pygmy seahorse (Pygmy seahorse) → Coral Triangle
+      ✅ Inserted new species (ID: 1f16b591...)
+      ✅ Linked to Coral Triangle
+
+   [32/240] Banded sea krait (Banded sea krait) → Coral Triangle
+      ✅ Inserted new species (ID: fed9e3e5...)
+      ✅ Linked to Coral Triangle
+
+   [33/240] Giant trevally (Giant trevally) → Coral Triangle
+      ✅ Inserted new species (ID: 0d4fa20b...)
+      ✅ Linked to Coral Triangle
+
+   [34/240] Indo-Pacific sailfish (Indo-Pacific sailfish) → Coral Triangle
+      ✅ Inserted new species (ID: 0f0a763e...)
+      ✅ Linked to Coral Triangle
+
+   [35/240] Bigfin reef squid (Bigfin reef squid) → Coral Triangle
+      ✅ Inserted new species (ID: da05638b...)
+      ✅ Linked to Coral Triangle
+
+   [36/240] Bubble-tip anemone (Bubble-tip anemone) → Coral Triangle
+      ✅ Inserted new species (ID: cb954262...)
+      ✅ Linked to Coral Triangle
+
+   [37/240] Staghorn coral (Acropora millepora) → Coral Triangle
+      ℹ️  Species exists (ID: 0a57b4ab...)
+      ✅ Updated species data
+      ℹ️  Already linked to Coral Triangle
+
+   [38/240] Unknown (Porites lutea) → Coral Triangle
+      ℹ️  Species exists (ID: 4a95391c...)
+      ✅ Updated species data
+      ℹ️  Already linked to Coral Triangle
+
+   [39/240] Pacific turtlegrass (Thalassia hemprichii) → Coral Triangle
+      ℹ️  Species exists (ID: 2efd84b4...)
+      ✅ Updated species data
+      ℹ️  Already linked to Coral Triangle
+
+   [40/240] Paddle weed (Halophila ovalis) → Coral Triangle
+      ℹ️  Species exists (ID: d5ae96c6...)
+      ✅ Updated species data
+      ℹ️  Already linked to Coral Triangle
+
+   [41/240] Jaguar (Jaguar) → Amazon and Guianas
+      ✅ Inserted new species (ID: 2aac90a6...)
+      ✅ Linked to Amazon and Guianas
+
+   [42/240] Harpy eagle (Harpy eagle) → Amazon and Guianas
+      ✅ Inserted new species (ID: b8f5558d...)
+      ✅ Linked to Amazon and Guianas
+
+   [43/240] Amazon river dolphin (Amazon river dolphin) → Amazon and Guianas
+      ✅ Inserted new species (ID: ea61457a...)
+      ✅ Linked to Amazon and Guianas
+
+   [44/240] Giant otter (Giant otter) → Amazon and Guianas
+      ✅ Inserted new species (ID: 3f625240...)
+      ✅ Linked to Amazon and Guianas
+
+   [45/240] Black caiman (Black caiman) → Amazon and Guianas
+      ✅ Inserted new species (ID: 609de870...)
+      ✅ Linked to Amazon and Guianas
+
+   [46/240] Green anaconda (Green anaconda) → Amazon and Guianas
+      ✅ Inserted new species (ID: a5d819aa...)
+      ✅ Linked to Amazon and Guianas
+
+   [47/240] Scarlet macaw (Scarlet macaw) → Amazon and Guianas
+      ✅ Inserted new species (ID: ddfc9485...)
+      ✅ Linked to Amazon and Guianas
+
+   [48/240] Blue-and-yellow macaw (Blue-and-yellow macaw) → Amazon and Guianas
+      ✅ Inserted new species (ID: aaaa48bf...)
+      ✅ Linked to Amazon and Guianas
+
+   [49/240] Red-bellied piranha (Red-bellied piranha) → Amazon and Guianas
+      ✅ Inserted new species (ID: ae0e2864...)
+      ✅ Linked to Amazon and Guianas
+
+   [50/240] Arapaima (Arapaima) → Amazon and Guianas
+      ✅ Inserted new species (ID: 1c61400c...)
+      ✅ Linked to Amazon and Guianas
+
+   [51/240] Electric eel (Electric eel) → Amazon and Guianas
+      ✅ Inserted new species (ID: 12fe7888...)
+      ✅ Linked to Amazon and Guianas
+
+   [52/240] Pygmy marmoset (Pygmy marmoset) → Amazon and Guianas
+      ✅ Inserted new species (ID: bc7c7a52...)
+      ✅ Linked to Amazon and Guianas
+
+   [53/240] Red howler monkey (Red howler monkey) → Amazon and Guianas
+      ✅ Inserted new species (ID: bca5abd1...)
+      ✅ Linked to Amazon and Guianas
+
+   [54/240] White-bellied spider monkey (White-bellied spider monkey) → Amazon and Guianas
+      ✅ Inserted new species (ID: 635a809b...)
+      ✅ Linked to Amazon and Guianas
+
+   [55/240] Capybara (Capybara) → Amazon and Guianas
+      ✅ Inserted new species (ID: 599377a6...)
+      ✅ Linked to Amazon and Guianas
+
+   [56/240] South American tapir (South American tapir) → Amazon and Guianas
+      ✅ Inserted new species (ID: 775c9a83...)
+      ✅ Linked to Amazon and Guianas
+
+   [57/240] Giant anteater (Giant anteater) → Amazon and Guianas
+      ✅ Inserted new species (ID: e42ad0bd...)
+      ✅ Linked to Amazon and Guianas
+
+   [58/240] Brown-throated sloth (Brown-throated sloth) → Amazon and Guianas
+      ✅ Inserted new species (ID: bf4dc0fa...)
+      ✅ Linked to Amazon and Guianas
+
+   [59/240] Hoatzin (Hoatzin) → Amazon and Guianas
+      ✅ Inserted new species (ID: 30ea49e9...)
+      ✅ Linked to Amazon and Guianas
+
+   [60/240] Spectacled caiman (Spectacled caiman) → Amazon and Guianas
+      ✅ Inserted new species (ID: 7ccbd5ed...)
+      ✅ Linked to Amazon and Guianas
+
+   [61/240] Amazonian manatee (Amazonian manatee) → Amazon and Guianas
+      ✅ Inserted new species (ID: a9c21cab...)
+      ✅ Linked to Amazon and Guianas
+
+   [62/240] Tucuxi (Tucuxi) → Amazon and Guianas
+      ✅ Inserted new species (ID: fdcd03f3...)
+      ✅ Linked to Amazon and Guianas
+
+   [63/240] Amazonian giant centipede (Scolopendra gigantea) → Amazon and Guianas
+      ✅ Inserted new species (ID: a9c6bc92...)
+      ✅ Linked to Amazon and Guianas
+
+   [64/240] Blue poison dart frog (Blue poison dart frog) → Amazon and Guianas
+      ✅ Inserted new species (ID: 7054e94e...)
+      ✅ Linked to Amazon and Guianas
+
+   [65/240] Amazon milk frog (Amazon milk frog) → Amazon and Guianas
+      ✅ Inserted new species (ID: 18fb7958...)
+      ✅ Linked to Amazon and Guianas
+
+   [66/240] Bushmaster (Lachesis muta) → Amazon and Guianas
+      ✅ Inserted new species (ID: f6d61237...)
+      ✅ Linked to Amazon and Guianas
+
+   [67/240] Emperor tamarin (Emperor tamarin) → Amazon and Guianas
+      ✅ Inserted new species (ID: 64e71ebf...)
+      ✅ Linked to Amazon and Guianas
+
+   [68/240] Common squirrel monkey (Common squirrel monkey) → Amazon and Guianas
+      ✅ Inserted new species (ID: 150416f7...)
+      ✅ Linked to Amazon and Guianas
+
+   [69/240] Red-rumped agouti (Red-rumped agouti) → Amazon and Guianas
+      ✅ Inserted new species (ID: b730d7b7...)
+      ✅ Linked to Amazon and Guianas
+
+   [70/240] Lowland paca (Lowland paca) → Amazon and Guianas
+      ✅ Inserted new species (ID: 391befa6...)
+      ✅ Linked to Amazon and Guianas
+
+   [71/240] Tayra (Tayra) → Amazon and Guianas
+      ✅ Inserted new species (ID: f60b78c6...)
+      ✅ Linked to Amazon and Guianas
+
+   [72/240] Goliath birdeater (Goliath birdeater) → Amazon and Guianas
+      ✅ Inserted new species (ID: 08023952...)
+      ✅ Linked to Amazon and Guianas
+
+   [73/240] Leafcutter ant (Leafcutter ant) → Amazon and Guianas
+      ✅ Inserted new species (ID: 8036deeb...)
+      ✅ Linked to Amazon and Guianas
+
+   [74/240] Blue morpho butterfly (Morpho menelaus) → Amazon and Guianas
+      ℹ️  Species exists (ID: ed9e900d...)
+      ✅ Updated species data
+      ℹ️  Already linked to Amazon and Guianas
+
+   [75/240] Hanging lobster claw (Heliconia rostrata) → Amazon and Guianas
+      ✅ Inserted new species (ID: f87b2ed3...)
+      ✅ Linked to Amazon and Guianas
+
+   [76/240] Unknown (Victoria amazonica) → Amazon and Guianas
+      ✅ Inserted new species (ID: 47092caf...)
+      ✅ Linked to Amazon and Guianas
+
+   [77/240] Brazil nut tree (Brazil nut) → Amazon and Guianas
+      ✅ Inserted new species (ID: 2bc57b06...)
+      ✅ Linked to Amazon and Guianas
+
+   [78/240] Rubber tree (Hevea brasiliensis) → Amazon and Guianas
+      ✅ Inserted new species (ID: 09173097...)
+      ✅ Linked to Amazon and Guianas
+
+   [79/240] Cacao tree (Theobroma cacao) → Amazon and Guianas
+      ✅ Inserted new species (ID: 215681c3...)
+      ✅ Linked to Amazon and Guianas
+
+   [80/240] Açaí palm (Euterpe oleracea) → Amazon and Guianas
+      ✅ Inserted new species (ID: 2d8a2973...)
+      ✅ Linked to Amazon and Guianas
+
+   [81/240] African forest elephant (African forest elephant) → Congo Basin
+      ✅ Inserted new species (ID: d1492fc0...)
+      ✅ Linked to Congo Basin
+
+   [82/240] Western lowland gorilla (Western lowland gorilla) → Congo Basin
+      ✅ Inserted new species (ID: f1ca9e83...)
+      ✅ Linked to Congo Basin
+
+   [83/240] Bonobo (Bonobo) → Congo Basin
+      ✅ Inserted new species (ID: e398b10d...)
+      ✅ Linked to Congo Basin
+
+   [84/240] Okapi (Okapi) → Congo Basin
+      ✅ Inserted new species (ID: 880aa908...)
+      ✅ Linked to Congo Basin
+
+   [85/240] Bongo (Bongo) → Congo Basin
+      ✅ Inserted new species (ID: a3e09d7c...)
+      ✅ Linked to Congo Basin
+
+   [86/240] Forest buffalo (Forest buffalo) → Congo Basin
+      ✅ Inserted new species (ID: ea3af94c...)
+      ✅ Linked to Congo Basin
+
+   [87/240] Sitatunga (Sitatunga) → Congo Basin
+      ✅ Inserted new species (ID: 2861084f...)
+      ✅ Linked to Congo Basin
+
+   [88/240] African grey parrot (African grey parrot) → Congo Basin
+      ✅ Inserted new species (ID: 0bcfdf29...)
+      ✅ Linked to Congo Basin
+
+   [89/240] Congo peafowl (Congo peafowl) → Congo Basin
+      ✅ Inserted new species (ID: c8b53c28...)
+      ✅ Linked to Congo Basin
+
+   [90/240] Shoebill (Shoebill) → Congo Basin
+      ✅ Inserted new species (ID: 50aaea99...)
+      ✅ Linked to Congo Basin
+
+   [91/240] Slender-snouted crocodile (Slender-snouted crocodile) → Congo Basin
+      ✅ Inserted new species (ID: 94ed5870...)
+      ✅ Linked to Congo Basin
+
+   [92/240] Nile crocodile (Nile crocodile) → Congo Basin
+      ✅ Inserted new species (ID: 009c5827...)
+      ✅ Linked to Congo Basin
+
+   [93/240] Goliath tigerfish (Goliath tigerfish) → Congo Basin
+      ✅ Inserted new species (ID: a32004b5...)
+      ✅ Linked to Congo Basin
+
+   [94/240] African lungfish (African lungfish) → Congo Basin
+      ✅ Inserted new species (ID: 068b2968...)
+      ✅ Linked to Congo Basin
+
+   [95/240] Electric catfish (Electric catfish) → Congo Basin
+      ✅ Inserted new species (ID: 8d289c59...)
+      ✅ Linked to Congo Basin
+
+   [96/240] Goliath frog (Goliath frog) → Congo Basin
+      ✅ Inserted new species (ID: 10a96a8c...)
+      ✅ Linked to Congo Basin
+
+   [97/240] Gaboon viper (Gaboon viper) → Congo Basin
+      ✅ Inserted new species (ID: bfd49502...)
+      ✅ Linked to Congo Basin
+
+   [98/240] Forest cobra (Forest cobra) → Congo Basin
+      ✅ Inserted new species (ID: 6bc7a92c...)
+      ✅ Linked to Congo Basin
+
+   [99/240] Giant pangolin (Giant pangolin) → Congo Basin
+      ✅ Inserted new species (ID: b1d2359a...)
+      ✅ Linked to Congo Basin
+
+   [100/240] Tree pangolin (Tree pangolin) → Congo Basin
+      ✅ Inserted new species (ID: 1c99e3c3...)
+      ✅ Linked to Congo Basin
+
+   [101/240] Mandrill (Mandrill) → Congo Basin
+      ✅ Inserted new species (ID: 403188c5...)
+      ✅ Linked to Congo Basin
+
+   [102/240] De Brazza's monkey (De Brazza's monkey) → Congo Basin
+      ✅ Inserted new species (ID: 2915ffbf...)
+      ✅ Linked to Congo Basin
+
+   [103/240] Pennant's colobus (Pennant's colobus) → Congo Basin
+      ✅ Inserted new species (ID: 8017fddd...)
+      ✅ Linked to Congo Basin
+
+   [104/240] Blue monkey (Blue monkey) → Congo Basin
+      ✅ Inserted new species (ID: 1a40b724...)
+      ✅ Linked to Congo Basin
+
+   [105/240] Allen's swamp monkey (Allen's swamp monkey) → Congo Basin
+      ✅ Inserted new species (ID: a29a8cde...)
+      ✅ Linked to Congo Basin
+
+   [106/240] Potto (Potto) → Congo Basin
+      ✅ Inserted new species (ID: 53db30c3...)
+      ✅ Linked to Congo Basin
+
+   [107/240] Hammer-headed bat (Hammer-headed bat) → Congo Basin
+      ✅ Inserted new species (ID: 3de6686c...)
+      ✅ Linked to Congo Basin
+
+   [108/240] Lord Derby's anomalure (Lord Derby's anomalure) → Congo Basin
+      ✅ Inserted new species (ID: 10dc2041...)
+      ✅ Linked to Congo Basin
+
+   [109/240] African golden cat (African golden cat) → Congo Basin
+      ✅ Inserted new species (ID: 332aa7b6...)
+      ✅ Linked to Congo Basin
+
+   [110/240] African leopard (African leopard) → Congo Basin
+      ✅ Inserted new species (ID: 54fe2584...)
+      ✅ Linked to Congo Basin
+
+   [111/240] African palm civet (African palm civet) → Congo Basin
+      ✅ Inserted new species (ID: d4423dcc...)
+      ✅ Linked to Congo Basin
+
+   [112/240] Red river hog (Red river hog) → Congo Basin
+      ✅ Inserted new species (ID: 406bf525...)
+      ✅ Linked to Congo Basin
+
+   [113/240] African dwarf crocodile (African dwarf crocodile) → Congo Basin
+      ✅ Inserted new species (ID: 45dbac69...)
+      ✅ Linked to Congo Basin
+
+   [114/240] African jacana (African jacana) → Congo Basin
+      ✅ Inserted new species (ID: 39c434c3...)
+      ✅ Linked to Congo Basin
+
+   [115/240] Great blue turaco (Great blue turaco) → Congo Basin
+      ✅ Inserted new species (ID: 9407f966...)
+      ✅ Linked to Congo Basin
+
+   [116/240] Giant African millipede (Archispirostreptus gigas) → Congo Basin
+      ✅ Inserted new species (ID: 767441cf...)
+      ✅ Linked to Congo Basin
+
+   [117/240] Okoumé (Aucoumea klaineana) → Congo Basin
+      ✅ Inserted new species (ID: 07fb8947...)
+      ✅ Linked to Congo Basin
+
+   [118/240] African teak (Milicia excelsa) → Congo Basin
+      ✅ Inserted new species (ID: e2f2aeb7...)
+      ✅ Linked to Congo Basin
+
+   [119/240] Sapele (Entandrophragma cylindricum) → Congo Basin
+      ✅ Inserted new species (ID: b7bb61e7...)
+      ✅ Linked to Congo Basin
+
+   [120/240] Raffia palm (Raphia hookeri) → Congo Basin
+      ✅ Inserted new species (ID: 44310f99...)
+      ✅ Linked to Congo Basin
+
+   [121/240] Ring-tailed lemur (Ring-tailed lemur) → Madagascar
+      ✅ Inserted new species (ID: 9367f817...)
+      ✅ Linked to Madagascar
+
+   [122/240] Indri (Indri) → Madagascar
+      ✅ Inserted new species (ID: 3ccf94ce...)
+      ✅ Linked to Madagascar
+
+   [123/240] Aye-aye (Aye-aye) → Madagascar
+      ✅ Inserted new species (ID: 81757e96...)
+      ✅ Linked to Madagascar
+
+   [124/240] Fossa (Fossa) → Madagascar
+      ✅ Inserted new species (ID: 5b93a90c...)
+      ✅ Linked to Madagascar
+
+   [125/240] Madagascar hissing cockroach (Madagascar hissing cockroach) → Madagascar
+      ✅ Inserted new species (ID: 7cd687e9...)
+      ✅ Linked to Madagascar
+
+   [126/240] Tomato frog (Tomato frog) → Madagascar
+      ✅ Inserted new species (ID: 282bfe52...)
+      ✅ Linked to Madagascar
+
+   [127/240] Panther chameleon (Panther chameleon) → Madagascar
+      ✅ Inserted new species (ID: 19b50c97...)
+      ✅ Linked to Madagascar
+
+   [128/240] Madagascar fish eagle (Madagascar fish eagle) → Madagascar
+      ✅ Inserted new species (ID: b7f29709...)
+      ✅ Linked to Madagascar
+
+   [129/240] Madagascar pochard (Madagascar pochard) → Madagascar
+      ✅ Inserted new species (ID: 63c13dc2...)
+      ✅ Linked to Madagascar
+
+   [130/240] Radiated tortoise (Radiated tortoise) → Madagascar
+      ✅ Inserted new species (ID: 7aab964a...)
+      ✅ Linked to Madagascar
+
+   [131/240] Ploughshare tortoise (Ploughshare tortoise) → Madagascar
+      ✅ Inserted new species (ID: 9b69271e...)
+      ✅ Linked to Madagascar
+
+   [132/240] Malagasy giant rat (Malagasy giant rat) → Madagascar
+      ✅ Inserted new species (ID: 4a053264...)
+      ✅ Linked to Madagascar
+
+   [133/240] Coquerel's sifaka (Coquerel's sifaka) → Madagascar
+      ✅ Inserted new species (ID: 3e9fbecf...)
+      ✅ Linked to Madagascar
+
+   [134/240] Verreaux's sifaka (Verreaux's sifaka) → Madagascar
+      ✅ Inserted new species (ID: ace75516...)
+      ✅ Linked to Madagascar
+
+   [135/240] Black-and-white ruffed lemur (Black-and-white ruffed lemur) → Madagascar
+      ✅ Inserted new species (ID: 9540791d...)
+      ✅ Linked to Madagascar
+
+   [136/240] Red ruffed lemur (Red ruffed lemur) → Madagascar
+      ✅ Inserted new species (ID: 49752e10...)
+      ✅ Linked to Madagascar
+
+   [137/240] Crowned lemur (Crowned lemur) → Madagascar
+      ✅ Inserted new species (ID: 9644f4f8...)
+      ✅ Linked to Madagascar
+
+   [138/240] Golden bamboo lemur (Golden bamboo lemur) → Madagascar
+      ✅ Inserted new species (ID: b34f80ec...)
+      ✅ Linked to Madagascar
+
+   [139/240] Greater bamboo lemur (Greater bamboo lemur) → Madagascar
+      ✅ Inserted new species (ID: fd4f808e...)
+      ✅ Linked to Madagascar
+
+   [140/240] Silky sifaka (Silky sifaka) → Madagascar
+      ✅ Inserted new species (ID: 5740c9e6...)
+      ✅ Linked to Madagascar
+
+   [141/240] Diademed sifaka (Diademed sifaka) → Madagascar
+      ✅ Inserted new species (ID: de262d49...)
+      ✅ Linked to Madagascar
+
+   [142/240] Fat-tailed dwarf lemur (Fat-tailed dwarf lemur) → Madagascar
+      ✅ Inserted new species (ID: 117e9629...)
+      ✅ Linked to Madagascar
+
+   [143/240] Madame Berthe's mouse lemur (Madame Berthe's mouse lemur) → Madagascar
+      ✅ Inserted new species (ID: 9a6a61e9...)
+      ✅ Linked to Madagascar
+
+   [144/240] Lowland streaked tenrec (Lowland streaked tenrec) → Madagascar
+      ✅ Inserted new species (ID: f63fa21d...)
+      ✅ Linked to Madagascar
+
+   [145/240] Falanouc (Falanouc) → Madagascar
+      ✅ Inserted new species (ID: eeb44afc...)
+      ✅ Linked to Madagascar
+
+   [146/240] Malagasy civet (Malagasy civet) → Madagascar
+      ✅ Inserted new species (ID: 642ddda8...)
+      ✅ Linked to Madagascar
+
+   [147/240] Madagascar flying fox (Madagascar flying fox) → Madagascar
+      ✅ Inserted new species (ID: 829559bc...)
+      ✅ Linked to Madagascar
+
+   [148/240] Madagascar pygmy kingfisher (Madagascar pygmy kingfisher) → Madagascar
+      ✅ Inserted new species (ID: 2284fcb7...)
+      ✅ Linked to Madagascar
+
+   [149/240] Helmet vanga (Helmet vanga) → Madagascar
+      ✅ Inserted new species (ID: 9c0d4158...)
+      ✅ Linked to Madagascar
+
+   [150/240] Cuckoo roller (Cuckoo roller) → Madagascar
+      ✅ Inserted new species (ID: d527869c...)
+      ✅ Linked to Madagascar
+
+   [151/240] Oustalet's chameleon (Oustalet's chameleon) → Madagascar
+      ✅ Inserted new species (ID: 67f929ab...)
+      ✅ Linked to Madagascar
+
+   [152/240] Parson's chameleon (Parson's chameleon) → Madagascar
+      ✅ Inserted new species (ID: b4a3644e...)
+      ✅ Linked to Madagascar
+
+   [153/240] Madagascar ground boa (Madagascar ground boa) → Madagascar
+      ✅ Inserted new species (ID: 3be9d363...)
+      ✅ Linked to Madagascar
+
+   [154/240] Madagascar tree boa (Madagascar tree boa) → Madagascar
+      ✅ Inserted new species (ID: 863b93fb...)
+      ✅ Linked to Madagascar
+
+   [155/240] Satanic leaf-tailed gecko (Satanic leaf-tailed gecko) → Madagascar
+      ✅ Inserted new species (ID: 0aab7c27...)
+      ✅ Linked to Madagascar
+
+   [156/240] Madagascar periwinkle (Catharanthus roseus) → Madagascar
+      ✅ Inserted new species (ID: e1adb41f...)
+      ✅ Linked to Madagascar
+
+   [157/240] Traveller's tree (Ravenala madagascariensis) → Madagascar
+      ✅ Inserted new species (ID: a2e78ce0...)
+      ✅ Linked to Madagascar
+
+   [158/240] Grandidier's baobab (Adansonia grandidieri) → Madagascar
+      ℹ️  Species exists (ID: 3e117005...)
+      ✅ Updated species data
+      ℹ️  Already linked to Madagascar
+
+   [159/240] Madagascar palm (Pachypodium lamerei) → Madagascar
+      ✅ Inserted new species (ID: 8e98e172...)
+      ✅ Linked to Madagascar
+
+   [160/240] Madagascar ocotillo (Alluaudia procera) → Madagascar
+      ✅ Inserted new species (ID: 8089d691...)
+      ✅ Linked to Madagascar
+
+   [161/240] Bornean orangutan (Bornean orangutan) → Borneo
+      ✅ Inserted new species (ID: f86aebcc...)
+      ✅ Linked to Borneo
+
+   [162/240] Proboscis monkey (Proboscis monkey) → Borneo
+      ✅ Inserted new species (ID: 89c74634...)
+      ✅ Linked to Borneo
+
+   [163/240] Bornean pygmy elephant (Bornean elephant) → Borneo
+      ✅ Inserted new species (ID: 5a88465e...)
+      ✅ Linked to Borneo
+
+   [164/240] Sunda clouded leopard (Sunda clouded leopard) → Borneo
+      ✅ Inserted new species (ID: 6f87d90c...)
+      ✅ Linked to Borneo
+
+   [165/240] Sun bear (Sun bear) → Borneo
+      ✅ Inserted new species (ID: 898e5cb4...)
+      ✅ Linked to Borneo
+
+   [166/240] Binturong (Binturong) → Borneo
+      ✅ Inserted new species (ID: 72d49d84...)
+      ✅ Linked to Borneo
+
+   [167/240] Banteng (Banteng) → Borneo
+      ✅ Inserted new species (ID: b9bfbf2e...)
+      ✅ Linked to Borneo
+
+   [168/240] Hose's langur (Hose's langur) → Borneo
+      ✅ Inserted new species (ID: c332bbe4...)
+      ✅ Linked to Borneo
+
+   [169/240] Bornean white-bearded gibbon (Bornean white-bearded gibbon) → Borneo
+      ✅ Inserted new species (ID: 5040b82d...)
+      ✅ Linked to Borneo
+
+   [170/240] Bornean slow loris (Bornean slow loris) → Borneo
+      ✅ Inserted new species (ID: f834b29c...)
+      ✅ Linked to Borneo
+
+   [171/240] Western tarsier (Western tarsier) → Borneo
+      ✅ Inserted new species (ID: 01be787c...)
+      ✅ Linked to Borneo
+
+   [172/240] Bornean bearded pig (Bornean bearded pig) → Borneo
+      ✅ Inserted new species (ID: d01e3aed...)
+      ✅ Linked to Borneo
+
+   [173/240] Malay civet (Malay civet) → Borneo
+      ✅ Inserted new species (ID: 7cae727f...)
+      ✅ Linked to Borneo
+
+   [174/240] Sunda pangolin (Sunda pangolin) → Borneo
+      ✅ Inserted new species (ID: 1761f4fd...)
+      ✅ Linked to Borneo
+
+   [175/240] Maroon leaf monkey (Maroon leaf monkey) → Borneo
+      ✅ Inserted new species (ID: 1112fd82...)
+      ✅ Linked to Borneo
+
+   [176/240] Bornean peacock-pheasant (Bornean peacock-pheasant) → Borneo
+      ✅ Inserted new species (ID: 27e5d9d4...)
+      ✅ Linked to Borneo
+
+   [177/240] Rhinoceros hornbill (Rhinoceros hornbill) → Borneo
+      ✅ Inserted new species (ID: 61a3d849...)
+      ✅ Linked to Borneo
+
+   [178/240] Helmeted hornbill (Helmeted hornbill) → Borneo
+      ✅ Inserted new species (ID: 24500b61...)
+      ✅ Linked to Borneo
+
+   [179/240] Storm's stork (Storm's stork) → Borneo
+      ✅ Inserted new species (ID: d0aec582...)
+      ✅ Linked to Borneo
+
+   [180/240] Bornean ground cuckoo (Bornean ground cuckoo) → Borneo
+      ✅ Inserted new species (ID: 8a6d666b...)
+      ✅ Linked to Borneo
+
+   [181/240] Blue-headed pitta (Blue-headed pitta) → Borneo
+      ✅ Inserted new species (ID: a6e8cc63...)
+      ✅ Linked to Borneo
+
+   [182/240] Bornean bristlehead (Bornean bristlehead) → Borneo
+      ✅ Inserted new species (ID: bfd34fd4...)
+      ✅ Linked to Borneo
+
+   [183/240] Saltwater crocodile (Saltwater crocodile) → Borneo
+      ✅ Inserted new species (ID: 80441b78...)
+      ✅ Linked to Borneo
+
+   [184/240] False gharial (Tomistoma) → Borneo
+      ✅ Inserted new species (ID: 4dd58c13...)
+      ✅ Linked to Borneo
+
+   [185/240] Bornean flat-headed frog (Barbourula kalimantanensis) → Borneo
+      ✅ Inserted new species (ID: 987036e8...)
+      ✅ Linked to Borneo
+
+   [186/240] Bornean rainbow toad (Ansonia latidisca) → Borneo
+      ✅ Inserted new species (ID: de29fa8d...)
+      ✅ Linked to Borneo
+
+   [187/240] Wallace's flying frog (Wallace's flying frog) → Borneo
+      ✅ Inserted new species (ID: 9352081b...)
+      ✅ Linked to Borneo
+
+   [188/240] Thomas's flying squirrel (Aeromys tephromelas) → Borneo
+      ✅ Inserted new species (ID: 5283f3bc...)
+      ✅ Linked to Borneo
+
+   [189/240] Bornean yellow muntjac (Bornean yellow muntjac) → Borneo
+      ✅ Inserted new species (ID: 2fb25366...)
+      ✅ Linked to Borneo
+
+   [190/240] Kinabalu giant red leech (Kinabalu giant red leech) → Borneo
+      ✅ Inserted new species (ID: 945a15be...)
+      ✅ Linked to Borneo
+
+   [191/240] Rajah Brooke's birdwing (Rajah Brooke's birdwing) → Borneo
+      ✅ Inserted new species (ID: 5eb08e45...)
+      ✅ Linked to Borneo
+
+   [192/240] Atlas moth (Atlas moth) → Borneo
+      ✅ Inserted new species (ID: ff802d5d...)
+      ✅ Linked to Borneo
+
+   [193/240] Unknown (Nepenthes rajah) → Borneo
+      ✅ Inserted new species (ID: 4be05625...)
+      ✅ Linked to Borneo
+
+   [194/240] Unknown (Nepenthes villosa) → Borneo
+      ✅ Inserted new species (ID: 4f16e97b...)
+      ✅ Linked to Borneo
+
+   [195/240] Corpse flower (Rafflesia arnoldii) → Borneo
+      ℹ️  Species exists (ID: 98f9d460...)
+      ✅ Updated species data
+      ℹ️  Already linked to Borneo
+
+   [196/240] Unknown (Shorea leprosula) → Borneo
+      ✅ Inserted new species (ID: 16144e7c...)
+      ✅ Linked to Borneo
+
+   [197/240] Borneo camphor (Dryobalanops aromatica) → Borneo
+      ✅ Inserted new species (ID: 086ddc4c...)
+      ✅ Linked to Borneo
+
+   [198/240] Agarwood (Aquilaria malaccensis) → Borneo
+      ✅ Inserted new species (ID: d027ad8f...)
+      ✅ Linked to Borneo
+
+   [199/240] Bornean ironwood (Eusideroxylon zwageri) → Borneo
+      ✅ Inserted new species (ID: 85a70d37...)
+      ✅ Linked to Borneo
+
+   [200/240] Unknown (Dipterocarpus gracilis) → Borneo
+      ✅ Inserted new species (ID: 73fefa65...)
+      ✅ Linked to Borneo
+
+   [201/240] Polar bear (Polar bear) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 708ff81f...)
+      ✅ Linked to Arctic Terrestrial
+
+   [202/240] Arctic fox (Arctic fox) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 30ca6df7...)
+      ✅ Linked to Arctic Terrestrial
+
+   [203/240] Arctic hare (Arctic hare) → Arctic Terrestrial
+      ✅ Inserted new species (ID: f1f47fa2...)
+      ✅ Linked to Arctic Terrestrial
+
+   [204/240] Musk ox (Musk ox) → Arctic Terrestrial
+      ✅ Inserted new species (ID: bd361cc9...)
+      ✅ Linked to Arctic Terrestrial
+
+   [205/240] Caribou (Caribou) → Arctic Terrestrial
+      ✅ Inserted new species (ID: ffb084de...)
+      ✅ Linked to Arctic Terrestrial
+
+   [206/240] Arctic wolf (Arctic wolf) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 8d6b2c03...)
+      ✅ Linked to Arctic Terrestrial
+
+   [207/240] Snowy owl (Snowy owl) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 3b81f5b5...)
+      ✅ Linked to Arctic Terrestrial
+
+   [208/240] Gyrfalcon (Gyrfalcon) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 07e6fd14...)
+      ✅ Linked to Arctic Terrestrial
+
+   [209/240] Willow ptarmigan (Willow ptarmigan) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 2c0bccf1...)
+      ✅ Linked to Arctic Terrestrial
+
+   [210/240] Rock ptarmigan (Rock ptarmigan) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 6547098f...)
+      ✅ Linked to Arctic Terrestrial
+
+   [211/240] Arctic tern (Arctic tern) → Arctic Terrestrial
+      ✅ Inserted new species (ID: cb5d2dae...)
+      ✅ Linked to Arctic Terrestrial
+
+   [212/240] Atlantic puffin (Atlantic puffin) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 2920735d...)
+      ✅ Linked to Arctic Terrestrial
+
+   [213/240] Walrus (Walrus) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 13147f2d...)
+      ✅ Linked to Arctic Terrestrial
+
+   [214/240] Ringed seal (Ringed seal) → Arctic Terrestrial
+      ✅ Inserted new species (ID: d69e4116...)
+      ✅ Linked to Arctic Terrestrial
+
+   [215/240] Bearded seal (Bearded seal) → Arctic Terrestrial
+      ✅ Inserted new species (ID: e1e52af6...)
+      ✅ Linked to Arctic Terrestrial
+
+   [216/240] Harp seal (Harp seal) → Arctic Terrestrial
+      ✅ Inserted new species (ID: ebc439a5...)
+      ✅ Linked to Arctic Terrestrial
+
+   [217/240] Narwhal (Narwhal) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 3b3127d8...)
+      ✅ Linked to Arctic Terrestrial
+
+   [218/240] Beluga whale (Beluga whale) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 48c2dd95...)
+      ✅ Linked to Arctic Terrestrial
+
+   [219/240] Bowhead whale (Bowhead whale) → Arctic Terrestrial
+      ✅ Inserted new species (ID: d8ef75f8...)
+      ✅ Linked to Arctic Terrestrial
+
+   [220/240] Killer whale (Orca) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 279dcdd4...)
+      ✅ Linked to Arctic Terrestrial
+
+   [221/240] Greenland shark (Greenland shark) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 40decd3f...)
+      ✅ Linked to Arctic Terrestrial
+
+   [222/240] Arctic char (Arctic char) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 9ecec39f...)
+      ✅ Linked to Arctic Terrestrial
+
+   [223/240] Polar cod (Polar cod) → Arctic Terrestrial
+      ✅ Inserted new species (ID: adf5cb7f...)
+      ✅ Linked to Arctic Terrestrial
+
+   [224/240] Capelin (Capelin) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 7734d458...)
+      ✅ Linked to Arctic Terrestrial
+
+   [225/240] Snow goose (Snow goose) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 74f48cf2...)
+      ✅ Linked to Arctic Terrestrial
+
+   [226/240] Brent goose (Brent goose) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 5eff351e...)
+      ✅ Linked to Arctic Terrestrial
+
+   [227/240] King eider (King eider) → Arctic Terrestrial
+      ✅ Inserted new species (ID: efa3dc27...)
+      ✅ Linked to Arctic Terrestrial
+
+   [228/240] Common eider (Common eider) → Arctic Terrestrial
+      ✅ Inserted new species (ID: bc2e1b2d...)
+      ✅ Linked to Arctic Terrestrial
+
+   [229/240] Ivory gull (Ivory gull) → Arctic Terrestrial
+      ✅ Inserted new species (ID: d76da9b9...)
+      ✅ Linked to Arctic Terrestrial
+
+   [230/240] Lapland longspur (Lapland longspur) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 6d412dab...)
+      ✅ Linked to Arctic Terrestrial
+
+   [231/240] Norway lemming (Norway lemming) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 39bd5340...)
+      ✅ Linked to Arctic Terrestrial
+
+   [232/240] Collared lemming (Collared lemming) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 2da9ea90...)
+      ✅ Linked to Arctic Terrestrial
+
+   [233/240] Wolverine (Wolverine) → Arctic Terrestrial
+      ✅ Inserted new species (ID: b2320963...)
+      ✅ Linked to Arctic Terrestrial
+
+   [234/240] Arctic ground squirrel (Arctic ground squirrel) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 9523495e...)
+      ✅ Linked to Arctic Terrestrial
+
+   [235/240] Least weasel (Least weasel) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 7935eb43...)
+      ✅ Linked to Arctic Terrestrial
+
+   [236/240] Snow bunting (Snow bunting) → Arctic Terrestrial
+      ✅ Inserted new species (ID: d3d01599...)
+      ✅ Linked to Arctic Terrestrial
+
+   [237/240] Purple saxifrage (Purple saxifrage) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 29cdc0ec...)
+      ✅ Linked to Arctic Terrestrial
+
+   [238/240] Arctic poppy (Arctic poppy) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 99b22964...)
+      ✅ Linked to Arctic Terrestrial
+
+   [239/240] Bearberry (Bearberry) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 15bf8daf...)
+      ✅ Linked to Arctic Terrestrial
+
+   [240/240] Mountain avens (Dryas octopetala) → Arctic Terrestrial
+      ✅ Inserted new species (ID: 28de6f69...)
+      ✅ Linked to Arctic Terrestrial
+
+======================================================================
+📊 IMPORT SUMMARY
+======================================================================
+✅ New species imported: 233
+♻️  Existing species updated: 7
+🔗 New ecoregion links created: 233
+📍 Total species processed: 240
+
+💡 Tip: Add more species to curated_species_database.csv and run this script again!
+📝 CSV Format: ecoregion_name,scientific_name,common_name,class,conservation_status,image_url,image_attribution,description,habitat_type

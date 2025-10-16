@@ -25,7 +25,7 @@ export function classifySpecies(data: SpeciesData): SpeciesClassification {
   const type = (data.animalType || data.class || '').toLowerCase();
   const name = (data.commonName || '').toLowerCase();
   const scientificName = (data.scientificName || '').toLowerCase();
-  
+
   // Determine species type
   let speciesType = 'Animal';
   if (type.includes('mammal')) speciesType = 'Mammal';
@@ -38,7 +38,10 @@ export function classifySpecies(data: SpeciesData): SpeciesClassification {
   else if (type.includes('mollusc')) speciesType = 'Mollusc';
   else if (type.includes('crustacean')) speciesType = 'Crustacean';
   else if (type.includes('arthropod')) speciesType = 'Arthropod';
-  else if (data.kingdom?.toLowerCase().includes('plant')) speciesType = 'Plant';
+  // Check for plant taxonomic classes
+  else if (type.includes('magnoliopsida') || type.includes('liliopsida') ||
+           type.includes('pinopsida') || type.includes('polypodiopsida') ||
+           type.includes('plant') || data.kingdom?.toLowerCase().includes('plant')) speciesType = 'Plant';
   
   // Determine UI group
   let uiGroup: FilterCategory = 'mammals';
@@ -100,20 +103,41 @@ export function getSpeciesType(data: SpeciesData | string): string {
 }
 
 /**
- * Gets UI group for filtering
+ * Gets UI group for filtering (new dietary category system)
  */
 export function getUIGroup(data: SpeciesData | string): FilterCategory {
   if (typeof data === 'string') {
     const type = data.toLowerCase();
-    if (type.includes('mammal')) return 'mammals';
-    if (type.includes('bird') || type.includes('aves')) return 'birds';
-    if (type.includes('reptil')) return 'reptiles';
-    if (type.includes('amphibian')) return 'amphibians';
-    if (type.includes('fish')) return 'fish';
-    if (type.includes('insect') || type.includes('arthropod') || type.includes('coral') || 
-        type.includes('mollusc') || type.includes('crustacean')) return 'invertebrates';
-    return 'mammals';
+    // Plants and Corals are Producers
+    if (type.includes('plant') || type.includes('coral') || type.includes('magnoliopsida') || type.includes('liliopsida')) return 'producers';
+    // Default to omnivores for unknown
+    return 'omnivores';
   }
-  
-  return classifySpecies(data).uiGroup;
+
+  const classification = classifySpecies(data);
+  // Map to dietary categories
+  return getDietaryCategory(classification.trophicRole, classification.speciesType);
+}
+
+/**
+ * Gets dietary category from trophic role (for UI filtering)
+ */
+export function getDietaryCategory(trophicRole: string, speciesType?: string): FilterCategory {
+  // Producers (Plants & Corals)
+  if (trophicRole === 'Producer' || trophicRole === 'Mixotroph' || speciesType === 'Plant' || speciesType === 'Coral') {
+    return 'producers';
+  }
+
+  // Carnivores (meat-eaters)
+  if (trophicRole === 'Predator' || trophicRole === 'Scavenger' || trophicRole === 'Parasite') {
+    return 'carnivores';
+  }
+
+  // Herbivores (plant-eaters)
+  if (trophicRole === 'Herbivore' || trophicRole === 'Detritivore') {
+    return 'herbivores';
+  }
+
+  // Omnivores (everything else including filter-feeders)
+  return 'omnivores';
 }

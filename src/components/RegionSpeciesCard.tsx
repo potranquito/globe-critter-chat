@@ -1,6 +1,7 @@
 import { Minus, MapPin } from 'lucide-react';
 import { classifySpecies } from '@/utils/speciesClassification';
 import { BirdCallPlayer } from './BirdCallPlayer';
+import { Button } from '@/components/ui/button';
 
 interface RegionSpeciesCardProps {
   commonName: string;
@@ -13,7 +14,11 @@ interface RegionSpeciesCardProps {
   speciesImageUrl?: string;  // NEW - species-specific image
   description?: string; // Optional for better trophic role classification
   habitatType?: string; // Optional for better trophic role classification
+  dietaryCategory?: string; // NEW - for food web game
   onChatClick?: () => void;
+  // 🎮 NEW: Food web game props
+  onSelectForGame?: (species: any) => void;
+  isSelectedForGame?: boolean;
 }
 
 const RegionSpeciesCard = ({
@@ -27,7 +32,10 @@ const RegionSpeciesCard = ({
   speciesImageUrl,
   description,
   habitatType,
-  onChatClick
+  dietaryCategory,
+  onChatClick,
+  onSelectForGame,
+  isSelectedForGame
 }: RegionSpeciesCardProps) => {
 
   // Use species image first, fallback to region image
@@ -120,7 +128,7 @@ const RegionSpeciesCard = ({
           <p className="text-base font-semibold text-accent">{formatConservationStatus(conservationStatus)}</p>
         </div>
 
-        <div>
+        <div className="mb-4">
           <p className="text-xs text-muted-foreground">Ecological Role</p>
           <div className="flex items-center gap-2">
             <span className="text-xl">{finalClassification.trophicRoleEmoji}</span>
@@ -137,6 +145,24 @@ const RegionSpeciesCard = ({
             )}
           </div>
         </div>
+
+        {/* 🎮 Select Species Button for Food Web Game */}
+        {onSelectForGame && (
+          <Button
+            onClick={() => onSelectForGame({
+              commonName,
+              scientificName,
+              animalType,
+              conservationStatus,
+              occurrenceCount,
+              imageUrl: speciesImageUrl || regionImageUrl,
+              dietaryCategory
+            })}
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 transition-all"
+          >
+            {isSelectedForGame ? '✓ Selected' : 'Select Species'}
+          </Button>
+        )}
       </div>
     </div>
   );

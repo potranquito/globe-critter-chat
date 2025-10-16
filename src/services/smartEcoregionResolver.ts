@@ -249,10 +249,22 @@ function lookupEcoregionsByIds(
  */
 function getFallbackEcoregions(speciesName: string): EcoregionData[] {
   const name = speciesName.toLowerCase();
+  const keywords = [
+    'forests', 'mangroves', 'pine', 'montane', 'dry', 'moist', 'xeric', 'scrub',
+    'savanna', 'puna', 'steppe', 'taiga', 'tundra', 'islands', 'coastal', 
+    'valley', 'highlands', 'lowlands', 'deserts', 'grasslands', 'wetlands', 'swamp'
+  ];
 
-  // Pattern matching for common habitat keywords
-  if (name.includes('arctic') || name.includes('polar') || name.includes('tundra')) {
-    // Return Arctic ecoregions
+  for (const keyword of keywords) {
+    if (name.includes(keyword)) {
+      return Object.values(terrestrialEcoregions as any).filter((eco: any) =>
+        eco.name.toLowerCase().includes(keyword)
+      ).slice(0, 5);
+    }
+  }
+
+  // Original fallback logic
+  if (name.includes('arctic') || name.includes('polar')) {
     return Object.values(terrestrialEcoregions as any).filter((eco: any) => 
       eco.name.toLowerCase().includes('arctic') || 
       eco.name.toLowerCase().includes('tundra')

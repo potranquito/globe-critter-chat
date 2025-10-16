@@ -31,7 +31,7 @@ import time
 load_dotenv(override=True)
 
 # Configuration
-SHAPEFILE_DIR = Path.home() / 'Downloads' / 'IUCN-data'
+SHAPEFILE_DIR = Path(__file__).parent.parent / 'data' / 'iucn-spatial'
 BATCH_SIZE = 500  # Insert 500 species at a time
 
 # Conservation status mapping

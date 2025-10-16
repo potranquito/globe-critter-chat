@@ -17,6 +17,7 @@ import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
 import { LocationsCarousel } from '@/components/LocationsCarousel';
 import { EcoRegionCard } from '@/components/EcoRegionCard';
 import { SpeciesTypeFilter, type SpeciesTypeFilter as SpeciesTypeFilterType } from '@/components/SpeciesTypeFilter';
+import { FoodWebSelectionBar } from '@/components/FoodWebSelectionBar';
 import { useToast } from '@/hooks/use-toast';
 import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
 import { Button } from '@/components/ui/button';
@@ -188,6 +189,18 @@ const Index = () => {
   // ✅ NEW: Education context tracks the current card for context-aware chat
   const [educationContext, setEducationContext] = useState<EducationContext | null>(null);
 
+  // 🎮 NEW: Food web game - selected species for trivia
+  interface SelectedFoodWebSpecies {
+    carnivore: RegionSpecies | null;
+    herbivoreOmnivore: RegionSpecies | null;
+    producer: RegionSpecies | null;
+  }
+  const [selectedFoodWebSpecies, setSelectedFoodWebSpecies] = useState<SelectedFoodWebSpecies>({
+    carnivore: null,
+    herbivoreOmnivore: null,
+    producer: null
+  });
+
   // 🌍 Load WWF ecoregions from database on mount
   useEffect(() => {
     const loadEcoRegions = async () => {
@@ -344,8 +357,8 @@ const Index = () => {
       // Step 1: Find the ecoregion in database by name (including image data)
       const { data: ecoregionData, error: ecoregionError } = await supabase
         .from('ecoregions')
-        .select('*, image_url, image_attribution, image_source')
-        .ilike('name', `%${point.name}%`)
+        .select('*')
+        .eq('name', point.name)
         .limit(1)
         .single();
 
@@ -358,14 +371,14 @@ const Index = () => {
         // Get parks within geographic bounds (with deduplication)
         const { data: parksData, error: parksError } = await supabase
           .from('parks')
-          .select('id, name, center_lat, center_lng, designation_eng, gis_area_km2, wdpa_id, iucn_category, marine_area_km2, image_url, image_attribution')
+          .select('id, name, center_lat, center_lng, park_type, size_km2, wdpa_id, protection_status, image_url, image_attribution')
           .gte('center_lat', point.lat - boundsRadius)
           .lte('center_lat', point.lat + boundsRadius)
           .gte('center_lng', point.lng - boundsRadius)
           .lte('center_lng', point.lng + boundsRadius)
           .not('center_lat', 'is', null)
           .not('center_lng', 'is', null)
-          .order('gis_area_km2', { ascending: false });
+          .order('size_km2', { ascending: false });
 
         // Determine ecoregion type from name for fallback
         const isFallbackMarine = point.name.toLowerCase().includes('coral') ||
@@ -375,9 +388,9 @@ const Index = () => {
 
         // Filter parks by marine/terrestrial before deduplication
         let filteredParksData = (parksData || []).map(park => {
-          const marinePercentage = park.marine_area_km2 && park.gis_area_km2
-            ? (park.marine_area_km2 / park.gis_area_km2) * 100
-            : 0;
+          // Marine percentage - we don't have marine_area_km2 in our schema
+          // Use park name keywords to determine if marine
+          const marinePercentage = 0;
 
           // Check if park name contains marine keywords
           const parkName = (park.name || '').toLowerCase();
@@ -552,263 +565,70 @@ const Index = () => {
 
       console.log('Found ecoregion:', ecoregionData);
 
-      // Step 2: Get parks in this ecoregion using spatial proximity
-      // Use ecoregion's radius to define search area
-      const searchRadiusDegrees = (ecoregionData.radius_km || 1000) / 111; // Convert km to degrees (~111km per degree)
+      // Step 2: Get parks directly linked to this ecoregion
+      console.log(`🏞️  Fetching parks for ecoregion: ${ecoregionData.name} (ID: ${ecoregionData.id})`);
 
-      let parksData = [];
-      let parksError = null;
-
-      // For specific ecoregions: Use name-based search for known parks
-      const ecoName = ecoregionData.name.toLowerCase();
-      const isCoralTriangle = ecoName.includes('coral triangle');
-      const isArctic = ecoName.includes('arctic');
-      const isAmazon = ecoName.includes('amazon') || ecoName.includes('guiana');
-
-      if (isCoralTriangle) {
-        console.log('🐠 Coral Triangle: Using name-based search for marine parks');
-
-        // Search for parks with coral/reef/marine keywords in Coral Triangle region (Southeast Asia)
-        const { data: marineParks, error: marineError } = await supabase
-          .from('parks')
-          .select('id, name, center_lat, center_lng, designation_eng, gis_area_km2, wdpa_id, iucn_category, marine_area_km2, image_url, image_attribution')
-          .or('name.ilike.%tubbataha%,name.ilike.%coral%,name.ilike.%reef%,name.ilike.%marine%,name.ilike.%nusa penida%,name.ilike.%kimbe%,name.ilike.%verde island%')
-          .gte('center_lat', -15) // Southeast Asia/Pacific region
-          .lte('center_lat', 25)
-          .gte('center_lng', 90)
-          .lte('center_lng', 180)
-          .not('center_lat', 'is', null)
-          .not('center_lng', 'is', null)
-          .order('gis_area_km2', { ascending: false })
-          .limit(50);
-
-        parksData = marineParks || [];
-        parksError = marineError;
-        console.log(`  Found ${parksData.length} parks via name search`);
-      } else if (isArctic) {
-        console.log('🧊 Arctic: Searching for parks near ecoregion center (Greenland/Canada/Iceland region)');
-
-        // Arctic Terrestrial center is at (66.23°N, -17.25°W) near Iceland/Greenland
-        // Search within ±40° longitude to cover Greenland, Canada, and Iceland
-        // This excludes far regions like Svalbard (+20°E) and Alaska (-150°W) that are too far from view
-        const { data: arcticParks, error: arcticError } = await supabase
-          .from('parks')
-          .select('id, name, center_lat, center_lng, designation_eng, gis_area_km2, wdpa_id, iucn_category, marine_area_km2, image_url, image_attribution')
-          .gte('center_lat', 63) // Arctic region
-          .gte('center_lng', -60) // Western bound (eastern Canada/Greenland)
-          .lte('center_lng', 25)  // Eastern bound (Iceland region)
-          .gt('gis_area_km2', 1000) // Only large parks (> 1000 km²)
-          .not('center_lat', 'is', null)
-          .not('center_lng', 'is', null)
-          .order('gis_area_km2', { ascending: false })
-          .limit(50);
-
-        parksData = arcticParks || [];
-        parksError = arcticError;
-        console.log(`  Found ${parksData.length} Arctic parks in Greenland/Canada/Iceland region`);
-        if (parksData.length > 0) {
-          console.log(`  Sample parks:`, parksData.slice(0, 5).map(p => p.name));
-        }
-      } else if (isAmazon) {
-        console.log('🌳 Amazon: Using broader search for rainforest parks');
-
-        // Search for Amazon parks using broader keywords
-        const { data: amazonParks, error: amazonError } = await supabase
-          .from('parks')
-          .select('id, name, center_lat, center_lng, designation_eng, gis_area_km2, wdpa_id, iucn_category, marine_area_km2')
-          .or('name.ilike.%jaú%,name.ilike.%jau%,name.ilike.%manu%,name.ilike.%yasuni%,name.ilike.%yasuní%,name.ilike.%amazon%,name.ilike.%nacional%,name.ilike.%reserva%,name.ilike.%parque%,name.ilike.%national park%')
-          .gte('center_lat', -15) // Amazon region
-          .lte('center_lat', 5)
-          .gte('center_lng', -80)
-          .lte('center_lng', -45)
-          .not('center_lat', 'is', null)
-          .not('center_lng', 'is', null)
-          .order('gis_area_km2', { ascending: false })
-          .limit(50);
-
-        parksData = amazonParks || [];
-        parksError = amazonError;
-        console.log(`  Found ${parksData.length} Amazon parks via name search`);
-      } else {
-        // Standard geographic search for other ecoregions
-        const { data: geoPark, error: geoError } = await supabase
-          .from('parks')
-          .select('id, name, center_lat, center_lng, designation_eng, gis_area_km2, wdpa_id, iucn_category, marine_area_km2, image_url, image_attribution')
-          .gte('center_lat', ecoregionData.center_lat - searchRadiusDegrees)
-          .lte('center_lat', ecoregionData.center_lat + searchRadiusDegrees)
-          .gte('center_lng', ecoregionData.center_lng - searchRadiusDegrees)
-          .lte('center_lng', ecoregionData.center_lng + searchRadiusDegrees)
-          .not('center_lat', 'is', null)
-          .not('center_lng', 'is', null)
-          .order('gis_area_km2', { ascending: false })
-          .limit(50);
-
-        parksData = geoPark || [];
-        parksError = geoError;
-      }
+      const { data: parksData, error: parksError } = await supabase
+        .from('parks')
+        .select('id, name, center_lat, center_lng, park_type, size_km2, wdpa_id, protection_status, image_url, image_attribution')
+        .eq('ecoregion_id', ecoregionData.id)
+        .not('center_lat', 'is', null)
+        .not('center_lng', 'is', null)
+        .order('size_km2', { ascending: false });
 
       if (parksError) {
         console.error('Error fetching parks:', parksError);
-      }
-
-      // Filter parks by actual distance using Haversine
-      const haversineDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-        const R = 6371; // Earth radius in km
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return R * c;
-      };
-
-      // Determine if this is a marine or terrestrial ecoregion
-      const isMarine = ecoregionData.realm === 'Marine' || ecoregionData.name.includes('Coral Triangle');
-      const isTerrestrial = ecoregionData.realm === 'Terrestrial';
-      // isArctic already declared above for name-based search
-
-      console.log(`🏞️ Park filtering for ${ecoregionData.name}:`, { isMarine, isTerrestrial, isArctic });
-
-      // Filter parks within radius and calculate distances
-      const parksWithDistance = (parksData || [])
-        .map(park => {
-          // Calculate what percentage of the park is marine
-          const marinePercentage = park.marine_area_km2 && park.gis_area_km2
-            ? (park.marine_area_km2 / park.gis_area_km2) * 100
-            : 0;
-
-          // Check if park name contains marine keywords
-          const parkName = (park.name || '').toLowerCase();
-          const hasMarineKeyword = parkName.includes('marine') ||
-                                   parkName.includes('coral') ||
-                                   parkName.includes('reef') ||
-                                   parkName.includes('ocean') ||
-                                   parkName.includes('sea') ||
-                                   parkName.includes('coastal');
-
-          // Determine if park is marine:
-          // 1. If marine_area_km2 > 50%: definitely marine
-          // 2. If park name has marine keywords: likely marine
-          // 3. Otherwise check marine_area_km2 data
-          let isMarinePark;
-          if (marinePercentage > 50) {
-            isMarinePark = true;
-          } else if (hasMarineKeyword) {
-            isMarinePark = true; // Park name suggests it's marine
-          } else if (park.marine_area_km2 && park.marine_area_km2 > 0) {
-            isMarinePark = marinePercentage > 20; // Lower threshold if it has some marine area
-          } else {
-            isMarinePark = false; // Default to terrestrial
-          }
-
-          return {
-            ...park,
-            marinePercentage,
-            isMarinePark,
-            hasMarineKeyword,
-            distance: haversineDistance(
-              ecoregionData.center_lat,
-              ecoregionData.center_lng,
-              park.center_lat,
-              park.center_lng
-            )
-          };
-        })
-        .filter(park => {
-          // First filter: within radius
-          if (park.distance > ecoregionData.radius_km) return false;
-
-          // Second filter: marine/terrestrial matching
-          if (isMarine) {
-            // Marine ecoregions: ONLY marine parks
-            return park.isMarinePark;
-          } else if (isTerrestrial && !isArctic) {
-            // Terrestrial ecoregions (except Arctic): ONLY terrestrial parks
-            return !park.isMarinePark;
-          } else if (isArctic) {
-            // Arctic: Mix of both, but prefer 2 terrestrial + 1 marine
-            return true; // We'll handle the selection later
-          }
-          return true;
-        })
-        .sort((a, b) => b.gis_area_km2 - a.gis_area_km2); // Sort by size descending
-
-      console.log(`  📊 After habitat filtering: ${parksWithDistance.length} parks (from ${parksData?.length || 0} candidates)`);
-
-      // Debug: Show sample of filtered parks
-      if (parksWithDistance.length > 0) {
-        console.log(`  🔍 Sample filtered parks:`);
-        parksWithDistance.slice(0, 5).forEach((park, i) => {
-          console.log(`    ${i+1}. ${park.name}: marine=${park.isMarinePark}, hasKeyword=${park.hasMarineKeyword}, marinePct=${park.marinePercentage.toFixed(1)}%`);
-        });
       } else {
-        console.log(`  ⚠️  NO PARKS after filtering!`);
-        // Show what was filtered out
-        const allMapped = (parksData || []).map(park => {
-          const parkName = (park.name || '').toLowerCase();
-          const hasMarineKeyword = parkName.includes('marine') || parkName.includes('coral') || parkName.includes('reef');
-          return { name: park.name, hasMarineKeyword, isMarine };
-        });
-        console.log(`  All ${allMapped.length} parks before filtering (showing first 10):`);
-        allMapped.slice(0, 10).forEach((p, i) => {
-          console.log(`    ${i+1}. ${p.name}: hasKeyword=${p.hasMarineKeyword}`);
-        });
-      }
-
-      // Select parks with good geographic spacing
-      // Adjust min distance based on region size - larger regions need more spacing
-      const selectedParks: any[] = [];
-      const selectedParkIds = new Set<string>(); // Track selected park IDs to prevent duplicates
-      const MIN_DISTANCE_KM = Math.min(200, ecoregionData.radius_km * 0.15); // 15% of radius, max 200km
-      console.log(`  Using min distance: ${Math.round(MIN_DISTANCE_KM)}km for park spacing`);
-
-      // Standard selection for all ecoregions (including Arctic)
-      for (const park of parksWithDistance) {
-        if (selectedParks.length >= 3) break;
-
-        // Skip if this park ID was already selected (prevents duplicates)
-        if (selectedParkIds.has(park.id)) {
-          continue;
-        }
-
-        // Check if this park is far enough from already selected parks
-        const isFarEnough = selectedParks.every(selected => {
-          const distanceBetween = haversineDistance(
-            park.center_lat,
-            park.center_lng,
-            selected.center_lat,
-            selected.center_lng
-          );
-          return distanceBetween >= MIN_DISTANCE_KM;
-        });
-
-        if (isFarEnough || selectedParks.length === 0) {
-          selectedParks.push(park);
-          selectedParkIds.add(park.id); // Track this park ID
+        console.log(`✅ Found ${parksData?.length || 0} parks linked to ${ecoregionData.name}`);
+        if (parksData && parksData.length > 0) {
+          console.log('Parks:', parksData.map(p => p.name));
         }
       }
 
-      const parks = selectedParks;
-      console.log(`Found ${parks.length} well-spaced parks within ${ecoregionData.radius_km}km of ${point.name}`);
+      // Use all parks linked to this ecoregion (already curated to 3 per ecoregion)
+      const parks = (parksData || []).slice(0, 3); // Take up to 3 parks
+      console.log(`  ✅ Using ${parks.length} parks for ${ecoregionData.name}`);
       if (parks.length > 0) {
-        console.log(`  Parks to display:`, parks.map(p => p.name));
+        console.log(`  Parks to display:`, parks.map((p: any) => p.name));
       }
 
-      // Step 3: Get CURATED species using database function
-      // This returns only manually curated species with high-quality images
-      const speciesPerClass = 10; // Get 10 species per taxonomic group for diversity (ensures min 25 total)
-      const { data: balancedSpecies, error: speciesError } = await supabase.rpc(
-        'get_curated_species_by_ecoregion_balanced',
-        {
-          ecoregion_uuid: ecoregionData.id,
-          max_per_class: speciesPerClass
-        }
-      );
+      // Determine ecoregion habitat type for species filtering
+      const isMarine = ecoregionData.realm === 'Marine' || ecoregionData.name.includes('Coral Triangle');
+      const isTerrestrial = ecoregionData.realm === 'Terrestrial' || ecoregionData.realm === 'Nearctic' || ecoregionData.realm === 'Neotropical' || ecoregionData.realm === 'Afrotropic' || ecoregionData.realm === 'Indo-Malayan';
+
+      // Step 3: Get ALL species for this ecoregion (not limited)
+      const { data: balancedSpecies, error: speciesError } = await supabase
+        .from('species')
+        .select(`
+          id,
+          scientific_name,
+          common_name,
+          class,
+          conservation_status,
+          ui_group,
+          image_url,
+          is_marine,
+          is_terrestrial,
+          is_freshwater,
+          species_type,
+          trophic_role,
+          dietary_category,
+          species_ecoregions!inner(ecoregion_id, overlap_percentage)
+        `)
+        .eq('species_ecoregions.ecoregion_id', ecoregionData.id)
+        .order('is_curated', { ascending: false })
+        .order('common_name', { ascending: true, nullsLast: true });
 
       if (speciesError) {
-        console.error('Error fetching balanced species:', speciesError);
+        console.error('Error fetching species:', speciesError);
       }
+
+      // Debug: Check what ui_group values we got from database
+      console.log('📊 Sample species from database:', (balancedSpecies || []).slice(0, 3).map((s: any) => ({
+        name: s.common_name || s.scientific_name,
+        ui_group: s.ui_group,
+        class: s.class
+      })));
 
       // Filter by habitat type if needed
       let filteredSpecies = balancedSpecies || [];
@@ -839,7 +659,7 @@ const Index = () => {
       const taxonomicCounts: { [key: string]: number } = {};
       filteredSpecies.forEach((item: any) => {
         const className = item.class || 'Unknown';
-        const taxonomicGroup = item.taxonomic_group || 'Unknown';
+        const taxonomicGroup = item.ui_group || 'Unknown';
         classCounts[className] = (classCounts[className] || 0) + 1;
         taxonomicCounts[taxonomicGroup] = (taxonomicCounts[taxonomicGroup] || 0) + 1;
       });
@@ -852,20 +672,29 @@ const Index = () => {
       const freshwaterCount = filteredSpecies.filter((item: any) => item.is_freshwater).length;
       console.log(`  📊 Habitat breakdown: Marine: ${marineCount}, Terrestrial: ${terrestrialCount}, Freshwater: ${freshwaterCount}`);
 
-      // Transform species data to match expected format (balanced function returns flat structure)
-      const speciesList = filteredSpecies.map((item: any) => ({
-        scientificName: item.scientific_name,
-        commonName: item.common_name || item.scientific_name,
-        animalType: item.class || 'Unknown',
-        taxonomicGroup: item.taxonomic_group,
-        conservationStatus: item.conservation_status || 'NE',
-        occurrenceCount: Math.round(item.overlap_percentage || 50),
-        imageUrl: item.image_url,
-        // Preserve habitat flags for future filtering
-        is_marine: item.is_marine,
-        is_terrestrial: item.is_terrestrial,
-        is_freshwater: item.is_freshwater
-      }));
+      // Transform species data to match expected format
+      const speciesList = filteredSpecies.map((item: any) => {
+        // Handle nested species_ecoregions structure
+        const overlap = item.species_ecoregions?.[0]?.overlap_percentage || 100;
+
+        return {
+          scientificName: item.scientific_name,
+          commonName: item.common_name || item.scientific_name,
+          animalType: item.class || 'Unknown',
+          taxonomicGroup: item.ui_group || 'Unknown',
+          conservationStatus: item.conservation_status || 'NE',
+          occurrenceCount: Math.round(overlap),
+          imageUrl: item.image_url,
+          // Preserve habitat flags for future filtering
+          is_marine: item.is_marine,
+          is_terrestrial: item.is_terrestrial,
+          is_freshwater: item.is_freshwater,
+          // NEW: Include classification fields for filtering
+          speciesType: item.species_type,
+          trophicRole: item.trophic_role,
+          dietaryCategory: item.dietary_category
+        };
+      });
 
       console.log(`Found ${speciesList.length} species in ${point.name}`);
       console.log('Species data sample:', speciesList.slice(0, 2));
@@ -903,9 +732,9 @@ const Index = () => {
           lat: park.center_lat,
           lng: park.center_lng
         },
-        designation: park.designation_eng,
-        area: park.gis_area_km2 ? `${park.gis_area_km2.toFixed(0)} km²` : undefined,
-        type: park.iucn_category || 'Protected Area'
+        designation: park.park_type,
+        area: park.size_km2 ? `${park.size_km2.toFixed(0)} km²` : undefined,
+        type: park.protection_status || 'Protected Area'
       }));
 
       console.log(`📍 Setting ${formattedParks.length} protected areas for map display`);
@@ -2033,6 +1862,134 @@ const Index = () => {
     // await handleSearch(species.commonName);
   };
 
+  // 🎮 Food Web Game Helper Functions
+
+  // Determine which slot a species belongs to based on dietary category
+  const determineSpeciesSlot = (species: RegionSpecies): 'carnivore' | 'herbivoreOmnivore' | 'producer' | null => {
+    const category = species.dietaryCategory?.toLowerCase();
+
+    if (category === 'carnivore') {
+      return 'carnivore';
+    } else if (category === 'herbivore' || category === 'omnivore') {
+      return 'herbivoreOmnivore';
+    } else if (category === 'producer') {
+      return 'producer';
+    }
+
+    return null; // Unknown category
+  };
+
+  // Check if all 3 slots are filled for trivia game
+  const isAllSlotsFilledForTrivia = (): boolean => {
+    return (
+      selectedFoodWebSpecies.carnivore !== null &&
+      selectedFoodWebSpecies.herbivoreOmnivore !== null &&
+      selectedFoodWebSpecies.producer !== null
+    );
+  };
+
+  // Check if a species is already selected in any slot
+  const isSpeciesSelected = (scientificName: string): boolean => {
+    return (
+      selectedFoodWebSpecies.carnivore?.scientificName === scientificName ||
+      selectedFoodWebSpecies.herbivoreOmnivore?.scientificName === scientificName ||
+      selectedFoodWebSpecies.producer?.scientificName === scientificName
+    );
+  };
+
+  // Handle selecting a species for the food web game (with swap behavior)
+  const handleSelectSpeciesForGame = (species: RegionSpecies) => {
+    const slot = determineSpeciesSlot(species);
+
+    if (!slot) {
+      toast({
+        title: "Cannot Select Species",
+        description: "This species doesn't have a valid dietary category.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Get the current species in this slot (if any)
+    const currentSpeciesInSlot = selectedFoodWebSpecies[slot];
+
+    // Update the slot with the new species (swap behavior)
+    setSelectedFoodWebSpecies(prev => ({
+      ...prev,
+      [slot]: species
+    }));
+
+    // Show feedback to user
+    if (currentSpeciesInSlot) {
+      toast({
+        title: "Species Swapped",
+        description: `Replaced ${currentSpeciesInSlot.commonName} with ${species.commonName}`,
+      });
+    } else {
+      toast({
+        title: "Species Selected",
+        description: `${species.commonName} added as ${slot === 'herbivoreOmnivore' ? 'Herbivore/Omnivore' : slot.charAt(0).toUpperCase() + slot.slice(1)}`,
+      });
+    }
+  };
+
+  // Handle starting the trivia game
+  const handlePlayTrivia = async () => {
+    // Open chat panel if closed
+    setIsChatHistoryExpanded(true);
+
+    // Prepare trivia context
+    const triviaPrompt = `🎮 **Food Web Trivia Game Started!**
+
+You are now playing a trivia game about the food web in **${regionInfo?.regionName || 'this ecosystem'}**!
+
+**Selected Species:**
+- 🥩 **Carnivore**: ${selectedFoodWebSpecies.carnivore?.commonName} (${selectedFoodWebSpecies.carnivore?.scientificName})
+- 🌱 **Herbivore/Omnivore**: ${selectedFoodWebSpecies.herbivoreOmnivore?.commonName} (${selectedFoodWebSpecies.herbivoreOmnivore?.scientificName})
+- ☀️ **Producer**: ${selectedFoodWebSpecies.producer?.commonName} (${selectedFoodWebSpecies.producer?.scientificName})
+
+**How the game works:**
+1. I'll ask you easy multiple-choice questions about these species and their roles in the ecosystem
+2. Answer by typing your choice (A, B, C, or D)
+3. I'll evaluate your answer and provide educational feedback
+4. We'll learn about food webs, energy flow, and how these species interact!
+
+**Ready to start? Here's your first question:**
+
+**Question 1:** In a food web, energy flows from producers to consumers. Which of your selected species is the **producer** (makes its own food through photosynthesis)?
+
+A) ${selectedFoodWebSpecies.carnivore?.commonName}
+B) ${selectedFoodWebSpecies.herbivoreOmnivore?.commonName}
+C) ${selectedFoodWebSpecies.producer?.commonName}
+D) None of the above
+
+Type your answer (A, B, C, or D)!`;
+
+    // Add message to chat history
+    const triviaMessage: ChatMessage = {
+      role: 'assistant',
+      content: triviaPrompt
+    };
+
+    setChatHistory(prev => [...prev, triviaMessage]);
+
+    // Set education context for the agent
+    setEducationContext({
+      mode: 'trivia',
+      ecoregion: regionInfo,
+      species: [
+        selectedFoodWebSpecies.carnivore,
+        selectedFoodWebSpecies.herbivoreOmnivore,
+        selectedFoodWebSpecies.producer
+      ].filter(s => s !== null) as RegionSpecies[]
+    });
+
+    toast({
+      title: "🎮 Trivia Game Started!",
+      description: "Answer the question in the chat below",
+    });
+  };
+
   // Filter species based on active filters - works for both region and habitat species
   const getFilteredSpecies = () => {
     // Use habitat species if viewing a habitat, otherwise use region species
@@ -2040,20 +1997,26 @@ const Index = () => {
 
     if (activeSpeciesFilters.size === 0) return speciesList;
 
-    return speciesList.filter(sp => {
+    const filtered = speciesList.filter(sp => {
       for (const filter of activeSpeciesFilters) {
-        // Handle both RegionSpecies (animalType) and Species (type) formats
-        const animalType = (sp.animalType || sp.type)?.toLowerCase() || '';
+        // Get ui_group from taxonomicGroup field (set from database)
+        const uiGroup = sp.taxonomicGroup?.toLowerCase() || '';
         const conservationStatus = sp.conservationStatus?.toUpperCase() || '';
 
+        // UI Group filters (Animals, Birds, Plants & Corals)
+        if (filter === 'animals' && uiGroup === 'animals') return true;
+        if (filter === 'birds' && uiGroup === 'birds') return true;
+        if (filter === 'plants-corals' && uiGroup === 'plants & corals') return true;
+
+        // Legacy animal type filters (for backward compatibility)
+        const animalType = (sp.animalType || sp.type)?.toLowerCase() || '';
         const animalTypes = ['mammal', 'bird', 'fish', 'reptile', 'amphibian', 'insect'];
         if (filter === 'all-animals' && animalTypes.includes(animalType)) return true;
         if (filter === 'mammals' && animalType === 'mammal') return true;
-        if (filter === 'birds' && animalType === 'bird') return true;
-        if (filter === 'fish' && animalType === 'fish') return true;
         if (filter === 'reptiles' && animalType === 'reptile') return true;
         if (filter === 'amphibians' && animalType === 'amphibian') return true;
         if (filter === 'insects' && animalType === 'insect') return true;
+        if (filter === 'fish' && animalType === 'fish') return true;
         if (filter === 'plants' && animalType === 'plant') return true;
 
         // Conservation status filters
@@ -2065,6 +2028,15 @@ const Index = () => {
       }
       return false;
     });
+
+    console.log('🔍 Filter results:', {
+      totalSpecies: speciesList.length,
+      activeFilters: Array.from(activeSpeciesFilters),
+      filteredCount: filtered.length,
+      sampleSpecies: filtered.slice(0, 3).map(s => ({ name: s.commonName, group: s.taxonomicGroup }))
+    });
+
+    return filtered;
   };
 
   const handlePreviousSpecies = async () => {
@@ -2404,6 +2376,9 @@ const Index = () => {
             onSpeciesSelect={handleCarouselSpeciesSelect}
             activeFilters={activeSpeciesFilters}
             speciesTypeFilter={speciesTypeFilter}
+            selectedForGameSpecies={Object.values(selectedFoodWebSpecies)
+              .filter(s => s !== null)
+              .map(s => s!.scientificName)}
           />
         </div>
       )}
@@ -2504,6 +2479,7 @@ const Index = () => {
               setCurrentSpeciesIndex(0);
               setSelectedWildlifePark(null);
               setMapCenter(null); // Clear map center to prevent re-zooming
+              setSelectedFoodWebSpecies({ carnivore: null, herbivoreOmnivore: null, producer: null }); // Reset food web game
 
               // Trigger globe reset to default view
               setResetGlobeView(true);
@@ -2652,12 +2628,15 @@ const Index = () => {
             occurrenceCount={selectedCarouselSpecies.occurrenceCount}
             regionName={regionInfo?.regionName || 'Unknown Region'}
             speciesImageUrl={selectedCarouselSpecies.imageUrl}
+            dietaryCategory={selectedCarouselSpecies.dietaryCategory}
             onChatClick={() => {
               toast({
                 title: 'Learn More',
                 description: `Ask questions about ${selectedCarouselSpecies.commonName}...`,
               });
             }}
+            onSelectForGame={handleSelectSpeciesForGame}
+            isSelectedForGame={isSpeciesSelected(selectedCarouselSpecies.scientificName)}
           />
 
           {/* Navigation Arrows */}
@@ -2680,19 +2659,15 @@ const Index = () => {
             </Button>
           </div>
 
-          {/* Generate Lesson Plan Button */}
-          <Button
-            onClick={() => {
-              toast({
-                title: 'Lesson Plan',
-                description: `Generating lesson plan for ${selectedCarouselSpecies.commonName}...`,
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="secondary"
-          >
-            Generate Lesson Plan
-          </Button>
+          {/* 🎮 Play Trivia Button - Shows when all 3 species selected */}
+          {isAllSlotsFilledForTrivia() && (
+            <Button
+              onClick={handlePlayTrivia}
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold"
+            >
+              🎮 Play Trivia
+            </Button>
+          )}
 
           {/* Back to Globe Button */}
           <Button
@@ -2708,6 +2683,7 @@ const Index = () => {
               setSearchType(null);
               setMapCenter(null);
               setUseGoogleMaps(false);
+              setSelectedFoodWebSpecies({ carnivore: null, herbivoreOmnivore: null, producer: null }); // Reset food web game
               setResetGlobeView(true);
               setTimeout(() => setResetGlobeView(false), 100);
 
@@ -2820,6 +2796,11 @@ const Index = () => {
       {/* Global Health Bar - Top Center */}
       <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-auto items-center">
         <GlobalHealthBar />
+
+        {/* 🎮 Food Web Selection Bar - Under Health Bar */}
+        {useGoogleMaps && (
+          <FoodWebSelectionBar selectedSpecies={selectedFoodWebSpecies} />
+        )}
       </div>
 
       {/* Chat History and Input with Reset Button */}
