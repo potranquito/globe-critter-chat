@@ -1,8 +1,9 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import GlobeComponent from '@/components/Globe';
 import GoogleEarthMap from '@/components/GoogleEarthMap';
 import ChatInput, { ChatContext } from '@/components/ChatInput';
 import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
+import { QuickReply } from '@/components/QuickReplies';
 import { UserProfile } from '@/components/UserProfile';
 import { GlobalHealthBar } from '@/components/GlobalHealthBar';
 import FastFactsCard from '@/components/FastFactsCard';
@@ -23,6 +24,7 @@ import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getCuratedSpecies, hasCuratedData } from '@/data/curatedSpecies';
+import { MCPTestComponent } from '@/components/MCPTestComponent';
 import type { HabitatRegion } from '@/types/habitat';
 import { performRegionAnalysis } from '@/services/regionService';
 import type { RegionInfo, RegionSpecies } from '@/services/regionService';
@@ -173,6 +175,8 @@ const Index = () => {
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isChatHistoryExpanded, setIsChatHistoryExpanded] = useState(false);
   const [isDeepDiveMode, setIsDeepDiveMode] = useState(false);
+  const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
+  const [lastTriviaAnswer, setLastTriviaAnswer] = useState<string | null>(null);
   const [currentSpeciesIndex, setCurrentSpeciesIndex] = useState<number>(0);
   const [selectedCarouselSpecies, setSelectedCarouselSpecies] = useState<RegionSpecies | null>(null);
   const [habitatZones, setHabitatZones] = useState<any[]>([]); // NEW: Transparent habitat overlays
@@ -182,6 +186,14 @@ const Index = () => {
 
   // ✅ NEW: AbortController to cancel pending API calls on reset
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+
+  // ✅ Refs for character-by-character streaming display
+  const streamingBufferRef = useRef({ fullResponse: '', displayedResponse: '' });
+  const characterIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 🔍 DEBUG: Refs to track panel positions
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const leftPanelRef = useRef<HTMLDivElement>(null);
 
   // ✅ NEW: Separate loading state for background fetches (wildlife, protected areas)
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
@@ -239,29 +251,40 @@ const Index = () => {
     loadEcoRegions();
   }, []);
 
-  // 📚 Update education context whenever the right-side card changes
+  // 📚 Update education context whenever the right-side card or food web changes
   useEffect(() => {
     console.log('🔍 Education context update check:', {
       selectedCarouselSpecies: selectedCarouselSpecies?.commonName,
       selectedWildlifePark: selectedWildlifePark?.name,
       isViewingEcoRegion,
       regionInfo: regionInfo?.regionName,
-      useGoogleMaps
+      useGoogleMaps,
+      foodWebCount: [selectedFoodWebSpecies.carnivore, selectedFoodWebSpecies.herbivoreOmnivore, selectedFoodWebSpecies.producer].filter(Boolean).length
     });
 
-    // Priority 1: Carousel Species Card
-    if (selectedCarouselSpecies && regionInfo) {
-      console.log('✅ Setting education context: SPECIES', selectedCarouselSpecies.commonName);
+    // Priority 1: Food Web (ONLY if all 3 species selected - after Play Trivia pressed)
+    const foodWebSpeciesArray = [
+      selectedFoodWebSpecies.carnivore ? { ...selectedFoodWebSpecies.carnivore, role: 'carnivore' as const } : null,
+      selectedFoodWebSpecies.herbivoreOmnivore ? { ...selectedFoodWebSpecies.herbivoreOmnivore, role: 'herbivoreOmnivore' as const } : null,
+      selectedFoodWebSpecies.producer ? { ...selectedFoodWebSpecies.producer, role: 'producer' as const } : null,
+    ].filter(Boolean);
+
+    // Only activate food web context when all 3 species are selected AND chat has been opened (trivia started)
+    if (foodWebSpeciesArray.length === 3 && regionInfo && useGoogleMaps && chatHistory.length > 0) {
+      console.log('✅ Setting education context: FOOD WEB (all 3 species)');
       setEducationContext({
-        type: 'species',
-        displayName: selectedCarouselSpecies.commonName,
+        type: 'foodweb',
+        displayName: `Food Web in ${regionInfo.regionName}`,
         data: {
-          commonName: selectedCarouselSpecies.commonName,
-          scientificName: selectedCarouselSpecies.scientificName,
-          animalType: selectedCarouselSpecies.animalType,
-          conservationStatus: selectedCarouselSpecies.conservationStatus,
-          regionName: regionInfo.regionName,
-          occurrenceCount: selectedCarouselSpecies.occurrenceCount,
+          ecoregionName: regionInfo.regionName,
+          species: foodWebSpeciesArray.map(s => ({
+            commonName: s!.commonName,
+            scientificName: s!.scientificName,
+            role: s!.role,
+            conservationStatus: s!.conservationStatus,
+            animalType: s!.animalType,
+          })),
+          speciesCount: foodWebSpeciesArray.length,
         },
       });
       return;
@@ -283,7 +306,25 @@ const Index = () => {
       return;
     }
 
-    // Priority 3: Eco-Region Card
+    // Priority 3: Carousel Species Card (only if no food web selected)
+    if (selectedCarouselSpecies && regionInfo) {
+      console.log('✅ Setting education context: SPECIES', selectedCarouselSpecies.commonName);
+      setEducationContext({
+        type: 'species',
+        displayName: selectedCarouselSpecies.commonName,
+        data: {
+          commonName: selectedCarouselSpecies.commonName,
+          scientificName: selectedCarouselSpecies.scientificName,
+          animalType: selectedCarouselSpecies.animalType,
+          conservationStatus: selectedCarouselSpecies.conservationStatus,
+          regionName: regionInfo.regionName,
+          occurrenceCount: selectedCarouselSpecies.occurrenceCount,
+        },
+      });
+      return;
+    }
+
+    // Priority 4: Eco-Region Card
     if (isViewingEcoRegion && regionInfo) {
       console.log('✅ Setting education context: ECOREGION', regionInfo.regionName);
       setEducationContext({
@@ -301,12 +342,32 @@ const Index = () => {
     // No card showing - clear education context
     console.log('❌ Clearing education context');
     setEducationContext(null);
-  }, [selectedCarouselSpecies, selectedWildlifePark, isViewingEcoRegion, regionInfo, regionSpecies, useGoogleMaps]);
+  }, [selectedCarouselSpecies, selectedWildlifePark, isViewingEcoRegion, regionInfo, regionSpecies, useGoogleMaps, selectedFoodWebSpecies, chatHistory.length]);
+
+  // Update quick replies when chat history changes
+  useEffect(() => {
+    if (chatHistory.length > 0 && isChatHistoryExpanded) {
+      const lastMessage = chatHistory[chatHistory.length - 1];
+      const newReplies = generateQuickReplies(lastMessage);
+      setQuickReplies(newReplies);
+    } else {
+      setQuickReplies([]);
+    }
+  }, [chatHistory, isChatHistoryExpanded, lastTriviaAnswer]);
 
   // 🎯 HANDLE ECO-REGION CLICK: Switch to 2D map view centered on region
   const handleEcoRegionClick = async (point: any) => {
     console.log('Eco-region clicked:', point.name);
     setHasInteracted(true);
+
+    // ✅ Reset chat history and food web game for new ecoregion
+    setChatHistory([]);
+    setIsChatHistoryExpanded(false);
+    setSelectedFoodWebSpecies({
+      carnivore: null,
+      herbivoreOmnivore: null,
+      producer: null
+    });
 
     // Add slower transition - delay switching to 2D map view
     setTimeout(() => {
@@ -758,6 +819,92 @@ const Index = () => {
     }
   };
 
+  // Generate quick replies based on conversation state
+  const generateQuickReplies = (lastMessage: ChatMessage | undefined): QuickReply[] => {
+    if (!lastMessage || lastMessage.role !== 'assistant') {
+      return [];
+    }
+
+    const messageContent = lastMessage.content.toLowerCase();
+
+    // Check if it's a multiple choice trivia question (contains A. B. C. D.)
+    const isMultipleChoice = /[a-d]\.\s+/i.test(lastMessage.content);
+
+    // Check if user just answered (last user message before this assistant message)
+    const messages = chatHistory;
+    const lastUserMessage = messages.length >= 2 ? messages[messages.length - 2] : null;
+    const userJustAnswered = lastUserMessage?.role === 'user' && lastTriviaAnswer !== null;
+
+    if (isMultipleChoice && !userJustAnswered) {
+      // State 1: Show A/B/C/D answer buttons
+      return [
+        { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
+        { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
+        { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
+        { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' },
+      ];
+    } else if (userJustAnswered) {
+      // State 2: After answering - show follow-up options
+      return [
+        { id: 'explain', label: 'Explain', emoji: '✅', action: 'explain' as const },
+        { id: 'next', label: 'Next Question', emoji: '🎲', action: 'trivia' as const },
+        { id: 'facts', label: 'Fast Facts', emoji: '💡', action: 'facts' as const },
+      ];
+    } else {
+      // State 3: General chat - show discovery options (works for both food web and single species)
+      return [
+        { id: 'trivia', label: 'New Trivia', emoji: '🎲', action: 'trivia' as const },
+        { id: 'facts', label: 'Fun Facts', emoji: '💡', action: 'facts' as const },
+        { id: 'conservation', label: 'Status', emoji: '🛡️', action: 'conservation' as const },
+      ];
+    }
+  };
+
+  // Handle quick reply button clicks
+  const handleQuickReply = (reply: QuickReply) => {
+    let message = '';
+
+    switch (reply.action) {
+      case 'answer':
+        message = reply.value || '';
+        setLastTriviaAnswer(reply.value || null);
+        break;
+      case 'explain':
+        message = 'Can you explain why that answer is correct?';
+        setLastTriviaAnswer(null);
+        break;
+      case 'trivia':
+        message = 'Give me another trivia question';
+        setLastTriviaAnswer(null);
+        break;
+      case 'facts':
+        message = 'Tell me some interesting facts';
+        break;
+      case 'conservation':
+        message = 'What is the conservation status and threats?';
+        break;
+    }
+
+    if (message) {
+      handleSearch(message);
+    }
+  };
+
+  // Retry handler for failed messages
+  const handleRetryMessage = (messageId: string) => {
+    const message = chatHistory.find(msg => msg.id === messageId);
+    if (!message || message.role !== 'user') {
+      console.error('Cannot retry: message not found or not a user message');
+      return;
+    }
+
+    // Remove the failed message and its associated assistant message (if any)
+    setChatHistory(prev => prev.filter(msg => msg.id !== messageId));
+
+    // Resend the message
+    handleSearch(message.content);
+  };
+
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
     setIsLoading(true);
@@ -770,11 +917,13 @@ const Index = () => {
     if (isEducationMode) {
       console.log('📚 Entering education mode for:', educationContext.displayName);
       // Add user message to chat history
+      const userMessageId = Date.now().toString();
       const userMessage: ChatMessage = {
-        id: Date.now().toString(),
+        id: userMessageId,
         role: 'user',
         content: query,
-        timestamp: new Date()
+        timestamp: new Date(),
+        status: 'sending'
       };
       setChatHistory(prev => [...prev, userMessage]);
 
@@ -791,36 +940,102 @@ const Index = () => {
       };
       setChatHistory(prev => [...prev, assistantMessage]);
 
-      // Call education agent with streaming
-      let fullResponse = '';
-      sendEducationMessage(
-        query,
-        educationContext,
-        (chunk: string) => {
-          // Update the assistant message with each chunk
-          fullResponse += chunk;
+      // Character-by-character streaming display using refs
+      streamingBufferRef.current = { fullResponse: '', displayedResponse: '' };
+
+      const revealNextCharacter = () => {
+        const { fullResponse, displayedResponse } = streamingBufferRef.current;
+
+        console.log('🔍 Reveal:', {
+          fullLength: fullResponse.length,
+          displayedLength: displayedResponse.length,
+          nextChar: fullResponse[displayedResponse.length]
+        });
+
+        if (displayedResponse.length < fullResponse.length) {
+          streamingBufferRef.current.displayedResponse = fullResponse.substring(0, displayedResponse.length + 1);
           setChatHistory(prev =>
             prev.map(msg =>
               msg.id === assistantMessageId
-                ? { ...msg, content: fullResponse }
+                ? { ...msg, content: streamingBufferRef.current.displayedResponse }
+                : msg
+            )
+          );
+        } else if (characterIntervalRef.current && fullResponse.length > 0) {
+          // All characters revealed - stop the interval and stop loading
+          console.log('✅ All characters revealed, stopping interval');
+          clearInterval(characterIntervalRef.current);
+          characterIntervalRef.current = null;
+          setIsLoading(false);
+        }
+      };
+
+      sendEducationMessage(
+        query,
+        educationContext,
+        chatHistory.map(msg => ({ role: msg.role, content: msg.content })),
+        (chunk: string) => {
+          // Check for off-topic response
+          if (streamingBufferRef.current.fullResponse.includes('OFF_TOPIC_ERROR') || chunk.includes('OFF_TOPIC_ERROR')) {
+            // Clear interval and mark as error
+            if (characterIntervalRef.current) clearInterval(characterIntervalRef.current);
+            setChatHistory(prev =>
+              prev.map(msg =>
+                msg.id === userMessageId
+                  ? { ...msg, status: 'error' as const, errorMessage: 'Please stay relevant when chatting about wildlife' }
+                  : msg.id === assistantMessageId
+                  ? { ...msg, content: '' }
+                  : msg
+              )
+            );
+            setIsLoading(false);
+            return;
+          }
+
+          // Accumulate chunks (character reveal happens via interval)
+          console.log('📦 Chunk received:', chunk);
+          streamingBufferRef.current.fullResponse += chunk;
+
+          // Start the interval after the first chunk arrives
+          if (!characterIntervalRef.current) {
+            console.log('🚀 Starting character reveal interval');
+            characterIntervalRef.current = setInterval(revealNextCharacter, 30);
+          }
+        },
+        () => {
+          // On complete - let character reveal continue naturally until all text is shown
+          // Don't stop the interval or setIsLoading(false) - let revealNextCharacter handle that
+          // The interval will stop automatically when displayedResponse catches up to fullResponse
+
+          console.log('✅ Streaming complete, waiting for character reveal to finish');
+          // Update user message status to 'sent'
+          setChatHistory(prev =>
+            prev.map(msg =>
+              msg.id === userMessageId
+                ? { ...msg, status: 'sent' as const }
                 : msg
             )
           );
         },
-        () => {
-          // On complete
-          setIsLoading(false);
-          console.log('✅ Education response complete');
-        },
         (error: Error) => {
-          // On error
+          // On error - clear interval
+          if (characterIntervalRef.current) clearInterval(characterIntervalRef.current);
           console.error('Education agent error:', error);
+          // Update user message status to 'error'
           setChatHistory(prev =>
-            prev.map(msg =>
-              msg.id === assistantMessageId
-                ? { ...msg, content: `Sorry, I encountered an error: ${error.message}` }
-                : msg
-            )
+            prev.map(msg => {
+              if (msg.id === userMessageId) {
+                return {
+                  ...msg,
+                  status: 'error' as const,
+                  errorMessage: 'Please stay relevant when chatting about wildlife'
+                };
+              }
+              if (msg.id === assistantMessageId) {
+                return { ...msg, content: `Sorry, I encountered an error: ${error.message}` };
+              }
+              return msg;
+            })
           );
           setIsLoading(false);
           toast({
@@ -862,7 +1077,8 @@ const Index = () => {
         id: Date.now().toString(),
         role: 'user',
         content: query,
-        timestamp: new Date()
+        timestamp: new Date(),
+        status: 'sending'
       };
       setChatHistory(prev => [...prev, userMessage]);
 
@@ -1935,59 +2151,54 @@ const Index = () => {
 
   // Handle starting the trivia game
   const handlePlayTrivia = async () => {
-    // Open chat panel if closed
-    setIsChatHistoryExpanded(true);
+    console.log('🎮 Play Trivia clicked!');
 
-    // Prepare trivia context
-    const triviaPrompt = `🎮 **Food Web Trivia Game Started!**
+    try {
+      // Step 1: Clear any pre-selected species (starting fresh)
+      setSelectedFoodWebSpecies({
+        carnivore: null,
+        herbivoreOmnivore: null,
+        producer: null
+      });
 
-You are now playing a trivia game about the food web in **${regionInfo?.regionName || 'this ecosystem'}**!
+      // Step 2: Open chat interface
+      setIsChatHistoryExpanded(true);
 
-**Selected Species:**
-- 🥩 **Carnivore**: ${selectedFoodWebSpecies.carnivore?.commonName} (${selectedFoodWebSpecies.carnivore?.scientificName})
-- 🌱 **Herbivore/Omnivore**: ${selectedFoodWebSpecies.herbivoreOmnivore?.commonName} (${selectedFoodWebSpecies.herbivoreOmnivore?.scientificName})
-- ☀️ **Producer**: ${selectedFoodWebSpecies.producer?.commonName} (${selectedFoodWebSpecies.producer?.scientificName})
+      // Step 3: Forest Guardian narrative opening
+      const forestGuardianIntro = `🌍 **Hi! Welcome to the ${regionInfo?.regionName || 'ecosystem'}.**
 
-**How the game works:**
-1. I'll ask you easy multiple-choice questions about these species and their roles in the ecosystem
-2. Answer by typing your choice (A, B, C, or D)
-3. I'll evaluate your answer and provide educational feedback
-4. We'll learn about food webs, energy flow, and how these species interact!
+I am the Forest Guardian AI. Poopy Pants blinded me and I need help taking care of my animal friends. Can you help me find them?
 
-**Ready to start? Here's your first question:**
+I need to find a **producer** - a tree or plant that creates its own energy through photosynthesis.
 
-**Question 1:** In a food web, energy flows from producers to consumers. Which of your selected species is the **producer** (makes its own food through photosynthesis)?
+Look for species with a ☀️ symbol in the carousel. Can you spot a large tree?`;
 
-A) ${selectedFoodWebSpecies.carnivore?.commonName}
-B) ${selectedFoodWebSpecies.herbivoreOmnivore?.commonName}
-C) ${selectedFoodWebSpecies.producer?.commonName}
-D) None of the above
+      // Step 4: Add opening message to chat
+      const openingMessage: ChatMessage = {
+        id: `trivia-start-${Date.now()}`,
+        role: 'assistant',
+        content: forestGuardianIntro,
+        timestamp: new Date()
+      };
 
-Type your answer (A, B, C, or D)!`;
+      setChatHistory([openingMessage]);
 
-    // Add message to chat history
-    const triviaMessage: ChatMessage = {
-      role: 'assistant',
-      content: triviaPrompt
-    };
+      // Set quick replies for the trivia game
+      setQuickReplies([
+        { text: '💡 Hint', emoji: '💡' },
+        { text: 'Tell me more', emoji: '📚' },
+        { text: 'I found it!', emoji: '✅' }
+      ]);
 
-    setChatHistory(prev => [...prev, triviaMessage]);
+      toast({
+        title: "🌍 Forest Guardian Active",
+        description: "Help me rebuild the food web!",
+      });
 
-    // Set education context for the agent
-    setEducationContext({
-      mode: 'trivia',
-      ecoregion: regionInfo,
-      species: [
-        selectedFoodWebSpecies.carnivore,
-        selectedFoodWebSpecies.herbivoreOmnivore,
-        selectedFoodWebSpecies.producer
-      ].filter(s => s !== null) as RegionSpecies[]
-    });
-
-    toast({
-      title: "🎮 Trivia Game Started!",
-      description: "Answer the question in the chat below",
-    });
+      console.log('✅ Food Web Trivia started!');
+    } catch (error) {
+      console.error('❌ Error starting trivia:', error);
+    }
   };
 
   // Filter species based on active filters - works for both region and habitat species
@@ -2088,6 +2299,107 @@ Type your answer (A, B, C, or D)!`;
       return newFilters;
     });
   };
+
+  // Handle back to globe - reusable function
+  const handleBackToGlobe = () => {
+    // Reset everything to go back to 3D globe
+    setSelectedCarouselSpecies(null);
+    setRegionInfo(null);
+    setRegionSpecies([]);
+    setCurrentHabitat(null);
+    setHabitats([]);
+    setHabitatZones([]);
+    setIsViewingEcoRegion(false);
+    setSearchType(null);
+    setMapCenter(null);
+    setUseGoogleMaps(false);
+    setSelectedFoodWebSpecies({ carnivore: null, herbivoreOmnivore: null, producer: null });
+    setChatHistory([]); // Clear chat history too
+    setResetGlobeView(true);
+    setTimeout(() => setResetGlobeView(false), 100);
+
+    toast({
+      title: 'Back to Globe 🌍',
+      description: 'Returning to world view...',
+    });
+  };
+
+  // Handle reset chat - clears conversation but keeps species selected
+  const handleResetChat = () => {
+    setChatHistory([]);
+    setQuickReplies([]);
+    setLastTriviaAnswer(null);
+
+    toast({
+      title: 'Chat Reset',
+      description: 'Starting fresh conversation...',
+    });
+  };
+
+  // Side panels need to be well below all top elements
+  // Top buttons end at 64px (16px top + 48px height)
+  // Food Web banner starts at 72px and is variable height
+  // Set panels at 84px to ensure clearance below buttons
+  const sidePanelTopPx = 84;
+
+  // 🔍 DEBUG: Log when side panel positioning might be affected
+  useEffect(() => {
+    const hasAnySpeciesSelected = Object.values(selectedFoodWebSpecies).some(s => s !== null);
+    console.log('📐 LAYOUT STATE CHANGED:', {
+      sidePanelTopPx,
+      hasFoodWebBanner: hasAnySpeciesSelected,
+      selectedFoodWebSpecies: Object.keys(selectedFoodWebSpecies).reduce((acc, key) => {
+        acc[key] = selectedFoodWebSpecies[key as keyof typeof selectedFoodWebSpecies] ? 'FILLED' : 'EMPTY';
+        return acc;
+      }, {} as Record<string, string>),
+      hasChatHistory: chatHistory.length > 0,
+      isChatHistoryExpanded,
+      hasRightPanel: !!(selectedCarouselSpecies || speciesInfo || currentHabitat || expandedImage || selectedWildlifePark || (isViewingEcoRegion && regionInfo)),
+      hasLeftPanel: !!(regionInfo && regionSpecies.length > 0) || !!(currentHabitat && currentHabitat.keySpecies),
+    });
+
+    // Log top element positions
+    setTimeout(() => {
+      const globalHealth = document.querySelector('.fixed.top-4.left-1\\/2');
+      const foodWebBanner = globalHealth?.querySelector('.glass-panel');
+      const chatInput = document.querySelector('form');
+
+      console.log('📐 ELEMENT POSITIONS:', {
+        globalHealthBar: globalHealth?.getBoundingClientRect(),
+        foodWebBanner: foodWebBanner?.getBoundingClientRect(),
+        chatInput: chatInput?.getBoundingClientRect(),
+      });
+    }, 100);
+  }, [selectedFoodWebSpecies, chatHistory.length, isChatHistoryExpanded, selectedCarouselSpecies, speciesInfo, currentHabitat, expandedImage, selectedWildlifePark, isViewingEcoRegion, regionInfo, regionSpecies.length]);
+
+  // 🔍 DEBUG: Monitor right panel position
+  useEffect(() => {
+    if (rightPanelRef.current) {
+      const rect = rightPanelRef.current.getBoundingClientRect();
+      console.log('➡️ RIGHT PANEL RENDERED:', {
+        top: rect.top,
+        bottom: rect.bottom,
+        height: rect.height,
+        width: rect.width,
+        sidePanelTopPx,
+        actualStyleTop: rightPanelRef.current.style.top,
+      });
+    }
+  }, [selectedCarouselSpecies, speciesInfo, currentHabitat, expandedImage, selectedWildlifePark, isViewingEcoRegion, regionInfo]);
+
+  // 🔍 DEBUG: Monitor left panel position
+  useEffect(() => {
+    if (leftPanelRef.current) {
+      const rect = leftPanelRef.current.getBoundingClientRect();
+      console.log('⬅️ LEFT PANEL RENDERED:', {
+        top: rect.top,
+        bottom: rect.bottom,
+        height: rect.height,
+        width: rect.width,
+        actualStyleTop: leftPanelRef.current.style.top,
+      });
+    }
+  }, [regionInfo, regionSpecies.length, currentHabitat]);
 
   const handleReset = () => {
     // ✅ Cancel ALL pending API calls immediately
@@ -2228,9 +2540,25 @@ Type your answer (A, B, C, or D)!`;
     });
   };
 
-  // Compute chat context based on what's showing on the right side
+  // Compute chat context based on what's showing (food web or right side)
   const chatContext = useMemo((): ChatContext => {
-    // Priority 1: Wildlife Park
+    // Priority 1: Food Web (ONLY if all 3 species selected)
+    const foodWebCount = [selectedFoodWebSpecies.carnivore, selectedFoodWebSpecies.herbivoreOmnivore, selectedFoodWebSpecies.producer].filter(Boolean).length;
+    if (foodWebCount === 3 && regionInfo && chatHistory.length > 0) {
+      const speciesNames = [
+        selectedFoodWebSpecies.carnivore?.commonName,
+        selectedFoodWebSpecies.herbivoreOmnivore?.commonName,
+        selectedFoodWebSpecies.producer?.commonName
+      ].filter(Boolean).join(', ');
+
+      return {
+        type: 'region-species', // Reuse existing type for compatibility
+        name: `Food Web`,
+        details: `${speciesNames} - Ask about the species, their interactions, or ecosystem`
+      };
+    }
+
+    // Priority 2: Wildlife Park
     if (selectedWildlifePark) {
       return {
         type: 'wildlife-park',
@@ -2239,7 +2567,7 @@ Type your answer (A, B, C, or D)!`;
       };
     }
 
-    // Priority 2: Expanded Image
+    // Priority 3: Expanded Image
     if (expandedImage) {
       return {
         type: expandedImage.type === 'threat' ? 'threat' : 'ecosystem',
@@ -2248,7 +2576,7 @@ Type your answer (A, B, C, or D)!`;
       };
     }
 
-    // Priority 3: Carousel Species
+    // Priority 4: Carousel Species
     if (selectedCarouselSpecies) {
       return {
         type: 'region-species',
@@ -2257,7 +2585,7 @@ Type your answer (A, B, C, or D)!`;
       };
     }
 
-    // Priority 4: Hardcoded Species
+    // Priority 5: Hardcoded Species
     if (speciesInfo) {
       return {
         type: 'species',
@@ -2266,7 +2594,7 @@ Type your answer (A, B, C, or D)!`;
       };
     }
 
-    // Priority 5: Habitat
+    // Priority 6: Habitat
     if (currentHabitat) {
       return {
         type: 'habitat',
@@ -2280,7 +2608,7 @@ Type your answer (A, B, C, or D)!`;
       type: 'default',
       name: 'Globe Critter Chat'
     };
-  }, [selectedWildlifePark, expandedImage, selectedCarouselSpecies, speciesInfo, currentHabitat, currentSpecies, regionInfo]);
+  }, [selectedWildlifePark, expandedImage, selectedCarouselSpecies, speciesInfo, currentHabitat, currentSpecies, regionInfo, selectedFoodWebSpecies, chatHistory.length]);
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-background">
@@ -2288,7 +2616,7 @@ Type your answer (A, B, C, or D)!`;
       <UserProfile />
 
       {/* Globe or Google Maps */}
-      <div className="absolute inset-0 z-0">
+      <div className="fixed inset-0 z-0" style={{ width: '100vw', height: '100vh' }}>
         {useGoogleMaps ? (
           <GoogleEarthMap
             habitats={[
@@ -2357,7 +2685,10 @@ Type your answer (A, B, C, or D)!`;
 
       {/* Species Type Filter - Pinned to Left Edge */}
       {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
-        <div className="absolute left-4 top-24 bottom-6 w-14 z-[60] pointer-events-auto">
+        <div
+          className="absolute left-0 w-14 z-[60] pointer-events-auto"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)' }}
+        >
           <SpeciesTypeFilter
             activeFilter={speciesTypeFilter}
             onFilterChange={setSpeciesTypeFilter}
@@ -2368,7 +2699,11 @@ Type your answer (A, B, C, or D)!`;
 
       {/* Region Species Carousel - Next to Filter */}
       {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
-        <div className="absolute left-20 top-24 bottom-6 w-64 z-[60] pointer-events-auto">
+        <div
+          ref={leftPanelRef}
+          className="absolute left-16 w-64 z-[60] pointer-events-auto"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)' }}
+        >
           <RegionSpeciesCarousel
             species={regionSpecies}
             regionName={regionInfo.regionName}
@@ -2426,7 +2761,11 @@ Type your answer (A, B, C, or D)!`;
       {/* Priority 6: Habitat */}
 
       {isViewingEcoRegion && regionInfo && !selectedWildlifePark && !expandedImage && !selectedCarouselSpecies && !speciesInfo && !currentHabitat ? (
-        <div className="absolute right-0 top-24 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+        <div
+          ref={rightPanelRef}
+          className="absolute right-0 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        >
           <EcoRegionCard
             regionName={regionInfo.regionName}
             description={regionInfo.description}
@@ -2467,37 +2806,12 @@ Type your answer (A, B, C, or D)!`;
             Generate Lesson Plan
           </Button>
 
-          {/* Back to Globe Button */}
-          <Button
-            onClick={() => {
-              // Reset everything to go back to 3D globe
-              setIsViewingEcoRegion(false);
-              setUseGoogleMaps(false);
-              setHasInteracted(false);
-              setRegionInfo(null);
-              setRegionSpecies([]);
-              setCurrentSpeciesIndex(0);
-              setSelectedWildlifePark(null);
-              setMapCenter(null); // Clear map center to prevent re-zooming
-              setSelectedFoodWebSpecies({ carnivore: null, herbivoreOmnivore: null, producer: null }); // Reset food web game
-
-              // Trigger globe reset to default view
-              setResetGlobeView(true);
-              setTimeout(() => setResetGlobeView(false), 100); // Reset the trigger after a brief moment
-
-              toast({
-                title: 'Back to Globe 🌍',
-                description: 'Returning to world view...',
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="outline"
-          >
-            Back to Globe
-          </Button>
         </div>
       ) : selectedWildlifePark ? (
-        <div className="absolute right-0 top-24 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+        <div
+          className="absolute right-0 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        >
           <WildlifeLocationCard
             name={selectedWildlifePark.name}
             address={selectedWildlifePark.address}
@@ -2541,35 +2855,12 @@ Type your answer (A, B, C, or D)!`;
             Play Game 🎮
           </Button>
 
-          {/* Back Button */}
-          <Button
-            onClick={() => {
-              // Reset everything to go back to 3D globe
-              setSelectedWildlifePark(null);
-              setIsViewingEcoRegion(false);
-              setUseGoogleMaps(false);
-              setHasInteracted(false);
-              setRegionSpecies([]);
-              setCurrentSpeciesIndex(0);
-              setMapCenter(null); // Clear map center to prevent re-zooming
-
-              // Trigger globe reset to default view
-              setResetGlobeView(true);
-              setTimeout(() => setResetGlobeView(false), 100); // Reset the trigger after a brief moment
-
-              toast({
-                title: 'Back to Globe 🌍',
-                description: 'Returning to world view...',
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="outline"
-          >
-            Back to Globe
-          </Button>
         </div>
       ) : expandedImage ? (
-        <div className="absolute right-0 top-24 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+        <div
+          className="absolute right-0 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        >
           <ExpandedImageView
             imageUrl={expandedImage.url}
             type={expandedImage.type}
@@ -2619,7 +2910,11 @@ Type your answer (A, B, C, or D)!`;
           </Button>
         </div>
       ) : selectedCarouselSpecies ? (
-        <div className="absolute right-0 top-24 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+        <div
+          ref={rightPanelRef}
+          className="absolute right-0 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        >
           <RegionSpeciesCard
             commonName={selectedCarouselSpecies.commonName}
             scientificName={selectedCarouselSpecies.scientificName}
@@ -2659,47 +2954,23 @@ Type your answer (A, B, C, or D)!`;
             </Button>
           </div>
 
-          {/* 🎮 Play Trivia Button - Shows when all 3 species selected */}
-          {isAllSlotsFilledForTrivia() && (
+          {/* Reset Chat Button - Shows when food web trivia is active */}
+          {chatHistory.length > 0 && (
             <Button
-              onClick={handlePlayTrivia}
-              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold"
+              onClick={handleResetChat}
+              className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
+              variant="outline"
             >
-              🎮 Play Trivia
+              <RotateCcw className="h-4 w-4 mr-2" />
+              Reset Chat
             </Button>
           )}
-
-          {/* Back to Globe Button */}
-          <Button
-            onClick={() => {
-              // Reset everything to go back to 3D globe
-              setSelectedCarouselSpecies(null);
-              setRegionInfo(null);
-              setRegionSpecies([]);
-              setCurrentHabitat(null);
-              setHabitats([]);
-              setHabitatZones([]);
-              setIsViewingEcoRegion(false);
-              setSearchType(null);
-              setMapCenter(null);
-              setUseGoogleMaps(false);
-              setSelectedFoodWebSpecies({ carnivore: null, herbivoreOmnivore: null, producer: null }); // Reset food web game
-              setResetGlobeView(true);
-              setTimeout(() => setResetGlobeView(false), 100);
-
-              toast({
-                title: 'Back to Globe 🌍',
-                description: 'Returning to world view...',
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="outline"
-          >
-            Back to Globe
-          </Button>
         </div>
       ) : speciesInfo ? (
-        <div className="absolute right-0 top-24 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+        <div
+          className="absolute right-0 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        >
           <FastFactsCard
             commonName={speciesInfo.commonName}
             animalType={speciesInfo.animalType}
@@ -2745,7 +3016,10 @@ Type your answer (A, B, C, or D)!`;
           </Button>
         </div>
       ) : currentHabitat ? (
-        <div className="absolute right-0 top-24 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4">
+        <div
+          className="absolute right-0 w-80 z-[60] pointer-events-auto flex flex-col gap-3 pr-4"
+          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)', overflow: 'auto' }}
+        >
           <HabitatFactsCard
             habitat={currentHabitat}
             imageUrl={currentHabitat.imageUrl}
@@ -2793,8 +3067,22 @@ Type your answer (A, B, C, or D)!`;
         </div>
       ) : null}
 
+      {/* Back to Globe Button - Top Left */}
+      {useGoogleMaps && (
+        <div className="fixed top-4 left-4 z-[100] pointer-events-auto">
+          <Button
+            onClick={handleBackToGlobe}
+            variant="outline"
+            className="glass-panel hover:bg-accent rounded-xl h-12 px-4 flex items-center gap-2"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="text-sm font-medium">Back to Globe</span>
+          </Button>
+        </div>
+      )}
+
       {/* Global Health Bar - Top Center */}
-      <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-auto items-center">
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-auto items-center">
         <GlobalHealthBar />
 
         {/* 🎮 Food Web Selection Bar - Under Health Bar */}
@@ -2804,7 +3092,7 @@ Type your answer (A, B, C, or D)!`;
       </div>
 
       {/* Chat History and Input with Reset Button */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 w-full max-w-[1250px] flex flex-col items-center gap-3 pointer-events-none">
+      <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-30 w-full max-w-[1250px] flex flex-col items-center gap-3 pointer-events-none pb-2">
         {/* Active Layers Chip */}
         {activeLayers.length > 0 && (
           <div className="glass-panel px-4 py-2 rounded-full flex items-center gap-2 pointer-events-auto">
@@ -2815,43 +3103,68 @@ Type your answer (A, B, C, or D)!`;
           </div>
         )}
 
-        {/* Search Loader - Shows for initial load OR background fetches */}
-        <SearchLoader 
-          isLoading={isLoading || isBackgroundLoading} 
-          message={
-            isBackgroundLoading ? "Finding nearby wildlife locations..." :
-            currentSpecies ? "Fetching wildlife data..." : 
-            "Discovering habitat..."
-          }
-        />
+        {/* Search Loader - Shows for initial load OR background fetches, but NOT in chat mode */}
+        {!isChatHistoryExpanded && (
+          <SearchLoader
+            isLoading={isLoading || isBackgroundLoading}
+            message={
+              isBackgroundLoading ? "Finding nearby wildlife locations..." :
+              currentSpecies ? "Fetching wildlife data..." :
+              "Discovering habitat..."
+            }
+          />
+        )}
 
-
-        <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
-          <div className="w-full max-w-[450px] flex flex-col gap-1">
-            {/* Chat History - shows above input when expanded */}
-            <ChatHistory
-              messages={chatHistory}
-              isExpanded={isChatHistoryExpanded}
-              onMinimize={() => setIsChatHistoryExpanded(false)}
-            />
-
-            <ChatInput
-              onSubmit={handleSearch}
-              isLoading={isLoading}
-              context={chatContext}
-              onFocus={() => {
-                // Enable deep dive mode when user focuses on the input with a species/habitat selected
-                if (speciesInfo || currentHabitat) {
-                  setIsDeepDiveMode(true);
-                  // Expand chat history if there are messages
-                  if (chatHistory.length > 0) {
-                    setIsChatHistoryExpanded(true);
-                  }
-                }
-              }}
-            />
+        {/* Big START FOOD WEB TRIVIA Button - Shows when in 2D map view, before game starts */}
+        {useGoogleMaps && !isChatHistoryExpanded && regionInfo && regionSpecies.length > 0 && (
+          <div className="flex justify-center w-full pointer-events-auto">
+            <Button
+              onClick={handlePlayTrivia}
+              className="h-16 px-12 text-xl font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 hover:scale-105"
+            >
+              🎮 START FOOD WEB TRIVIA
+            </Button>
           </div>
-          {(habitats.length > 0 || userPins.length > 0 || speciesInfo || currentHabitat) && (
+        )}
+
+        {/* Chat Input - Only show on 2D map after Play Trivia is clicked */}
+        {useGoogleMaps && isChatHistoryExpanded && (
+          <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
+            <div className="w-full max-w-[650px] flex flex-col gap-1">
+              {/* Chat History - shows above input when expanded */}
+              <ChatHistory
+                messages={chatHistory}
+                isExpanded={isChatHistoryExpanded}
+                onMinimize={() => setIsChatHistoryExpanded(false)}
+                isTyping={isLoading}
+                onRetry={handleRetryMessage}
+                quickReplies={quickReplies}
+                onQuickReply={handleQuickReply}
+              />
+
+              <ChatInput
+                onSubmit={handleSearch}
+                isLoading={isLoading}
+                context={chatContext}
+                placeholder="Describe what you see or type 'hint'..."
+                onFocus={() => {
+                  // Enable deep dive mode when user focuses on the input with a species/habitat selected
+                  if (speciesInfo || currentHabitat) {
+                    setIsDeepDiveMode(true);
+                    // Expand chat history if there are messages
+                    if (chatHistory.length > 0) {
+                      setIsChatHistoryExpanded(true);
+                    }
+                  }
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Reset Button */}
+        {(habitats.length > 0 || userPins.length > 0 || speciesInfo || currentHabitat) && (
+          <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
             <Button
               onClick={handleReset}
               variant="secondary"
@@ -2861,20 +3174,33 @@ Type your answer (A, B, C, or D)!`;
             >
               <RotateCcw className="h-5 w-5" />
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
-      {/* Info Card */}
-      {habitats.length === 0 && !hasInteracted && (
+      {/* Info Card - Different messages for 3D Globe vs 2D Map */}
+      {!hasInteracted && (
         <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
           <div className="glass-panel rounded-2xl px-8 py-4 max-w-lg text-center animate-float">
-            <p className="text-muted-foreground">
-              Search for endangered species like <span className="text-accent font-medium">Polar Bear</span> or locations like <span className="text-accent font-medium">Las Vegas</span>
-            </p>
+            {!useGoogleMaps ? (
+              // 3D Globe view
+              <p className="text-muted-foreground">
+                🌍 <span className="text-accent font-medium">Click on any ecoregion pin</span> to explore wildlife and habitats
+              </p>
+            ) : (
+              // 2D Map view
+              <p className="text-muted-foreground">
+                🗺️ <span className="text-accent font-medium">Select species</span> from the carousel to learn more
+              </p>
+            )}
           </div>
         </div>
       )}
+
+      {/* MCP Test Component - Remove after testing */}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[200] w-full max-w-2xl px-4">
+        <MCPTestComponent />
+      </div>
 
     </div>
   );
