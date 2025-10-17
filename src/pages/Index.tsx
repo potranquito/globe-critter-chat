@@ -24,12 +24,29 @@ import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getCuratedSpecies, hasCuratedData } from '@/data/curatedSpecies';
-import { MCPTestComponent } from '@/components/MCPTestComponent';
 import type { HabitatRegion } from '@/types/habitat';
 import { performRegionAnalysis } from '@/services/regionService';
 import type { RegionInfo, RegionSpecies } from '@/services/regionService';
 import type { FilterCategory } from '@/types/speciesFilter';
-import { sendEducationMessage, type EducationContext } from '@/services/educationAgent';
+import {
+  sendEducationMessage,
+  type EducationContext,
+  initializeFoodWebTargets,
+  validateSpeciesSelection,
+  createProducerAgentContext,
+  createHerbivoreAgentContext,
+  createCarnivoreAgentContext
+} from '@/services/educationAgent';
+import { getRegionSpecies } from '@/services/mcpClient';
+import {
+  generateTriviaQuestion,
+  generateBriefSpeciesInfo,
+  generateHint,
+  generateHintLevel1WithLLM,
+  generateHintLevel2WithWebSearch,
+  generateHintLevel3WithVision,
+  type TriviaQuestion
+} from '@/services/triviaAgent';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
@@ -213,6 +230,35 @@ const Index = () => {
     producer: null
   });
 
+  // 🎮 NEW: Food web game - target species and phase tracking
+  const [foodWebTargetSpecies, setFoodWebTargetSpecies] = useState<{
+    producer: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+    herbivoreOmnivore: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+    carnivore: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+  }>({
+    producer: null,
+    herbivoreOmnivore: null,
+    carnivore: null
+  });
+
+  const [foodWebGamePhase, setFoodWebGamePhase] = useState<1 | 2 | 3>(1);
+  const [foundFoodWebSpecies, setFoundFoodWebSpecies] = useState<Array<any>>([]);
+
+  // 🎮 NEW: Reveal mechanic state
+  const [selectedSpeciesForReveal, setSelectedSpeciesForReveal] = useState<RegionSpecies | null>(null);
+  const [isSpeciesRevealed, setIsSpeciesRevealed] = useState(false);
+  const [revealAttemptCount, setRevealAttemptCount] = useState(0); // Track attempts (max 4)
+  const [isCarouselLocked, setIsCarouselLocked] = useState(false); // Lock after wrong reveal
+  const [isFoodWebGameActive, setIsFoodWebGameActive] = useState(false); // 🎮 Game state flag
+
+  // 🎓 NEW: Trivia question state
+  const [triviaQuestion, setTriviaQuestion] = useState<any | null>(null);
+  const [triviaAttemptCount, setTriviaAttemptCount] = useState(0); // Max 3
+  const [isWaitingForAnswer, setIsWaitingForAnswer] = useState(false); // Locks carousel during questions
+  const [triviaContext, setTriviaContext] = useState<'hint' | 'wrongSpecies' | null>(null); // Track why trivia was shown
+  const [showHintButton, setShowHintButton] = useState(false); // Shows after correct answer
+  const [hintLevel, setHintLevel] = useState(0); // 0-3 (no hints used → all hints used)
+
   // 🌍 Load WWF ecoregions from database on mount
   useEffect(() => {
     const loadEcoRegions = async () => {
@@ -345,7 +391,13 @@ const Index = () => {
   }, [selectedCarouselSpecies, selectedWildlifePark, isViewingEcoRegion, regionInfo, regionSpecies, useGoogleMaps, selectedFoodWebSpecies, chatHistory.length]);
 
   // Update quick replies when chat history changes
+  // 🎮 DISABLED during Food Web Game - quick replies are managed manually by game flow
   useEffect(() => {
+    // Skip auto-generation when in Food Web Game mode
+    if (isFoodWebGameActive) {
+      return; // Quick replies managed by game flow
+    }
+
     if (chatHistory.length > 0 && isChatHistoryExpanded) {
       const lastMessage = chatHistory[chatHistory.length - 1];
       const newReplies = generateQuickReplies(lastMessage);
@@ -353,7 +405,7 @@ const Index = () => {
     } else {
       setQuickReplies([]);
     }
-  }, [chatHistory, isChatHistoryExpanded, lastTriviaAnswer]);
+  }, [chatHistory, isChatHistoryExpanded, lastTriviaAnswer, isFoodWebGameActive]);
 
   // 🎯 HANDLE ECO-REGION CLICK: Switch to 2D map view centered on region
   const handleEcoRegionClick = async (point: any) => {
@@ -368,6 +420,22 @@ const Index = () => {
       herbivoreOmnivore: null,
       producer: null
     });
+
+    // 🎮 RESET ALL GAME STATE when entering new region
+    setIsFoodWebGameActive(false);
+    setFoodWebGamePhase(0);
+    setSelectedSpeciesForReveal(null);
+    setIsSpeciesRevealed(false);
+    setRevealAttemptCount(0);
+    setIsCarouselLocked(false);
+    setTriviaQuestion(null);
+    setTriviaContext(null);
+    setTriviaAttemptCount(0);
+    setIsWaitingForAnswer(false);
+    setShowHintButton(false);
+    setHintLevel(0);
+    setFoodWebTargetSpecies({ producer: null, herbivoreOmnivore: null, carnivore: null });
+    console.log('🔄 Game state reset - isFoodWebGameActive set to FALSE');
 
     // Add slower transition - delay switching to 2D map view
     setTimeout(() => {
@@ -657,31 +725,62 @@ const Index = () => {
       const isMarine = ecoregionData.realm === 'Marine' || ecoregionData.name.includes('Coral Triangle');
       const isTerrestrial = ecoregionData.realm === 'Terrestrial' || ecoregionData.realm === 'Nearctic' || ecoregionData.realm === 'Neotropical' || ecoregionData.realm === 'Afrotropic' || ecoregionData.realm === 'Indo-Malayan';
 
-      // Step 3: Get ALL species for this ecoregion (not limited)
-      const { data: balancedSpecies, error: speciesError } = await supabase
-        .from('species')
-        .select(`
-          id,
-          scientific_name,
-          common_name,
-          class,
-          conservation_status,
-          ui_group,
-          image_url,
-          is_marine,
-          is_terrestrial,
-          is_freshwater,
-          species_type,
-          trophic_role,
-          dietary_category,
-          species_ecoregions!inner(ecoregion_id, overlap_percentage)
-        `)
-        .eq('species_ecoregions.ecoregion_id', ecoregionData.id)
-        .order('is_curated', { ascending: false })
-        .order('common_name', { ascending: true, nullsLast: true });
+      // Step 3: Get ALL species for this ecoregion via MCP server
+      console.log('📡 Fetching species from MCP server for:', ecoregionData.name);
 
-      if (speciesError) {
-        console.error('Error fetching species:', speciesError);
+      let balancedSpecies: any[] = [];
+      try {
+        const mcpResult = await getRegionSpecies({
+          ecoregionName: ecoregionData.name,
+          limit: 200 // Get large pool for variety
+        });
+
+        if (mcpResult.success && mcpResult.species) {
+          // Transform MCP species to match Supabase format
+          const transformedSpecies = mcpResult.species.map((sp: any) => ({
+            id: sp.id,
+            scientific_name: sp.scientific_name,
+            common_name: sp.common_name,
+            class: sp.species_type || 'Unknown', // MCP uses species_type
+            conservation_status: sp.conservation_status,
+            ui_group: sp.dietary_category || 'Unknown', // Use dietary_category as ui_group
+            image_url: sp.image_url,
+            is_marine: sp.is_marine || false,
+            is_terrestrial: sp.is_terrestrial || false,
+            is_freshwater: sp.is_freshwater || false,
+            species_type: sp.species_type,
+            trophic_role: sp.trophic_role,
+            dietary_category: sp.dietary_category,
+            species_ecoregions: sp.species_ecoregions || []
+          }));
+
+          // Deduplicate by BOTH species ID and image URL (remove duplicate frogs AND duplicate images)
+          const seenIds = new Set<string>();
+          const seenImages = new Set<string>();
+          balancedSpecies = transformedSpecies.filter((sp: any) => {
+            // Skip if duplicate ID
+            if (seenIds.has(sp.id)) {
+              console.log(`🔄 Removing duplicate ID: ${sp.common_name} (${sp.id})`);
+              return false;
+            }
+
+            // Skip if duplicate image (different species, same photo)
+            if (sp.image_url && seenImages.has(sp.image_url)) {
+              console.log(`🔄 Removing duplicate image: ${sp.common_name} (same image as another species)`);
+              return false;
+            }
+
+            seenIds.add(sp.id);
+            if (sp.image_url) seenImages.add(sp.image_url);
+            return true;
+          });
+
+          console.log(`✅ MCP returned ${mcpResult.species.length} species, deduplicated to ${balancedSpecies.length}`);
+        } else {
+          console.error('❌ MCP query failed:', mcpResult.message || 'Unknown error');
+        }
+      } catch (error) {
+        console.error('❌ Error fetching species from MCP:', error);
       }
 
       // Debug: Check what ui_group values we got from database
@@ -759,6 +858,14 @@ const Index = () => {
 
       console.log(`Found ${speciesList.length} species in ${point.name}`);
       console.log('Species data sample:', speciesList.slice(0, 2));
+
+      // 🔍 DEBUG: Check dietary categories in carousel
+      const dietaryCategoryCounts = speciesList.reduce((acc: any, sp: any) => {
+        const cat = sp.dietaryCategory || 'null';
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      }, {});
+      console.log('🍴 Dietary categories in carousel:', dietaryCategoryCounts);
 
       if (speciesList.length === 0) {
         console.warn('No species found in ecoregion. Species may not be linked to this ecoregion yet.');
@@ -883,6 +990,10 @@ const Index = () => {
       case 'conservation':
         message = 'What is the conservation status and threats?';
         break;
+      case 'hint':
+        // Call hint handler directly instead of sending a message
+        handleHintClick();
+        return; // Don't send a message
     }
 
     if (message) {
@@ -907,6 +1018,27 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
+
+    // 🎓 INTERCEPT: Check if this is a trivia answer (A/B/C/D)
+    if (isWaitingForAnswer && triviaQuestion && ['A', 'B', 'C', 'D'].includes(query.trim().toUpperCase())) {
+      await handleTriviaAnswer(query.trim().toUpperCase());
+      return;
+    }
+
+    // 💡 INTERCEPT: Check if this is a hint request
+    if (query.toLowerCase().includes('hint') || query === '💡 Hint') {
+      if (showHintButton) {
+        handleHintClick();
+      } else {
+        toast({
+          title: "Hint Unavailable",
+          description: "Answer a trivia question correctly first!",
+          variant: "destructive"
+        });
+      }
+      return;
+    }
+
     setIsLoading(true);
     setHasInteracted(true);
 
@@ -946,11 +1078,8 @@ const Index = () => {
       const revealNextCharacter = () => {
         const { fullResponse, displayedResponse } = streamingBufferRef.current;
 
-        console.log('🔍 Reveal:', {
-          fullLength: fullResponse.length,
-          displayedLength: displayedResponse.length,
-          nextChar: fullResponse[displayedResponse.length]
-        });
+        // Character streaming progress (commented to reduce console spam)
+        // console.log('🔍 Reveal:', displayedResponse.length, '/', fullResponse.length);
 
         if (displayedResponse.length < fullResponse.length) {
           streamingBufferRef.current.displayedResponse = fullResponse.substring(0, displayedResponse.length + 1);
@@ -2059,23 +2188,898 @@ const Index = () => {
   };
 
   const handleCarouselSpeciesSelect = async (species: RegionSpecies) => {
-    // When a species is selected from the carousel, show the carousel species card
-    const index = getFilteredSpecies().findIndex(s => s.scientificName === species.scientificName);
-    if (index !== -1) {
-      setCurrentSpeciesIndex(index);
+    console.log('🎯 Carousel species clicked:', species.commonName, '| Game Active:', isFoodWebGameActive);
+
+    // 🎮 AUTO-START: If game not active, clicking a species starts the game
+    if (!isFoodWebGameActive) {
+      console.log('🎮 AUTO-START: Game not active - starting Food Web Trivia!');
+
+      toast({
+        title: "Starting Food Web Trivia! 🌍",
+        description: "Let's find the right species together!",
+      });
+
+      // Start the game (this clears all state and initializes)
+      await handlePlayTrivia();
+
+      // IMPORTANT: Return immediately without setting any species state
+      // User will need to click species again after seeing the intro
+      console.log('✅ Game started. User can now select species.');
+      return;
     }
 
-    // Set the selected carousel species to show RegionSpeciesCard
-    setSelectedCarouselSpecies(species);
+    // 🎮 FOOD WEB GAME MODE: New Reveal Mechanic
+    console.log('🎮 Species clicked during food web game:', species.commonName);
 
-    // Clear ALL other cards to ensure mutual exclusivity
-    setSpeciesInfo(null);
-    setSelectedWildlifePark(null);
-    setExpandedImage(null);
-    setCurrentHabitat(null);
+    // Check if carousel is locked (waiting for trivia answer OR after 4 wrong attempts)
+    if (isCarouselLocked || isWaitingForAnswer) {
+      toast({
+        title: "Carousel Locked",
+        description: isWaitingForAnswer
+          ? "Answer the trivia question to unlock!"
+          : "Answer the question to try again!",
+        variant: "destructive"
+      });
+      return;
+    }
 
-    // Optionally: You could also search for more detailed info
-    // await handleSearch(species.commonName);
+    // Show species image on right panel (facts HIDDEN until reveal)
+    setSelectedSpeciesForReveal(species);
+    setIsSpeciesRevealed(false); // Facts hidden
+    setSelectedCarouselSpecies(species); // Show in right panel
+
+    console.log('✅ Species selected for reveal. Facts hidden until reveal button clicked.');
+
+    toast({
+      title: "Species Selected",
+      description: "Click 'Reveal Species' to check if it's correct!",
+    });
+  };
+
+  // 🎮 Handle Reveal Species Button
+  const handleRevealSpecies = async () => {
+    if (!selectedSpeciesForReveal) return;
+
+    console.log('🔍 Revealing species:', selectedSpeciesForReveal.commonName);
+
+    // Reveal the facts
+    setIsSpeciesRevealed(true);
+
+    // Get current target based on phase
+    const currentTarget = foodWebGamePhase === 1
+      ? foodWebTargetSpecies.producer
+      : foodWebGamePhase === 2
+        ? foodWebTargetSpecies.herbivoreOmnivore
+        : foodWebTargetSpecies.carnivore;
+
+    if (!currentTarget) {
+      console.error('No current target for phase', foodWebGamePhase);
+      return;
+    }
+
+    // Validate the selection
+    const validation = validateSpeciesSelection(
+      selectedSpeciesForReveal,
+      currentTarget
+    );
+
+    console.log('Validation result:', validation);
+
+    if (validation.correct) {
+      // ✅ CORRECT SELECTION!
+      console.log('✅ Correct! User found:', validation.targetName);
+
+      // Add to found species
+      const newFoundSpecies = [
+        ...foundFoodWebSpecies,
+        {
+          commonName: currentTarget.commonName,
+          scientificName: currentTarget.scientificName,
+          role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+          conservationStatus: selectedSpeciesForReveal.conservationStatus || 'Unknown',
+          animalType: currentTarget.animalType
+        }
+      ];
+      setFoundFoodWebSpecies(newFoundSpecies);
+
+      // Clear species card after 10 seconds
+      setTimeout(() => {
+        setSelectedSpeciesForReveal(null);
+        setIsSpeciesRevealed(false);
+        setSelectedCarouselSpecies(null);
+      }, 10000); // 10 second delay
+
+      // Reset reveal state for next phase (but keep card visible)
+      setRevealAttemptCount(0);
+      setIsCarouselLocked(false);
+
+      // Send celebration message to AI
+      await handleSearch(`I found the ${validation.targetName}!`);
+
+      // Check if game is complete (all 3 phases done)
+      if (foodWebGamePhase >= 3) {
+        // GAME COMPLETE!
+        console.log('🎉 All 3 species found! Game complete!');
+
+        // Reset game state
+        setIsFoodWebGameActive(false);
+
+        toast({
+          title: "🎉 Game Complete!",
+          description: "You found all 3 species!",
+        });
+      } else {
+        // Move to next phase
+        const nextPhase = (foodWebGamePhase + 1) as 1 | 2 | 3;
+        setFoodWebGamePhase(nextPhase);
+
+        // Update education context for next phase (Agent Transition)
+        console.log(`🤖 Agent Transition: Phase ${foodWebGamePhase} → Phase ${nextPhase}`);
+        console.log(`🤖 Activating Agent: PHASE ${nextPhase} - ${nextPhase === 2 ? 'HERBIVORE' : 'CARNIVORE'} AGENT`);
+
+        const nextContext = nextPhase === 2
+          ? createHerbivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies)
+          : createCarnivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies);
+
+        setEducationContext(nextContext);
+
+        console.log(`✅ Moving to phase ${nextPhase}`);
+
+        toast({
+          title: `Phase ${nextPhase}/3`,
+          description: `Now find the ${nextPhase === 2 ? foodWebTargetSpecies.herbivoreOmnivore?.commonName : foodWebTargetSpecies.carnivore?.commonName}!`,
+        });
+      }
+    } else {
+      // ❌ WRONG SELECTION
+      console.log('❌ Wrong! That is not:', validation.targetName);
+
+      // Increment attempt counter
+      const newAttemptCount = revealAttemptCount + 1;
+      setRevealAttemptCount(newAttemptCount);
+
+      // 🎓 NEW: Share brief species info + trigger trivia question
+      const briefInfo = generateBriefSpeciesInfo(selectedSpeciesForReveal, { commonName: validation.targetName });
+
+      // Stream brief species info
+      await streamTextToChat(
+        `wrong-species-${Date.now()}`,
+        briefInfo,
+        'assistant'
+      );
+
+      // Clear right panel after a delay (10 seconds)
+      setTimeout(() => {
+        setSelectedSpeciesForReveal(null);
+        setIsSpeciesRevealed(false);
+        setSelectedCarouselSpecies(null);
+      }, 10000); // 10 second delay
+
+      // 🎁 AUTO-ADVANCE: If all 3 hints have been used, auto-select correct species and move to next phase
+      if (hintLevel >= 3) {
+        console.log('🎁 All hints exhausted - auto-advancing to next phase with correct species');
+
+        const autoAdvanceMessage = `I see you're having trouble finding the **${validation.targetName}**. That's okay! Let me help you move forward.
+
+The correct answer was the **${currentTarget.commonName}**. Now let's find the next species in our food web!`;
+
+        await streamTextToChat(
+          `auto-advance-${Date.now()}`,
+          autoAdvanceMessage,
+          'assistant'
+        );
+
+        // Add the species to found list
+        const newFoundSpecies = [
+          ...foundFoodWebSpecies,
+          {
+            commonName: currentTarget.commonName,
+            scientificName: currentTarget.scientificName,
+            role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+            conservationStatus: 'Unknown',
+            animalType: currentTarget.animalType
+          }
+        ];
+        setFoundFoodWebSpecies(newFoundSpecies);
+
+        // Reset for next phase
+        setRevealAttemptCount(0);
+        setHintLevel(0);
+        setShowHintButton(false);
+
+        // Advance to next phase
+        if (foodWebGamePhase < 3) {
+          const nextPhase = (foodWebGamePhase + 1) as 1 | 2 | 3;
+          setFoodWebGamePhase(nextPhase);
+
+          const nextTarget = nextPhase === 2
+            ? foodWebTargetSpecies.herbivoreOmnivore
+            : foodWebTargetSpecies.carnivore;
+
+          const nextMessage = `Great! Now let's find a **${nextPhase === 2 ? 'herbivore or omnivore' : 'carnivore'}**.
+
+Can you find the **${nextTarget?.commonName}**?`;
+
+          await streamTextToChat(
+            `next-phase-${Date.now()}`,
+            nextMessage,
+            'assistant'
+          );
+
+          setQuickReplies([
+            { id: 'hint', label: 'Give Me A Hint', emoji: '💡', action: 'hint' as const }
+          ]);
+        } else {
+          // Game complete
+          const completeMessage = `🎉 **Congratulations!** You've completed the food web!
+
+You found all three levels:
+- Producer: ${foodWebTargetSpecies.producer?.commonName}
+- Herbivore/Omnivore: ${foodWebTargetSpecies.herbivoreOmnivore?.commonName}
+- Carnivore: ${foodWebTargetSpecies.carnivore?.commonName}
+
+Great job learning about the ${regionInfo?.regionName} ecosystem!`;
+
+          await streamTextToChat(
+            `game-complete-${Date.now()}`,
+            completeMessage,
+            'assistant'
+          );
+
+          setQuickReplies([]);
+          setIsFoodWebGameActive(false);
+        }
+
+        return; // Skip trivia generation
+      }
+
+      // Lock carousel and show loading spinner while generating trivia
+      setIsWaitingForAnswer(true);
+      setIsLoading(true); // Show spinning earth while thinking
+
+      try {
+        const question: TriviaQuestion = await generateTriviaQuestion({
+          targetSpecies: {
+            commonName: currentTarget.commonName,
+            scientificName: currentTarget.scientificName,
+            animalType: currentTarget.animalType,
+            role: foodWebGamePhase === 1 ? 'producer' :
+                  foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+          },
+          ecoregionName: regionInfo!.regionName,
+          gradeLevel: 5,
+          difficulty: 'medium'
+        });
+
+        // Stop loading spinner after trivia generated
+        setIsLoading(false);
+
+        setTriviaQuestion(question);
+        setTriviaContext('wrongSpecies'); // Mark this as wrong-species trivia
+
+        // Stream trivia question
+        const questionMessage = `**In order to continue, you must answer this question:**
+
+${question.question}
+
+${question.choices.join('\n')}`;
+
+        await streamTextToChat(
+          `trivia-q-${Date.now()}`,
+          questionMessage,
+          'assistant'
+        );
+
+        // Set multiple choice quick replies
+        setQuickReplies([
+          { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
+          { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
+          { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
+          { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' }
+        ]);
+
+      } catch (error) {
+        console.error('Failed to generate trivia question:', error);
+        // Fallback: unlock carousel
+        setIsWaitingForAnswer(false);
+      }
+
+      return; // Don't execute 4th attempt logic anymore
+
+      // Check if this was the 4th attempt
+      if (newAttemptCount >= 4) {
+        // AUTO-REVEAL: Give them the answer
+        console.log('🎁 4th attempt - auto-revealing correct species');
+
+        toast({
+          title: "Don't worry!",
+          description: `It's the ${validation.targetName}! Let me tell you about it...`,
+        });
+
+        // AI explains what the correct species is
+        await handleSearch(`I've tried 4 times. Can you just tell me about the ${validation.targetName}?`);
+
+        // Unlock carousel and reset attempts
+        setIsCarouselLocked(false);
+        setRevealAttemptCount(0);
+
+        // Auto-add to food web (they get credit for trying)
+        const newFoundSpecies = [
+          ...foundFoodWebSpecies,
+          {
+            commonName: currentTarget.commonName,
+            scientificName: currentTarget.scientificName,
+            role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+            conservationStatus: 'Unknown',
+            animalType: currentTarget.animalType
+          }
+        ];
+        setFoundFoodWebSpecies(newFoundSpecies);
+
+        // Move to next phase
+        if (foodWebGamePhase < 3) {
+          const nextPhase = (foodWebGamePhase + 1) as 1 | 2 | 3;
+          setFoodWebGamePhase(nextPhase);
+
+          // Agent Transition (after 4th failed attempt)
+          console.log(`🤖 Agent Transition (4th attempt): Phase ${foodWebGamePhase} → Phase ${nextPhase}`);
+          console.log(`🤖 Activating Agent: PHASE ${nextPhase} - ${nextPhase === 2 ? 'HERBIVORE' : 'CARNIVORE'} AGENT`);
+
+          const nextContext = nextPhase === 2
+            ? createHerbivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies)
+            : createCarnivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies);
+
+          setEducationContext(nextContext);
+        } else {
+          // Game complete
+          setIsFoodWebGameActive(false);
+
+          toast({
+            title: "🎉 Game Complete!",
+            description: "You found all 3 species!",
+          });
+        }
+
+        return;
+      }
+
+      // Lock carousel until trivia answered
+      setIsCarouselLocked(true);
+
+      // Send message to AI with species info + request for hint
+      // AI will respond with: "That was a [species]! [fact]. But I need the [target]. Want a hint?"
+      await handleSearch(`That was a ${selectedSpeciesForReveal.commonName}. Is that the ${validation.targetName}?`);
+
+      toast({
+        title: "Not quite!",
+        description: `That was a ${selectedSpeciesForReveal.commonName}. Answer the question to try again!`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  // 🎓 Handle Trivia Answer
+  const handleTriviaAnswer = async (choice: string) => {
+    if (!triviaQuestion) return;
+
+    // Clear quick replies immediately to remove A/B/C/D buttons
+    setQuickReplies([]);
+
+    const answerIndex = ['A', 'B', 'C', 'D'].indexOf(choice);
+    if (answerIndex === -1) return;
+
+    const correct = answerIndex === triviaQuestion.correctAnswer;
+
+    if (correct) {
+      // ✅ CORRECT ANSWER
+
+      // 🎓 Check if this was the hint-gating trivia FIRST (before streaming success message)
+      if (triviaContext === 'hint') {
+        console.log('[Hint Trivia] User answered correctly - showing hint now');
+
+        // Show loading spinner IMMEDIATELY before any text
+        setIsLoading(true);
+
+        const newHintLevel = Math.min(hintLevel + 1, 3);
+        setHintLevel(newHintLevel);
+
+        const currentTarget = foodWebGamePhase === 1
+          ? foodWebTargetSpecies.producer
+          : foodWebGamePhase === 2
+            ? foodWebTargetSpecies.herbivoreOmnivore
+            : foodWebTargetSpecies.carnivore;
+
+        // Generate hint while spinner is showing
+        let hint: string = '';
+
+        try {
+          // Use different hint generation methods based on level
+          if (newHintLevel === 1) {
+            // Hint 1: LLM knowledge base describing physical appearance
+            hint = await generateHintLevel1WithLLM(
+              {
+                commonName: currentTarget!.commonName,
+                scientificName: currentTarget!.scientificName,
+                animalType: currentTarget!.animalType,
+                role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+              },
+              regionInfo!.regionName
+            );
+          } else if (newHintLevel === 2) {
+            // Hint 2: Web search for internet descriptions
+            hint = await generateHintLevel2WithWebSearch(
+              {
+                commonName: currentTarget!.commonName,
+                scientificName: currentTarget!.scientificName,
+                animalType: currentTarget!.animalType,
+                role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+              },
+              regionInfo!.regionName
+            );
+          } else {
+            // Hint 3: Vision API to analyze species image
+            hint = await generateHintLevel3WithVision(
+              {
+                commonName: currentTarget!.commonName,
+                scientificName: currentTarget!.scientificName,
+                animalType: currentTarget!.animalType,
+                imageUrl: currentTarget!.imageUrl || ''
+              },
+              regionInfo!.regionName
+            );
+          }
+        } catch (error) {
+          console.error('[Hint Generation] Error:', error);
+          // Fallback hint if generation fails
+          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} in the ${regionInfo!.regionName}. The species is a ${currentTarget!.animalType}.`;
+        }
+
+        // Ensure hint is not empty
+        if (!hint || hint.trim() === '') {
+          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} called ${currentTarget!.commonName}.`;
+        }
+
+        console.log('[Hint Generated]:', hint);
+
+        // Stop loading animation
+        setIsLoading(false);
+
+        // NOW stream success message + hint together
+        const successWithHintMessage = `✅ **Correct!**
+
+${triviaQuestion.explanation}
+
+${hint}`;
+
+        console.log('[Streaming hint-gated response]:', successWithHintMessage);
+
+        await streamTextToChat(
+          `trivia-correct-hint-${Date.now()}`,
+          successWithHintMessage,
+          'assistant'
+        );
+
+        // Clear all quick replies first to remove any lingering A/B/C/D buttons
+        setQuickReplies([]);
+
+        // Small delay to ensure state updates properly
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Show button for next hint level (or hide if all used)
+        if (newHintLevel >= 3) {
+          setQuickReplies([]); // Hide button after all hints used
+        } else {
+          const nextLabel = newHintLevel === 1 ? 'Give Me A Second Hint' : 'Give Me A Third Hint';
+          setQuickReplies([
+            { id: 'hint', label: nextLabel, emoji: '💡', action: 'hint' as const }
+          ]);
+        }
+
+        // Unlock carousel and clear trivia
+        setIsWaitingForAnswer(false);
+        setShowHintButton(true);
+        setTriviaQuestion(null);
+        setTriviaAttemptCount(0);
+
+        // Clear trivia context
+        setTriviaContext(null);
+
+        toast({
+          title: "Correct!",
+          description: "Here's your hint!",
+        });
+      } else {
+        // Wrong species trivia - ALSO show hint automatically after correct answer
+        console.log('[Wrong Species Trivia] User answered correctly - showing hint automatically');
+
+        // Show loading spinner IMMEDIATELY before any text
+        setIsLoading(true);
+
+        const newHintLevel = Math.min(hintLevel + 1, 3);
+        setHintLevel(newHintLevel);
+
+        const currentTarget = foodWebGamePhase === 1
+          ? foodWebTargetSpecies.producer
+          : foodWebGamePhase === 2
+            ? foodWebTargetSpecies.herbivoreOmnivore
+            : foodWebTargetSpecies.carnivore;
+
+        // Generate hint while spinner is showing
+        let hint: string = '';
+
+        try {
+          // Use different hint generation methods based on level
+          if (newHintLevel === 1) {
+            // Hint 1: LLM knowledge base describing physical appearance
+            hint = await generateHintLevel1WithLLM(
+              {
+                commonName: currentTarget!.commonName,
+                scientificName: currentTarget!.scientificName,
+                animalType: currentTarget!.animalType,
+                role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+              },
+              regionInfo!.regionName
+            );
+          } else if (newHintLevel === 2) {
+            // Hint 2: Web search for internet descriptions
+            hint = await generateHintLevel2WithWebSearch(
+              {
+                commonName: currentTarget!.commonName,
+                scientificName: currentTarget!.scientificName,
+                animalType: currentTarget!.animalType,
+                role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+              },
+              regionInfo!.regionName
+            );
+          } else {
+            // Hint 3: Vision API to analyze species image
+            hint = await generateHintLevel3WithVision(
+              {
+                commonName: currentTarget!.commonName,
+                scientificName: currentTarget!.scientificName,
+                animalType: currentTarget!.animalType,
+                imageUrl: currentTarget!.imageUrl || ''
+              },
+              regionInfo!.regionName
+            );
+          }
+        } catch (error) {
+          console.error('[Hint Generation] Error:', error);
+          // Fallback hint if generation fails
+          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} in the ${regionInfo!.regionName}. The species is a ${currentTarget!.animalType}.`;
+        }
+
+        // Ensure hint is not empty
+        if (!hint || hint.trim() === '') {
+          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} called ${currentTarget!.commonName}.`;
+        }
+
+        console.log('[Hint Generated]:', hint);
+
+        // Stop loading animation
+        setIsLoading(false);
+
+        // Stream success message + hint together
+        const successWithHintMessage = `✅ **Correct!**
+
+${triviaQuestion.explanation}
+
+${hint}`;
+
+        console.log('[Streaming wrong-species hint response]:', successWithHintMessage);
+
+        await streamTextToChat(
+          `trivia-correct-hint-${Date.now()}`,
+          successWithHintMessage,
+          'assistant'
+        );
+
+        // Clear all quick replies first
+        setQuickReplies([]);
+
+        // Small delay to ensure state updates properly
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Show button for next hint level (or hide if all used)
+        if (newHintLevel >= 3) {
+          setQuickReplies([]); // Hide button after all hints used
+        } else {
+          const nextLabel = newHintLevel === 1 ? 'Give Me A Second Hint' : 'Give Me A Third Hint';
+          setQuickReplies([
+            { id: 'hint', label: nextLabel, emoji: '💡', action: 'hint' as const }
+          ]);
+        }
+
+        // Unlock carousel and clear trivia
+        setIsWaitingForAnswer(false);
+        setShowHintButton(true);
+        setTriviaQuestion(null);
+        setTriviaAttemptCount(0);
+
+        // Clear trivia context
+        setTriviaContext(null);
+
+        toast({
+          title: "Correct!",
+          description: "Here's your hint!",
+        });
+      }
+
+    } else {
+      // ❌ WRONG ANSWER
+      const wrongMessage = `❌ **Not quite.**
+
+The correct answer is **${triviaQuestion.choices[triviaQuestion.correctAnswer]}**.`;
+
+      // Stream wrong answer message
+      await streamTextToChat(
+        `trivia-wrong-${Date.now()}`,
+        wrongMessage,
+        'assistant'
+      );
+
+      const newAttemptCount = triviaAttemptCount + 1;
+      setTriviaAttemptCount(newAttemptCount);
+
+      if (newAttemptCount >= 3) {
+        // After 3 wrong trivia attempts, auto-skip to next phase
+        const skipMessage = `Let's move on. The species we're looking for is the **${foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']?.commonName}**. It's a ${foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']?.animalType} that plays an important role in this ecosystem.`;
+
+        // Stream skip message
+        await streamTextToChat(
+          `trivia-skip-${Date.now()}`,
+          skipMessage,
+          'assistant'
+        );
+
+        // Unlock and advance to next phase
+        setIsWaitingForAnswer(false);
+        setTriviaQuestion(null);
+        setTriviaAttemptCount(0);
+        setShowHintButton(false);
+        setHintLevel(0);
+
+        // Auto-advance (same logic as 4th wrong reveal)
+        const currentTarget = foodWebGamePhase === 1
+          ? foodWebTargetSpecies.producer
+          : foodWebGamePhase === 2
+            ? foodWebTargetSpecies.herbivoreOmnivore
+            : foodWebTargetSpecies.carnivore;
+
+        const newFoundSpecies = [
+          ...foundFoodWebSpecies,
+          {
+            commonName: currentTarget!.commonName,
+            scientificName: currentTarget!.scientificName,
+            role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+            conservationStatus: 'Unknown',
+            animalType: currentTarget!.animalType
+          }
+        ];
+        setFoundFoodWebSpecies(newFoundSpecies);
+
+        if (foodWebGamePhase < 3) {
+          const nextPhase = (foodWebGamePhase + 1) as 1 | 2 | 3;
+          setFoodWebGamePhase(nextPhase);
+
+          const nextContext = nextPhase === 2
+            ? createHerbivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies)
+            : createCarnivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies);
+
+          setEducationContext(nextContext);
+
+          toast({
+            title: `Phase ${nextPhase}/3`,
+            description: `Now find the ${nextPhase === 2 ? foodWebTargetSpecies.herbivoreOmnivore?.commonName : foodWebTargetSpecies.carnivore?.commonName}!`,
+          });
+
+          setQuickReplies([
+            { text: '💡 Hint', emoji: '💡' }
+          ]);
+        } else {
+          // Game complete
+          setIsFoodWebGameActive(false);
+          toast({
+            title: "🎉 Game Complete!",
+            description: "You found all 3 species!",
+          });
+        }
+
+      } else {
+        // Show loading spinner while generating next question
+        setIsLoading(true);
+
+        // Generate another question
+        try {
+          const newQuestion: TriviaQuestion = await generateTriviaQuestion({
+            targetSpecies: {
+              commonName: foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']!.commonName,
+              scientificName: foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']!.scientificName,
+              animalType: foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']!.animalType,
+              role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+            },
+            ecoregionName: regionInfo!.regionName,
+            gradeLevel: 5,
+            difficulty: 'medium'
+          });
+
+          setTriviaQuestion(newQuestion);
+          setIsLoading(false);
+
+          const nextQuestionMessage = `Let's try another question:
+
+${newQuestion.question}
+
+${newQuestion.choices.join('\n')}`;
+
+          await streamTextToChat(
+            `trivia-q2-${Date.now()}`,
+            nextQuestionMessage,
+            'assistant'
+          );
+
+          // Set A/B/C/D quick replies
+          setQuickReplies([
+            { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
+            { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
+            { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
+            { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' }
+          ]);
+        } catch (error) {
+          console.error('Failed to generate follow-up question:', error);
+          // Fallback: unlock carousel
+          setIsWaitingForAnswer(false);
+        }
+      }
+    }
+  };
+
+  // 💡 Helper: Get hint button label based on hint level
+  const getHintButtonLabel = (): string => {
+    switch (hintLevel) {
+      case 0:
+        return 'Give Me A Hint';
+      case 1:
+        return 'Give Me A Second Hint';
+      case 2:
+        return 'Give Me A Third Hint';
+      default:
+        return 'Give Me A Hint';
+    }
+  };
+
+  // 💡 Handle Hint Click
+  const handleHintClick = async () => {
+    const currentTarget = foodWebGamePhase === 1
+      ? foodWebTargetSpecies.producer
+      : foodWebGamePhase === 2
+        ? foodWebTargetSpecies.herbivoreOmnivore
+        : foodWebTargetSpecies.carnivore;
+
+    if (!currentTarget) return;
+
+    // 🚫 PREVENT DOUBLE TRIVIA: Don't generate hint trivia if there's already an active trivia question
+    if (triviaQuestion !== null) {
+      console.log('[Hint Click] Trivia already active - ignoring hint request');
+      toast({
+        title: "Answer the current question first",
+        description: "Please answer the trivia question before requesting a hint.",
+      });
+      return;
+    }
+
+    // 🎓 TRIVIA GATE: If hintLevel is 0, ask trivia question first
+    if (hintLevel === 0) {
+      console.log('🎓 Generating trivia question to unlock hint...');
+
+      // First, explain the trivia gate
+      const gateMessage = `Before I give you a hint, you must answer a trivia question correctly first!`;
+      await streamTextToChat(
+        `trivia-gate-${Date.now()}`,
+        gateMessage,
+        'assistant'
+      );
+
+      // Show loading animation while generating trivia
+      setIsLoading(true);
+      setQuickReplies([]); // Clear any existing quick replies
+
+      // Generate trivia question
+      const question = await generateTriviaQuestion({
+        targetSpecies: {
+          commonName: currentTarget.commonName,
+          scientificName: currentTarget.scientificName,
+          animalType: currentTarget.animalType,
+          role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+        },
+        ecoregionName: regionInfo!.regionName,
+        gradeLevel: 5,
+        difficulty: 'medium'
+      });
+
+      setTriviaQuestion(question);
+      setTriviaContext('hint'); // Mark this as hint-gating trivia
+      setTriviaAttemptCount(0);
+
+      // Stream trivia question to chat
+      const triviaText = `${question.question}\n\n${question.choices.join('\n')}`;
+      await streamTextToChat(
+        `trivia-hint-${Date.now()}`,
+        triviaText,
+        'assistant'
+      );
+
+      // Stop loading animation
+      setIsLoading(false);
+
+      // Show A/B/C/D quick replies
+      setQuickReplies([
+        { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
+        { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
+        { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
+        { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' }
+      ]);
+
+      return;
+    }
+
+    // Give hint 2 or 3 (hint 1 comes from trivia gate, generated in handleTriviaAnswer)
+    const newHintLevel = Math.min(hintLevel + 1, 3);
+    setHintLevel(newHintLevel);
+
+    // Show loading animation while generating hint
+    setIsLoading(true);
+
+    let hintText: string;
+
+    // Use different hint generation methods based on level
+    if (newHintLevel === 2) {
+      // Hint 2: Web search for internet descriptions
+      hintText = await generateHintLevel2WithWebSearch(
+        {
+          commonName: currentTarget.commonName,
+          scientificName: currentTarget.scientificName,
+          animalType: currentTarget.animalType,
+          role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
+        },
+        regionInfo!.regionName
+      );
+    } else {
+      // Hint 3: Vision API to analyze species image
+      hintText = await generateHintLevel3WithVision(
+        {
+          commonName: currentTarget.commonName,
+          scientificName: currentTarget.scientificName,
+          animalType: currentTarget.animalType,
+          imageUrl: currentTarget.imageUrl || ''
+        },
+        regionInfo!.regionName
+      );
+    }
+
+    // Stop loading animation
+    setIsLoading(false);
+
+    // Stream hint to chat
+    await streamTextToChat(
+      `hint-${Date.now()}`,
+      hintText,
+      'assistant'
+    );
+
+    // Update button based on hint level
+    if (newHintLevel >= 3) {
+      setQuickReplies([]); // Hide button after all hints used
+    } else {
+      // Show button for next hint level (will always be hint 3 since we're at hint 2)
+      setQuickReplies([
+        { id: 'hint', label: 'Give Me A Third Hint', emoji: '💡', action: 'hint' as const }
+      ]);
+    }
   };
 
   // 🎮 Food Web Game Helper Functions
@@ -2149,6 +3153,77 @@ const Index = () => {
     }
   };
 
+  // 🎮 STREAMING TEXT HELPER
+  // ========================
+  /**
+   * Stream text character by character to chat history
+   * Creates a typewriter effect for messages
+   */
+  const streamTextToChat = async (
+    messageId: string,
+    fullText: string,
+    role: 'assistant' | 'user' = 'assistant',
+    charsPerFrame: number = 1, // Characters to add per frame (1 for reading speed)
+    delayMs: number = 50 // Delay between frames in milliseconds (50ms = human reading speed)
+  ): Promise<void> => {
+    return new Promise((resolve) => {
+      let currentIndex = 0;
+
+      // Create initial message with empty content
+      const initialMessage: ChatMessage = {
+        id: messageId,
+        role,
+        content: '',
+        timestamp: new Date()
+      };
+
+      // Add empty message to chat
+      setChatHistory(prev => [...prev, initialMessage]);
+
+      // Stream text character by character
+      const interval = setInterval(() => {
+        currentIndex += charsPerFrame;
+
+        if (currentIndex >= fullText.length) {
+          // Finished streaming
+          currentIndex = fullText.length;
+          clearInterval(interval);
+
+          // Set final complete message
+          setChatHistory(prev =>
+            prev.map(msg =>
+              msg.id === messageId
+                ? { ...msg, content: fullText }
+                : msg
+            )
+          );
+
+          resolve();
+        } else {
+          // Update message with more characters
+          const partialText = fullText.slice(0, currentIndex);
+          setChatHistory(prev =>
+            prev.map(msg =>
+              msg.id === messageId
+                ? { ...msg, content: partialText }
+                : msg
+            )
+          );
+        }
+      }, delayMs);
+    });
+  };
+
+  // 🎮 FOOD WEB TRIVIA GAME - AGENT ARCHITECTURE
+  // =============================================
+  // Intro: Forest Guardian welcome message
+  // Phase 1: Producer Agent (guides to find producer species)
+  //   - Transitions to Phase 2 when correct species found OR after 4th failed attempt
+  // Phase 2: Herbivore Agent (guides to find herbivore/omnivore species)
+  //   - Transitions to Phase 3 when correct species found OR after 4th failed attempt
+  // Phase 3: Carnivore Agent (guides to find carnivore species)
+  //   - Game completes when correct species found OR after 4th failed attempt
+
   // Handle starting the trivia game
   const handlePlayTrivia = async () => {
     console.log('🎮 Play Trivia clicked!');
@@ -2160,44 +3235,115 @@ const Index = () => {
         herbivoreOmnivore: null,
         producer: null
       });
+      setFoundFoodWebSpecies([]);
+      setFoodWebGamePhase(1);
 
-      // Step 2: Open chat interface
-      setIsChatHistoryExpanded(true);
+      // Reset reveal mechanic state
+      setSelectedSpeciesForReveal(null);
+      setIsSpeciesRevealed(false);
+      setRevealAttemptCount(0);
+      setIsCarouselLocked(false);
 
-      // Step 3: Forest Guardian narrative opening
-      const forestGuardianIntro = `🌍 **Hi! Welcome to the ${regionInfo?.regionName || 'ecosystem'}.**
+      // Reset trivia state
+      setTriviaQuestion(null);
+      setTriviaContext(null);
+      setTriviaAttemptCount(0);
+      setIsWaitingForAnswer(false);
+      setShowHintButton(false);
+      setHintLevel(0);
 
-I am the Forest Guardian AI. Poopy Pants blinded me and I need help taking care of my animal friends. Can you help me find them?
+      // Clear selected carousel species (ensures clean start)
+      setSelectedCarouselSpecies(null);
 
-I need to find a **producer** - a tree or plant that creates its own energy through photosynthesis.
+      // Step 2: Check if carousel has species
+      if (!regionInfo?.regionName) {
+        console.error('No region info available');
+        return;
+      }
 
-Look for species with a ☀️ symbol in the carousel. Can you spot a large tree?`;
+      if (regionSpecies.length === 0) {
+        toast({
+          title: "Error",
+          description: "No species available in carousel. Select a region first!",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      // Step 4: Add opening message to chat
-      const openingMessage: ChatMessage = {
-        id: `trivia-start-${Date.now()}`,
-        role: 'assistant',
-        content: forestGuardianIntro,
-        timestamp: new Date()
-      };
+      console.log('🎯 Initializing target species for:', regionInfo.regionName);
+      const targets = await initializeFoodWebTargets(regionInfo.regionName, regionSpecies);
 
-      setChatHistory([openingMessage]);
+      if (!targets.producer || !targets.herbivoreOmnivore || !targets.carnivore) {
+        toast({
+          title: "Error",
+          description: "Could not find enough species for this region. Try another region!",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      // Set quick replies for the trivia game
-      setQuickReplies([
-        { text: '💡 Hint', emoji: '💡' },
-        { text: 'Tell me more', emoji: '📚' },
-        { text: 'I found it!', emoji: '✅' }
-      ]);
+      setFoodWebTargetSpecies(targets);
 
-      toast({
-        title: "🌍 Forest Guardian Active",
-        description: "Help me rebuild the food web!",
+      console.log('✅ Target species initialized:', {
+        producer: targets.producer.commonName,
+        herbivore: targets.herbivoreOmnivore.commonName,
+        carnivore: targets.carnivore.commonName
       });
 
-      console.log('✅ Food Web Trivia started!');
+      // Step 3: Activate game mode (enables carousel interaction)
+      setIsFoodWebGameActive(true);
+
+      // Step 4: Open chat interface
+      setIsChatHistoryExpanded(true);
+
+      // Step 5: Forest Guardian narrative opening with specific species
+      const forestGuardianIntro = `🌍 **Hi! Welcome to the ${regionInfo.regionName}.**
+
+I am the Forest Guardian AI. Poopy Pants blinded me and I need help finding my animal friends!
+
+Can you help me find the **${targets.producer.commonName}**? Look through the species carousel on the left and click on it when you find it!`;
+
+      // Step 6: Stream opening message to chat with typewriter effect
+      setChatHistory([]); // Clear first
+      await streamTextToChat(
+        `trivia-start-${Date.now()}`,
+        forestGuardianIntro,
+        'assistant'
+        // Uses default slow reading speed
+      );
+
+      // Step 7: Set up education context for Phase 1 (Producer Agent)
+      console.log('🤖 Activating Agent: PHASE 1 - PRODUCER AGENT');
+      const phase1Context = createProducerAgentContext(
+        regionInfo.regionName,
+        targets,
+        []
+      );
+      setEducationContext(phase1Context);
+
+      // Set quick replies for the trivia game
+      // Show "Give Me A Hint" button after intro
+      // User must answer trivia question correctly to get hint
+      setQuickReplies([{
+        id: 'hint',
+        label: 'Give Me A Hint',
+        emoji: '💡',
+        action: 'hint' as const
+      }]);
+
+      toast({
+        title: "🌍 Food Web Game Started!",
+        description: `Find the ${targets.producer.commonName}`,
+      });
+
+      console.log('✅ Food Web Trivia started! Target:', targets.producer.commonName);
     } catch (error) {
       console.error('❌ Error starting trivia:', error);
+      toast({
+        title: "Error",
+        description: "Failed to start game. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -2774,38 +3920,6 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
             imageUrl={regionInfo.imageUrl}
           />
 
-          {/* Navigation Arrows - Disabled for eco-regions (no carousel) */}
-          <div className="flex gap-2">
-            <Button
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Generate Lesson Plan Button */}
-          <Button
-            onClick={() => {
-              toast({
-                title: 'Lesson Plan',
-                description: `Generating lesson plan for ${regionInfo.regionName}...`,
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="secondary"
-          >
-            Generate Lesson Plan
-          </Button>
-
         </div>
       ) : selectedWildlifePark ? (
         <div
@@ -2822,39 +3936,6 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
             location={selectedWildlifePark.location || { lat: selectedWildlifePark.lat, lng: selectedWildlifePark.lng }}
             onClose={() => setSelectedWildlifePark(null)}
           />
-
-          {/* Navigation Arrows - Disabled for wildlife parks (no carousel) */}
-          <div className="flex gap-2">
-            <Button
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Play Game Button */}
-          <Button
-            onClick={() => {
-              toast({
-                title: 'Starting Game 🎮',
-                description: `Loading game for ${selectedWildlifePark.name}...`,
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="secondary"
-          >
-            Play Game 🎮
-          </Button>
-
         </div>
       ) : expandedImage ? (
         <div
@@ -2894,20 +3975,6 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
-
-          {/* Generate Lesson Plan Button */}
-          <Button
-            onClick={() => {
-              toast({
-                title: 'Lesson Plan',
-                description: `Generating lesson plan about this ${expandedImage.type}...`,
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="secondary"
-          >
-            Generate Lesson Plan
-          </Button>
         </div>
       ) : selectedCarouselSpecies ? (
         <div
@@ -2932,27 +3999,10 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
             }}
             onSelectForGame={handleSelectSpeciesForGame}
             isSelectedForGame={isSpeciesSelected(selectedCarouselSpecies.scientificName)}
+            isGameMode={isChatHistoryExpanded && foodWebTargetSpecies.producer !== null}
+            hideFacts={!isSpeciesRevealed && selectedSpeciesForReveal !== null}
+            onRevealClick={handleRevealSpecies}
           />
-
-          {/* Navigation Arrows */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handlePreviousSpecies}
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled={isLoading || regionSpecies.length === 0}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              onClick={handleNextSpecies}
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled={isLoading || regionSpecies.length === 0}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
 
           {/* Reset Chat Button - Shows when food web trivia is active */}
           {chatHistory.length > 0 && (
@@ -2980,40 +4030,6 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
             imageUrl={speciesInfo.imageUrl}
             onChatClick={handleChatClick}
           />
-
-          {/* Navigation Arrows */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handlePreviousSpecies}
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled={isLoading || regionSpecies.length === 0}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              onClick={handleNextSpecies}
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled={isLoading || regionSpecies.length === 0}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Generate Lesson Plan Button */}
-          <Button
-            onClick={() => {
-              toast({
-                title: 'Lesson Plan',
-                description: `Generating lesson plan for ${speciesInfo.commonName}...`,
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="secondary"
-          >
-            Generate Lesson Plan
-          </Button>
         </div>
       ) : currentHabitat ? (
         <div
@@ -3030,40 +4046,6 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
               });
             }}
           />
-
-          {/* Navigation Arrows */}
-          <div className="flex gap-2">
-            <Button
-              onClick={handlePreviousSpecies}
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled={isLoading || getFilteredSpecies().length === 0}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button
-              onClick={handleNextSpecies}
-              className="glass-panel flex-1 h-10 hover:bg-white/10 transition-colors"
-              variant="secondary"
-              disabled={isLoading || getFilteredSpecies().length === 0}
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-
-          {/* Generate Lesson Plan Button */}
-          <Button
-            onClick={() => {
-              toast({
-                title: 'Lesson Plan',
-                description: `Generating lesson plan for ${currentHabitat.name}...`,
-              });
-            }}
-            className="glass-panel w-full h-11 text-sm font-medium hover:bg-white/10"
-            variant="secondary"
-          >
-            Generate Lesson Plan
-          </Button>
         </div>
       ) : null}
 
@@ -3197,10 +4179,6 @@ Look for species with a ☀️ symbol in the carousel. Can you spot a large tree
         </div>
       )}
 
-      {/* MCP Test Component - Remove after testing */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[200] w-full max-w-2xl px-4">
-        <MCPTestComponent />
-      </div>
 
     </div>
   );

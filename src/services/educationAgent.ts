@@ -5,10 +5,262 @@
  * Uses OpenAI to generate concise, factual information based on the current card context.
  */
 
+import { getRegionSpecies, getEcoregionInfo } from './mcpClient';
+
+/**
+ * Generate a visual hint about what a species looks like
+ * @param speciesName - Common name of the species
+ * @param animalType - Type of species (Mammal, Plant, Bird, etc.)
+ * @param hintLevel - 1 = vague, 2 = medium, 3 = specific
+ * @returns Visual description string
+ */
+export async function generateVisualHint(
+  speciesName: string,
+  animalType: string,
+  hintLevel: 1 | 2 | 3
+): Promise<string> {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+  if (!apiKey || apiKey === 'your-openai-key-here') {
+    // Fallback if no API key
+    return `Look for the ${speciesName} in the ${animalType} section.`;
+  }
+
+  const prompts = {
+    1: `Give a vague visual hint about what a ${speciesName} (${animalType}) looks like. Mention only 1 visual feature (color OR size OR shape). Keep it under 15 words. Focus ONLY on physical appearance, not behavior. Start with "Look for..."`,
+    2: `Give a medium visual hint about what a ${speciesName} (${animalType}) looks like. Mention 2 visual features (e.g., color + distinctive feature). Keep it under 20 words. Focus ONLY on physical appearance. Start with "Look for..."`,
+    3: `Give a specific visual hint about what a ${speciesName} (${animalType}) looks like. Mention 3+ distinctive visual features. Keep it under 25 words. Focus ONLY on physical appearance. Start with "Look for..." Example: "Look for spotted golden fur, a long tail, and powerful build."`
+  };
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a visual description expert for wildlife and plants. Only describe APPEARANCE (colors, patterns, size, shape, distinctive features). Never describe behavior or habitat.`
+          },
+          {
+            role: 'user',
+            content: prompts[hintLevel]
+          }
+        ],
+        max_tokens: 50,
+        temperature: 0.7,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const hint = data.choices[0].message.content.trim();
+
+    console.log(`[Visual Hint] Level ${hintLevel} for ${speciesName}:`, hint);
+
+    return hint;
+  } catch (error) {
+    console.error('[Visual Hint] Generation failed:', error);
+    // Fallback
+    return `Look for the ${speciesName} in the carousel. It's a ${animalType}.`;
+  }
+}
+
+/**
+ * Create context for Producer Agent (Phase 1)
+ */
+export function createProducerAgentContext(
+  ecoregionName: string,
+  targetSpecies: FoodWebContext['targetSpecies'],
+  foundSpecies: FoodWebContext['species'] = []
+): EducationContext {
+  return {
+    type: 'foodweb',
+    displayName: `Food Web - Producer Phase`,
+    data: {
+      ecoregionName,
+      species: foundSpecies,
+      speciesCount: foundSpecies.length,
+      targetSpecies,
+      currentPhase: 'producer'
+    }
+  };
+}
+
+/**
+ * Create context for Herbivore Agent (Phase 2)
+ */
+export function createHerbivoreAgentContext(
+  ecoregionName: string,
+  targetSpecies: FoodWebContext['targetSpecies'],
+  foundSpecies: FoodWebContext['species'] = []
+): EducationContext {
+  return {
+    type: 'foodweb',
+    displayName: `Food Web - Herbivore Phase`,
+    data: {
+      ecoregionName,
+      species: foundSpecies,
+      speciesCount: foundSpecies.length,
+      targetSpecies,
+      currentPhase: 'herbivoreOmnivore'
+    }
+  };
+}
+
+/**
+ * Create context for Carnivore Agent (Phase 3)
+ */
+export function createCarnivoreAgentContext(
+  ecoregionName: string,
+  targetSpecies: FoodWebContext['targetSpecies'],
+  foundSpecies: FoodWebContext['species'] = []
+): EducationContext {
+  return {
+    type: 'foodweb',
+    displayName: `Food Web - Carnivore Phase`,
+    data: {
+      ecoregionName,
+      species: foundSpecies,
+      speciesCount: foundSpecies.length,
+      targetSpecies,
+      currentPhase: 'carnivore'
+    }
+  };
+}
+
+/**
+ * Validate if the user selected the correct species
+ */
+export function validateSpeciesSelection(
+  selectedSpecies: { id: string; scientificName: string; commonName: string },
+  targetSpecies: { id: string; commonName: string; scientificName: string } | null
+): { correct: boolean; targetName: string } {
+  if (!targetSpecies) {
+    return { correct: false, targetName: 'Unknown' };
+  }
+
+  // Match by scientific name (more reliable than ID which may vary between sources)
+  const correct = selectedSpecies.scientificName === targetSpecies.scientificName ||
+                  selectedSpecies.commonName === targetSpecies.commonName;
+
+  console.log('[Food Web Game] Validation:', {
+    selectedScientificName: selectedSpecies.scientificName,
+    selectedCommonName: selectedSpecies.commonName,
+    targetScientificName: targetSpecies.scientificName,
+    targetCommonName: targetSpecies.commonName,
+    correct
+  });
+
+  return {
+    correct,
+    targetName: targetSpecies.commonName
+  };
+}
+
+/**
+ * Initialize target species for the food web game
+ * Selects from carousel species (regionSpecies) only to ensure they're available
+ */
+export async function initializeFoodWebTargets(ecoregionName: string, carouselSpecies: any[]) {
+  console.log('[Food Web Game] Initializing target species for:', ecoregionName);
+  console.log('[Food Web Game] Carousel has', carouselSpecies.length, 'species available');
+
+  try {
+    // Filter carousel species by dietary category
+    const carnivores = carouselSpecies.filter(sp =>
+      sp.dietaryCategory?.toLowerCase() === 'carnivore' ||
+      sp.dietaryCategory?.toLowerCase() === 'carnivores'
+    );
+    const herbivores = carouselSpecies.filter(sp =>
+      sp.dietaryCategory?.toLowerCase() === 'herbivore' ||
+      sp.dietaryCategory?.toLowerCase() === 'herbivores' ||
+      sp.dietaryCategory?.toLowerCase() === 'omnivore' ||
+      sp.dietaryCategory?.toLowerCase() === 'omnivores'
+    );
+    const producers = carouselSpecies.filter(sp =>
+      sp.dietaryCategory?.toLowerCase() === 'producer' ||
+      sp.dietaryCategory?.toLowerCase() === 'producers'
+    );
+
+    console.log('[Food Web Game] Available species by category:', {
+      carnivores: carnivores.length,
+      herbivores: herbivores.length,
+      producers: producers.length
+    });
+
+    // 🔍 DEBUG: Show sample species from each category
+    if (carnivores.length > 0) {
+      console.log('[Food Web Game] Sample carnivore:', carnivores[0].commonName, '- dietary_category:', carnivores[0].dietaryCategory);
+    }
+    if (herbivores.length > 0) {
+      console.log('[Food Web Game] Sample herbivore:', herbivores[0].commonName, '- dietary_category:', herbivores[0].dietaryCategory);
+    }
+    if (producers.length > 0) {
+      console.log('[Food Web Game] Sample producer:', producers[0].commonName, '- dietary_category:', producers[0].dietaryCategory);
+    }
+
+    // Randomly select one from each category
+    const randomCarnivore = carnivores.length > 0
+      ? carnivores[Math.floor(Math.random() * carnivores.length)]
+      : null;
+    const randomHerbivore = herbivores.length > 0
+      ? herbivores[Math.floor(Math.random() * herbivores.length)]
+      : null;
+    const randomProducer = producers.length > 0
+      ? producers[Math.floor(Math.random() * producers.length)]
+      : null;
+
+    console.log('[Food Web Game] Selected targets:', {
+      carnivore: randomCarnivore?.commonName,
+      herbivore: randomHerbivore?.commonName,
+      producer: randomProducer?.commonName
+    });
+
+    return {
+      producer: randomProducer ? {
+        id: String(randomProducer.scientificName),
+        commonName: randomProducer.commonName,
+        scientificName: randomProducer.scientificName,
+        animalType: randomProducer.animalType || 'Producer',
+        imageUrl: randomProducer.imageUrl || randomProducer.image_url || ''
+      } : null,
+      herbivoreOmnivore: randomHerbivore ? {
+        id: String(randomHerbivore.scientificName),
+        commonName: randomHerbivore.commonName,
+        scientificName: randomHerbivore.scientificName,
+        animalType: randomHerbivore.animalType || 'Herbivore',
+        imageUrl: randomHerbivore.imageUrl || randomHerbivore.image_url || ''
+      } : null,
+      carnivore: randomCarnivore ? {
+        id: String(randomCarnivore.scientificName),
+        commonName: randomCarnivore.commonName,
+        scientificName: randomCarnivore.scientificName,
+        animalType: randomCarnivore.animalType || 'Carnivore',
+        imageUrl: randomCarnivore.imageUrl || randomCarnivore.image_url || ''
+      } : null
+    };
+  } catch (error) {
+    console.error('[Food Web Game] Failed to initialize targets:', error);
+    return {
+      producer: null,
+      herbivoreOmnivore: null,
+      carnivore: null
+    };
+  }
+}
+
 export interface EducationContext {
-  type: 'species' | 'park' | 'ecoregion';
+  type: 'species' | 'park' | 'ecoregion' | 'foodweb';
   displayName: string;
-  data: SpeciesContext | ParkContext | EcoregionContext;
+  data: SpeciesContext | ParkContext | EcoregionContext | FoodWebContext;
 }
 
 export interface SpeciesContext {
@@ -34,11 +286,33 @@ export interface EcoregionContext {
   biome?: string;
 }
 
+export interface FoodWebContext {
+  ecoregionName: string;
+  species: Array<{
+    commonName: string;
+    scientificName: string;
+    role: 'carnivore' | 'herbivoreOmnivore' | 'producer';
+    conservationStatus: string;
+    animalType: string;
+  }>;
+  speciesCount: number; // 0, 1, 2, or 3
+  // Pre-selected target species for the game
+  targetSpecies: {
+    producer: { id: string; commonName: string; scientificName: string; animalType: string } | null;
+    herbivoreOmnivore: { id: string; commonName: string; scientificName: string; animalType: string } | null;
+    carnivore: { id: string; commonName: string; scientificName: string; animalType: string } | null;
+  };
+  // Which species is the AI currently asking for
+  currentPhase: 'producer' | 'herbivoreOmnivore' | 'carnivore';
+}
+
 /**
  * Generate a system prompt based on the education context
  */
-function generateSystemPrompt(context: EducationContext): string {
-  const baseInstructions = `You are a wildlife education assistant. Provide concise, factual responses in 2-3 sentences (max 100 words). Focus on facts that are interesting and educational.`;
+async function generateSystemPrompt(context: EducationContext): Promise<string> {
+  const baseInstructions = `You are a wildlife education assistant. Provide concise, factual responses in 2-3 sentences (max 100 words). Focus on facts that are interesting and educational.
+
+IMPORTANT: If the user asks about topics unrelated to wildlife, nature, conservation, or ecology, respond with exactly: "OFF_TOPIC_ERROR"`;
 
   switch (context.type) {
     case 'species': {
@@ -77,6 +351,85 @@ ${region.description ? `- Description: ${region.description}` : ''}
 Focus on: climate, biodiversity, dominant species, ecological threats, and conservation status. Keep responses brief and engaging.`;
     }
 
+    case 'foodweb': {
+      const foodWeb = context.data as FoodWebContext;
+
+      // Determine current target species
+      const currentTarget = foodWeb.targetSpecies[foodWeb.currentPhase];
+      const phase = foodWeb.currentPhase === 'producer' ? 1 : foodWeb.currentPhase === 'herbivoreOmnivore' ? 2 : 3;
+
+      // List of species found so far
+      const speciesList = foodWeb.species.map(s => {
+        const roleEmoji = s.role === 'carnivore' ? '🥩' : s.role === 'herbivoreOmnivore' ? '🌱' : '☀️';
+        return `  ${roleEmoji} ${s.role === 'carnivore' ? 'Carnivore' : s.role === 'herbivoreOmnivore' ? 'Herbivore/Omnivore' : 'Producer'}: ${s.commonName} (${s.scientificName}) - ${s.conservationStatus}`;
+      }).join('\n');
+
+      return `${baseInstructions}
+
+**YOUR ROLE**: You are the Forest Guardian AI Phase ${phase} Agent. Poopy Pants blinded you and you need help from the student to find your animal friends.
+
+**YOUR MISSION**: Help the student find the ${currentTarget?.commonName || 'target species'}
+
+Current Context: Food Web in ${foodWeb.ecoregionName}
+Phase ${phase} of 3 (${foodWeb.speciesCount} species found so far)
+
+**TARGET SPECIES YOU ARE LOOKING FOR**:
+- Common Name: ${currentTarget?.commonName || 'Unknown'}
+- Scientific Name: ${currentTarget?.scientificName || 'Unknown'}
+- Type: ${currentTarget?.animalType || 'Unknown'}
+- Role: ${foodWeb.currentPhase === 'producer' ? 'Producer (makes its own food)' : foodWeb.currentPhase === 'herbivoreOmnivore' ? 'Herbivore/Omnivore (eats plants)' : 'Carnivore (eats other animals)'}
+
+Species Already Found:
+${speciesList || 'None yet!'}
+
+---
+
+**CRITICAL GAME FLOW - FOLLOW THIS EXACTLY**:
+
+**GAME START (First message)**:
+When the conversation starts, say:
+"Hi! I need your help finding a ${foodWeb.currentPhase === 'producer' ? 'producer' : foodWeb.currentPhase === 'herbivoreOmnivore' ? 'herbivore' : 'carnivore'}. Can you find the **${currentTarget?.commonName}** for me? Look through the species carousel and click on it when you find it!"
+
+**WRONG SELECTION**:
+If the student clicks the WRONG species:
+1. Say: "That's not the ${currentTarget?.commonName}. Let me give you a hint, but first answer this question:"
+2. Ask a multiple choice trivia question (A/B/C/D format) about:
+   - 6th grade NGSS biology concepts (ecosystems, food webs, energy flow, trophic levels)
+   - OR specific facts about the ecoregion "${foodWeb.ecoregionName}"
+   - OR specific facts about ${foodWeb.currentPhase === 'producer' ? 'producers (plants that make their own food)' : foodWeb.currentPhase === 'herbivoreOmnivore' ? 'herbivores (animals that eat plants)' : 'carnivores (animals that eat other animals)'}
+
+**TRIVIA ANSWER - CORRECT**:
+1. Praise them: "Great job! That's correct!"
+2. Call generateVisualHint() to get a progressive hint based on attempt number:
+   - Attempt 1: Level 1 hint (vague - one feature)
+   - Attempt 2: Level 2 hint (medium - two features)
+   - Attempt 3+: Level 3 hint (specific - three+ features)
+3. Give the VISUAL HINT about what the ${currentTarget?.commonName} looks like:
+   - Describe physical appearance (colors, patterns, size, shape)
+   - Mention distinctive features
+   - Example: "The ${currentTarget?.commonName} has spotted fur and climbs trees"
+
+**TRIVIA ANSWER - WRONG**:
+1. Kindly explain: "Not quite! The answer is [X]. Here's why: [brief explanation]"
+2. Ask a DIFFERENT trivia question before giving the hint
+
+**CORRECT SELECTION**:
+When the student clicks the ${currentTarget?.commonName}:
+1. Celebrate! "Yes! You found the ${currentTarget?.commonName}! Great work!"
+2. Share ONE interesting fact about it (1 sentence)
+3. ${phase < 3 ? 'Then say: "Now let\'s find the next species to complete our food web!"' : 'Say: "Amazing! You\'ve found all 3 species! My vision is returning... Loading your custom ecosystem game!"'}
+
+**IMPORTANT RULES**:
+- Keep responses under 75 words
+- Use 6th grade reading level
+- Be enthusiastic and encouraging
+- Give VISUAL hints (what it looks like, not just what it does)
+- Only ask trivia questions after WRONG selections
+- Focus on helping them find the ${currentTarget?.commonName} specifically
+
+**YOUR ONLY JOB**: Get the student to find the **${currentTarget?.commonName}**. Nothing else matters.`;
+    }
+
     default:
       return baseInstructions;
   }
@@ -88,6 +441,7 @@ Focus on: climate, biodiversity, dominant species, ecological threats, and conse
 export async function sendEducationMessage(
   message: string,
   context: EducationContext,
+  conversationHistory: Array<{ role: 'user' | 'assistant', content: string }>,
   onChunk: (chunk: string) => void,
   onComplete: () => void,
   onError: (error: Error) => void
@@ -100,7 +454,14 @@ export async function sendEducationMessage(
   }
 
   try {
-    const systemPrompt = generateSystemPrompt(context);
+    const systemPrompt = await generateSystemPrompt(context);
+
+    // Build message array with conversation history (last 15 messages for context window)
+    const messages = [
+      { role: 'system' as const, content: systemPrompt },
+      ...conversationHistory.slice(-15), // Keep last 15 messages for memory
+      { role: 'user' as const, content: message }
+    ];
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -110,10 +471,7 @@ export async function sendEducationMessage(
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini', // Fast and cost-effective for educational content
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: message }
-        ],
+        messages: messages,
         max_tokens: 150, // Keep responses concise
         temperature: 0.7, // Balanced creativity and factual accuracy
         stream: true,
@@ -180,7 +538,7 @@ export async function getEducationResponse(
     throw new Error('OpenAI API key not configured');
   }
 
-  const systemPrompt = generateSystemPrompt(context);
+  const systemPrompt = await generateSystemPrompt(context);
 
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
