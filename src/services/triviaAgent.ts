@@ -434,8 +434,8 @@ export function generateHint(
 }
 
 /**
- * Generate Hint Level 2 using OpenAI Web Search
- * Searches the internet for information about the species and returns a description
+ * Generate Hint Level 2 using OpenAI with enhanced knowledge
+ * Provides detailed physical description as if gathered from web sources
  */
 export async function generateHintLevel2WithWebSearch(
   targetSpecies: { commonName: string; scientificName: string; animalType: string; role: string },
@@ -453,48 +453,60 @@ export async function generateHintLevel2WithWebSearch(
         messages: [
           {
             role: 'system',
-            content: 'You are a wildlife educator helping students identify species. Use web search to find accurate, current information about species.'
+            content: `You are a field guide expert providing detailed species identification hints based on comprehensive biological knowledge. You help students identify species by describing them in rich detail WITHOUT revealing their names.`
           },
           {
             role: 'user',
-            content: `Search the web for current information about ${targetSpecies.commonName} (${targetSpecies.scientificName}), a ${targetSpecies.animalType} from ${ecoregionName}.
+            content: `I need help identifying a ${targetSpecies.animalType} from ${ecoregionName}. The scientific name is ${targetSpecies.scientificName}.
 
-Based on what you find online, provide identification hints focusing on:
-- Physical appearance and distinguishing features
-- Size or color patterns
-- Distinctive characteristics biologists use to identify it
-- Habitat or behavior details
+Provide a detailed identification hint as if you've gathered information from multiple field guides and species databases. Include:
+- Detailed physical characteristics (size, color, texture, patterns)
+- Distinctive morphological features that help distinguish it from similar species
+- Habitat preferences and where it's typically found
+- Any notable behavioral traits or ecological role
 
-Keep the hint brief (2-3 sentences) and DO NOT mention the species name directly - refer to it as "this species".
-Format as: "🔍 **Hint 2/3 (from web search):** [your hint based on online sources]"`
+CRITICAL RULES:
+- DO NOT mention "${targetSpecies.commonName}" or any common names
+- DO NOT mention the scientific name "${targetSpecies.scientificName}"
+- Refer to it only as "this species" or "this ${targetSpecies.animalType}"
+- Be specific and descriptive (3-4 sentences)
+- Focus on VISUAL identification features that would appear in photos/carousel
+
+Format as: "🔍 **Hint 2/3 (Detailed description):** [your detailed identification hint]"
+
+Example good hint: "This species features large, pinnate leaves up to 5 meters long with a distinctive glossy dark green texture. The trunk is tall and fibrous, reaching heights of 15-20 meters. It typically grows in swampy lowland areas and produces creamy yellow flower clusters."
+
+Example bad hint: "This is an Okoumé tree" or "Look for the Raffia palm"`
           }
         ],
-        temperature: 0.7,
-        max_tokens: 200,
-        tools: [
-          {
-            type: 'web_search_preview'
-          }
-        ]
+        temperature: 0.8,
+        max_tokens: 250
       })
     });
 
     if (!response.ok) {
-      console.error('[Hint Level 2] OpenAI API error:', response.status);
-      // Fallback to simple hint
-      return `🔍 **Hint 2/3:** The species is called the **${targetSpecies.commonName}**. Look through the carousel carefully!`;
+      const errorText = await response.text();
+      console.error('[Hint Level 2] OpenAI API error:', response.status, errorText);
+      // Fallback to basic descriptive hint
+      const roleDesc = targetSpecies.role === 'producer' ? 'producer plant'
+        : targetSpecies.role === 'herbivoreOmnivore' ? 'herbivore or omnivore'
+        : 'carnivore';
+      return `🔍 **Hint 2/3:** Look for a ${roleDesc} in the ${ecoregionName}. This ${targetSpecies.animalType} has distinctive features that set it apart from similar species in the region.`;
     }
 
     const data = await response.json();
     const hint = data.choices[0].message.content;
 
-    console.log('[Hint Level 2] Generated hint with web search:', hint);
+    console.log('[Hint Level 2] Generated detailed hint:', hint);
     return hint;
 
   } catch (error) {
     console.error('[Hint Level 2] Error:', error);
-    // Fallback to simple hint
-    return `🔍 **Hint 2/3:** The species is called the **${targetSpecies.commonName}**. Look through the carousel carefully!`;
+    // Fallback to basic descriptive hint
+    const roleDesc = targetSpecies.role === 'producer' ? 'producer plant'
+      : targetSpecies.role === 'herbivoreOmnivore' ? 'herbivore or omnivore'
+      : 'carnivore';
+    return `🔍 **Hint 2/3:** Look for a ${roleDesc} in the ${ecoregionName}. This ${targetSpecies.animalType} has distinctive features that set it apart from similar species in the region.`;
   }
 }
 

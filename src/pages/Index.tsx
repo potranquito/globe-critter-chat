@@ -2282,6 +2282,13 @@ const Index = () => {
       ];
       setFoundFoodWebSpecies(newFoundSpecies);
 
+      // ✅ FIX: Also add to selectedFoodWebSpecies to show in banner!
+      const slot = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore';
+      setSelectedFoodWebSpecies(prev => ({
+        ...prev,
+        [slot]: selectedSpeciesForReveal
+      }));
+
       // Clear species card after 10 seconds
       setTimeout(() => {
         setSelectedSpeciesForReveal(null);
@@ -2381,6 +2388,16 @@ The correct answer was the **${currentTarget.commonName}**. Now let's find the n
           }
         ];
         setFoundFoodWebSpecies(newFoundSpecies);
+
+        // ✅ FIX: Also add to selectedFoodWebSpecies to show in banner
+        const slot = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore';
+        setSelectedFoodWebSpecies(prev => ({
+          ...prev,
+          [slot]: {
+            ...currentTarget,
+            conservationStatus: 'Unknown'
+          }
+        }));
 
         // Reset for next phase
         setRevealAttemptCount(0);
@@ -2647,9 +2664,11 @@ ${question.choices.join('\n')}`;
         setIsLoading(false);
 
         // NOW stream success message + hint together
+        // IMPORTANT: Extra line breaks ensure hint appears clearly separated
         const successWithHintMessage = `✅ **Correct!**
 
 ${triviaQuestion.explanation}
+
 
 ${hint}`;
 
@@ -2764,9 +2783,11 @@ ${hint}`;
         setIsLoading(false);
 
         // Stream success message + hint together
+        // IMPORTANT: Extra line breaks ensure hint appears clearly separated
         const successWithHintMessage = `✅ **Correct!**
 
 ${triviaQuestion.explanation}
+
 
 ${hint}`;
 
@@ -2810,10 +2831,15 @@ ${hint}`;
       }
 
     } else {
-      // ❌ WRONG ANSWER
+      // ❌ WRONG ANSWER - User loses this hint opportunity
+      const newAttemptCount = triviaAttemptCount + 1;
+      setTriviaAttemptCount(newAttemptCount);
+
       const wrongMessage = `❌ **Not quite.**
 
-The correct answer is **${triviaQuestion.choices[triviaQuestion.correctAnswer]}**.`;
+The correct answer is **${triviaQuestion.choices[triviaQuestion.correctAnswer]}**.
+
+You didn't earn this hint. ${newAttemptCount < 3 ? 'Try selecting another species or press the hint button to try another trivia question.' : ''}`;
 
       // Stream wrong answer message
       await streamTextToChat(
@@ -2822,34 +2848,34 @@ The correct answer is **${triviaQuestion.choices[triviaQuestion.correctAnswer]}*
         'assistant'
       );
 
-      const newAttemptCount = triviaAttemptCount + 1;
-      setTriviaAttemptCount(newAttemptCount);
+      // Check if auto-advance should trigger (3 trivia failures OR 3 wrong species)
+      if (newAttemptCount >= 3 || revealAttemptCount >= 3) {
+        console.log(`🎁 Auto-advance triggered: ${newAttemptCount} trivia failures, ${revealAttemptCount} wrong species`);
 
-      if (newAttemptCount >= 3) {
-        // After 3 wrong trivia attempts, auto-skip to next phase
-        const skipMessage = `Let's move on. The species we're looking for is the **${foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']?.commonName}**. It's a ${foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']?.animalType} that plays an important role in this ecosystem.`;
-
-        // Stream skip message
-        await streamTextToChat(
-          `trivia-skip-${Date.now()}`,
-          skipMessage,
-          'assistant'
-        );
-
-        // Unlock and advance to next phase
-        setIsWaitingForAnswer(false);
-        setTriviaQuestion(null);
-        setTriviaAttemptCount(0);
-        setShowHintButton(false);
-        setHintLevel(0);
-
-        // Auto-advance (same logic as 4th wrong reveal)
+        // Auto-skip to next phase
         const currentTarget = foodWebGamePhase === 1
           ? foodWebTargetSpecies.producer
           : foodWebGamePhase === 2
             ? foodWebTargetSpecies.herbivoreOmnivore
             : foodWebTargetSpecies.carnivore;
 
+        const skipMessage = `Let's move on. The species we're looking for is the **${currentTarget?.commonName}**. It's a ${currentTarget?.animalType} that plays an important role in this ecosystem.`;
+
+        await streamTextToChat(
+          `trivia-skip-${Date.now()}`,
+          skipMessage,
+          'assistant'
+        );
+
+        // Reset counters and state
+        setIsWaitingForAnswer(false);
+        setTriviaQuestion(null);
+        setTriviaAttemptCount(0);
+        setRevealAttemptCount(0);
+        setShowHintButton(false);
+        setHintLevel(0);
+
+        // Add species to found list
         const newFoundSpecies = [
           ...foundFoodWebSpecies,
           {
@@ -2862,23 +2888,37 @@ The correct answer is **${triviaQuestion.choices[triviaQuestion.correctAnswer]}*
         ];
         setFoundFoodWebSpecies(newFoundSpecies);
 
+        // ✅ FIX: Also add to selectedFoodWebSpecies to show in banner
+        const slot = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore';
+        setSelectedFoodWebSpecies(prev => ({
+          ...prev,
+          [slot]: {
+            ...currentTarget!,
+            conservationStatus: 'Unknown'
+          }
+        }));
+
+        // Advance to next phase
         if (foodWebGamePhase < 3) {
           const nextPhase = (foodWebGamePhase + 1) as 1 | 2 | 3;
           setFoodWebGamePhase(nextPhase);
 
-          const nextContext = nextPhase === 2
-            ? createHerbivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies)
-            : createCarnivoreAgentContext(regionInfo!.regionName, foodWebTargetSpecies, newFoundSpecies);
+          const nextTarget = nextPhase === 2
+            ? foodWebTargetSpecies.herbivoreOmnivore
+            : foodWebTargetSpecies.carnivore;
 
-          setEducationContext(nextContext);
+          const nextMessage = `Great! Now let's find a **${nextPhase === 2 ? 'herbivore or omnivore' : 'carnivore'}**.
 
-          toast({
-            title: `Phase ${nextPhase}/3`,
-            description: `Now find the ${nextPhase === 2 ? foodWebTargetSpecies.herbivoreOmnivore?.commonName : foodWebTargetSpecies.carnivore?.commonName}!`,
-          });
+Can you find the **${nextTarget?.commonName}**?`;
+
+          await streamTextToChat(
+            `next-phase-${Date.now()}`,
+            nextMessage,
+            'assistant'
+          );
 
           setQuickReplies([
-            { text: '💡 Hint', emoji: '💡' }
+            { id: 'hint', label: 'Give Me A Hint', emoji: '💡', action: 'hint' as const }
           ]);
         } else {
           // Game complete
@@ -2890,50 +2930,29 @@ The correct answer is **${triviaQuestion.choices[triviaQuestion.correctAnswer]}*
         }
 
       } else {
-        // Show loading spinner while generating next question
-        setIsLoading(true);
+        // User lost this hint opportunity - clear trivia and show hint button
+        console.log('[Trivia Wrong] User lost hint, attempts remaining');
 
-        // Generate another question
-        try {
-          const newQuestion: TriviaQuestion = await generateTriviaQuestion({
-            targetSpecies: {
-              commonName: foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']!.commonName,
-              scientificName: foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']!.scientificName,
-              animalType: foodWebTargetSpecies[foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore']!.animalType,
-              role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
-            },
-            ecoregionName: regionInfo!.regionName,
-            gradeLevel: 5,
-            difficulty: 'medium'
-          });
+        // Clear trivia state
+        setTriviaQuestion(null);
+        setIsWaitingForAnswer(false);
+        setTriviaContext(null);
 
-          setTriviaQuestion(newQuestion);
-          setIsLoading(false);
+        // Show hint button for next attempt
+        const nextHintLabel = newAttemptCount === 1 ? 'Give Me A Second Hint' :
+                              newAttemptCount === 2 ? 'Give Me A Third Hint' :
+                              'Give Me A Hint';
 
-          const nextQuestionMessage = `Let's try another question:
+        setQuickReplies([
+          { id: 'hint', label: nextHintLabel, emoji: '💡', action: 'hint' as const }
+        ]);
 
-${newQuestion.question}
-
-${newQuestion.choices.join('\n')}`;
-
-          await streamTextToChat(
-            `trivia-q2-${Date.now()}`,
-            nextQuestionMessage,
-            'assistant'
-          );
-
-          // Set A/B/C/D quick replies
-          setQuickReplies([
-            { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
-            { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
-            { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
-            { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' }
-          ]);
-        } catch (error) {
-          console.error('Failed to generate follow-up question:', error);
-          // Fallback: unlock carousel
-          setIsWaitingForAnswer(false);
-        }
+        const hintsRemaining = 3 - newAttemptCount;
+        toast({
+          title: "Hint not earned",
+          description: `${hintsRemaining} hint ${hintsRemaining === 1 ? 'attempt' : 'attempts'} remaining`,
+          variant: "destructive"
+        });
       }
     }
   };
@@ -2976,19 +2995,11 @@ ${newQuestion.choices.join('\n')}`;
     if (hintLevel === 0) {
       console.log('🎓 Generating trivia question to unlock hint...');
 
-      // First, explain the trivia gate
-      const gateMessage = `Before I give you a hint, you must answer a trivia question correctly first!`;
-      await streamTextToChat(
-        `trivia-gate-${Date.now()}`,
-        gateMessage,
-        'assistant'
-      );
-
-      // Show loading animation while generating trivia
+      // Show loading animation FIRST (appears in the message box where trivia will show)
       setIsLoading(true);
       setQuickReplies([]); // Clear any existing quick replies
 
-      // Generate trivia question
+      // Generate trivia question while loading spinner is showing
       const question = await generateTriviaQuestion({
         targetSpecies: {
           commonName: currentTarget.commonName,
@@ -3005,16 +3016,23 @@ ${newQuestion.choices.join('\n')}`;
       setTriviaContext('hint'); // Mark this as hint-gating trivia
       setTriviaAttemptCount(0);
 
-      // Stream trivia question to chat
-      const triviaText = `${question.question}\n\n${question.choices.join('\n')}`;
-      await streamTextToChat(
-        `trivia-hint-${Date.now()}`,
-        triviaText,
-        'assistant'
-      );
-
       // Stop loading animation
       setIsLoading(false);
+
+      // Stream COMBINED message: gate text + trivia question together in ONE message box
+      const combinedMessage = `Before I give you a hint, you must answer a trivia question correctly first!
+
+**In order to continue, you must answer this question:**
+
+${question.question}
+
+${question.choices.join('\n')}`;
+
+      await streamTextToChat(
+        `trivia-hint-${Date.now()}`,
+        combinedMessage,
+        'assistant'
+      );
 
       // Show A/B/C/D quick replies
       setQuickReplies([
