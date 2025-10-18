@@ -8,20 +8,22 @@ interface FoodWebMiniCardProps {
     animalType: string;
     dietaryCategory?: string;
   };
-  slotType: 'carnivore' | 'herbivoreOmnivore' | 'producer';
+  slotType: 'carnivore' | 'herbivore' | 'omnivore' | 'bird' | 'plantCoral';
   onClick?: () => void;
+  isCorrect?: boolean; // 🎮 Show green glow for correct answer
+  isWrong?: boolean; // 🎮 Show red shake for wrong answer
+  isClickable?: boolean; // 🎮 Enable click interaction for trivia
 }
 
-export const FoodWebMiniCard = ({ species, slotType, onClick }: FoodWebMiniCardProps) => {
-  // Get emoji based on dietary category
+export const FoodWebMiniCard = ({ species, slotType, onClick, isCorrect, isWrong, isClickable }: FoodWebMiniCardProps) => {
+  // Get emoji based on slot type
   const getDietaryEmoji = () => {
     if (slotType === 'carnivore') return '🥩';
-    if (slotType === 'producer') return '☀️';
-    // herbivoreOmnivore
-    const category = species.dietaryCategory?.toLowerCase();
-    if (category === 'herbivore') return '🌱';
-    if (category === 'omnivore') return '🍽️';
-    return '🌱'; // Default for herbivore/omnivore slot
+    if (slotType === 'herbivore') return '🌱';
+    if (slotType === 'omnivore') return '🍽️';
+    if (slotType === 'bird') return '🦅';
+    if (slotType === 'plantCoral') return '☀️';
+    return '🌱'; // Default
   };
 
   // Get fallback emoji based on animal type
@@ -37,23 +39,27 @@ export const FoodWebMiniCard = ({ species, slotType, onClick }: FoodWebMiniCardP
     return '🔍';
   };
 
+  // Build dynamic className based on state
+  const cardClassName = `relative overflow-hidden transition-all duration-300 animate-fade-in ${
+    isClickable ? 'cursor-pointer hover:scale-105 hover:shadow-xl' : ''
+  } ${
+    isCorrect ? 'ring-4 ring-green-500 shadow-green-500/50 scale-105' : ''
+  } ${
+    isWrong ? 'ring-4 ring-red-500 shadow-red-500/50 animate-shake' : ''
+  }`;
+
   return (
     <Card
-      className="relative overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl cursor-pointer animate-fade-in"
-      style={{ width: '200px' }}
-      onClick={onClick}
+      className={cardClassName}
+      style={{ width: '140px' }}
+      onClick={isClickable ? onClick : undefined}
     >
-      {/* Dietary Category Badge */}
-      <div className="absolute top-2 right-2 z-10 bg-background/90 backdrop-blur-sm rounded-full p-2 shadow-lg">
-        <span className="text-2xl">{getDietaryEmoji()}</span>
-      </div>
-
       {/* Species Image */}
       {species.imageUrl ? (
         <img
           src={species.imageUrl}
           alt={species.commonName}
-          className="w-full h-48 object-cover"
+          className="w-full h-24 object-cover"
           onError={(e) => {
             // Fallback to emoji placeholder
             const target = e.target as HTMLImageElement;
@@ -64,18 +70,8 @@ export const FoodWebMiniCard = ({ species, slotType, onClick }: FoodWebMiniCardP
       ) : null}
 
       {/* Fallback Emoji Display */}
-      <div className={`w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ${species.imageUrl ? 'hidden' : ''}`}>
-        <span className="text-8xl">{getAnimalEmoji(species.animalType)}</span>
-      </div>
-
-      {/* Species Name */}
-      <div className="p-3 bg-background/95 backdrop-blur-sm">
-        <p className="text-sm font-bold text-center text-foreground truncate" title={species.commonName}>
-          {species.commonName}
-        </p>
-        <p className="text-xs text-center text-muted-foreground truncate" title={species.scientificName}>
-          {species.scientificName}
-        </p>
+      <div className={`w-full h-24 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center ${species.imageUrl ? 'hidden' : ''}`}>
+        <span className="text-5xl">{getAnimalEmoji(species.animalType)}</span>
       </div>
     </Card>
   );

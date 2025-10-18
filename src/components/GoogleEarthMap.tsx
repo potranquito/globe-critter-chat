@@ -2,8 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { APIProvider, Map, AdvancedMarker, useMap } from '@vis.gl/react-google-maps';
 import { MapPin } from 'lucide-react';
 import { useGoogleMapsApi } from '@/hooks/useGoogleMapsApi';
-// ZoomControls removed per user request
-import UsageIndicator from './UsageIndicator';
+// ZoomControls and UsageIndicator removed per user request
 import ImageMarker from './ImageMarker';
 import GlobeComponent from './Globe';
 import WildlifeLocationCard from './WildlifeLocationCard';
@@ -137,7 +136,7 @@ const GoogleEarthMap = ({
 
   if (loading) {
     return (
-      <div className="w-full h-screen flex items-center justify-center bg-background">
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="bg-background">
         <div className="glass-panel rounded-lg p-6">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-3"></div>
           <p className="text-sm text-muted-foreground">Loading Google Earth...</p>
@@ -147,7 +146,7 @@ const GoogleEarthMap = ({
   }
   if (authError) {
     return (
-      <div className="relative w-full h-screen">
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <GlobeComponent 
           habitats={habitats as any}
           onPointClick={onPointClick}
@@ -160,7 +159,7 @@ const GoogleEarthMap = ({
 
   if (error || !apiKey) {
     return (
-      <div className="relative w-full h-screen">
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <GlobeComponent 
           habitats={habitats as any}
           onPointClick={onPointClick}
@@ -180,7 +179,7 @@ const GoogleEarthMap = ({
 
   return (
     <APIProvider apiKey={apiKey}>
-      <div className="relative w-full h-screen">
+      <div style={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <Map
           mapId="wildlife-map"
           defaultCenter={defaultCenter}
@@ -197,7 +196,7 @@ const GoogleEarthMap = ({
               setCurrentZoom(e.map.getZoom() || 3);
             }
           }}
-          className="w-full h-full"
+          style={{ width: '100%', height: '100%' }}
         >
           <MapEventHandler onDoubleClick={onDoubleGlobeClick} />
 
@@ -319,16 +318,7 @@ const GoogleEarthMap = ({
           ))}
         </Map>
 
-        {/* UI Overlays - Zoom controls removed per user request */}
-
-        {usage && (
-          <UsageIndicator
-            daily={usage.daily}
-            monthly={usage.monthly}
-            dailyLimit={usage.dailyLimit}
-            monthlyLimit={usage.monthlyLimit}
-          />
-        )}
+        {/* UI Overlays - Zoom controls and UsageIndicator removed per user request */}
 
       </div>
     </APIProvider>

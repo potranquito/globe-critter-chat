@@ -19,6 +19,10 @@ interface RegionSpeciesCardProps {
   // 🎮 NEW: Food web game props
   onSelectForGame?: (species: any) => void;
   isSelectedForGame?: boolean;
+  // 🎮 NEW: Reveal mechanic props
+  isGameMode?: boolean;
+  hideFacts?: boolean; // Hide name/facts until revealed
+  onRevealClick?: () => void;
 }
 
 const RegionSpeciesCard = ({
@@ -35,7 +39,10 @@ const RegionSpeciesCard = ({
   dietaryCategory,
   onChatClick,
   onSelectForGame,
-  isSelectedForGame
+  isSelectedForGame,
+  isGameMode = false,
+  hideFacts = false,
+  onRevealClick
 }: RegionSpeciesCardProps) => {
 
   // Use species image first, fallback to region image
@@ -120,34 +127,55 @@ const RegionSpeciesCard = ({
 
       {/* Fast Facts - Match Polar Bear Card exactly */}
       <div className="p-4">
-        <h3 className="text-xl font-bold text-foreground mb-1">{commonName}</h3>
-        <p className="text-sm text-primary mb-4">{finalClassification.speciesType}</p>
+        {/* Show facts only if not hidden (or if revealed in game mode) */}
+        {!hideFacts ? (
+          <>
+            <h3 className="text-xl font-bold text-foreground mb-1">{commonName}</h3>
+            <p className="text-sm text-primary mb-4">{finalClassification.speciesType}</p>
 
-        <div className="mb-3">
-          <p className="text-xs text-muted-foreground">Conservation Status</p>
-          <p className="text-base font-semibold text-accent">{formatConservationStatus(conservationStatus)}</p>
-        </div>
+            <div className="mb-3">
+              <p className="text-xs text-muted-foreground">Conservation Status</p>
+              <p className="text-base font-semibold text-accent">{formatConservationStatus(conservationStatus)}</p>
+            </div>
 
-        <div className="mb-4">
-          <p className="text-xs text-muted-foreground">Ecological Role</p>
-          <div className="flex items-center gap-2">
-            <span className="text-xl">{finalClassification.trophicRoleEmoji}</span>
-            <p className="text-base font-semibold text-primary">
-              {finalClassification.trophicRoleLabel}
-            </p>
-            {/* Bird call player - only for birds */}
-            {finalClassification.speciesType === 'Bird' && (
-              <BirdCallPlayer
-                scientificName={scientificName}
-                commonName={commonName}
-                size="sm"
-              />
-            )}
+            <div className="mb-4">
+              <p className="text-xs text-muted-foreground">Ecological Role</p>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{finalClassification.trophicRoleEmoji}</span>
+                <p className="text-base font-semibold text-primary">
+                  {finalClassification.trophicRoleLabel}
+                </p>
+                {/* Bird call player - only for birds */}
+                {finalClassification.speciesType === 'Bird' && (
+                  <BirdCallPlayer
+                    scientificName={scientificName}
+                    commonName={commonName}
+                    size="sm"
+                  />
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          // Facts hidden - show placeholder
+          <div className="text-center py-8">
+            <p className="text-2xl mb-2">❓</p>
+            <p className="text-sm text-muted-foreground">Click "Reveal Species" to find out!</p>
           </div>
-        </div>
+        )}
 
-        {/* 🎮 Select Species Button for Food Web Game */}
-        {onSelectForGame && (
+        {/* 🎮 Reveal Species Button (Game Mode) */}
+        {isGameMode && hideFacts && onRevealClick && (
+          <Button
+            onClick={onRevealClick}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 transition-all"
+          >
+            🔍 Reveal Species
+          </Button>
+        )}
+
+        {/* 🎮 Select Species Button for Food Web Game (Legacy - Non-Game Mode) */}
+        {!isGameMode && onSelectForGame && (
           <Button
             onClick={() => onSelectForGame({
               commonName,

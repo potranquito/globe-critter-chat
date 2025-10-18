@@ -166,6 +166,227 @@ export function validateSpeciesSelection(
 }
 
 /**
+ * AI-powered species selection for educational carousel
+ * Uses AI to intelligently select 3 species based on educational strategy
+ */
+export async function selectSpeciesWithAI(
+  carouselSpecies: any[],
+  ecoregionName: string
+): Promise<{
+  carnivore: any;
+  herbivore: any;
+  omnivore: any;
+  bird: any;
+  plantCoral: any;
+  strategy: string;
+  explanation: string;
+}> {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+  // Filter species by dietary category and type
+  const carnivores = carouselSpecies.filter(sp =>
+    sp.dietaryCategory?.toLowerCase() === 'carnivore' ||
+    sp.dietaryCategory?.toLowerCase() === 'carnivores'
+  );
+  const herbivores = carouselSpecies.filter(sp =>
+    sp.dietaryCategory?.toLowerCase() === 'herbivore' ||
+    sp.dietaryCategory?.toLowerCase() === 'herbivores'
+  );
+  const omnivores = carouselSpecies.filter(sp =>
+    sp.dietaryCategory?.toLowerCase() === 'omnivore' ||
+    sp.dietaryCategory?.toLowerCase() === 'omnivores'
+  );
+  const birds = carouselSpecies.filter(sp =>
+    sp.taxonomicGroup?.toLowerCase() === 'birds' ||
+    sp.animalType?.toLowerCase().includes('bird') ||
+    sp.animalType?.toLowerCase().includes('aves')
+  );
+  const plantsCorals = carouselSpecies.filter(sp =>
+    sp.taxonomicGroup?.toLowerCase() === 'plants & corals' ||
+    sp.animalType?.toLowerCase().includes('plant') ||
+    sp.animalType?.toLowerCase().includes('coral')
+  );
+
+  console.log('[AI Selection] Available species:', {
+    carnivores: carnivores.length,
+    herbivores: herbivores.length,
+    omnivores: omnivores.length,
+    birds: birds.length,
+    plantsCorals: plantsCorals.length
+  });
+
+  // Fallback to random if no API key
+  if (!apiKey || apiKey === 'your-openai-key-here') {
+    console.log('[AI Selection] No API key - using random selection');
+    return randomSelection(carnivores, herbivores, omnivores, birds, plantsCorals);
+  }
+
+  try {
+    // Prepare species data for AI
+    const speciesToSelect = {
+      carnivores: carnivores.map(s => ({
+        commonName: s.commonName,
+        scientificName: s.scientificName,
+        conservationStatus: s.conservationStatus || 'Unknown',
+        animalType: s.animalType || 'Unknown'
+      })),
+      herbivores: herbivores.map(s => ({
+        commonName: s.commonName,
+        scientificName: s.scientificName,
+        conservationStatus: s.conservationStatus || 'Unknown',
+        animalType: s.animalType || 'Unknown'
+      })),
+      omnivores: omnivores.map(s => ({
+        commonName: s.commonName,
+        scientificName: s.scientificName,
+        conservationStatus: s.conservationStatus || 'Unknown',
+        animalType: s.animalType || 'Unknown'
+      })),
+      birds: birds.map(s => ({
+        commonName: s.commonName,
+        scientificName: s.scientificName,
+        conservationStatus: s.conservationStatus || 'Unknown',
+        animalType: s.animalType || 'Unknown'
+      })),
+      plantsCorals: plantsCorals.map(s => ({
+        commonName: s.commonName,
+        scientificName: s.scientificName,
+        conservationStatus: s.conservationStatus || 'Unknown',
+        animalType: s.animalType || 'Plant/Coral'
+      }))
+    };
+
+    const systemPrompt = `You are an educational AI that selects species for a food web learning game. Your goal is to create engaging, educational experiences for 6th grade students.
+
+Available strategies:
+1. "carnivore-focus" - Highlight apex predators and their importance
+2. "food-web-variety" - Show diverse ecosystem connections
+3. "conservation-focus" - Emphasize endangered species
+4. "biodiversity-showcase" - Display ecosystem diversity
+5. "charismatic-megafauna" - Use recognizable, exciting animals
+
+Select ONE of each: carnivore, herbivore, omnivore, bird, and plant/coral that work well together as an educational food web. Consider:
+- Educational value for 6th graders
+- Visual appeal and recognizability
+- Conservation status diversity
+- Ecological relationships across all trophic levels
+
+IMPORTANT: For each species, provide ONLY the scientific name (e.g., "Panthera leo"), NOT the common name.
+
+Respond with ONLY valid JSON in this exact format:
+{
+  "strategy": "food-web-variety",
+  "explanation": "Brief explanation for students",
+  "carnivore": "Panthera leo",
+  "herbivore": "Giraffa camelopardalis",
+  "omnivore": "Ursus arctos",
+  "bird": "Aquila chrysaetos",
+  "plantCoral": "Acacia tortilis"
+}`;
+
+    const userPrompt = `Region: ${ecoregionName}
+
+Available Species:
+CARNIVORES: ${speciesToSelect.carnivores.map(s => `${s.commonName} (${s.scientificName})`).join(', ')}
+
+HERBIVORES: ${speciesToSelect.herbivores.map(s => `${s.commonName} (${s.scientificName})`).join(', ')}
+
+OMNIVORES: ${speciesToSelect.omnivores.map(s => `${s.commonName} (${s.scientificName})`).join(', ')}
+
+BIRDS: ${speciesToSelect.birds.map(s => `${s.commonName} (${s.scientificName})`).join(', ')}
+
+PLANTS/CORALS: ${speciesToSelect.plantsCorals.map(s => `${s.commonName} (${s.scientificName})`).join(', ')}
+
+Select 5 species (one from each category) that create a compelling educational food web. Respond ONLY with JSON.`;
+
+    console.log('[AI Selection] Calling OpenAI...');
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ],
+        max_tokens: 300,
+        temperature: 0.8, // More creative selection
+        response_format: { type: 'json_object' } // Force JSON response
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const aiResponse = JSON.parse(data.choices[0].message.content);
+
+    console.log('[AI Selection] AI chose:', aiResponse);
+
+    // Find the selected species in the original arrays
+    const selectedCarnivore = carnivores.find(s => s.scientificName === aiResponse.carnivore);
+    const selectedHerbivore = herbivores.find(s => s.scientificName === aiResponse.herbivore);
+    const selectedOmnivore = omnivores.find(s => s.scientificName === aiResponse.omnivore);
+    const selectedBird = birds.find(s => s.scientificName === aiResponse.bird);
+    const selectedPlantCoral = plantsCorals.find(s => s.scientificName === aiResponse.plantCoral);
+
+    // Validate all species were found
+    if (!selectedCarnivore || !selectedHerbivore || !selectedOmnivore || !selectedBird || !selectedPlantCoral) {
+      console.warn('[AI Selection] AI selected species not found, falling back to random');
+      return randomSelection(carnivores, herbivores, omnivores, birds, plantsCorals);
+    }
+
+    return {
+      carnivore: selectedCarnivore,
+      herbivore: selectedHerbivore,
+      omnivore: selectedOmnivore,
+      bird: selectedBird,
+      plantCoral: selectedPlantCoral,
+      strategy: aiResponse.strategy,
+      explanation: aiResponse.explanation
+    };
+  } catch (error) {
+    console.error('[AI Selection] Failed:', error);
+    return randomSelection(carnivores, herbivores, omnivores, birds, plantsCorals);
+  }
+}
+
+/**
+ * Fallback random selection (used when AI fails or no API key)
+ */
+function randomSelection(carnivores: any[], herbivores: any[], omnivores: any[], birds: any[], plantsCorals: any[]) {
+  const randomCarnivore = carnivores.length > 0
+    ? carnivores[Math.floor(Math.random() * carnivores.length)]
+    : null;
+  const randomHerbivore = herbivores.length > 0
+    ? herbivores[Math.floor(Math.random() * herbivores.length)]
+    : null;
+  const randomOmnivore = omnivores.length > 0
+    ? omnivores[Math.floor(Math.random() * omnivores.length)]
+    : null;
+  const randomBird = birds.length > 0
+    ? birds[Math.floor(Math.random() * birds.length)]
+    : null;
+  const randomPlantCoral = plantsCorals.length > 0
+    ? plantsCorals[Math.floor(Math.random() * plantsCorals.length)]
+    : null;
+
+  return {
+    carnivore: randomCarnivore,
+    herbivore: randomHerbivore,
+    omnivore: randomOmnivore,
+    bird: randomBird,
+    plantCoral: randomPlantCoral,
+    strategy: 'random-selection',
+    explanation: 'Species selected randomly for this learning experience.'
+  };
+}
+
+/**
  * Initialize target species for the food web game
  * Selects from carousel species (regionSpecies) only to ensure they're available
  */

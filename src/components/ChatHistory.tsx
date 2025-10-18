@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Minimize2, Globe, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Minimize2, Loader2, CheckCircle2, XCircle, AlertTriangle, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QuickReplies, { QuickReply } from '@/components/QuickReplies';
 
@@ -58,110 +58,119 @@ const ChatHistory = ({
     return null;
   }
 
-  // Check if last assistant message is currently streaming (empty or with content)
+  // Check if last assistant message is currently streaming
   const lastMessage = messages[messages.length - 1];
-  // Show earth if typing AND it's an assistant message
   const isLastMessageStreaming = isTyping && lastMessage?.role === 'assistant';
 
   return (
     <div
       className={cn(
-        "relative rounded-3xl overflow-hidden transition-all duration-300 ease-in-out shadow-2xl",
-        "backdrop-blur-xl bg-gradient-to-br from-emerald-900/30 via-green-900/25 to-teal-900/30",
-        "border-2 border-emerald-500/20 hover:border-emerald-400/30",
+        "relative rounded-t-lg overflow-hidden transition-all duration-300 ease-in-out shadow-2xl",
+        "bg-slate-950/95 backdrop-blur-sm",
+        "border-x border-t border-emerald-500/30",
         isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none",
         className
       )}
       style={{
         maxHeight: isExpanded ? 'calc(100vh - 350px)' : '0',
-        background: 'linear-gradient(135deg, rgba(6, 78, 59, 0.3) 0%, rgba(5, 46, 22, 0.25) 50%, rgba(19, 78, 74, 0.3) 100%)',
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
       }}
     >
-      {/* Minimize button - wildlife themed */}
-      {isExpanded && (
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={onMinimize}
-          className="absolute top-3 right-3 h-9 w-9 rounded-full bg-emerald-500/20 hover:bg-emerald-400/30 border border-emerald-400/40 z-[100] transition-all duration-200 hover:scale-110"
-          style={{ pointerEvents: 'auto' }}
-        >
-          <Minimize2 className="h-4 w-4 text-emerald-300" />
-        </Button>
-      )}
+      {/* Terminal Header */}
+      <div className="flex items-center justify-between px-4 py-2 bg-slate-900/90 border-b border-emerald-500/20">
+        <div className="flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+          </div>
+          <span className="text-xs font-semibold text-emerald-400 ml-2">wildlife-terminal</span>
+        </div>
 
-      {/* Messages */}
+        {isExpanded && (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={onMinimize}
+            className="h-7 w-7 rounded hover:bg-emerald-500/10 text-emerald-400/70 hover:text-emerald-300"
+            style={{ pointerEvents: 'auto' }}
+          >
+            <Minimize2 className="h-4 w-4" />
+          </Button>
+        )}
+      </div>
+
+      {/* Terminal Output */}
       <div
-        className="overflow-y-auto p-5 space-y-4 pt-16 custom-scrollbar"
+        className="overflow-y-auto p-4 space-y-2 custom-scrollbar"
         style={{ maxHeight: 'calc(100vh - 400px)' }}
       >
         {messages.map((message, index) => {
           const isCurrentlyStreaming = isLastMessageStreaming && index === messages.length - 1;
+          const showSpinner = message.role === 'assistant' && isCurrentlyStreaming;
 
           return (
             <div
               key={message.id}
-              className={cn(
-                "flex flex-col gap-1.5 animate-fade-in",
-                message.role === 'user' ? 'items-end' : 'items-start'
-              )}
+              className="animate-fade-in"
             >
-              <div
-                className={cn(
-                  "rounded-2xl px-5 py-3 max-w-[80%] shadow-lg transition-all duration-200",
-                  message.role === 'user'
-                    ? 'bg-gradient-to-br from-emerald-600 to-teal-600 text-white border border-emerald-400/30'
-                    : 'bg-gradient-to-br from-slate-800/90 to-slate-700/80 text-slate-100 border border-slate-600/40 backdrop-blur-sm'
-                )}
-              >
-                {/* Assistant message with spinning earth during streaming */}
-                {message.role === 'assistant' ? (
-                  <div className="flex items-start gap-2">
-                    {/* Spinning earth - only show while streaming */}
-                    {isCurrentlyStreaming && (
-                      <Globe
-                        className="h-5 w-5 text-cyan-400 animate-spin shrink-0 mt-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.6)]"
-                        style={{ animationDuration: '2s' }}
-                      />
-                    )}
-                    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed flex-1">
-                      {message.content || (isCurrentlyStreaming && 'Thinking...')}
+              {/* User Input Line */}
+              {message.role === 'user' ? (
+                <div className="flex items-start gap-2 group">
+                  <span className="text-emerald-400 font-bold shrink-0">❯</span>
+                  <div className="flex-1">
+                    <p className="text-sm text-emerald-100 whitespace-pre-wrap break-words leading-relaxed">
+                      {message.content}
                     </p>
-                  </div>
-                ) : (
-                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                )}
-              </div>
-
-              {/* Timestamp and error handling */}
-              <div className="flex items-center gap-2 px-3">
-                <span className="text-xs text-emerald-300/70 font-medium">
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-
-                {/* Error icon with retry - wildlife themed */}
-                {message.role === 'user' && message.status === 'error' && (
-                  <div className="flex items-center gap-1.5">
-                    <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
-                    {onRetry && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => onRetry(message.id)}
-                        className="h-6 px-2.5 text-xs text-amber-400 hover:text-amber-300 hover:bg-amber-400/10 rounded-full border border-amber-400/20"
-                      >
-                        <RotateCcw className="h-3 w-3 mr-1" />
-                        Retry
-                      </Button>
+                    {message.status === 'error' && (
+                      <div className="flex items-center gap-2 mt-1">
+                        <XCircle className="h-3.5 w-3.5 text-red-400" />
+                        <span className="text-xs text-red-400">Failed to send</span>
+                        {onRetry && (
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onRetry(message.id)}
+                            className="h-5 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded"
+                          >
+                            <RotateCcw className="h-3 w-3 mr-1" />
+                            Retry
+                          </Button>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
-              </div>
+                  <span className="text-xs text-slate-600 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+              ) : (
+                /* Assistant Output Line */
+                <div className="flex items-start gap-2 group">
+                  {/* Status Indicator */}
+                  {showSpinner ? (
+                    <Loader2 className="h-4 w-4 text-cyan-400 animate-spin shrink-0 mt-0.5" />
+                  ) : message.status === 'error' ? (
+                    <XCircle className="h-4 w-4 text-red-400 shrink-0 mt-0.5" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4 text-emerald-500/70 shrink-0 mt-0.5" />
+                  )}
 
-              {/* Error message */}
-              {message.status === 'error' && message.errorMessage && (
-                <div className="text-xs text-amber-300 px-3 max-w-[80%] bg-amber-900/20 rounded-lg py-1.5 px-3 border border-amber-500/20">
-                  {message.errorMessage}
+                  <div className="flex-1">
+                    <p className="text-sm text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
+                      {message.content || (showSpinner && <span className="text-slate-500 italic">Processing...</span>)}
+                    </p>
+                    {message.status === 'error' && message.errorMessage && (
+                      <div className="flex items-start gap-2 mt-1 text-xs text-red-400 bg-red-950/20 border border-red-900/30 rounded px-2 py-1">
+                        <AlertTriangle className="h-3 w-3 shrink-0 mt-0.5" />
+                        <span>{message.errorMessage}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <span className="text-xs text-slate-600 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
                 </div>
               )}
             </div>
@@ -170,7 +179,7 @@ const ChatHistory = ({
 
         {/* Quick Reply Buttons */}
         {quickReplies.length > 0 && onQuickReply && !isTyping && (
-          <div className="flex justify-center px-2 pt-2">
+          <div className="flex justify-start px-2 pt-2">
             <QuickReplies
               replies={quickReplies}
               onSelect={onQuickReply}
@@ -186,35 +195,28 @@ const ChatHistory = ({
       {/* Custom Scrollbar Styles */}
       <style jsx>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 8px;
+          width: 6px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(5, 46, 22, 0.2);
-          border-radius: 10px;
-          margin: 8px 0;
+          background: rgba(15, 23, 42, 0.4);
+          border-radius: 3px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: linear-gradient(180deg, #10b981 0%, #14b8a6 100%);
-          border-radius: 10px;
-          border: 2px solid rgba(5, 46, 22, 0.2);
+          background: rgba(16, 185, 129, 0.3);
+          border-radius: 3px;
           transition: all 0.3s ease;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: linear-gradient(180deg, #34d399 0%, #2dd4bf 100%);
-          box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb:active {
-          background: linear-gradient(180deg, #059669 0%, #0d9488 100%);
+          background: rgba(16, 185, 129, 0.5);
         }
 
         /* Firefox scrollbar */
         .custom-scrollbar {
           scrollbar-width: thin;
-          scrollbar-color: #10b981 rgba(5, 46, 22, 0.2);
+          scrollbar-color: rgba(16, 185, 129, 0.3) rgba(15, 23, 42, 0.4);
         }
       `}</style>
     </div>

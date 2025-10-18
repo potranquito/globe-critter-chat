@@ -35,7 +35,8 @@ import {
   validateSpeciesSelection,
   createProducerAgentContext,
   createHerbivoreAgentContext,
-  createCarnivoreAgentContext
+  createCarnivoreAgentContext,
+  selectSpeciesWithAI
 } from '@/services/educationAgent';
 import { getRegionSpecies } from '@/services/mcpClient';
 import {
@@ -212,6 +213,15 @@ const Index = () => {
   const rightPanelRef = useRef<HTMLDivElement>(null);
   const leftPanelRef = useRef<HTMLDivElement>(null);
 
+  // 🎰 Refs for sequential spin selection (to avoid state sync issues)
+  const spinSelectedSpeciesRef = useRef<{
+    carnivore: RegionSpecies | null;
+    herbivore: RegionSpecies | null;
+    omnivore: RegionSpecies | null;
+    bird: RegionSpecies | null;
+    plantCoral: RegionSpecies | null;
+  }>({ carnivore: null, herbivore: null, omnivore: null, bird: null, plantCoral: null });
+
   // ✅ NEW: Separate loading state for background fetches (wildlife, protected areas)
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
 
@@ -221,27 +231,35 @@ const Index = () => {
   // 🎮 NEW: Food web game - selected species for trivia
   interface SelectedFoodWebSpecies {
     carnivore: RegionSpecies | null;
-    herbivoreOmnivore: RegionSpecies | null;
-    producer: RegionSpecies | null;
+    herbivore: RegionSpecies | null;
+    omnivore: RegionSpecies | null;
+    bird: RegionSpecies | null;
+    plantCoral: RegionSpecies | null;
   }
   const [selectedFoodWebSpecies, setSelectedFoodWebSpecies] = useState<SelectedFoodWebSpecies>({
     carnivore: null,
-    herbivoreOmnivore: null,
-    producer: null
+    herbivore: null,
+    omnivore: null,
+    bird: null,
+    plantCoral: null
   });
 
   // 🎮 NEW: Food web game - target species and phase tracking
   const [foodWebTargetSpecies, setFoodWebTargetSpecies] = useState<{
-    producer: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
-    herbivoreOmnivore: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
     carnivore: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+    herbivore: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+    omnivore: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+    bird: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
+    plantCoral: { id: string; commonName: string; scientificName: string; animalType: string; imageUrl?: string } | null;
   }>({
-    producer: null,
-    herbivoreOmnivore: null,
-    carnivore: null
+    carnivore: null,
+    herbivore: null,
+    omnivore: null,
+    bird: null,
+    plantCoral: null
   });
 
-  const [foodWebGamePhase, setFoodWebGamePhase] = useState<1 | 2 | 3>(1);
+  const [foodWebGamePhase, setFoodWebGamePhase] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [foundFoodWebSpecies, setFoundFoodWebSpecies] = useState<Array<any>>([]);
 
   // 🎮 NEW: Reveal mechanic state
@@ -250,6 +268,11 @@ const Index = () => {
   const [revealAttemptCount, setRevealAttemptCount] = useState(0); // Track attempts (max 4)
   const [isCarouselLocked, setIsCarouselLocked] = useState(false); // Lock after wrong reveal
   const [isFoodWebGameActive, setIsFoodWebGameActive] = useState(false); // 🎮 Game state flag
+  const [isSpinningWheel, setIsSpinningWheel] = useState(false); // 🎰 Spin wheel animation state
+  const [spinPhase, setSpinPhase] = useState<1 | 2 | 3 | 4 | 5>(1); // 🎰 Which species to select: 1=carnivore, 2=herbivore, 3=omnivore, 4=bird, 5=plantCoral
+  const [isAISelecting, setIsAISelecting] = useState(false); // 🤖 AI is selecting species
+  const [correctAnswerFeedback, setCorrectAnswerFeedback] = useState<string | null>(null); // 🎮 Show green glow
+  const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState<string | null>(null); // 🎮 Show red shake
 
   // 🎓 NEW: Trivia question state
   const [triviaQuestion, setTriviaQuestion] = useState<any | null>(null);
@@ -258,6 +281,10 @@ const Index = () => {
   const [triviaContext, setTriviaContext] = useState<'hint' | 'wrongSpecies' | null>(null); // Track why trivia was shown
   const [showHintButton, setShowHintButton] = useState(false); // Shows after correct answer
   const [hintLevel, setHintLevel] = useState(0); // 0-3 (no hints used → all hints used)
+
+  // 🎮 NEW: Identification game state
+  const [collectedSpecies, setCollectedSpecies] = useState<RegionSpecies[]>([]); // Species user has correctly identified (across all batches)
+  const [currentChallengeSpecies, setCurrentChallengeSpecies] = useState<RegionSpecies | null>(null); // Species agent is asking for
 
   // 🌍 Load WWF ecoregions from database on mount
   useEffect(() => {
@@ -305,19 +332,21 @@ const Index = () => {
       isViewingEcoRegion,
       regionInfo: regionInfo?.regionName,
       useGoogleMaps,
-      foodWebCount: [selectedFoodWebSpecies.carnivore, selectedFoodWebSpecies.herbivoreOmnivore, selectedFoodWebSpecies.producer].filter(Boolean).length
+      foodWebCount: [selectedFoodWebSpecies.carnivore, selectedFoodWebSpecies.herbivore, selectedFoodWebSpecies.omnivore, selectedFoodWebSpecies.bird, selectedFoodWebSpecies.plantCoral].filter(Boolean).length
     });
 
-    // Priority 1: Food Web (ONLY if all 3 species selected - after Play Trivia pressed)
+    // Priority 1: Food Web (ONLY if all 5 species selected - after Play Trivia pressed)
     const foodWebSpeciesArray = [
       selectedFoodWebSpecies.carnivore ? { ...selectedFoodWebSpecies.carnivore, role: 'carnivore' as const } : null,
-      selectedFoodWebSpecies.herbivoreOmnivore ? { ...selectedFoodWebSpecies.herbivoreOmnivore, role: 'herbivoreOmnivore' as const } : null,
-      selectedFoodWebSpecies.producer ? { ...selectedFoodWebSpecies.producer, role: 'producer' as const } : null,
+      selectedFoodWebSpecies.herbivore ? { ...selectedFoodWebSpecies.herbivore, role: 'herbivore' as const } : null,
+      selectedFoodWebSpecies.omnivore ? { ...selectedFoodWebSpecies.omnivore, role: 'omnivore' as const } : null,
+      selectedFoodWebSpecies.bird ? { ...selectedFoodWebSpecies.bird, role: 'bird' as const } : null,
+      selectedFoodWebSpecies.plantCoral ? { ...selectedFoodWebSpecies.plantCoral, role: 'plantCoral' as const } : null,
     ].filter(Boolean);
 
-    // Only activate food web context when all 3 species are selected AND chat has been opened (trivia started)
-    if (foodWebSpeciesArray.length === 3 && regionInfo && useGoogleMaps && chatHistory.length > 0) {
-      console.log('✅ Setting education context: FOOD WEB (all 3 species)');
+    // Only activate food web context when all 5 species are selected AND chat has been opened (trivia started)
+    if (foodWebSpeciesArray.length === 5 && regionInfo && useGoogleMaps && chatHistory.length > 0) {
+      console.log('✅ Setting education context: FOOD WEB (all 5 species)');
       setEducationContext({
         type: 'foodweb',
         displayName: `Food Web in ${regionInfo.regionName}`,
@@ -417,8 +446,10 @@ const Index = () => {
     setIsChatHistoryExpanded(false);
     setSelectedFoodWebSpecies({
       carnivore: null,
-      herbivoreOmnivore: null,
-      producer: null
+      herbivore: null,
+      omnivore: null,
+      bird: null,
+      plantCoral: null
     });
 
     // 🎮 RESET ALL GAME STATE when entering new region
@@ -434,7 +465,7 @@ const Index = () => {
     setIsWaitingForAnswer(false);
     setShowHintButton(false);
     setHintLevel(0);
-    setFoodWebTargetSpecies({ producer: null, herbivoreOmnivore: null, carnivore: null });
+    setFoodWebTargetSpecies({ carnivore: null, herbivore: null, omnivore: null, bird: null, plantCoral: null });
     console.log('🔄 Game state reset - isFoodWebGameActive set to FALSE');
 
     // Add slower transition - delay switching to 2D map view
@@ -2246,11 +2277,7 @@ const Index = () => {
     setIsSpeciesRevealed(true);
 
     // Get current target based on phase
-    const currentTarget = foodWebGamePhase === 1
-      ? foodWebTargetSpecies.producer
-      : foodWebGamePhase === 2
-        ? foodWebTargetSpecies.herbivoreOmnivore
-        : foodWebTargetSpecies.carnivore;
+    const currentTarget = getCurrentTarget(foodWebGamePhase);
 
     if (!currentTarget) {
       console.error('No current target for phase', foodWebGamePhase);
@@ -2275,7 +2302,7 @@ const Index = () => {
         {
           commonName: currentTarget.commonName,
           scientificName: currentTarget.scientificName,
-          role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+          role: getSlotForPhase(foodWebGamePhase),
           conservationStatus: selectedSpeciesForReveal.conservationStatus || 'Unknown',
           animalType: currentTarget.animalType
         }
@@ -2283,7 +2310,7 @@ const Index = () => {
       setFoundFoodWebSpecies(newFoundSpecies);
 
       // ✅ FIX: Also add to selectedFoodWebSpecies to show in banner!
-      const slot = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore';
+      const slot = getSlotForPhase(foodWebGamePhase);
       setSelectedFoodWebSpecies(prev => ({
         ...prev,
         [slot]: selectedSpeciesForReveal
@@ -2313,7 +2340,7 @@ const Index = () => {
 
         toast({
           title: "🎉 Game Complete!",
-          description: "You found all 3 species!",
+          description: "You found all 5 species!",
         });
       } else {
         // Move to next phase
@@ -2382,7 +2409,7 @@ The correct answer was the **${currentTarget.commonName}**. Now let's find the n
           {
             commonName: currentTarget.commonName,
             scientificName: currentTarget.scientificName,
-            role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+            role: getSlotForPhase(foodWebGamePhase),
             conservationStatus: 'Unknown',
             animalType: currentTarget.animalType
           }
@@ -2390,7 +2417,7 @@ The correct answer was the **${currentTarget.commonName}**. Now let's find the n
         setFoundFoodWebSpecies(newFoundSpecies);
 
         // ✅ FIX: Also add to selectedFoodWebSpecies to show in banner
-        const slot = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore';
+        const slot = getSlotForPhase(foodWebGamePhase);
         setSelectedFoodWebSpecies(prev => ({
           ...prev,
           [slot]: {
@@ -2430,10 +2457,12 @@ Can you find the **${nextTarget?.commonName}**?`;
           // Game complete
           const completeMessage = `🎉 **Congratulations!** You've completed the food web!
 
-You found all three levels:
-- Producer: ${foodWebTargetSpecies.producer?.commonName}
-- Herbivore/Omnivore: ${foodWebTargetSpecies.herbivoreOmnivore?.commonName}
+You found all five species:
 - Carnivore: ${foodWebTargetSpecies.carnivore?.commonName}
+- Herbivore: ${foodWebTargetSpecies.herbivore?.commonName}
+- Omnivore: ${foodWebTargetSpecies.omnivore?.commonName}
+- Bird: ${foodWebTargetSpecies.bird?.commonName}
+- Plant/Coral: ${foodWebTargetSpecies.plantCoral?.commonName}
 
 Great job learning about the ${regionInfo?.regionName} ecosystem!`;
 
@@ -2526,7 +2555,7 @@ ${question.choices.join('\n')}`;
           {
             commonName: currentTarget.commonName,
             scientificName: currentTarget.scientificName,
-            role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+            role: getSlotForPhase(foodWebGamePhase),
             conservationStatus: 'Unknown',
             animalType: currentTarget.animalType
           }
@@ -2553,7 +2582,7 @@ ${question.choices.join('\n')}`;
 
           toast({
             title: "🎉 Game Complete!",
-            description: "You found all 3 species!",
+            description: "You found all 5 species!",
           });
         }
 
@@ -2648,13 +2677,13 @@ ${question.choices.join('\n')}`;
         } catch (error) {
           console.error('[Hint Generation] Error:', error);
           // Fallback hint if generation fails
-          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          const roleDesc = getRoleDescription(foodWebGamePhase);
           hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} in the ${regionInfo!.regionName}. The species is a ${currentTarget!.animalType}.`;
         }
 
         // Ensure hint is not empty
         if (!hint || hint.trim() === '') {
-          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          const roleDesc = getRoleDescription(foodWebGamePhase);
           hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} called ${currentTarget!.commonName}.`;
         }
 
@@ -2767,13 +2796,13 @@ ${hint}`;
         } catch (error) {
           console.error('[Hint Generation] Error:', error);
           // Fallback hint if generation fails
-          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          const roleDesc = getRoleDescription(foodWebGamePhase);
           hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} in the ${regionInfo!.regionName}. The species is a ${currentTarget!.animalType}.`;
         }
 
         // Ensure hint is not empty
         if (!hint || hint.trim() === '') {
-          const roleDesc = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivore or omnivore' : 'carnivore';
+          const roleDesc = getRoleDescription(foodWebGamePhase);
           hint = `🔍 **Hint ${newHintLevel}/3:** Look for a ${roleDesc} called ${currentTarget!.commonName}.`;
         }
 
@@ -2881,7 +2910,7 @@ You didn't earn this hint. ${newAttemptCount < 3 ? 'Try selecting another specie
           {
             commonName: currentTarget!.commonName,
             scientificName: currentTarget!.scientificName,
-            role: foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore',
+            role: getSlotForPhase(foodWebGamePhase),
             conservationStatus: 'Unknown',
             animalType: currentTarget!.animalType
           }
@@ -2889,7 +2918,7 @@ You didn't earn this hint. ${newAttemptCount < 3 ? 'Try selecting another specie
         setFoundFoodWebSpecies(newFoundSpecies);
 
         // ✅ FIX: Also add to selectedFoodWebSpecies to show in banner
-        const slot = foodWebGamePhase === 1 ? 'producer' : foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore';
+        const slot = getSlotForPhase(foodWebGamePhase);
         setSelectedFoodWebSpecies(prev => ({
           ...prev,
           [slot]: {
@@ -2925,7 +2954,7 @@ Can you find the **${nextTarget?.commonName}**?`;
           setIsFoodWebGameActive(false);
           toast({
             title: "🎉 Game Complete!",
-            description: "You found all 3 species!",
+            description: "You found all 5 species!",
           });
         }
 
@@ -2973,11 +3002,7 @@ Can you find the **${nextTarget?.commonName}**?`;
 
   // 💡 Handle Hint Click
   const handleHintClick = async () => {
-    const currentTarget = foodWebGamePhase === 1
-      ? foodWebTargetSpecies.producer
-      : foodWebGamePhase === 2
-        ? foodWebTargetSpecies.herbivoreOmnivore
-        : foodWebTargetSpecies.carnivore;
+    const currentTarget = getCurrentTarget(foodWebGamePhase);
 
     if (!currentTarget) return;
 
@@ -3102,27 +3127,66 @@ ${question.choices.join('\n')}`;
 
   // 🎮 Food Web Game Helper Functions
 
+  // Map phase number to slot name
+  type FoodWebSlot = 'carnivore' | 'herbivore' | 'omnivore' | 'bird' | 'plantCoral';
+  const getSlotForPhase = (phase: 1 | 2 | 3 | 4 | 5): FoodWebSlot => {
+    const phaseMap: Record<1 | 2 | 3 | 4 | 5, FoodWebSlot> = {
+      1: 'carnivore',
+      2: 'herbivore',
+      3: 'omnivore',
+      4: 'bird',
+      5: 'plantCoral'
+    };
+    return phaseMap[phase];
+  };
+
+  // Get human-readable role description for hints
+  const getRoleDescription = (phase: 1 | 2 | 3 | 4 | 5): string => {
+    const roleDescMap: Record<1 | 2 | 3 | 4 | 5, string> = {
+      1: 'carnivore',
+      2: 'herbivore',
+      3: 'omnivore',
+      4: 'bird',
+      5: 'plant or coral'
+    };
+    return roleDescMap[phase];
+  };
+
+  // Get current target species based on phase
+  const getCurrentTarget = (phase: 1 | 2 | 3 | 4 | 5) => {
+    const slot = getSlotForPhase(phase);
+    return foodWebTargetSpecies[slot];
+  };
+
   // Determine which slot a species belongs to based on dietary category
-  const determineSpeciesSlot = (species: RegionSpecies): 'carnivore' | 'herbivoreOmnivore' | 'producer' | null => {
+  const determineSpeciesSlot = (species: RegionSpecies): FoodWebSlot | null => {
     const category = species.dietaryCategory?.toLowerCase();
+    const taxonomicGroup = species.taxonomicGroup?.toLowerCase();
+    const animalType = species.animalType?.toLowerCase();
 
     if (category === 'carnivore') {
       return 'carnivore';
-    } else if (category === 'herbivore' || category === 'omnivore') {
-      return 'herbivoreOmnivore';
-    } else if (category === 'producer') {
-      return 'producer';
+    } else if (category === 'herbivore') {
+      return 'herbivore';
+    } else if (category === 'omnivore') {
+      return 'omnivore';
+    } else if (taxonomicGroup === 'birds' || animalType?.includes('bird') || animalType?.includes('aves')) {
+      return 'bird';
+    } else if (category === 'producer' || taxonomicGroup === 'plants & corals' || animalType?.includes('plant') || animalType?.includes('coral')) {
+      return 'plantCoral';
     }
 
     return null; // Unknown category
   };
 
-  // Check if all 3 slots are filled for trivia game
+  // Check if all 5 slots are filled for trivia game
   const isAllSlotsFilledForTrivia = (): boolean => {
     return (
       selectedFoodWebSpecies.carnivore !== null &&
-      selectedFoodWebSpecies.herbivoreOmnivore !== null &&
-      selectedFoodWebSpecies.producer !== null
+      selectedFoodWebSpecies.herbivore !== null &&
+      selectedFoodWebSpecies.omnivore !== null &&
+      selectedFoodWebSpecies.bird !== null &&
+      selectedFoodWebSpecies.plantCoral !== null
     );
   };
 
@@ -3130,8 +3194,10 @@ ${question.choices.join('\n')}`;
   const isSpeciesSelected = (scientificName: string): boolean => {
     return (
       selectedFoodWebSpecies.carnivore?.scientificName === scientificName ||
-      selectedFoodWebSpecies.herbivoreOmnivore?.scientificName === scientificName ||
-      selectedFoodWebSpecies.producer?.scientificName === scientificName
+      selectedFoodWebSpecies.herbivore?.scientificName === scientificName ||
+      selectedFoodWebSpecies.omnivore?.scientificName === scientificName ||
+      selectedFoodWebSpecies.bird?.scientificName === scientificName ||
+      selectedFoodWebSpecies.plantCoral?.scientificName === scientificName
     );
   };
 
@@ -3242,124 +3308,394 @@ ${question.choices.join('\n')}`;
   // Phase 3: Carnivore Agent (guides to find carnivore species)
   //   - Game completes when correct species found OR after 4th failed attempt
 
-  // Handle starting the trivia game
-  const handlePlayTrivia = async () => {
-    console.log('🎮 Play Trivia clicked!');
+  // 🎰 Handle spin wheel complete - Sequential spins (one species at a time)
+  const handleSpinComplete = (selected: RegionSpecies, phase: 1 | 2 | 3 | 4 | 5) => {
+    console.log(`🎰 Spin ${phase}/5 complete! Selected:`, selected.commonName);
 
-    try {
-      // Step 1: Clear any pre-selected species (starting fresh)
-      setSelectedFoodWebSpecies({
-        carnivore: null,
-        herbivoreOmnivore: null,
-        producer: null
-      });
-      setFoundFoodWebSpecies([]);
-      setFoodWebGamePhase(1);
+    // Get slot name for this phase
+    const slot = getSlotForPhase(phase);
 
-      // Reset reveal mechanic state
-      setSelectedSpeciesForReveal(null);
-      setIsSpeciesRevealed(false);
-      setRevealAttemptCount(0);
-      setIsCarouselLocked(false);
+    // Update refs and state
+    spinSelectedSpeciesRef.current[slot] = selected;
+    setSelectedFoodWebSpecies(prev => ({
+      ...prev,
+      [slot]: selected
+    }));
+    setFoodWebTargetSpecies(prev => ({
+      ...prev,
+      [slot]: selected
+    }));
 
-      // Reset trivia state
-      setTriviaQuestion(null);
-      setTriviaContext(null);
-      setTriviaAttemptCount(0);
-      setIsWaitingForAnswer(false);
-      setShowHintButton(false);
-      setHintLevel(0);
+    // Check if this was the final phase
+    if (phase === 5) {
+      // All 5 species selected - DONE!
+      setIsSpinningWheel(false);
+      setSpinPhase(1); // Reset for next game
 
-      // Clear selected carousel species (ensures clean start)
-      setSelectedCarouselSpecies(null);
+      // 💬 Add completion message to chat
+      const selectionComplete: ChatMessage = {
+        id: `selection-complete-${Date.now()}`,
+        role: 'assistant',
+        content: `✅ All 5 species selected!\n\n🦁 **Carnivore:** ${spinSelectedSpeciesRef.current.carnivore!.commonName}\n🦌 **Herbivore:** ${spinSelectedSpeciesRef.current.herbivore!.commonName}\n🍽️ **Omnivore:** ${spinSelectedSpeciesRef.current.omnivore!.commonName}\n🦅 **Bird:** ${spinSelectedSpeciesRef.current.bird!.commonName}\n🌱 **Plant/Coral:** ${spinSelectedSpeciesRef.current.plantCoral!.commonName}\n\nNow let's play! I'll challenge you to find each species...`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, selectionComplete]);
 
-      // Step 2: Check if carousel has species
-      if (!regionInfo?.regionName) {
-        console.error('No region info available');
-        return;
-      }
-
-      if (regionSpecies.length === 0) {
-        toast({
-          title: "Error",
-          description: "No species available in carousel. Select a region first!",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      console.log('🎯 Initializing target species for:', regionInfo.regionName);
-      const targets = await initializeFoodWebTargets(regionInfo.regionName, regionSpecies);
-
-      if (!targets.producer || !targets.herbivoreOmnivore || !targets.carnivore) {
-        toast({
-          title: "Error",
-          description: "Could not find enough species for this region. Try another region!",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      setFoodWebTargetSpecies(targets);
-
-      console.log('✅ Target species initialized:', {
-        producer: targets.producer.commonName,
-        herbivore: targets.herbivoreOmnivore.commonName,
-        carnivore: targets.carnivore.commonName
-      });
-
-      // Step 3: Activate game mode (enables carousel interaction)
+      // Start the identification game
       setIsFoodWebGameActive(true);
 
-      // Step 4: Open chat interface
-      setIsChatHistoryExpanded(true);
+      // Wait 2 seconds, then agent challenges user to click on a species
+      setTimeout(() => {
+        // Pick a random species from the 5 selected
+        const allSpecies = [
+          spinSelectedSpeciesRef.current.carnivore!,
+          spinSelectedSpeciesRef.current.herbivore!,
+          spinSelectedSpeciesRef.current.omnivore!,
+          spinSelectedSpeciesRef.current.bird!,
+          spinSelectedSpeciesRef.current.plantCoral!
+        ];
+        const randomSpecies = allSpecies[Math.floor(Math.random() * allSpecies.length)];
 
-      // Step 5: Forest Guardian narrative opening with specific species
-      const forestGuardianIntro = `🌍 **Hi! Welcome to the ${regionInfo.regionName}.**
+        setCurrentChallengeSpecies(randomSpecies);
 
-I am the Forest Guardian AI. Poopy Pants blinded me and I need help finding my animal friends!
+        // Agent challenges user
+        const challengeMessage: ChatMessage = {
+          id: `challenge-${Date.now()}`,
+          role: 'assistant',
+          content: `🎯 **Find the species!**\n\nClick on the **${randomSpecies.commonName}** in the banner above!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, challengeMessage]);
+      }, 2000);
+    } else {
+      // More spins needed - move to next phase
+      setIsSpinningWheel(false);
+      setTimeout(() => {
+        setSpinPhase((phase + 1) as 1 | 2 | 3 | 4 | 5);
+        setIsSpinningWheel(true);
+      }, 800); // Pause to see the selected species
+    }
+  };
 
-Can you help me find the **${targets.producer.commonName}**? Look through the species carousel on the left and click on it when you find it!`;
+  // 🎮 Handle banner card click - Identification game
+  const handleBannerCardClick = (species: any, slotType: string) => {
+    console.log('🎮 Banner card clicked:', species.commonName);
 
-      // Step 6: Stream opening message to chat with typewriter effect
-      setChatHistory([]); // Clear first
-      await streamTextToChat(
-        `trivia-start-${Date.now()}`,
-        forestGuardianIntro,
-        'assistant'
-        // Uses default slow reading speed
-      );
+    // MODE 1: Answering trivia question
+    if (triviaQuestion && isWaitingForAnswer) {
+      const isCorrect = species.scientificName === triviaQuestion.correctAnswer;
 
-      // Step 7: Set up education context for Phase 1 (Producer Agent)
-      console.log('🤖 Activating Agent: PHASE 1 - PRODUCER AGENT');
-      const phase1Context = createProducerAgentContext(
-        regionInfo.regionName,
-        targets,
-        []
-      );
-      setEducationContext(phase1Context);
+      if (isCorrect) {
+        setCorrectAnswerFeedback(species.scientificName);
+        setWrongAnswerFeedback(null);
+        setIsWaitingForAnswer(false);
+        setTriviaQuestion(null);
 
-      // Set quick replies for the trivia game
-      // Show "Give Me A Hint" button after intro
-      // User must answer trivia question correctly to get hint
-      setQuickReplies([{
-        id: 'hint',
-        label: 'Give Me A Hint',
-        emoji: '💡',
-        action: 'hint' as const
-      }]);
+        // Success message for trivia
+        const triviaSuccessMessage: ChatMessage = {
+          id: `trivia-success-${Date.now()}`,
+          role: 'assistant',
+          content: `✅ **Correct!** Good job answering the trivia!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, triviaSuccessMessage]);
 
-      toast({
-        title: "🌍 Food Web Game Started!",
-        description: `Find the ${targets.producer.commonName}`,
-      });
+        // Clear challenge and respin after trivia completion
+        setTimeout(() => {
+          setCorrectAnswerFeedback(null);
+          setCurrentChallengeSpecies(null);
 
-      console.log('✅ Food Web Trivia started! Target:', targets.producer.commonName);
-    } catch (error) {
-      console.error('❌ Error starting trivia:', error);
+          // Check if we've collected 3 species (game complete)
+          if (collectedSpecies.length >= 3) {
+            const completeMessage: ChatMessage = {
+              id: `game-complete-${Date.now()}`,
+              role: 'assistant',
+              content: `🎊 **Amazing!** You've collected 3 species!\n\nClick the **Play Game** button to start the ecosystem game!`,
+              timestamp: new Date(),
+              status: 'sent'
+            };
+            setChatHistory(prev => [...prev, completeMessage]);
+          } else {
+            // Continue game - respin for new species
+            const respinMessage: ChatMessage = {
+              id: `respin-${Date.now()}`,
+              role: 'assistant',
+              content: `Let's get 5 new species...`,
+              timestamp: new Date(),
+              status: 'sent'
+            };
+            setChatHistory(prev => [...prev, respinMessage]);
+
+            // Auto-respin after 1 second
+            setTimeout(() => {
+              handlePlayTrivia(); // This triggers the spin
+            }, 1000);
+          }
+        }, 1500);
+      } else {
+        setWrongAnswerFeedback(species.scientificName);
+        setCorrectAnswerFeedback(null);
+        setTimeout(() => setWrongAnswerFeedback(null), 1000);
+      }
+      return;
+    }
+
+    // MODE 2: Identification game - finding the challenge species
+    if (!currentChallengeSpecies) return;
+
+    const isCorrect = species.scientificName === currentChallengeSpecies.scientificName;
+
+    if (isCorrect) {
+      // ✅ CORRECT! Collect the species
+      setCorrectAnswerFeedback(species.scientificName);
+
+      // Add to collected species (total collection)
+      setCollectedSpecies(prev => [...prev, species]);
+
+      // Also set as current carousel species so it shows immediately on right panel
+      setSelectedCarouselSpecies(species);
+
+      // Celebrate message
+      const successMessage: ChatMessage = {
+        id: `success-${Date.now()}`,
+        role: 'assistant',
+        content: `🎉 **Correct!** You found the ${species.commonName}!\n\nSpecies added to your collection!`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, successMessage]);
+
+      // Check if we've collected 3 species
+      const newCollectedCount = collectedSpecies.length + 1; // +1 because state hasn't updated yet
+
+      setTimeout(() => {
+        setCorrectAnswerFeedback(null);
+        setCurrentChallengeSpecies(null);
+
+        if (newCollectedCount >= 3) {
+          // 🎊 GAME COMPLETE! 3 species collected
+          const completeMessage: ChatMessage = {
+            id: `game-complete-${Date.now()}`,
+            role: 'assistant',
+            content: `🎊 **Amazing!** You've collected 3 species!\n\nClick the **Play Game** button to start the ecosystem game!`,
+            timestamp: new Date(),
+            status: 'sent'
+          };
+          setChatHistory(prev => [...prev, completeMessage]);
+        } else {
+          // Continue game - respin for new species
+          const respinMessage: ChatMessage = {
+            id: `respin-${Date.now()}`,
+            role: 'assistant',
+            content: `Let's get 5 new species...`,
+            timestamp: new Date(),
+            status: 'sent'
+          };
+          setChatHistory(prev => [...prev, respinMessage]);
+
+          // Auto-respin after 1 second
+          setTimeout(() => {
+            handlePlayTrivia(); // This triggers the spin
+          }, 1000);
+        }
+      }, 2000);
+    } else {
+      // ❌ WRONG! Must answer trivia
+      setWrongAnswerFeedback(species.scientificName);
+
+      const wrongMessage: ChatMessage = {
+        id: `wrong-${Date.now()}`,
+        role: 'assistant',
+        content: `❌ **Oops!** That's not the ${currentChallengeSpecies.commonName}.\n\nAnswer this question to continue:`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, wrongMessage]);
+
+      // Show trivia question
+      setTimeout(() => {
+        setWrongAnswerFeedback(null);
+        setTriviaContext('wrongSpecies');
+        generateTriviaForWrongAnswer();
+      }, 1500);
+    }
+  };
+
+  // Generate trivia question when user clicks wrong species
+  const generateTriviaForWrongAnswer = () => {
+    // Simple trivia question
+    const question = {
+      question: `What type of animal is the ${currentChallengeSpecies!.commonName}?`,
+      correctAnswer: currentChallengeSpecies!.scientificName,
+      type: 'identification' as const
+    };
+    setTriviaQuestion(question);
+    setIsWaitingForAnswer(true);
+  };
+
+  // 🎮 Generate new format trivia question (identification or dietary role)
+  const generateNewFormatTrivia = async (selected: { carnivore: RegionSpecies; herbivore: RegionSpecies; omnivore: RegionSpecies; bird: RegionSpecies; plantCoral: RegionSpecies }) => {
+    const questionTypes = ['identification', 'dietary'];
+    const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+
+    const speciesArray = [selected.carnivore, selected.herbivore, selected.omnivore, selected.bird, selected.plantCoral];
+    const targetSpecies = speciesArray[Math.floor(Math.random() * speciesArray.length)];
+
+    if (questionType === 'identification') {
+      // "Which one is [species name]?"
+      const question = {
+        question: `Which one is the **${targetSpecies.commonName}**?`,
+        correctAnswer: targetSpecies.scientificName,
+        type: 'identification' as const
+      };
+      setTriviaQuestion(question);
+    } else {
+      // "Which one is the [carnivore/herbivore/omnivore/bird/plant]?"
+      const dietaryRoles = {
+        carnivore: { label: 'carnivore', species: selected.carnivore },
+        herbivore: { label: 'herbivore', species: selected.herbivore },
+        omnivore: { label: 'omnivore', species: selected.omnivore },
+        bird: { label: 'bird', species: selected.bird },
+        plantCoral: { label: 'plant or coral', species: selected.plantCoral }
+      };
+      const roles = Object.values(dietaryRoles);
+      const targetRole = roles[Math.floor(Math.random() * roles.length)];
+
+      const question = {
+        question: `Which one is the **${targetRole.label}**?`,
+        correctAnswer: targetRole.species.scientificName,
+        type: 'dietary' as const
+      };
+      setTriviaQuestion(question);
+    }
+
+    setIsWaitingForAnswer(true);
+  };
+
+  // Handle starting the trivia game
+  const handlePlayTrivia = async () => {
+    console.log('🎰 Spin Species Wheel clicked!');
+
+    // Prevent double-clicking while AI is selecting or wheel is spinning
+    if (isAISelecting || isSpinningWheel) {
+      console.log('🎰 Already in progress - ignoring click', { isAISelecting, isSpinningWheel });
+      return;
+    }
+
+    setIsAISelecting(true);
+
+    // Step 1: Clear any pre-selected species (starting fresh)
+    setSelectedFoodWebSpecies({
+      carnivore: null,
+      herbivore: null,
+      omnivore: null,
+      bird: null,
+      plantCoral: null
+    });
+    setFoundFoodWebSpecies([]);
+    setFoodWebGamePhase(1);
+
+    // Reset reveal mechanic state
+    setSelectedSpeciesForReveal(null);
+    setIsSpeciesRevealed(false);
+    setRevealAttemptCount(0);
+    setIsCarouselLocked(false);
+
+    // Reset trivia state
+    setTriviaQuestion(null);
+    setTriviaContext(null);
+    setTriviaAttemptCount(0);
+    setIsWaitingForAnswer(false);
+    setShowHintButton(false);
+    setHintLevel(0);
+
+    // Don't clear selected carousel species if we're in the middle of the identification game
+    // Only clear it on the very first spin (when chat history is empty)
+    if (!isChatHistoryExpanded) {
+      setSelectedCarouselSpecies(null);
+    }
+
+    // 💬 Show chat input and history when spin starts
+    setIsChatHistoryExpanded(true);
+
+    // Add spin message to chat history (append, don't replace)
+    const spinMessage: ChatMessage = {
+      id: `spin-${Date.now()}`,
+      role: 'assistant',
+      content: `🎰 Selecting 5 new species...`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+
+    // Only replace chat history if it's empty (first time), otherwise append
+    setChatHistory(prev => prev.length === 0 ? [spinMessage] : [...prev, spinMessage]);
+
+    console.log('💬 Spin message added to chat');
+
+    // Step 2: Check if carousel has species
+    if (!regionInfo?.regionName) {
+      console.error('No region info available');
+      return;
+    }
+
+    if (regionSpecies.length === 0) {
       toast({
         title: "Error",
-        description: "Failed to start game. Please try again.",
+        description: "No species available in carousel. Select a region first!",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // 🤖 Step 3: AI selects species intelligently
+    console.log('🤖 Calling AI to select species...');
+    try {
+      const aiSelection = await selectSpeciesWithAI(regionSpecies, regionInfo.regionName);
+
+      console.log('🤖 AI selected:', {
+        carnivore: aiSelection.carnivore?.commonName,
+        herbivore: aiSelection.herbivore?.commonName,
+        omnivore: aiSelection.omnivore?.commonName,
+        bird: aiSelection.bird?.commonName,
+        plantCoral: aiSelection.plantCoral?.commonName,
+        strategy: aiSelection.strategy
+      });
+
+      // Store AI selections in ref for carousel to use
+      spinSelectedSpeciesRef.current = {
+        carnivore: aiSelection.carnivore,
+        herbivore: aiSelection.herbivore,
+        omnivore: aiSelection.omnivore,
+        bird: aiSelection.bird,
+        plantCoral: aiSelection.plantCoral
+      };
+
+      // Add AI's explanation to chat
+      const aiMessage: ChatMessage = {
+        id: `ai-selection-${Date.now()}`,
+        role: 'assistant',
+        content: `🎯 **Selection Strategy**: ${aiSelection.strategy}\n\n${aiSelection.explanation}\n\nWatch as I reveal each species...`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, aiMessage]);
+
+      // 🎰 Start sequential spin animation (Phase 1: Carnivore)
+      console.log('🎰 Starting sequential spin wheel animation...');
+      console.log('🎰 Region species count:', regionSpecies.length);
+      console.log('🎰 Setting isSpinningWheel to TRUE');
+      setIsAISelecting(false); // AI done
+      setSpinPhase(1); // Start with carnivore
+      setIsSpinningWheel(true);
+    } catch (error) {
+      console.error('🤖 AI selection failed:', error);
+      setIsAISelecting(false); // AI failed
+      toast({
+        title: "Error",
+        description: "Failed to select species. Please try again.",
         variant: "destructive"
       });
     }
@@ -3477,7 +3813,7 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
     setSearchType(null);
     setMapCenter(null);
     setUseGoogleMaps(false);
-    setSelectedFoodWebSpecies({ carnivore: null, herbivoreOmnivore: null, producer: null });
+    setSelectedFoodWebSpecies({ carnivore: null, herbivore: null, omnivore: null, bird: null, plantCoral: null });
     setChatHistory([]); // Clear chat history too
     setResetGlobeView(true);
     setTimeout(() => setResetGlobeView(false), 100);
@@ -3706,13 +4042,15 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
 
   // Compute chat context based on what's showing (food web or right side)
   const chatContext = useMemo((): ChatContext => {
-    // Priority 1: Food Web (ONLY if all 3 species selected)
-    const foodWebCount = [selectedFoodWebSpecies.carnivore, selectedFoodWebSpecies.herbivoreOmnivore, selectedFoodWebSpecies.producer].filter(Boolean).length;
-    if (foodWebCount === 3 && regionInfo && chatHistory.length > 0) {
+    // Priority 1: Food Web (ONLY if all 5 species selected)
+    const foodWebCount = [selectedFoodWebSpecies.carnivore, selectedFoodWebSpecies.herbivore, selectedFoodWebSpecies.omnivore, selectedFoodWebSpecies.bird, selectedFoodWebSpecies.plantCoral].filter(Boolean).length;
+    if (foodWebCount === 5 && regionInfo && chatHistory.length > 0) {
       const speciesNames = [
         selectedFoodWebSpecies.carnivore?.commonName,
-        selectedFoodWebSpecies.herbivoreOmnivore?.commonName,
-        selectedFoodWebSpecies.producer?.commonName
+        selectedFoodWebSpecies.herbivore?.commonName,
+        selectedFoodWebSpecies.omnivore?.commonName,
+        selectedFoodWebSpecies.bird?.commonName,
+        selectedFoodWebSpecies.plantCoral?.commonName
       ].filter(Boolean).join(', ');
 
       return {
@@ -3847,27 +4185,14 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
 
       {/* Map/Globe Toggle - Hidden (now in left controls) */}
 
-      {/* Species Type Filter - Pinned to Left Edge */}
-      {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
-        <div
-          className="absolute left-0 w-14 z-[60] pointer-events-auto"
-          style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)' }}
-        >
-          <SpeciesTypeFilter
-            activeFilter={speciesTypeFilter}
-            onFilterChange={setSpeciesTypeFilter}
-            showCorals={regionInfo.biome?.toLowerCase().includes('marine') || regionInfo.ecosystemType?.toLowerCase().includes('marine')}
-          />
-        </div>
-      )}
-
-      {/* Region Species Carousel - Next to Filter */}
+      {/* Region Species Carousel - Left side of screen */}
       {regionInfo && regionSpecies.length > 0 && !currentHabitat && (
         <div
           ref={leftPanelRef}
-          className="absolute left-16 w-64 z-[60] pointer-events-auto"
+          className="absolute left-4 w-64 z-[60] pointer-events-auto"
           style={{ top: `${sidePanelTopPx}px`, maxHeight: 'calc(100vh - 200px)' }}
         >
+          {/* 📜 Species Carousel - Always show (works for both normal and game mode) */}
           <RegionSpeciesCarousel
             species={regionSpecies}
             regionName={regionInfo.regionName}
@@ -3878,7 +4203,31 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
             selectedForGameSpecies={Object.values(selectedFoodWebSpecies)
               .filter(s => s !== null)
               .map(s => s!.scientificName)}
+            disableAutoScroll={true}
+            isSpinning={isSpinningWheel}
+            spinPhase={spinPhase}
+            onSpinComplete={handleSpinComplete}
+            preSelectedSpecies={spinSelectedSpeciesRef.current}
           />
+        </div>
+      )}
+
+      {/* 🎰 Spin Species Wheel Button - Vertically centered next to carousel */}
+      {useGoogleMaps && regionInfo && regionSpecies.length > 0 && !currentHabitat && (
+        <div
+          className="absolute left-[288px] pointer-events-auto z-[60]"
+          style={{
+            top: '50%',
+            transform: 'translateY(calc(-50% + 100px))'
+          }}
+        >
+          <Button
+            onClick={handlePlayTrivia}
+            disabled={isAISelecting || isSpinningWheel}
+            className="h-14 px-6 text-base font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isAISelecting ? '🤖 AI Selecting...' : isSpinningWheel ? '🎰 Spinning...' : '🎰 Spin Species Wheel'}
+          </Button>
         </div>
       )}
 
@@ -4017,10 +4366,19 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
             }}
             onSelectForGame={handleSelectSpeciesForGame}
             isSelectedForGame={isSpeciesSelected(selectedCarouselSpecies.scientificName)}
-            isGameMode={isChatHistoryExpanded && foodWebTargetSpecies.producer !== null}
+            isGameMode={isChatHistoryExpanded && Object.values(foodWebTargetSpecies).some(t => t !== null)}
             hideFacts={!isSpeciesRevealed && selectedSpeciesForReveal !== null}
             onRevealClick={handleRevealSpecies}
           />
+
+          {/* Species Collection Counter - only show during identification game */}
+          {collectedSpecies.length > 0 && useGoogleMaps && (
+            <div className="glass-panel rounded-xl p-3 shadow-lg text-center">
+              <p className="text-sm font-bold text-foreground">
+                Collected Species: {collectedSpecies.length}/3
+              </p>
+            </div>
+          )}
 
           {/* Reset Chat Button - Shows when food web trivia is active */}
           {chatHistory.length > 0 && (
@@ -4087,7 +4445,27 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
 
         {/* 🎮 Food Web Selection Bar - Under Health Bar */}
         {useGoogleMaps && (
-          <FoodWebSelectionBar selectedSpecies={selectedFoodWebSpecies} />
+          <>
+            <FoodWebSelectionBar
+              selectedSpecies={selectedFoodWebSpecies}
+              onSpeciesClick={handleBannerCardClick}
+              isClickable={isWaitingForAnswer || currentChallengeSpecies !== null}
+              correctAnswer={correctAnswerFeedback || undefined}
+              wrongAnswer={wrongAnswerFeedback || undefined}
+            />
+
+            {/* 🎮 Trivia Question Display */}
+            {triviaQuestion && isWaitingForAnswer && (
+              <div className="glass-panel rounded-xl p-3 shadow-2xl animate-fade-in max-w-md">
+                <p className="text-sm font-bold text-center text-foreground">
+                  {triviaQuestion.question}
+                </p>
+                <p className="text-xs text-center text-muted-foreground mt-1">
+                  Click a card above to answer
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -4115,38 +4493,30 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
           />
         )}
 
-        {/* Big START FOOD WEB TRIVIA Button - Shows when in 2D map view, before game starts */}
-        {useGoogleMaps && !isChatHistoryExpanded && regionInfo && regionSpecies.length > 0 && (
-          <div className="flex justify-center w-full pointer-events-auto">
-            <Button
-              onClick={handlePlayTrivia}
-              className="h-16 px-12 text-xl font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 hover:scale-105"
-            >
-              🎮 START FOOD WEB TRIVIA
-            </Button>
-          </div>
-        )}
-
-        {/* Chat Input - Only show on 2D map after Play Trivia is clicked */}
-        {useGoogleMaps && isChatHistoryExpanded && (
+        {/* Terminal UI - Show when game is active or chat has messages */}
+        {useGoogleMaps && (isFoodWebGameActive || chatHistory.length > 0) && (
           <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
-            <div className="w-full max-w-[650px] flex flex-col gap-1">
+            <div className="w-full max-w-[650px] flex flex-col">
               {/* Chat History - shows above input when expanded */}
-              <ChatHistory
-                messages={chatHistory}
-                isExpanded={isChatHistoryExpanded}
-                onMinimize={() => setIsChatHistoryExpanded(false)}
-                isTyping={isLoading}
-                onRetry={handleRetryMessage}
-                quickReplies={quickReplies}
-                onQuickReply={handleQuickReply}
-              />
+              {chatHistory.length > 0 && (
+                <ChatHistory
+                  messages={chatHistory}
+                  isExpanded={isChatHistoryExpanded}
+                  onMinimize={() => setIsChatHistoryExpanded(false)}
+                  isTyping={isLoading}
+                  onRetry={handleRetryMessage}
+                  quickReplies={quickReplies}
+                  onQuickReply={handleQuickReply}
+                />
+              )}
 
               <ChatInput
                 onSubmit={handleSearch}
                 isLoading={isLoading}
                 context={chatContext}
                 placeholder="Describe what you see or type 'hint'..."
+                hasMessages={chatHistory.length > 0}
+                onExpandHistory={!isChatHistoryExpanded ? () => setIsChatHistoryExpanded(true) : undefined}
                 onFocus={() => {
                   // Enable deep dive mode when user focuses on the input with a species/habitat selected
                   if (speciesInfo || currentHabitat) {
@@ -4197,6 +4567,23 @@ Can you help me find the **${targets.producer.commonName}**? Look through the sp
         </div>
       )}
 
+      {/* 🎮 Play Game Button - Bottom Right (Shows when 3+ species collected) */}
+      {collectedSpecies.length >= 3 && (
+        <div className="fixed bottom-8 right-8 z-[100] animate-bounce">
+          <Button
+            onClick={() => {
+              toast({
+                title: "🎮 Game Coming Soon!",
+                description: `You've collected ${collectedSpecies.length} species. The ecosystem game will launch here!`,
+              });
+            }}
+            size="lg"
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl hover:shadow-emerald-500/50 text-xl font-bold px-10 py-8 hover:scale-110 transition-all duration-300 rounded-2xl"
+          >
+            🎮 Play Game
+          </Button>
+        </div>
+      )}
 
     </div>
   );

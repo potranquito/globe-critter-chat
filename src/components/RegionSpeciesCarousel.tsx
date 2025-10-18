@@ -28,6 +28,17 @@ interface RegionSpeciesCarouselProps {
   activeFilters?: Set<FilterCategory>;
   speciesTypeFilter?: SpeciesTypeFilter; // New simplified filter
   selectedForGameSpecies?: string[]; // 🎮 NEW: Array of selected species scientific names
+  disableAutoScroll?: boolean; // 🎰 Turn off auto-scroll for spin wheel mode
+  isSpinning?: boolean; // 🎰 Spin wheel animation active
+  spinPhase?: 1 | 2 | 3 | 4 | 5; // 🎰 Which species to select: 1=carnivore, 2=herbivore, 3=omnivore, 4=bird, 5=plantCoral
+  onSpinComplete?: (selected: RegionSpecies, phase: 1 | 2 | 3 | 4 | 5) => void; // 🎰 Returns single species
+  preSelectedSpecies?: { // 🤖 AI-selected species to reveal
+    carnivore: RegionSpecies | null;
+    herbivore: RegionSpecies | null;
+    omnivore: RegionSpecies | null;
+    bird: RegionSpecies | null;
+    plantCoral: RegionSpecies | null;
+  };
 }
 
 export const RegionSpeciesCarousel = ({
@@ -37,7 +48,12 @@ export const RegionSpeciesCarousel = ({
   onSpeciesSelect,
   activeFilters = new Set(),
   speciesTypeFilter = 'all',
-  selectedForGameSpecies = []
+  selectedForGameSpecies = [],
+  disableAutoScroll = false,
+  isSpinning = false,
+  spinPhase = 1,
+  onSpinComplete,
+  preSelectedSpecies
 }: RegionSpeciesCarouselProps) => {
 
   // Filter species based on active filters and species type filter
@@ -138,8 +154,10 @@ export const RegionSpeciesCarousel = ({
   const filteredSpecies = filterSpecies(species);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll effect
+  // Auto-scroll effect (disabled during spin wheel mode)
   useEffect(() => {
+    if (disableAutoScroll) return; // 🎰 Skip auto-scroll when spin wheel is active
+
     const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
     if (!scrollContainer) return;
 
@@ -176,7 +194,202 @@ export const RegionSpeciesCarousel = ({
       scrollContainer.removeEventListener('mouseenter', handleMouseEnter);
       scrollContainer.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [filteredSpecies.length]);
+  }, [filteredSpecies.length, disableAutoScroll]);
+
+  // 🎰 Spin wheel animation effect - Slot machine style (stops on selected species)
+  useEffect(() => {
+    console.log('🎰 Carousel spin effect triggered:', { isSpinning, spinPhase, hasCallback: !!onSpinComplete });
+
+    if (!isSpinning || !onSpinComplete) {
+      console.log('🎰 Spin effect exiting early:', { isSpinning, hasCallback: !!onSpinComplete });
+      return;
+    }
+
+    console.log('🎰 Starting slot-machine animation - Phase', spinPhase);
+
+    const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
+    if (!scrollContainer) {
+      console.error('🎰 ERROR: Scroll container not found!');
+      return;
+    }
+
+    console.log('🎰 Scroll container dimensions:', {
+      scrollHeight: scrollContainer.scrollHeight,
+      clientHeight: scrollContainer.clientHeight,
+      scrollTop: scrollContainer.scrollTop,
+      isScrollable: scrollContainer.scrollHeight > scrollContainer.clientHeight
+    });
+
+    // 🎯 STEP 1: Select winning species BEFORE spinning
+    let selectedSpecies: RegionSpecies;
+
+    console.log('🤖 DEBUG: preSelectedSpecies =', preSelectedSpecies);
+    console.log('🤖 DEBUG: spinPhase =', spinPhase);
+
+    // 🤖 Use AI pre-selected species if available, otherwise random
+    if (preSelectedSpecies) {
+      console.log('🤖 DEBUG: AI pre-selection available!', {
+        carnivore: preSelectedSpecies.carnivore?.commonName,
+        herbivore: preSelectedSpecies.herbivore?.commonName,
+        omnivore: preSelectedSpecies.omnivore?.commonName,
+        bird: preSelectedSpecies.bird?.commonName,
+        plantCoral: preSelectedSpecies.plantCoral?.commonName
+      });
+
+      if (spinPhase === 1 && preSelectedSpecies.carnivore) {
+        selectedSpecies = preSelectedSpecies.carnivore;
+        console.log('🤖 Phase 1 - Using AI-selected carnivore:', selectedSpecies.commonName);
+      } else if (spinPhase === 2 && preSelectedSpecies.herbivore) {
+        selectedSpecies = preSelectedSpecies.herbivore;
+        console.log('🤖 Phase 2 - Using AI-selected herbivore:', selectedSpecies.commonName);
+      } else if (spinPhase === 3 && preSelectedSpecies.omnivore) {
+        selectedSpecies = preSelectedSpecies.omnivore;
+        console.log('🤖 Phase 3 - Using AI-selected omnivore:', selectedSpecies.commonName);
+      } else if (spinPhase === 4 && preSelectedSpecies.bird) {
+        selectedSpecies = preSelectedSpecies.bird;
+        console.log('🤖 Phase 4 - Using AI-selected bird:', selectedSpecies.commonName);
+      } else if (spinPhase === 5 && preSelectedSpecies.plantCoral) {
+        selectedSpecies = preSelectedSpecies.plantCoral;
+        console.log('🤖 Phase 5 - Using AI-selected plant/coral:', selectedSpecies.commonName);
+      } else {
+        console.error('🤖 ERROR: AI pre-selected species not found for phase', spinPhase, preSelectedSpecies);
+        return;
+      }
+    } else {
+      console.log('🤖 DEBUG: No AI pre-selection, using random');
+
+      // Fallback to random selection if no AI pre-selection
+      let candidateSpecies: RegionSpecies[] = [];
+
+      if (spinPhase === 1) {
+        candidateSpecies = filteredSpecies.filter(s => {
+          const diet = s.dietaryCategory?.toLowerCase();
+          return diet === 'carnivore' || diet === 'carnivores';
+        });
+        console.log('🎰 Phase 1 - Carnivores found:', candidateSpecies.length);
+      } else if (spinPhase === 2) {
+        candidateSpecies = filteredSpecies.filter(s => {
+          const diet = s.dietaryCategory?.toLowerCase();
+          return diet === 'herbivore' || diet === 'herbivores';
+        });
+        console.log('🎰 Phase 2 - Herbivores found:', candidateSpecies.length);
+      } else if (spinPhase === 3) {
+        candidateSpecies = filteredSpecies.filter(s => {
+          const diet = s.dietaryCategory?.toLowerCase();
+          return diet === 'omnivore' || diet === 'omnivores';
+        });
+        console.log('🎰 Phase 3 - Omnivores found:', candidateSpecies.length);
+      } else if (spinPhase === 4) {
+        candidateSpecies = filteredSpecies.filter(s => {
+          const taxonomic = s.taxonomicGroup?.toLowerCase();
+          const type = s.animalType?.toLowerCase();
+          return taxonomic === 'birds' || type?.includes('bird') || type?.includes('aves');
+        });
+        console.log('🎰 Phase 4 - Birds found:', candidateSpecies.length);
+      } else if (spinPhase === 5) {
+        candidateSpecies = filteredSpecies.filter(s => {
+          const diet = s.dietaryCategory?.toLowerCase();
+          const taxonomic = s.taxonomicGroup?.toLowerCase();
+          const type = s.animalType?.toLowerCase();
+          return diet === 'producer' || diet === 'producers' || taxonomic === 'plants & corals' || type?.includes('plant') || type?.includes('coral');
+        });
+        console.log('🎰 Phase 5 - Plants/Corals found:', candidateSpecies.length);
+      }
+
+      if (candidateSpecies.length === 0) {
+        console.error('🎰 ERROR: No candidate species found for phase', spinPhase);
+        return;
+      }
+
+      selectedSpecies = candidateSpecies[Math.floor(Math.random() * candidateSpecies.length)];
+      console.log('🎰 Random selection:', selectedSpecies.commonName);
+    }
+
+    const selectedIndex = filteredSpecies.findIndex(s => s.scientificName === selectedSpecies.scientificName);
+
+    if (selectedIndex === -1) {
+      console.error('🤖 ERROR: AI-selected species not found in filtered carousel!', {
+        aiSelected: selectedSpecies.scientificName,
+        filteredCount: filteredSpecies.length
+      });
+      return;
+    }
+
+    console.log('🎰 Selected species:', selectedSpecies.commonName, 'at index', selectedIndex);
+    console.log('🎰 Species in filteredSpecies at that index:', filteredSpecies[selectedIndex]?.commonName);
+
+    // 🎯 STEP 2: Account for green border position (fixed at 50vh)
+    const CARD_HEIGHT = 200;
+    const CARD_GAP = 16;
+    const TOTAL_CARD_HEIGHT = CARD_HEIGHT + CARD_GAP;
+    const CONTAINER_PADDING_TOP = 4; // p-1 = 4px
+
+    // Card's center position in scrollable content (including padding)
+    const cardTopPosition = CONTAINER_PADDING_TOP + (selectedIndex * TOTAL_CARD_HEIGHT);
+    const cardCenterInContent = cardTopPosition + (CARD_HEIGHT / 2);
+
+    // Where is the green border relative to the carousel container?
+    const scrollContainerRect = scrollContainer.getBoundingClientRect();
+    const greenBorderScreenY = window.innerHeight / 2; // Fixed at 50vh
+    const greenBorderRelativeToContainer = greenBorderScreenY - scrollContainerRect.top;
+
+    // Scroll so card center aligns with green border position
+    const targetScrollTop = cardCenterInContent - greenBorderRelativeToContainer;
+
+    console.log('🎰 Alignment with green border:', {
+      selectedIndex,
+      cardTopPosition,
+      cardCenterInContent,
+      windowHeight: window.innerHeight,
+      greenBorderScreenY,
+      containerTop: scrollContainerRect.top,
+      greenBorderRelativeToContainer,
+      targetScrollTop
+    });
+
+    // 🎯 Scroll the container only - don't scroll the page!
+    const targetCard = scrollContainer.querySelector(`[data-species-card="${selectedIndex}"]`) as HTMLElement;
+
+    if (targetCard) {
+      console.log('🎰 Scrolling to center:', selectedSpecies.commonName);
+
+      // Get the card's position relative to the scroll container
+      const cardRect = targetCard.getBoundingClientRect();
+      const containerRect = scrollContainer.getBoundingClientRect();
+
+      // Calculate how much to scroll to center the card
+      const cardRelativeTop = cardRect.top - containerRect.top;
+      const cardCenter = cardRelativeTop + (cardRect.height / 2);
+      const containerCenter = scrollContainer.clientHeight / 2;
+      const scrollAmount = cardCenter - containerCenter;
+
+      const targetScroll = scrollContainer.scrollTop + scrollAmount;
+
+      console.log('🎰 Manual scroll calculation:', {
+        currentScroll: scrollContainer.scrollTop,
+        targetScroll,
+        scrollAmount
+      });
+
+      // Smooth scroll the container only (not the page)
+      scrollContainer.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+      });
+
+      // Wait for scroll animation
+      setTimeout(() => {
+        console.log('🎰 Spin complete! Stopped on:', selectedSpecies.commonName);
+        onSpinComplete(selectedSpecies, spinPhase);
+      }, 2000);
+    } else {
+      console.error('🎰 ERROR: Could not find card at index', selectedIndex);
+    }
+
+    return () => {
+      // Cleanup if component unmounts during animation
+    };
+  }, [isSpinning, filteredSpecies, spinPhase, onSpinComplete]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -258,18 +471,20 @@ export const RegionSpeciesCarousel = ({
       </div>
 
       {/* Scrollable Species List */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1">
+      <div className="flex-1 relative" style={{ maxHeight: 'calc(100vh - 150px)' }}>
+        <ScrollArea ref={scrollAreaRef} className="h-full w-full">
         {filteredSpecies.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No species match the selected filters</p>
           </div>
         ) : (
-          <div className="space-y-3 pr-1">
+          <div className="space-y-4 p-1">
             {filteredSpecies.map((sp, index) => {
               const isSelected = selectedForGameSpecies.includes(sp.scientificName);
               return (
             <Card
               key={`${sp.scientificName}-${index}`}
+              data-species-card={index}
               className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-2xl overflow-hidden aspect-square ${
                 currentSpecies === sp.scientificName ? 'ring-4 ring-primary shadow-2xl' : ''
               } ${
@@ -305,10 +520,11 @@ export const RegionSpeciesCarousel = ({
               )}
             </Card>
             )}
-            )}
+          )}
           </div>
         )}
-      </ScrollArea>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
