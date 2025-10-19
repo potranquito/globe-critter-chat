@@ -9,16 +9,39 @@ interface SelectedFoodWebSpecies {
   plantCoral: any | null;
 }
 
+interface ChatTheme {
+  primary: string;
+  secondary: string;
+  background: string;
+  text: string;
+  accent?: string;
+}
+
 interface FoodWebSelectionBarProps {
   selectedSpecies: SelectedFoodWebSpecies;
   onSpeciesClick?: (species: any, slotType: string) => void;
   isClickable?: boolean; // 🎮 Enable clicking for trivia answers
   correctAnswer?: string; // 🎮 Scientific name of correct species
   wrongAnswer?: string; // 🎮 Scientific name of wrong species (temporary visual feedback)
+  theme?: ChatTheme;
 }
 
-export const FoodWebSelectionBar = ({ selectedSpecies, onSpeciesClick, isClickable, correctAnswer, wrongAnswer }: FoodWebSelectionBarProps) => {
+export const FoodWebSelectionBar = ({ selectedSpecies, onSpeciesClick, isClickable, correctAnswer, wrongAnswer, theme }: FoodWebSelectionBarProps) => {
   const bannerRef = useRef<HTMLDivElement>(null);
+
+  // Default theme if none provided (emerald theme)
+  const currentTheme = theme || {
+    primary: 'hsl(160, 84%, 39%)',
+    secondary: 'hsl(158, 64%, 52%)',
+    background: 'hsl(222, 47%, 11%)',
+    text: 'hsl(152, 76%, 80%)',
+    accent: 'hsl(160, 100%, 70%)'
+  };
+
+  // Helper to add alpha to HSL color
+  const withAlpha = (hslColor: string, alpha: number) => {
+    return hslColor.replace('hsl(', 'hsla(').replace(')', `, ${alpha})`);
+  };
 
   // Filter out null values and create array of selected species with their slot types
   const speciesArray = [
@@ -66,7 +89,17 @@ export const FoodWebSelectionBar = ({ selectedSpecies, onSpeciesClick, isClickab
   }
 
   return (
-    <div ref={bannerRef} className="glass-panel rounded-xl p-2 shadow-2xl animate-fade-in">
+    <div
+      ref={bannerRef}
+      className="rounded-xl p-2 shadow-2xl animate-fade-in"
+      style={{
+        background: withAlpha(currentTheme.background, 0.6),
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        border: `1px solid ${withAlpha(currentTheme.primary, 0.3)}`,
+        boxShadow: `0 8px 32px 0 ${withAlpha(currentTheme.primary, 0.2)}`,
+      }}
+    >
       <div className="flex items-center justify-center gap-2">
         {speciesArray.map(({ species, slot }) => species && (
           <FoodWebMiniCard

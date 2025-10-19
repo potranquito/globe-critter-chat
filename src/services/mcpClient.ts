@@ -3,6 +3,21 @@
 
 const MCP_SERVER_URL = import.meta.env.VITE_MCP_SERVER_URL || 'http://localhost:3000/mcp';
 
+// DEBUG: Show actual MCP server URL at module load time
+console.error('🚀 [MCP Client] MODULE LOADED - Server URL:', MCP_SERVER_URL);
+console.error('🚀 [MCP Client] Environment variable:', import.meta.env.VITE_MCP_SERVER_URL);
+console.error('🚀 [MCP Client] TIMESTAMP:', new Date().toISOString());
+
+// VISIBLE ALERT for debugging
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    const msg = `MCP Server URL: ${MCP_SERVER_URL}`;
+    console.error('🔴🔴🔴 ALERT:', msg);
+    // Uncomment to show browser alert:
+    // alert(msg);
+  }, 1000);
+}
+
 interface MCPRequest {
   jsonrpc: '2.0';
   method: string;
@@ -49,16 +64,21 @@ export async function callMCPTool<T = any>(
     id: requestId
   };
 
-  console.log('[MCP Client] Calling tool:', toolName, args);
+  console.log('[MCP Client] 🔧 Calling tool:', toolName, args);
 
   try {
-    const response = await fetch(MCP_SERVER_URL, {
+    // Add cache-busting timestamp to force fresh requests
+    const cacheBustUrl = `${MCP_SERVER_URL}?t=${Date.now()}`;
+    console.log('[MCP Client] 🌐 Fetching from:', cacheBustUrl.substring(0, 50) + '...');
+
+    const response = await fetch(cacheBustUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json, text/event-stream',
       },
-      body: JSON.stringify(request)
+      body: JSON.stringify(request),
+      cache: 'no-store' // Disable HTTP caching
     });
 
     if (!response.ok) {
@@ -178,4 +198,64 @@ export async function getEcoregionInfo(
   args: GetEcoregionInfoArgs
 ): Promise<GetEcoregionInfoResult> {
   return callMCPTool<GetEcoregionInfoResult>('get_ecoregion_info', args);
+}
+
+export interface GenerateColorThemeArgs {
+  ecoregionName: string;
+  biome?: string;
+  description?: string;
+}
+
+export interface ColorTheme {
+  primary: string;      // HSL color string
+  secondary: string;    // HSL color string
+  background: string;   // HSL color string
+  text: string;         // HSL color string
+  accent: string;       // HSL color string
+}
+
+export interface GenerateColorThemeResult {
+  success: boolean;
+  theme?: ColorTheme;
+  baseHue?: number;
+  characteristics?: {
+    dominantColor: string;
+    temperature: 'warm' | 'cool' | 'neutral';
+  };
+  message?: string;
+}
+
+/**
+ * Generate dynamic HSL color theme for ecoregion using color theory
+ */
+export async function generateColorTheme(
+  args: GenerateColorThemeArgs
+): Promise<GenerateColorThemeResult> {
+  return callMCPTool<GenerateColorThemeResult>('generate_color_theme', args);
+}
+
+export interface GenerateCartoonAsciiArgs {
+  commonName: string;
+  scientificName: string;
+  animalType?: string;
+  width?: number;
+}
+
+export interface GenerateCartoonAsciiResult {
+  success: boolean;
+  cartoonUrl?: string;
+  commonName?: string;
+  scientificName?: string;
+  width?: number;
+  message?: string;
+}
+
+/**
+ * Generate cartoon illustration of species using DALL-E 2
+ * Returns image URL which frontend will convert to ASCII
+ */
+export async function generateCartoonAscii(
+  args: GenerateCartoonAsciiArgs
+): Promise<GenerateCartoonAsciiResult> {
+  return callMCPTool<GenerateCartoonAsciiResult>('generate_cartoon_ascii', args);
 }

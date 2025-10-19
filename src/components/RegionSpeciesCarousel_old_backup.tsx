@@ -30,14 +30,12 @@ interface RegionSpeciesCarouselProps {
   selectedForGameSpecies?: string[]; // 🎮 NEW: Array of selected species scientific names
   disableAutoScroll?: boolean; // 🎰 Turn off auto-scroll for spin wheel mode
   isSpinning?: boolean; // 🎰 Spin wheel animation active
-  spinPhase?: 1 | 2 | 3 | 4 | 5; // 🎰 Which species to select: 1=carnivore, 2=herbivore, 3=omnivore, 4=bird, 5=plantCoral
-  onSpinComplete?: (selected: RegionSpecies, phase: 1 | 2 | 3 | 4 | 5) => void; // 🎰 Returns single species
+  spinPhase?: 1 | 2 | 3; // 🎰 Which species to select: 1=producer, 2=herbivore, 3=carnivore
+  onSpinComplete?: (selected: RegionSpecies, phase: 1 | 2 | 3) => void; // 🎰 Returns single species
   preSelectedSpecies?: { // 🤖 AI-selected species to reveal
-    carnivore: RegionSpecies | null;
+    producer: RegionSpecies | null;
     herbivore: RegionSpecies | null;
-    omnivore: RegionSpecies | null;
-    bird: RegionSpecies | null;
-    plantCoral: RegionSpecies | null;
+    carnivore: RegionSpecies | null;
   };
 }
 
@@ -198,9 +196,14 @@ export const RegionSpeciesCarousel = ({
 
   // 🎰 Spin wheel animation effect - Slot machine style (stops on selected species)
   useEffect(() => {
+    console.log('🎰 Carousel spin effect triggered:', { isSpinning, spinPhase, hasCallback: !!onSpinComplete });
+
     if (!isSpinning || !onSpinComplete) {
+      console.log('🎰 Spin effect exiting early:', { isSpinning, hasCallback: !!onSpinComplete });
       return;
     }
+
+    console.log('🎰 Starting slot-machine animation - Phase', spinPhase);
 
     const scrollContainer = scrollAreaRef.current?.querySelector('[data-radix-scroll-area-viewport]');
     if (!scrollContainer) {
@@ -208,62 +211,64 @@ export const RegionSpeciesCarousel = ({
       return;
     }
 
+    console.log('🎰 Scroll container dimensions:', {
+      scrollHeight: scrollContainer.scrollHeight,
+      clientHeight: scrollContainer.clientHeight,
+      scrollTop: scrollContainer.scrollTop,
+      isScrollable: scrollContainer.scrollHeight > scrollContainer.clientHeight
+    });
+
     // 🎯 STEP 1: Select winning species BEFORE spinning
     let selectedSpecies: RegionSpecies;
 
+    console.log('🤖 DEBUG: preSelectedSpecies =', preSelectedSpecies);
+    console.log('🤖 DEBUG: spinPhase =', spinPhase);
+
     // 🤖 Use AI pre-selected species if available, otherwise random
     if (preSelectedSpecies) {
-      if (spinPhase === 1 && preSelectedSpecies.carnivore) {
-        selectedSpecies = preSelectedSpecies.carnivore;
+      console.log('🤖 DEBUG: AI pre-selection available!', {
+        producer: preSelectedSpecies.producer?.commonName,
+        herbivore: preSelectedSpecies.herbivore?.commonName,
+        carnivore: preSelectedSpecies.carnivore?.commonName
+      });
+
+      if (spinPhase === 1 && preSelectedSpecies.producer) {
+        selectedSpecies = preSelectedSpecies.producer;
+        console.log('🤖 Phase 1 - Using AI-selected producer:', selectedSpecies.commonName);
       } else if (spinPhase === 2 && preSelectedSpecies.herbivore) {
         selectedSpecies = preSelectedSpecies.herbivore;
-      } else if (spinPhase === 3 && preSelectedSpecies.omnivore) {
-        selectedSpecies = preSelectedSpecies.omnivore;
-      } else if (spinPhase === 4 && preSelectedSpecies.bird) {
-        selectedSpecies = preSelectedSpecies.bird;
-      } else if (spinPhase === 5 && preSelectedSpecies.plantCoral) {
-        selectedSpecies = preSelectedSpecies.plantCoral;
+        console.log('🤖 Phase 2 - Using AI-selected herbivore:', selectedSpecies.commonName);
+      } else if (spinPhase === 3 && preSelectedSpecies.carnivore) {
+        selectedSpecies = preSelectedSpecies.carnivore;
+        console.log('🤖 Phase 3 - Using AI-selected carnivore:', selectedSpecies.commonName);
       } else {
         console.error('🤖 ERROR: AI pre-selected species not found for phase', spinPhase, preSelectedSpecies);
         return;
       }
     } else {
+      console.log('🤖 DEBUG: No AI pre-selection, using random');
+
       // Fallback to random selection if no AI pre-selection
       let candidateSpecies: RegionSpecies[] = [];
 
       if (spinPhase === 1) {
         candidateSpecies = filteredSpecies.filter(s => {
           const diet = s.dietaryCategory?.toLowerCase();
-          return diet === 'carnivore' || diet === 'carnivores';
+          return diet === 'producer' || diet === 'producers';
         });
-        console.log('🎰 Phase 1 - Carnivores found:', candidateSpecies.length);
+        console.log('🎰 Phase 1 - Producers found:', candidateSpecies.length);
       } else if (spinPhase === 2) {
         candidateSpecies = filteredSpecies.filter(s => {
           const diet = s.dietaryCategory?.toLowerCase();
-          return diet === 'herbivore' || diet === 'herbivores';
+          return diet === 'herbivore' || diet === 'herbivores' || diet === 'omnivore' || diet === 'omnivores';
         });
-        console.log('🎰 Phase 2 - Herbivores found:', candidateSpecies.length);
+        console.log('🎰 Phase 2 - Herbivores/Omnivores found:', candidateSpecies.length);
       } else if (spinPhase === 3) {
         candidateSpecies = filteredSpecies.filter(s => {
           const diet = s.dietaryCategory?.toLowerCase();
-          return diet === 'omnivore' || diet === 'omnivores';
+          return diet === 'carnivore' || diet === 'carnivores';
         });
-        console.log('🎰 Phase 3 - Omnivores found:', candidateSpecies.length);
-      } else if (spinPhase === 4) {
-        candidateSpecies = filteredSpecies.filter(s => {
-          const taxonomic = s.taxonomicGroup?.toLowerCase();
-          const type = s.animalType?.toLowerCase();
-          return taxonomic === 'birds' || type?.includes('bird') || type?.includes('aves');
-        });
-        console.log('🎰 Phase 4 - Birds found:', candidateSpecies.length);
-      } else if (spinPhase === 5) {
-        candidateSpecies = filteredSpecies.filter(s => {
-          const diet = s.dietaryCategory?.toLowerCase();
-          const taxonomic = s.taxonomicGroup?.toLowerCase();
-          const type = s.animalType?.toLowerCase();
-          return diet === 'producer' || diet === 'producers' || taxonomic === 'plants & corals' || type?.includes('plant') || type?.includes('coral');
-        });
-        console.log('🎰 Phase 5 - Plants/Corals found:', candidateSpecies.length);
+        console.log('🎰 Phase 3 - Carnivores found:', candidateSpecies.length);
       }
 
       if (candidateSpecies.length === 0) {
@@ -317,44 +322,32 @@ export const RegionSpeciesCarousel = ({
       targetScrollTop
     });
 
-    // 🎯 Scroll the container only - don't scroll the page!
-    const targetCard = scrollContainer.querySelector(`[data-species-card="${selectedIndex}"]`) as HTMLElement;
+    // 🎰 Smooth scroll animation using CSS transform approach (like working spin wheel)
+    const startScrollTop = scrollContainer.scrollTop;
+    const totalDistance = targetScrollTop - startScrollTop;
+    const animationDuration = 2000; // 2 seconds
+    const startTime = Date.now();
 
-    if (targetCard) {
-      console.log('🎰 Scrolling to center:', selectedSpecies.commonName);
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / animationDuration, 1);
 
-      // Get the card's position relative to the scroll container
-      const cardRect = targetCard.getBoundingClientRect();
-      const containerRect = scrollContainer.getBoundingClientRect();
+      // Slot machine easing
+      const eased = 1 - Math.pow(1 - progress, 3);
 
-      // Calculate how much to scroll to center the card
-      const cardRelativeTop = cardRect.top - containerRect.top;
-      const cardCenter = cardRelativeTop + (cardRect.height / 2);
-      const containerCenter = scrollContainer.clientHeight / 2;
-      const scrollAmount = cardCenter - containerCenter;
+      scrollContainer.scrollTop = startScrollTop + (totalDistance * eased);
 
-      const targetScroll = scrollContainer.scrollTop + scrollAmount;
-
-      console.log('🎰 Manual scroll calculation:', {
-        currentScroll: scrollContainer.scrollTop,
-        targetScroll,
-        scrollAmount
-      });
-
-      // Smooth scroll the container only (not the page)
-      scrollContainer.scrollTo({
-        top: targetScroll,
-        behavior: 'smooth'
-      });
-
-      // Wait for scroll animation
-      setTimeout(() => {
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
         console.log('🎰 Spin complete! Stopped on:', selectedSpecies.commonName);
-        onSpinComplete(selectedSpecies, spinPhase);
-      }, 2000);
-    } else {
-      console.error('🎰 ERROR: Could not find card at index', selectedIndex);
-    }
+        setTimeout(() => {
+          onSpinComplete(selectedSpecies, spinPhase);
+        }, 500);
+      }
+    };
+
+    requestAnimationFrame(animate);
 
     return () => {
       // Cleanup if component unmounts during animation
@@ -442,6 +435,37 @@ export const RegionSpeciesCarousel = ({
 
       {/* Scrollable Species List */}
       <div className="flex-1 relative" style={{ maxHeight: 'calc(100vh - 150px)' }}>
+        {/* 🎰 Selection indicator - center zone with green overlay (fixed at button height) */}
+        <div
+          className="fixed z-10 pointer-events-none"
+          style={{
+            left: '27px', // Centered over carousel cards (16px carousel + 16px padding - 105px half of border = 27px)
+            top: '50%',
+            transform: 'translateY(-50%)'
+          }}
+        >
+          {/* Outer glow ring */}
+          <div
+            className={`w-[210px] h-[210px] rounded-lg transition-all duration-300 ${
+              isSpinning ? 'border-4 border-emerald-400' : 'border-2 border-emerald-500/60'
+            }`}
+            style={{
+              boxShadow: isSpinning
+                ? '0 0 40px rgba(16, 185, 129, 0.6), inset 0 0 20px rgba(16, 185, 129, 0.2)'
+                : '0 0 25px rgba(16, 185, 129, 0.4), inset 0 0 15px rgba(16, 185, 129, 0.15)',
+              animation: isSpinning ? 'pulse 1s ease-in-out infinite' : 'none',
+              background: isSpinning
+                ? 'radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, transparent 70%)'
+                : 'radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%)'
+            }}
+          />
+          {/* Center target indicator */}
+          {!isSpinning && (
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-emerald-500 text-2xl font-bold opacity-40">
+              ⬇
+            </div>
+          )}
+        </div>
         <ScrollArea ref={scrollAreaRef} className="h-full w-full">
         {filteredSpecies.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
@@ -454,7 +478,6 @@ export const RegionSpeciesCarousel = ({
               return (
             <Card
               key={`${sp.scientificName}-${index}`}
-              data-species-card={index}
               className={`relative cursor-pointer transition-all hover:scale-105 hover:shadow-2xl overflow-hidden aspect-square ${
                 currentSpecies === sp.scientificName ? 'ring-4 ring-primary shadow-2xl' : ''
               } ${

@@ -7,6 +7,14 @@ export interface ChatContext {
   details?: string;
 }
 
+interface ChatTheme {
+  primary: string;      // HSL color string (e.g., "hsl(160, 84%, 39%)")
+  secondary: string;    // HSL color string
+  background: string;   // HSL color string
+  text: string;         // HSL color string
+  accent?: string;      // HSL color string (optional)
+}
+
 interface ChatInputProps {
   onSubmit: (message: string) => void;
   isLoading?: boolean;
@@ -16,12 +24,33 @@ interface ChatInputProps {
   onBlur?: () => void;
   hasMessages?: boolean;
   onExpandHistory?: () => void;
+  theme?: ChatTheme;
 }
 
-const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus, onBlur, hasMessages = false, onExpandHistory }: ChatInputProps) => {
+const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus, onBlur, hasMessages = false, onExpandHistory, theme }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Default theme if none provided (emerald theme)
+  const currentTheme = theme || {
+    primary: 'hsl(160, 84%, 39%)',
+    secondary: 'hsl(158, 64%, 52%)',
+    background: 'hsl(222, 47%, 11%)',
+    text: 'hsl(152, 76%, 80%)',
+    accent: 'hsl(160, 100%, 70%)'
+  };
+
+  // Debug: Log when theme changes
+  useEffect(() => {
+    console.log('[ChatInput] 🎨 Theme prop changed:', theme);
+    console.log('[ChatInput] 🎨 Using theme:', currentTheme);
+  }, [theme]);
+
+  // Helper to add alpha to HSL color
+  const withAlpha = (hslColor: string, alpha: number) => {
+    return hslColor.replace('hsl(', 'hsla(').replace(')', `, ${alpha})`);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,18 +106,31 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
       }}
     >
       <div
-        className={`relative bg-slate-950/95 backdrop-blur-sm border border-emerald-500/30 w-full shadow-2xl ${
+        className={`relative backdrop-blur-sm border w-full shadow-2xl ${
           hasMessages ? 'rounded-b-lg border-t-0' : 'rounded-lg'
         }`}
-        style={{ maxWidth: '912px' }}
+        style={{
+          maxWidth: '912px',
+          backgroundColor: withAlpha(currentTheme.background, 0.95),
+          borderColor: withAlpha(currentTheme.primary, 0.3),
+        }}
       >
         {/* Expand History Button - Show when messages exist but history is minimized */}
         {hasMessages && onExpandHistory && (
-          <div className="flex items-center justify-between px-4 py-2 bg-slate-900/50 border-b border-emerald-500/10">
+          <div
+            className="flex items-center justify-between px-4 py-2 border-b"
+            style={{
+              backgroundColor: 'rgba(15, 23, 42, 0.5)',
+              borderColor: withAlpha(currentTheme.primary, 0.1),
+            }}
+          >
             <button
               type="button"
               onClick={onExpandHistory}
-              className="flex items-center gap-2 text-xs text-slate-400 hover:text-emerald-400 transition-colors"
+              className="flex items-center gap-2 text-xs transition-colors"
+              style={{ color: 'rgb(148, 163, 184)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = currentTheme.secondary; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'rgb(148, 163, 184)'; }}
             >
               <ChevronUp className="h-3 w-3" />
               <span>Show chat history</span>
@@ -98,9 +140,12 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
         )}
 
         {/* Terminal Input Line */}
-        <div className="flex items-center gap-2 px-4 py-3 border-t border-emerald-500/10">
+        <div
+          className="flex items-center gap-2 px-4 py-3 border-t"
+          style={{ borderColor: withAlpha(currentTheme.primary, 0.1) }}
+        >
           {/* Prompt Symbol */}
-          <span className="text-emerald-400 font-bold shrink-0">❯</span>
+          <span className="font-bold shrink-0" style={{ color: currentTheme.secondary }}>❯</span>
 
           {/* Loading Spinner */}
           {isLoading && (
@@ -123,7 +168,11 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
               onBlur?.();
             }}
             placeholder={getContextualPlaceholder()}
-            className="flex-1 bg-transparent border-none outline-none text-sm text-emerald-100 placeholder:text-slate-600 caret-emerald-400"
+            className="flex-1 bg-transparent border-none outline-none text-sm placeholder:text-slate-600"
+            style={{
+              color: currentTheme.text,
+              caretColor: currentTheme.secondary,
+            }}
             disabled={isLoading}
             autoComplete="off"
             spellCheck="false"
@@ -131,13 +180,19 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
 
           {/* Cursor Blink Effect (only when focused and empty) */}
           {isFocused && !message && (
-            <span className="text-emerald-400 animate-pulse">▊</span>
+            <span className="animate-pulse" style={{ color: currentTheme.secondary }}>▊</span>
           )}
         </div>
 
         {/* Bottom Status Bar */}
-        <div className="flex items-center justify-between px-4 py-1.5 bg-slate-900/50 border-t border-emerald-500/10 text-xs">
-          <div className="flex items-center gap-3 text-slate-600">
+        <div
+          className="flex items-center justify-between px-4 py-1.5 border-t text-xs"
+          style={{
+            backgroundColor: withAlpha(currentTheme.background, 0.7),
+            borderColor: withAlpha(currentTheme.primary, 0.3),
+          }}
+        >
+          <div className="flex items-center gap-3" style={{ color: withAlpha(currentTheme.text, 0.6) }}>
             <span>ESC to clear</span>
             <span>•</span>
             <span>ENTER to send</span>

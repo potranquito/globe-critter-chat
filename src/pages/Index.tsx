@@ -22,7 +22,8 @@ import { FoodWebSelectionBar } from '@/components/FoodWebSelectionBar';
 import { useToast } from '@/hooks/use-toast';
 import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ChevronLeft, ChevronRight } from 'lucide-react';
+import { RotateCcw, ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
+import { ClipLoader, RingLoader, DotLoader, PulseLoader, BeatLoader } from 'react-spinners';
 import { getCuratedSpecies, hasCuratedData } from '@/data/curatedSpecies';
 import type { HabitatRegion } from '@/types/habitat';
 import { performRegionAnalysis } from '@/services/regionService';
@@ -38,7 +39,8 @@ import {
   createCarnivoreAgentContext,
   selectSpeciesWithAI
 } from '@/services/educationAgent';
-import { getRegionSpecies } from '@/services/mcpClient';
+import { getRegionSpecies, generateColorTheme, generateCartoonAscii } from '@/services/mcpClient';
+import { imageToAscii, boxAsciiArt } from '@/utils/imageToAscii';
 import {
   generateTriviaQuestion,
   generateBriefSpeciesInfo,
@@ -274,17 +276,106 @@ const Index = () => {
   const [correctAnswerFeedback, setCorrectAnswerFeedback] = useState<string | null>(null); // 🎮 Show green glow
   const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState<string | null>(null); // 🎮 Show red shake
 
-  // 🎓 NEW: Trivia question state
-  const [triviaQuestion, setTriviaQuestion] = useState<any | null>(null);
-  const [triviaAttemptCount, setTriviaAttemptCount] = useState(0); // Max 3
-  const [isWaitingForAnswer, setIsWaitingForAnswer] = useState(false); // Locks carousel during questions
-  const [triviaContext, setTriviaContext] = useState<'hint' | 'wrongSpecies' | null>(null); // Track why trivia was shown
-  const [showHintButton, setShowHintButton] = useState(false); // Shows after correct answer
-  const [hintLevel, setHintLevel] = useState(0); // 0-3 (no hints used → all hints used)
+  // 🌍 Simplified Loading State
+  const [isInitializing, setIsInitializing] = useState(false);
+
+  // 🎓 Education Agent State (additional state for food web game)
+  const [conversationHistory, setConversationHistory] = useState<Array<{ role: 'user' | 'assistant', content: string }>>([]);
+  const [attemptCount, setAttemptCount] = useState(0); // Track wrong attempts for progressive hints
 
   // 🎮 NEW: Identification game state
   const [collectedSpecies, setCollectedSpecies] = useState<RegionSpecies[]>([]); // Species user has correctly identified (across all batches)
   const [currentChallengeSpecies, setCurrentChallengeSpecies] = useState<RegionSpecies | null>(null); // Species agent is asking for
+  const [countdownSeconds, setCountdownSeconds] = useState<number | null>(null); // Countdown timer (null = inactive)
+  const [countdownMessageId, setCountdownMessageId] = useState<string | null>(null); // ID of countdown message for updates
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null); // Timer interval ref
+
+  // 🎨 NEW: Chat theme colors based on ecoregion (HSL format)
+  interface ChatTheme {
+    primary: string;      // HSL color string (e.g., "hsl(160, 84%, 39%)")
+    secondary: string;    // HSL color string
+    background: string;   // HSL color string
+    text: string;         // HSL color string
+    accent?: string;      // HSL color string (optional)
+  }
+  const [chatTheme, setChatTheme] = useState<ChatTheme>({
+    primary: 'hsl(160, 84%, 39%)',
+    secondary: 'hsl(158, 64%, 52%)',
+    background: 'hsl(222, 47%, 11%)',
+    text: 'hsl(152, 76%, 80%)',
+    accent: 'hsl(160, 100%, 70%)'
+  });
+
+  // Debug: Log when chatTheme state changes
+  useEffect(() => {
+    console.log('[Index] 🎨 chatTheme state updated:', chatTheme);
+  }, [chatTheme]);
+
+  // ⏱️ Countdown timer logic
+  useEffect(() => {
+    // Clear any existing interval
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+
+    // If countdown is active and greater than 0
+    if (countdownSeconds !== null && countdownSeconds > 0) {
+      countdownIntervalRef.current = setInterval(() => {
+        setCountdownSeconds(prev => {
+          if (prev === null || prev <= 0) {
+            return null;
+          }
+
+          const newTime = prev - 1;
+
+          // Update countdown message in chat
+          if (countdownMessageId) {
+            setChatHistory(prevHistory =>
+              prevHistory.map(msg =>
+                msg.id === countdownMessageId
+                  ? { ...msg, content: `⏱️ Time remaining: **${newTime} seconds**` }
+                  : msg
+              )
+            );
+          }
+
+          // When countdown reaches 0
+          if (newTime === 0) {
+            // Remove countdown message from chat
+            if (countdownMessageId) {
+              setChatHistory(prevHistory =>
+                prevHistory.filter(msg => msg.id !== countdownMessageId)
+              );
+            }
+
+            // Show hint button
+            setQuickReplies([
+              { id: 'hint', label: 'Give Me A Hint', emoji: '💡', action: 'hint' as const }
+            ]);
+
+            // Clear interval
+            if (countdownIntervalRef.current) {
+              clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = null;
+            }
+
+            return null;
+          }
+
+          return newTime;
+        });
+      }, 1000); // Update every second
+    }
+
+    // Cleanup on unmount or when countdown changes
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+        countdownIntervalRef.current = null;
+      }
+    };
+  }, [countdownSeconds, countdownMessageId]);
 
   // 🌍 Load WWF ecoregions from database on mount
   useEffect(() => {
@@ -323,6 +414,357 @@ const Index = () => {
 
     loadEcoRegions();
   }, []);
+
+  // 🎭 Show cartoon mascot and guardian greeting when entering new region
+  useEffect(() => {
+    // Only run if we're viewing an ecoregion, species are loaded, and chat is empty
+    if (!isViewingEcoRegion || regionSpecies.length === 0 || chatHistory.length > 0) return;
+    if (!regionInfo?.regionName) return;
+
+    console.log('🎭 Generating cartoon mascot and guardian greeting via DALL-E...');
+
+    const generateMascotAndGreeting = async () => {
+      // Flag to control loading message cycling
+      let shouldContinueLoading = { value: true };
+
+      try {
+        // 🎨 Regenerate color theme for variety (each mascot gets a new theme!)
+        console.log('🎨 Regenerating color theme for fresh mascot...');
+        const newTheme = await generateDynamicTheme(regionInfo.regionName, regionInfo.biome);
+        setChatTheme(newTheme);
+        console.log('✅ New theme applied:', newTheme);
+
+        // 🌍 Show simple loading message
+        setIsInitializing(true);
+        setIsChatHistoryExpanded(true);
+
+        // Sequential loading messages with narrative transitions
+        const loadingMessages = [
+          { initial: '🔍 Scanning ecoregion', conclusion: '⚠️ Threats detected!' },
+          { initial: '🐾 Detecting nearby species', conclusion: '🏃 Endangered animals scared and running away!' },
+          { initial: '📡 Interpreting warning message', conclusion: '👹 Poopy Pants has been spotted!' },
+          { initial: '📞 Incoming call', conclusion: '❓ Mystery caller - Who is it?' }
+        ];
+
+        // Helper to stream a message character-by-character (returns Promise)
+        const streamMessage = (text: string, messageId: string): Promise<void> => {
+          return new Promise((resolve) => {
+            let charIndex = 0;
+            const streamInterval = setInterval(() => {
+              if (charIndex < text.length) {
+                const nextChar = text[charIndex];
+                setChatHistory(prev =>
+                  prev.map(msg =>
+                    msg.id === messageId
+                      ? { ...msg, content: msg.content + nextChar }
+                      : msg
+                  )
+                );
+                charIndex++;
+              } else {
+                clearInterval(streamInterval);
+                resolve();
+              }
+            }, 35); // 35ms per character for loading messages (slower for better readability)
+          });
+        };
+
+        // Helper to add thinking dots animation
+        const addThinkingDots = (text: string, messageId: string): Promise<void> => {
+          return new Promise((resolve) => {
+            let dotCount = 0;
+            const dotInterval = setInterval(() => {
+              if (!shouldContinueLoading.value) {
+                clearInterval(dotInterval);
+                resolve();
+                return;
+              }
+              dotCount = (dotCount + 1) % 4; // 0, 1, 2, 3, 0, 1, 2, 3...
+              const dots = '.'.repeat(dotCount);
+              setChatHistory(prev =>
+                prev.map(msg =>
+                  msg.id === messageId
+                    ? { ...msg, content: text + dots }
+                    : msg
+                )
+              );
+            }, 500); // Change dots every 500ms
+
+            // Stop after 2 seconds (4 cycles)
+            setTimeout(() => {
+              clearInterval(dotInterval);
+              resolve();
+            }, 2000);
+          });
+        };
+
+        // Async function to cycle through loading messages
+        const cycleLoadingMessages = async () => {
+          const messageIds: string[] = [];
+
+          while (shouldContinueLoading.value) {
+            // Cycle through all 4 messages
+            for (let i = 0; i < loadingMessages.length; i++) {
+              if (!shouldContinueLoading.value) break;
+              const messageId = `loading-${i}-${Date.now()}`;
+
+              // Create and add message
+              const newMessage: ChatMessage = {
+                id: messageId,
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+                status: 'sent'
+              };
+
+              if (i === 0 && messageIds.length === 0) {
+                // First message ever
+                setChatHistory([newMessage]);
+                messageIds.push(messageId);
+              } else {
+                // Add to existing messages
+                setChatHistory(prev => [...prev, newMessage]);
+                messageIds.push(messageId);
+              }
+
+              // Stream initial text
+              await streamMessage(loadingMessages[i].initial, messageId);
+
+              // Add thinking dots animation for 2 seconds
+              await addThinkingDots(loadingMessages[i].initial, messageId);
+
+              // Clear and stream conclusion (faster)
+              setChatHistory(prev =>
+                prev.map(msg =>
+                  msg.id === messageId ? { ...msg, content: '' } : msg
+                )
+              );
+              await streamMessage(loadingMessages[i].conclusion, messageId);
+
+              // Wait 1 second before next message
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+
+            // Keep only last 4 messages to avoid clutter
+            setChatHistory(prev => prev.slice(-4));
+          }
+        };
+
+        // Start cycling (will run until cleared)
+        cycleLoadingMessages();
+
+        // Pick a random species for the mascot
+        const randomSpecies = regionSpecies[Math.floor(Math.random() * regionSpecies.length)];
+
+        console.log('🎨 Calling MCP generateCartoonAscii for:', randomSpecies.commonName);
+
+        // Generate cartoon image via MCP tool (width is for ASCII art sizing, max 80)
+        const cartoonResult = await generateCartoonAscii({
+          commonName: randomSpecies.commonName,
+          scientificName: randomSpecies.scientificName,
+          animalType: randomSpecies.animalType || undefined,
+          width: 40
+        });
+
+        if (!cartoonResult.success || !cartoonResult.cartoonUrl) {
+          console.error('❌ Failed to generate cartoon. Full result:', cartoonResult);
+          throw new Error(`Failed to generate cartoon image: ${cartoonResult.message || 'Unknown error'}`);
+        }
+
+        console.log('✅ Cartoon generated and converted to ASCII!');
+
+        if (!cartoonResult.asciiArt) {
+          console.error('❌ No ASCII art in response');
+          throw new Error('No ASCII art generated');
+        }
+
+        // Generate fun nickname for the mascot
+        const funNames = [
+          'Hoppy', 'Junior', 'Spaz', 'Buddy', 'Champ', 'Scout',
+          'Lucky', 'Dash', 'Zippy', 'Sunny', 'Flash', 'Pepper',
+          'Rocket', 'Peanut', 'Cookie', 'Sparky', 'Ace', 'Max',
+          'Charlie', 'Ziggy', 'Biscuit', 'Muffin', 'Tango', 'Cosmo'
+        ];
+        const nickname = funNames[Math.floor(Math.random() * funNames.length)];
+
+        // 50% chance to show DALL-E image instead of ASCII art
+        const useDalleImage = Math.random() < 0.5;
+
+        // Create character sheet with either DALL-E image or ASCII art
+        const characterSheet = useDalleImage && cartoonResult.cartoonUrl
+          ? `🎨 **${regionInfo.regionName} Mascot**
+
+![${randomSpecies.commonName}](${cartoonResult.cartoonUrl})
+
+**📋 Character Sheet**
+**Name:** ${nickname}
+**Species:** ${randomSpecies.commonName}
+**Type:** ${randomSpecies.animalType || 'Unknown'}
+${randomSpecies.conservationStatus ? `**Status:** ${randomSpecies.conservationStatus}` : ''}`
+          : `🎨 **${regionInfo.regionName} Mascot**
+
+\`\`\`
+${cartoonResult.asciiArt}
+\`\`\`
+
+**📋 Character Sheet**
+**Name:** ${nickname}
+**Species:** ${randomSpecies.commonName}
+**Type:** ${randomSpecies.animalType || 'Unknown'}
+${randomSpecies.conservationStatus ? `**Status:** ${randomSpecies.conservationStatus}` : ''}`;
+
+        // Create messages: Cartoon character first, then guardian greeting
+        const asciiMessageId = `cartoon-${Date.now()}`;
+        const greetingMessageId = `greeting-${Date.now() + 1}`;
+
+        // Helper to expand conservation status abbreviations
+        const expandConservationStatus = (status: string | null): string => {
+          if (!status) return '';
+          const statusMap: Record<string, string> = {
+            'LC': 'Least Concern',
+            'NT': 'Near Threatened',
+            'VU': 'Vulnerable',
+            'EN': 'Endangered',
+            'CR': 'Critically Endangered',
+            'EW': 'Extinct in the Wild',
+            'EX': 'Extinct',
+            'DD': 'Data Deficient'
+          };
+          return statusMap[status.toUpperCase()] || status;
+        };
+
+        const guardianName = generateGuardianName(regionInfo.regionName);
+        const fullGreeting = `👋 Hello! I'm ${guardianName}\n\nWelcome to the ${regionInfo.regionName}! This incredible ecoregion is home to diverse wildlife and vibrant ecosystems.\n\n😵 I have a confession... The evil villain Poopy Pants blinded me! Now I've lost track of all my animal and plant friends who live here. Can you help me find them?\n\n🎮 Let's play a game! I'll give you the name of a species, and you click on its image to help me identify it. Together we can defeat Poopy Pants and reconnect with the creatures of this region!`;
+
+        // Extract just the image/ASCII portion for laser-in animation
+        const imageOnly = useDalleImage && cartoonResult.cartoonUrl
+          ? `![${randomSpecies.commonName}](${cartoonResult.cartoonUrl})`
+          : `\`\`\`\n${cartoonResult.asciiArt}\n\`\`\``;
+
+        // Extract character sheet text (without image/ASCII)
+        const expandedStatus = expandConservationStatus(randomSpecies.conservationStatus);
+        const characterSheetText = `🎨 ${regionInfo.regionName} Mascot
+
+📋 Character Sheet
+Name: ${nickname}
+Species: ${randomSpecies.commonName}
+Type: ${randomSpecies.animalType || 'Unknown'}
+${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
+
+        // DON'T clear loading interval yet - it will continue until laser-in completes
+
+        // Step 1: Show image/ASCII with laser-in animation (instant display, CSS animates it)
+        const imageMessageId = `image-${Date.now()}`;
+        const imageMessage: ChatMessage = {
+          id: imageMessageId,
+          role: 'assistant',
+          content: imageOnly, // Show full image/ASCII immediately (laser-in animation via CSS)
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, imageMessage]);
+
+        // Step 2: After laser-in completes (2.5s), clear loading and start streaming character sheet
+        setTimeout(() => {
+          // Stop loading message cycling
+          shouldContinueLoading.value = false;
+          setIsInitializing(false);
+          setIsLoading(true);
+
+          // Clear chat history and show character sheet message (empty to start)
+          const characterSheetMessageId = `character-sheet-${Date.now()}`;
+          const characterSheetMessage: ChatMessage = {
+            id: characterSheetMessageId,
+            role: 'assistant',
+            content: '',
+            timestamp: new Date(),
+            status: 'sent'
+          };
+          setChatHistory([imageMessage, characterSheetMessage]);
+
+          // Stream character sheet text
+          let charSheetIndex = 0;
+          const charSheetInterval = setInterval(() => {
+            if (charSheetIndex < characterSheetText.length) {
+              const nextChar = characterSheetText[charSheetIndex];
+              setChatHistory(prev =>
+                prev.map(msg =>
+                  msg.id === characterSheetMessageId
+                    ? { ...msg, content: msg.content + nextChar }
+                    : msg
+                )
+              );
+              charSheetIndex++;
+            } else {
+              // Character sheet complete, now stream greeting
+              clearInterval(charSheetInterval);
+
+              // Add empty greeting message
+              const greetingMessageId = `greeting-${Date.now()}`;
+              const greetingMessage: ChatMessage = {
+                id: greetingMessageId,
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+                status: 'sent'
+              };
+              setChatHistory(prev => [...prev, greetingMessage]);
+
+              // Stream guardian greeting
+              let greetingIndex = 0;
+              const greetingInterval = setInterval(() => {
+                if (greetingIndex < fullGreeting.length) {
+                  const nextChar = fullGreeting[greetingIndex];
+                  setChatHistory(prev =>
+                    prev.map(msg =>
+                      msg.id === greetingMessageId
+                        ? { ...msg, content: msg.content + nextChar }
+                        : msg
+                    )
+                  );
+                  greetingIndex++;
+                } else {
+                  // Greeting complete
+                  clearInterval(greetingInterval);
+                  setIsLoading(false);
+
+                  // Set custom quick reply button
+                  console.log('🎮 Setting quick reply button after greeting complete');
+                  setQuickReplies([
+                    {
+                      id: 'help-find-species',
+                      label: '🔍 Help Find Ecoregion Species',
+                      emoji: '🔍',
+                      action: 'help-find-species'
+                    }
+                  ]);
+                  console.log('✅ Quick reply button set');
+                }
+              }, 40); // 40ms per character for greeting (slowest for better readability)
+            }
+          }, 30); // 30ms per character for character sheet (slower for better readability)
+        }, 4000); // Wait for laser-in animation to complete (4 seconds)
+      } catch (error) {
+        console.error('❌ Error generating mascot:', error);
+        // Stop loading message cycling
+        shouldContinueLoading.value = false;
+        setIsLoading(false);
+        setIsInitializing(false);
+        // Show error message
+        const errorMessage: ChatMessage = {
+          id: `error-${Date.now()}`,
+          role: 'assistant',
+          content: '❌ Failed to generate mascot image. Please try refreshing the page.',
+          timestamp: new Date(),
+          status: 'error'
+        };
+        setChatHistory([errorMessage]);
+      }
+    };
+
+    generateMascotAndGreeting();
+  }, [isViewingEcoRegion, regionSpecies, chatHistory.length, regionInfo]);
+
 
   // 📚 Update education context whenever the right-side card or food web changes
   useEffect(() => {
@@ -422,9 +864,16 @@ const Index = () => {
   // Update quick replies when chat history changes
   // 🎮 DISABLED during Food Web Game - quick replies are managed manually by game flow
   useEffect(() => {
-    // Skip auto-generation when in Food Web Game mode
-    if (isFoodWebGameActive) {
+    // Skip auto-generation when in Food Web Game mode OR during spinning wheel phase
+    if (isFoodWebGameActive || isAISelecting || isSpinningWheel) {
       return; // Quick replies managed by game flow
+    }
+
+    // Skip if loading message is showing
+    const hasLoadingMessage = chatHistory.some(msg => msg.id.startsWith('loading-'));
+    if (hasLoadingMessage) {
+      setQuickReplies([]);
+      return;
     }
 
     if (chatHistory.length > 0 && isChatHistoryExpanded) {
@@ -434,16 +883,84 @@ const Index = () => {
     } else {
       setQuickReplies([]);
     }
-  }, [chatHistory, isChatHistoryExpanded, lastTriviaAnswer, isFoodWebGameActive]);
+  }, [chatHistory, isChatHistoryExpanded, lastTriviaAnswer, isFoodWebGameActive, isAISelecting, isSpinningWheel]);
 
   // 🎯 HANDLE ECO-REGION CLICK: Switch to 2D map view centered on region
+
+  // 🎨 Detect biome type from ecoregion name
+  const detectBiomeType = (regionName: string): string => {
+    const name = regionName.toLowerCase();
+
+    if (name.includes('marine') || name.includes('ocean') || name.includes('coral') || name.includes('reef')) return 'marine';
+    if (name.includes('desert') || name.includes('sahara') || name.includes('arid')) return 'desert';
+    if (name.includes('arctic') || name.includes('tundra') || name.includes('polar')) return 'arctic';
+    if (name.includes('tropical') || name.includes('rainforest') || name.includes('jungle')) return 'tropical';
+    if (name.includes('savanna') || name.includes('grassland') || name.includes('serengeti')) return 'savanna';
+    if (name.includes('mountain') || name.includes('alpine') || name.includes('highland')) return 'mountain';
+    if (name.includes('wetland') || name.includes('marsh') || name.includes('swamp') || name.includes('mangrove')) return 'wetland';
+    if (name.includes('temperate') || name.includes('deciduous') || name.includes('broadleaf')) return 'temperate-forest';
+    if (name.includes('boreal') || name.includes('taiga') || name.includes('conifer')) return 'boreal';
+
+    return 'forest'; // Default
+  };
+
+  // 🎨 Generate dynamic color theme using MCP service
+  const generateDynamicTheme = async (ecoregionName: string, biome?: string): Promise<ChatTheme> => {
+    try {
+      console.log('[Theme] 🎨 Generating dynamic color theme for:', ecoregionName, 'Biome:', biome);
+      const result = await generateColorTheme({ ecoregionName, biome });
+      console.log('[Theme] 📡 MCP Response:', result);
+
+      if (result.success && result.theme) {
+        console.log('[Theme] ✅ Generated theme:', result.theme);
+        console.log('[Theme] Base Hue:', result.baseHue, 'Dominant Color:', result.characteristics?.dominantColor);
+        return result.theme;
+      } else {
+        console.warn('[Theme] ⚠️ MCP color theme generation failed, using default');
+        return {
+          primary: 'hsl(160, 84%, 39%)',
+          secondary: 'hsl(158, 64%, 52%)',
+          background: 'hsl(222, 47%, 11%)',
+          text: 'hsl(152, 76%, 80%)',
+          accent: 'hsl(160, 100%, 70%)'
+        };
+      }
+    } catch (error) {
+      console.error('[Theme] ❌ Error generating color theme:', error);
+      // Fallback to default emerald theme
+      return {
+        primary: 'hsl(160, 84%, 39%)',
+        secondary: 'hsl(158, 64%, 52%)',
+        background: 'hsl(222, 47%, 11%)',
+        text: 'hsl(152, 76%, 80%)',
+        accent: 'hsl(160, 100%, 70%)'
+      };
+    }
+  };
+
+  // 🎭 Generate ASCII art for a species (DEPRECATED - now using DALL-E generated cartoons)
+  // This function is no longer used but kept for reference
+  /*
+  const generateSpeciesASCII = (species: RegionSpecies): string => {
+    // Old hardcoded ASCII art logic removed
+    return '';
+  };
+  */
+
+  // 🤖 Generate guardian name from region name
+  const generateGuardianName = (regionName: string): string => {
+    // Extract the main part of the region name (before any parentheses or dashes)
+    const mainName = regionName.split(/[(\-]/)[0].trim();
+
+    return `${mainName} AI Guardian`;
+  };
+
   const handleEcoRegionClick = async (point: any) => {
     console.log('Eco-region clicked:', point.name);
     setHasInteracted(true);
 
     // ✅ Reset chat history and food web game for new ecoregion
     setChatHistory([]);
-    setIsChatHistoryExpanded(false);
     setSelectedFoodWebSpecies({
       carnivore: null,
       herbivore: null,
@@ -459,14 +976,19 @@ const Index = () => {
     setIsSpeciesRevealed(false);
     setRevealAttemptCount(0);
     setIsCarouselLocked(false);
-    setTriviaQuestion(null);
-    setTriviaContext(null);
-    setTriviaAttemptCount(0);
-    setIsWaitingForAnswer(false);
-    setShowHintButton(false);
-    setHintLevel(0);
+    setConversationHistory([]);
+    setAttemptCount(0);
     setFoodWebTargetSpecies({ carnivore: null, herbivore: null, omnivore: null, bird: null, plantCoral: null });
     console.log('🔄 Game state reset - isFoodWebGameActive set to FALSE');
+
+    // 🎨 Generate dynamic color theme using MCP
+    const theme = await generateDynamicTheme(point.name, point.biome);
+    console.log('[handleEcoRegionClick] 🎨 Setting chat theme:', theme);
+    setChatTheme(theme);
+    console.log('[handleEcoRegionClick] ✅ Chat theme state updated');
+
+    // Auto-expand chat to prepare for messages
+    setIsChatHistoryExpanded(true);
 
     // Add slower transition - delay switching to 2D map view
     setTimeout(() => {
@@ -959,43 +1481,8 @@ const Index = () => {
 
   // Generate quick replies based on conversation state
   const generateQuickReplies = (lastMessage: ChatMessage | undefined): QuickReply[] => {
-    if (!lastMessage || lastMessage.role !== 'assistant') {
-      return [];
-    }
-
-    const messageContent = lastMessage.content.toLowerCase();
-
-    // Check if it's a multiple choice trivia question (contains A. B. C. D.)
-    const isMultipleChoice = /[a-d]\.\s+/i.test(lastMessage.content);
-
-    // Check if user just answered (last user message before this assistant message)
-    const messages = chatHistory;
-    const lastUserMessage = messages.length >= 2 ? messages[messages.length - 2] : null;
-    const userJustAnswered = lastUserMessage?.role === 'user' && lastTriviaAnswer !== null;
-
-    if (isMultipleChoice && !userJustAnswered) {
-      // State 1: Show A/B/C/D answer buttons
-      return [
-        { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
-        { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
-        { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
-        { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' },
-      ];
-    } else if (userJustAnswered) {
-      // State 2: After answering - show follow-up options
-      return [
-        { id: 'explain', label: 'Explain', emoji: '✅', action: 'explain' as const },
-        { id: 'next', label: 'Next Question', emoji: '🎲', action: 'trivia' as const },
-        { id: 'facts', label: 'Fast Facts', emoji: '💡', action: 'facts' as const },
-      ];
-    } else {
-      // State 3: General chat - show discovery options (works for both food web and single species)
-      return [
-        { id: 'trivia', label: 'New Trivia', emoji: '🎲', action: 'trivia' as const },
-        { id: 'facts', label: 'Fun Facts', emoji: '💡', action: 'facts' as const },
-        { id: 'conservation', label: 'Status', emoji: '🛡️', action: 'conservation' as const },
-      ];
-    }
+    // Quick replies disabled - return empty array
+    return [];
   };
 
   // Handle quick reply button clicks
@@ -1003,6 +1490,27 @@ const Index = () => {
     let message = '';
 
     switch (reply.action) {
+      case 'help-find-species':
+        // Start the species roulette game
+        setQuickReplies([]); // Clear the button
+
+        // Show loading message with spinning wheel activation
+        setIsLoading(true);
+        const loadingMessage: ChatMessage = {
+          id: `loading-${Date.now()}`,
+          role: 'assistant',
+          content: '🌍 Activating Spinning Wheel...',
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, loadingMessage]);
+
+        // Small delay to show loading message, then start the game
+        setTimeout(() => {
+          setIsLoading(false);
+          handlePlayTrivia();
+        }, 800);
+        return; // Don't send a message
       case 'answer':
         message = reply.value || '';
         setLastTriviaAnswer(reply.value || null);
@@ -1022,8 +1530,16 @@ const Index = () => {
         message = 'What is the conservation status and threats?';
         break;
       case 'hint':
-        // Call hint handler directly instead of sending a message
-        handleHintClick();
+        // Hints are now handled by the education agent through conversation
+        message = 'Can you give me a hint?';
+        break;
+      case 'play-food-web-game':
+        // Battle Poopy Pants game
+        setQuickReplies([]); // Clear the button
+        toast({
+          title: "⚔️ Battle Poopy Pants - Coming Soon!",
+          description: `You've collected ${collectedSpecies.length} species. The ecosystem battle game will launch here!`,
+        });
         return; // Don't send a message
     }
 
@@ -1049,26 +1565,6 @@ const Index = () => {
 
   const handleSearch = async (query: string) => {
     console.log('Search query:', query);
-
-    // 🎓 INTERCEPT: Check if this is a trivia answer (A/B/C/D)
-    if (isWaitingForAnswer && triviaQuestion && ['A', 'B', 'C', 'D'].includes(query.trim().toUpperCase())) {
-      await handleTriviaAnswer(query.trim().toUpperCase());
-      return;
-    }
-
-    // 💡 INTERCEPT: Check if this is a hint request
-    if (query.toLowerCase().includes('hint') || query === '💡 Hint') {
-      if (showHintButton) {
-        handleHintClick();
-      } else {
-        toast({
-          title: "Hint Unavailable",
-          description: "Answer a trivia question correctly first!",
-          variant: "destructive"
-        });
-      }
-      return;
-    }
 
     setIsLoading(true);
     setHasInteracted(true);
@@ -1159,7 +1655,7 @@ const Index = () => {
           // Start the interval after the first chunk arrives
           if (!characterIntervalRef.current) {
             console.log('🚀 Starting character reveal interval');
-            characterIntervalRef.current = setInterval(revealNextCharacter, 30);
+            characterIntervalRef.current = setInterval(revealNextCharacter, 10);
           }
         },
         () => {
@@ -2242,13 +2738,11 @@ const Index = () => {
     // 🎮 FOOD WEB GAME MODE: New Reveal Mechanic
     console.log('🎮 Species clicked during food web game:', species.commonName);
 
-    // Check if carousel is locked (waiting for trivia answer OR after 4 wrong attempts)
-    if (isCarouselLocked || isWaitingForAnswer) {
+    // Check if carousel is locked (during game interactions)
+    if (isCarouselLocked) {
       toast({
         title: "Carousel Locked",
-        description: isWaitingForAnswer
-          ? "Answer the trivia question to unlock!"
-          : "Answer the question to try again!",
+        description: "Complete the current interaction to continue!",
         variant: "destructive"
       });
       return;
@@ -2382,6 +2876,11 @@ const Index = () => {
         'assistant'
       );
 
+      // Show hint button after wrong answer
+      setQuickReplies([
+        { id: 'hint', label: 'Give Me A Hint', emoji: '💡', action: 'hint' as const }
+      ]);
+
       // Clear right panel after a delay (10 seconds)
       setTimeout(() => {
         setSelectedSpeciesForReveal(null);
@@ -2428,8 +2927,7 @@ The correct answer was the **${currentTarget.commonName}**. Now let's find the n
 
         // Reset for next phase
         setRevealAttemptCount(0);
-        setHintLevel(0);
-        setShowHintButton(false);
+        setAttemptCount(0);
 
         // Advance to next phase
         if (foodWebGamePhase < 3) {
@@ -2479,57 +2977,7 @@ Great job learning about the ${regionInfo?.regionName} ecosystem!`;
         return; // Skip trivia generation
       }
 
-      // Lock carousel and show loading spinner while generating trivia
-      setIsWaitingForAnswer(true);
-      setIsLoading(true); // Show spinning earth while thinking
-
-      try {
-        const question: TriviaQuestion = await generateTriviaQuestion({
-          targetSpecies: {
-            commonName: currentTarget.commonName,
-            scientificName: currentTarget.scientificName,
-            animalType: currentTarget.animalType,
-            role: foodWebGamePhase === 1 ? 'producer' :
-                  foodWebGamePhase === 2 ? 'herbivoreOmnivore' : 'carnivore'
-          },
-          ecoregionName: regionInfo!.regionName,
-          gradeLevel: 5,
-          difficulty: 'medium'
-        });
-
-        // Stop loading spinner after trivia generated
-        setIsLoading(false);
-
-        setTriviaQuestion(question);
-        setTriviaContext('wrongSpecies'); // Mark this as wrong-species trivia
-
-        // Stream trivia question
-        const questionMessage = `**In order to continue, you must answer this question:**
-
-${question.question}
-
-${question.choices.join('\n')}`;
-
-        await streamTextToChat(
-          `trivia-q-${Date.now()}`,
-          questionMessage,
-          'assistant'
-        );
-
-        // Set multiple choice quick replies
-        setQuickReplies([
-          { id: 'a', label: 'A', emoji: '🅰️', action: 'answer' as const, value: 'A' },
-          { id: 'b', label: 'B', emoji: '🅱️', action: 'answer' as const, value: 'B' },
-          { id: 'c', label: 'C', emoji: '🅲', action: 'answer' as const, value: 'C' },
-          { id: 'd', label: 'D', emoji: '🅳', action: 'answer' as const, value: 'D' }
-        ]);
-
-      } catch (error) {
-        console.error('Failed to generate trivia question:', error);
-        // Fallback: unlock carousel
-        setIsWaitingForAnswer(false);
-      }
-
+      // Note: Old trivia system code removed - now handled by education agent
       return; // Don't execute 4th attempt logic anymore
 
       // Check if this was the 4th attempt
@@ -2605,7 +3053,10 @@ ${question.choices.join('\n')}`;
   };
 
   // 🎓 Handle Trivia Answer
+  // Old trivia handler - no longer used with education agent system
   const handleTriviaAnswer = async (choice: string) => {
+    console.log('⚠️ handleTriviaAnswer called but is deprecated - education agent handles trivia now');
+    return;
     if (!triviaQuestion) return;
 
     // Clear quick replies immediately to remove A/B/C/D buttons
@@ -3001,7 +3452,10 @@ Can you find the **${nextTarget?.commonName}**?`;
   };
 
   // 💡 Handle Hint Click
+  // Old hint handler - no longer used with education agent system
   const handleHintClick = async () => {
+    console.log('⚠️ handleHintClick called but is deprecated - education agent handles hints now');
+    return;
     const currentTarget = getCurrentTarget(foodWebGamePhase);
 
     if (!currentTarget) return;
@@ -3332,11 +3786,11 @@ ${question.choices.join('\n')}`;
       setIsSpinningWheel(false);
       setSpinPhase(1); // Reset for next game
 
-      // 💬 Add completion message to chat
+      // 💬 Add completion message to chat (don't reveal species names!)
       const selectionComplete: ChatMessage = {
         id: `selection-complete-${Date.now()}`,
         role: 'assistant',
-        content: `✅ All 5 species selected!\n\n🦁 **Carnivore:** ${spinSelectedSpeciesRef.current.carnivore!.commonName}\n🦌 **Herbivore:** ${spinSelectedSpeciesRef.current.herbivore!.commonName}\n🍽️ **Omnivore:** ${spinSelectedSpeciesRef.current.omnivore!.commonName}\n🦅 **Bird:** ${spinSelectedSpeciesRef.current.bird!.commonName}\n🌱 **Plant/Coral:** ${spinSelectedSpeciesRef.current.plantCoral!.commonName}\n\nNow let's play! I'll challenge you to find each species...`,
+        content: `✅ All 5 species selected!\n\nNow let's play! I'll challenge you to find each species...`,
         timestamp: new Date(),
         status: 'sent'
       };
@@ -3359,15 +3813,64 @@ ${question.choices.join('\n')}`;
 
         setCurrentChallengeSpecies(randomSpecies);
 
-        // Agent challenges user
+        // Initialize education context for the game
+        const foodWebContext = {
+          type: 'foodweb' as const,
+          displayName: 'Food Web Game',
+          data: {
+            ecoregionName: regionInfo?.regionName || 'Unknown',
+            species: collectedSpecies.map(s => ({
+              commonName: s.commonName,
+              scientificName: s.scientificName,
+              role: 'carnivore' as const, // Simplified for now
+              conservationStatus: s.conservationStatus,
+              animalType: s.animalType
+            })),
+            speciesCount: collectedSpecies.length,
+            targetSpecies: {
+              producer: null,
+              herbivoreOmnivore: null,
+              carnivore: {
+                id: randomSpecies.id,
+                commonName: randomSpecies.commonName,
+                scientificName: randomSpecies.scientificName,
+                animalType: randomSpecies.animalType
+              }
+            },
+            currentPhase: 'carnivore' as const
+          }
+        };
+        setEducationContext(foodWebContext);
+        setConversationHistory([]); // Reset conversation for new challenge
+        setAttemptCount(0); // Reset attempts
+
+        // Agent challenges user - tell them which specific species to find
         const challengeMessage: ChatMessage = {
           id: `challenge-${Date.now()}`,
           role: 'assistant',
-          content: `🎯 **Find the species!**\n\nClick on the **${randomSpecies.commonName}** in the banner above!`,
+          content: `🎯 **Find the "${randomSpecies.commonName}"!**\n\nClick on the ${randomSpecies.commonName} above!`,
           timestamp: new Date(),
           status: 'sent'
         };
         setChatHistory(prev => [...prev, challengeMessage]);
+
+        // Clear quick replies when challenging user to find species
+        setQuickReplies([]);
+
+        // Start countdown timer
+        const countdownId = `countdown-${Date.now()}`;
+        setCountdownMessageId(countdownId);
+        setCountdownSeconds(15);
+
+        // Add countdown message to chat
+        const countdownMsg: ChatMessage = {
+          id: countdownId,
+          role: 'assistant',
+          content: '⏱️ Time remaining: **15 seconds**',
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, countdownMsg]);
       }, 2000);
     } else {
       // More spins needed - move to next phase
@@ -3383,68 +3886,15 @@ ${question.choices.join('\n')}`;
   const handleBannerCardClick = (species: any, slotType: string) => {
     console.log('🎮 Banner card clicked:', species.commonName);
 
-    // MODE 1: Answering trivia question
-    if (triviaQuestion && isWaitingForAnswer) {
-      const isCorrect = species.scientificName === triviaQuestion.correctAnswer;
-
-      if (isCorrect) {
-        setCorrectAnswerFeedback(species.scientificName);
-        setWrongAnswerFeedback(null);
-        setIsWaitingForAnswer(false);
-        setTriviaQuestion(null);
-
-        // Success message for trivia
-        const triviaSuccessMessage: ChatMessage = {
-          id: `trivia-success-${Date.now()}`,
-          role: 'assistant',
-          content: `✅ **Correct!** Good job answering the trivia!`,
-          timestamp: new Date(),
-          status: 'sent'
-        };
-        setChatHistory(prev => [...prev, triviaSuccessMessage]);
-
-        // Clear challenge and respin after trivia completion
-        setTimeout(() => {
-          setCorrectAnswerFeedback(null);
-          setCurrentChallengeSpecies(null);
-
-          // Check if we've collected 3 species (game complete)
-          if (collectedSpecies.length >= 3) {
-            const completeMessage: ChatMessage = {
-              id: `game-complete-${Date.now()}`,
-              role: 'assistant',
-              content: `🎊 **Amazing!** You've collected 3 species!\n\nClick the **Play Game** button to start the ecosystem game!`,
-              timestamp: new Date(),
-              status: 'sent'
-            };
-            setChatHistory(prev => [...prev, completeMessage]);
-          } else {
-            // Continue game - respin for new species
-            const respinMessage: ChatMessage = {
-              id: `respin-${Date.now()}`,
-              role: 'assistant',
-              content: `Let's get 5 new species...`,
-              timestamp: new Date(),
-              status: 'sent'
-            };
-            setChatHistory(prev => [...prev, respinMessage]);
-
-            // Auto-respin after 1 second
-            setTimeout(() => {
-              handlePlayTrivia(); // This triggers the spin
-            }, 1000);
-          }
-        }, 1500);
-      } else {
-        setWrongAnswerFeedback(species.scientificName);
-        setCorrectAnswerFeedback(null);
-        setTimeout(() => setWrongAnswerFeedback(null), 1000);
-      }
-      return;
-    }
-
-    // MODE 2: Identification game - finding the challenge species
+    // Check if we have a challenge species (game active)
     if (!currentChallengeSpecies) return;
+
+    // Clear countdown timer and remove countdown message
+    setCountdownSeconds(null);
+    if (countdownMessageId) {
+      setChatHistory(prev => prev.filter(msg => msg.id !== countdownMessageId));
+      setCountdownMessageId(null);
+    }
 
     const isCorrect = species.scientificName === currentChallengeSpecies.scientificName;
 
@@ -3462,11 +3912,14 @@ ${question.choices.join('\n')}`;
       const successMessage: ChatMessage = {
         id: `success-${Date.now()}`,
         role: 'assistant',
-        content: `🎉 **Correct!** You found the ${species.commonName}!\n\nSpecies added to your collection!`,
+        content: `🎉 **Correct!** You found it!\n\nSpecies added to your collection!`,
         timestamp: new Date(),
         status: 'sent'
       };
       setChatHistory(prev => [...prev, successMessage]);
+
+      // Clear quick replies when species found
+      setQuickReplies([]);
 
       // Check if we've collected 3 species
       const newCollectedCount = collectedSpecies.length + 1; // +1 because state hasn't updated yet
@@ -3480,11 +3933,16 @@ ${question.choices.join('\n')}`;
           const completeMessage: ChatMessage = {
             id: `game-complete-${Date.now()}`,
             role: 'assistant',
-            content: `🎊 **Amazing!** You've collected 3 species!\n\nClick the **Play Game** button to start the ecosystem game!`,
+            content: `🎊 **Amazing!** You've collected 3 species!\n\nYou're ready to battle the villain!`,
             timestamp: new Date(),
             status: 'sent'
           };
           setChatHistory(prev => [...prev, completeMessage]);
+
+          // Add "Battle Poopy Pants" button in chat
+          setQuickReplies([
+            { id: 'play-food-web-game', label: 'Battle Poopy Pants', emoji: '⚔️', action: 'play-food-web-game' as const }
+          ]);
         } else {
           // Continue game - respin for new species
           const respinMessage: ChatMessage = {
@@ -3503,77 +3961,87 @@ ${question.choices.join('\n')}`;
         }
       }, 2000);
     } else {
-      // ❌ WRONG! Must answer trivia
+      // ❌ WRONG! Ask education agent for help
       setWrongAnswerFeedback(species.scientificName);
+      setAttemptCount(prev => prev + 1); // Track attempts for progressive hints
 
-      const wrongMessage: ChatMessage = {
-        id: `wrong-${Date.now()}`,
-        role: 'assistant',
-        content: `❌ **Oops!** That's not the ${currentChallengeSpecies.commonName}.\n\nAnswer this question to continue:`,
+      // Add user's action to conversation
+      const userMessage = `I clicked on the ${species.commonName}`;
+      setConversationHistory(prev => [...prev, { role: 'user', content: userMessage }]);
+
+      // Show user's message in chat
+      const userChatMessage: ChatMessage = {
+        id: `user-click-${Date.now()}`,
+        role: 'user',
+        content: userMessage,
         timestamp: new Date(),
         status: 'sent'
       };
-      setChatHistory(prev => [...prev, wrongMessage]);
+      setChatHistory(prev => [...prev, userChatMessage]);
 
-      // Show trivia question
-      setTimeout(() => {
+      // Show loading state
+      setIsLoading(true);
+
+      // Create empty message that will be streamed into
+      const agentMessageId = `agent-${Date.now()}`;
+      const agentMessage: ChatMessage = {
+        id: agentMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [...prev, agentMessage]);
+
+      // Ask the education agent for trivia question
+      setTimeout(async () => {
         setWrongAnswerFeedback(null);
-        setTriviaContext('wrongSpecies');
-        generateTriviaForWrongAnswer();
-      }, 1500);
+
+        try {
+          await sendEducationMessage(
+            userMessage,
+            educationContext,
+            conversationHistory,
+            (chunk) => {
+              // Stream text chunk by chunk into chat
+              setChatHistory(prev =>
+                prev.map(msg =>
+                  msg.id === agentMessageId
+                    ? { ...msg, content: msg.content + chunk }
+                    : msg
+                )
+              );
+            },
+            () => {
+              // Complete - stop loading
+              setIsLoading(false);
+
+              // Add agent's response to conversation history
+              const lastMessage = chatHistory.find(msg => msg.id === agentMessageId);
+              if (lastMessage) {
+                setConversationHistory(prev => [...prev, { role: 'assistant', content: lastMessage.content }]);
+              }
+            },
+            (error) => {
+              // Error - stop loading and show error
+              setIsLoading(false);
+              console.error('Education agent error:', error);
+              setChatHistory(prev =>
+                prev.map(msg =>
+                  msg.id === agentMessageId
+                    ? { ...msg, content: '❌ Sorry, I encountered an error. Please try again.', status: 'error' }
+                    : msg
+                )
+              );
+            }
+          );
+        } catch (error) {
+          setIsLoading(false);
+          console.error('Failed to send message to education agent:', error);
+        }
+      }, 1000);
     }
   };
 
-  // Generate trivia question when user clicks wrong species
-  const generateTriviaForWrongAnswer = () => {
-    // Simple trivia question
-    const question = {
-      question: `What type of animal is the ${currentChallengeSpecies!.commonName}?`,
-      correctAnswer: currentChallengeSpecies!.scientificName,
-      type: 'identification' as const
-    };
-    setTriviaQuestion(question);
-    setIsWaitingForAnswer(true);
-  };
-
-  // 🎮 Generate new format trivia question (identification or dietary role)
-  const generateNewFormatTrivia = async (selected: { carnivore: RegionSpecies; herbivore: RegionSpecies; omnivore: RegionSpecies; bird: RegionSpecies; plantCoral: RegionSpecies }) => {
-    const questionTypes = ['identification', 'dietary'];
-    const questionType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
-
-    const speciesArray = [selected.carnivore, selected.herbivore, selected.omnivore, selected.bird, selected.plantCoral];
-    const targetSpecies = speciesArray[Math.floor(Math.random() * speciesArray.length)];
-
-    if (questionType === 'identification') {
-      // "Which one is [species name]?"
-      const question = {
-        question: `Which one is the **${targetSpecies.commonName}**?`,
-        correctAnswer: targetSpecies.scientificName,
-        type: 'identification' as const
-      };
-      setTriviaQuestion(question);
-    } else {
-      // "Which one is the [carnivore/herbivore/omnivore/bird/plant]?"
-      const dietaryRoles = {
-        carnivore: { label: 'carnivore', species: selected.carnivore },
-        herbivore: { label: 'herbivore', species: selected.herbivore },
-        omnivore: { label: 'omnivore', species: selected.omnivore },
-        bird: { label: 'bird', species: selected.bird },
-        plantCoral: { label: 'plant or coral', species: selected.plantCoral }
-      };
-      const roles = Object.values(dietaryRoles);
-      const targetRole = roles[Math.floor(Math.random() * roles.length)];
-
-      const question = {
-        question: `Which one is the **${targetRole.label}**?`,
-        correctAnswer: targetRole.species.scientificName,
-        type: 'dietary' as const
-      };
-      setTriviaQuestion(question);
-    }
-
-    setIsWaitingForAnswer(true);
-  };
 
   // Handle starting the trivia game
   const handlePlayTrivia = async () => {
@@ -3604,13 +4072,10 @@ ${question.choices.join('\n')}`;
     setRevealAttemptCount(0);
     setIsCarouselLocked(false);
 
-    // Reset trivia state
-    setTriviaQuestion(null);
-    setTriviaContext(null);
-    setTriviaAttemptCount(0);
-    setIsWaitingForAnswer(false);
-    setShowHintButton(false);
-    setHintLevel(0);
+    // Reset education agent state
+    setEducationContext(null);
+    setConversationHistory([]);
+    setAttemptCount(0);
 
     // Don't clear selected carousel species if we're in the middle of the identification game
     // Only clear it on the very first spin (when chat history is empty)
@@ -4212,25 +4677,6 @@ ${question.choices.join('\n')}`;
         </div>
       )}
 
-      {/* 🎰 Spin Species Wheel Button - Vertically centered next to carousel */}
-      {useGoogleMaps && regionInfo && regionSpecies.length > 0 && !currentHabitat && (
-        <div
-          className="absolute left-[288px] pointer-events-auto z-[60]"
-          style={{
-            top: '50%',
-            transform: 'translateY(calc(-50% + 100px))'
-          }}
-        >
-          <Button
-            onClick={handlePlayTrivia}
-            disabled={isAISelecting || isSpinningWheel}
-            className="h-14 px-6 text-base font-bold rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl hover:shadow-emerald-500/50 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isAISelecting ? '🤖 AI Selecting...' : isSpinningWheel ? '🎰 Spinning...' : '🎰 Spin Species Wheel'}
-          </Button>
-        </div>
-      )}
-
       {/* Show helpful message when no species data */}
       {regionInfo && regionSpecies.length === 0 && !activeSpeciesFilters.has('locations') && (
         <div className="absolute left-20 top-24 w-72 glass-panel rounded-2xl p-6 z-[60] pointer-events-auto animate-fade-in">
@@ -4449,22 +4895,11 @@ ${question.choices.join('\n')}`;
             <FoodWebSelectionBar
               selectedSpecies={selectedFoodWebSpecies}
               onSpeciesClick={handleBannerCardClick}
-              isClickable={isWaitingForAnswer || currentChallengeSpecies !== null}
+              isClickable={currentChallengeSpecies !== null}
               correctAnswer={correctAnswerFeedback || undefined}
               wrongAnswer={wrongAnswerFeedback || undefined}
+              theme={chatTheme}
             />
-
-            {/* 🎮 Trivia Question Display */}
-            {triviaQuestion && isWaitingForAnswer && (
-              <div className="glass-panel rounded-xl p-3 shadow-2xl animate-fade-in max-w-md">
-                <p className="text-sm font-bold text-center text-foreground">
-                  {triviaQuestion.question}
-                </p>
-                <p className="text-xs text-center text-muted-foreground mt-1">
-                  Click a card above to answer
-                </p>
-              </div>
-            )}
           </>
         )}
       </div>
@@ -4503,10 +4938,11 @@ ${question.choices.join('\n')}`;
                   messages={chatHistory}
                   isExpanded={isChatHistoryExpanded}
                   onMinimize={() => setIsChatHistoryExpanded(false)}
-                  isTyping={isLoading}
+                  isTyping={isLoading || isInitializing}
                   onRetry={handleRetryMessage}
                   quickReplies={quickReplies}
                   onQuickReply={handleQuickReply}
+                  theme={chatTheme}
                 />
               )}
 
@@ -4514,6 +4950,7 @@ ${question.choices.join('\n')}`;
                 onSubmit={handleSearch}
                 isLoading={isLoading}
                 context={chatContext}
+                theme={chatTheme}
                 placeholder="Describe what you see or type 'hint'..."
                 hasMessages={chatHistory.length > 0}
                 onExpandHistory={!isChatHistoryExpanded ? () => setIsChatHistoryExpanded(true) : undefined}
@@ -4564,24 +5001,6 @@ ${question.choices.join('\n')}`;
               </p>
             )}
           </div>
-        </div>
-      )}
-
-      {/* 🎮 Play Game Button - Bottom Right (Shows when 3+ species collected) */}
-      {collectedSpecies.length >= 3 && (
-        <div className="fixed bottom-8 right-8 z-[100] animate-bounce">
-          <Button
-            onClick={() => {
-              toast({
-                title: "🎮 Game Coming Soon!",
-                description: `You've collected ${collectedSpecies.length} species. The ecosystem game will launch here!`,
-              });
-            }}
-            size="lg"
-            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl hover:shadow-emerald-500/50 text-xl font-bold px-10 py-8 hover:scale-110 transition-all duration-300 rounded-2xl"
-          >
-            🎮 Play Game
-          </Button>
         </div>
       )}
 

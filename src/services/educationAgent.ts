@@ -325,18 +325,35 @@ Select 5 species (one from each category) that create a compelling educational f
     const data = await response.json();
     const aiResponse = JSON.parse(data.choices[0].message.content);
 
-    console.log('[AI Selection] AI chose:', aiResponse);
+    console.log('[AI Selection] AI chose:', JSON.stringify(aiResponse, null, 2));
 
-    // Find the selected species in the original arrays
-    const selectedCarnivore = carnivores.find(s => s.scientificName === aiResponse.carnivore);
-    const selectedHerbivore = herbivores.find(s => s.scientificName === aiResponse.herbivore);
-    const selectedOmnivore = omnivores.find(s => s.scientificName === aiResponse.omnivore);
-    const selectedBird = birds.find(s => s.scientificName === aiResponse.bird);
-    const selectedPlantCoral = plantsCorals.find(s => s.scientificName === aiResponse.plantCoral);
+    // Find the selected species in the original arrays (case-insensitive, trimmed)
+    const selectedCarnivore = carnivores.find(s =>
+      s.scientificName?.toLowerCase().trim() === aiResponse.carnivore?.toLowerCase().trim()
+    );
+    const selectedHerbivore = herbivores.find(s =>
+      s.scientificName?.toLowerCase().trim() === aiResponse.herbivore?.toLowerCase().trim()
+    );
+    const selectedOmnivore = omnivores.find(s =>
+      s.scientificName?.toLowerCase().trim() === aiResponse.omnivore?.toLowerCase().trim()
+    );
+    const selectedBird = birds.find(s =>
+      s.scientificName?.toLowerCase().trim() === aiResponse.bird?.toLowerCase().trim()
+    );
+    const selectedPlantCoral = plantsCorals.find(s =>
+      s.scientificName?.toLowerCase().trim() === aiResponse.plantCoral?.toLowerCase().trim()
+    );
 
     // Validate all species were found
     if (!selectedCarnivore || !selectedHerbivore || !selectedOmnivore || !selectedBird || !selectedPlantCoral) {
       console.warn('[AI Selection] AI selected species not found, falling back to random');
+      console.warn('[AI Selection] Missing:', {
+        carnivore: !selectedCarnivore ? aiResponse.carnivore : null,
+        herbivore: !selectedHerbivore ? aiResponse.herbivore : null,
+        omnivore: !selectedOmnivore ? aiResponse.omnivore : null,
+        bird: !selectedBird ? aiResponse.bird : null,
+        plantCoral: !selectedPlantCoral ? aiResponse.plantCoral : null
+      });
       return randomSelection(carnivores, herbivores, omnivores, birds, plantsCorals);
     }
 
@@ -574,6 +591,16 @@ Focus on: climate, biodiversity, dominant species, ecological threats, and conse
 
     case 'foodweb': {
       const foodWeb = context.data as FoodWebContext;
+
+      // Defensive null checks
+      if (!foodWeb || !foodWeb.targetSpecies || !foodWeb.currentPhase) {
+        console.error('[Education Agent] Invalid foodweb context:', foodWeb);
+        return `${baseInstructions}
+
+**YOUR ROLE**: You are a wildlife conservation assistant.
+
+Focus on: wildlife species, ecosystems, conservation, and food web relationships.`;
+      }
 
       // Determine current target species
       const currentTarget = foodWeb.targetSpecies[foodWeb.currentPhase];

@@ -1,0 +1,150 @@
+import { useState, useEffect, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Minimize2, Globe, AlertTriangle, RotateCcw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  status?: 'sending' | 'sent' | 'error';
+  errorMessage?: string;
+}
+
+interface ChatHistoryProps {
+  messages: ChatMessage[];
+  isExpanded: boolean;
+  onMinimize: () => void;
+  className?: string;
+  isTyping?: boolean;
+  onRetry?: (messageId: string) => void;
+}
+
+const ChatHistory = ({ messages, isExpanded, onMinimize, className, isTyping = false, onRetry }: ChatHistoryProps) => {
+  const [shouldRender, setShouldRender] = useState(isExpanded);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isExpanded) {
+      setShouldRender(true);
+    } else {
+      // Delay unmounting to allow exit animation
+      const timer = setTimeout(() => setShouldRender(false), 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isExpanded]);
+
+  // Auto-scroll to bottom when new messages arrive or typing indicator appears
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, isTyping]);
+
+  if (!shouldRender || messages.length === 0) {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        "rounded-2xl overflow-hidden transition-all duration-300 ease-in-out backdrop-blur-md bg-black/20 border border-white/10",
+        isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none",
+        className
+      )}
+      style={{
+        maxHeight: isExpanded ? 'calc(40vh + 75px)' : '0',
+      }}
+    >
+      {/* Minimize button - floating in top right */}
+      <Button
+        size="icon"
+        variant="ghost"
+        onClick={onMinimize}
+        className="absolute top-2 right-2 h-8 w-8 hover:bg-white/10 z-10"
+      >
+        <Minimize2 className="h-4 w-4" />
+      </Button>
+
+      {/* Messages */}
+      <div className="overflow-y-auto p-4 space-y-4 pt-12" style={{ maxHeight: 'calc(40vh + 75px)' }}>
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={cn(
+              "flex flex-col gap-1 animate-fade-in",
+              message.role === 'user' ? 'items-end' : 'items-start'
+            )}
+          >
+            <div
+              className={cn(
+                "rounded-xl px-4 py-2 max-w-[80%]",
+                message.role === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-white/10 text-foreground'
+              )}
+            >
+              <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            </div>
+
+            {/* Status indicator and timestamp row */}
+            <div className="flex items-center gap-2 px-2">
+              <span className="text-xs text-muted-foreground">
+                {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+
+              {/* Status Icons - only show for user messages */}
+              {message.role === 'user' && (
+                <>
+                  {message.status === 'sending' && (
+                    <Globe className="h-3 w-3 text-blue-400 animate-spin" style={{ animationDuration: '2s' }} />
+                  )}
+
+                  {message.status === 'error' && (
+                    <div className="flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3 text-red-400" />
+                      {onRetry && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => onRetry(message.id)}
+                          className="h-5 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-400/10"
+                        >
+                          <RotateCcw className="h-3 w-3 mr-1" />
+                          Retry
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Error message */}
+            {message.status === 'error' && message.errorMessage && (
+              <div className="text-xs text-red-400 px-2 max-w-[80%]">
+                {message.errorMessage}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {/* Typing Indicator - Spinning Earth */}
+        {isTyping && (
+          <div className="flex flex-col gap-1 items-start animate-fade-in">
+            <div className="rounded-xl px-4 py-3 bg-white/10 text-foreground flex items-center gap-2">
+              <Globe className="h-5 w-5 text-blue-400 animate-spin" style={{ animationDuration: '2s' }} />
+              <span className="text-sm text-muted-foreground">Thinking...</span>
+            </div>
+          </div>
+        )}
+
+        {/* Auto-scroll anchor */}
+        <div ref={messagesEndRef} />
+      </div>
+    </div>
+  );
+};
+
+export default ChatHistory;
