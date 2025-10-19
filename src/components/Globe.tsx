@@ -335,14 +335,22 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           el.className = 'cursor-pointer hover:scale-125 transition-transform';
           el.style.pointerEvents = 'auto';
           
-          // If it's an emoji marker, render emoji with pulsing ring for green pins
+          // If it's an emoji marker, render emoji with effects
           if (d.emoji) {
             const isGreenPin = d.emoji === '🟢';
+            const isPoopPin = d.emoji === '💩';
             el.innerHTML = `
               <div class="relative flex items-center justify-center">
                 ${isGreenPin ? `
                   <div class="absolute inset-0 flex items-center justify-center">
                     <div class="habitat-pulse-ring"></div>
+                  </div>
+                ` : ''}
+                ${isPoopPin ? `
+                  <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-0.5">
+                    <div class="poop-heat-wave" style="animation-delay: 0s;"></div>
+                    <div class="poop-heat-wave" style="animation-delay: 0.3s;"></div>
+                    <div class="poop-heat-wave" style="animation-delay: 0.6s;"></div>
                   </div>
                 ` : ''}
                 <div class="text-4xl drop-shadow-lg relative z-10" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">

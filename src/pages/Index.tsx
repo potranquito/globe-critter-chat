@@ -50,6 +50,7 @@ import {
   generateHintLevel3WithVision,
   type TriviaQuestion
 } from '@/services/triviaAgent';
+import { isEcoRegionCompleted, markFoodWebTriviaComplete, markPixelGameComplete } from '@/utils/ecoRegionProgress';
 import polarBearReal from '@/assets/polar-bear-real.jpg';
 import threatIceLoss from '@/assets/threat-ice-loss.jpg';
 import threatPollution from '@/assets/threat-pollution.jpg';
@@ -203,6 +204,7 @@ const Index = () => {
   const [searchType, setSearchType] = useState<'species' | 'location' | null>(null); // Track search type
   const [isViewingEcoRegion, setIsViewingEcoRegion] = useState(false); // Track if viewing eco-region
   const [ecoRegionPins, setEcoRegionPins] = useState<any[]>([]); // NEW: WWF ecoregions from database
+  const [currentEcoRegionId, setCurrentEcoRegionId] = useState<string | null>(null); // Track current eco-region ID for game completion
 
   // ✅ NEW: AbortController to cancel pending API calls on reset
   const [abortController, setAbortController] = useState<AbortController | null>(null);
@@ -393,17 +395,21 @@ const Index = () => {
         }
 
         if (ecoregions) {
-          // Convert database ecoregions to pin format (include image_url for later use)
-          const pins = ecoregions.map(eco => ({
-            lat: eco.center_lat,
-            lng: eco.center_lng,
-            species: eco.name,
-            name: eco.name,
-            size: 1.2,
-            color: eco.realm === 'Marine' ? '#3b82f6' : '#22c55e', // Blue for marine, green for terrestrial
-            type: 'habitat' as const,
-            emoji: '🟢', // Green pin with pulse animation
-          }));
+          // Convert database ecoregions to pin format with conditional emoji
+          const pins = ecoregions.map(eco => {
+            const isCompleted = isEcoRegionCompleted(eco.id);
+            return {
+              lat: eco.center_lat,
+              lng: eco.center_lng,
+              species: eco.name,
+              name: eco.name,
+              size: 1.2,
+              color: eco.realm === 'Marine' ? '#3b82f6' : '#22c55e', // Blue for marine, green for terrestrial
+              type: 'habitat' as const,
+              emoji: isCompleted ? '📍' : '💩', // 📍 for completed, 💩 for incomplete
+              ecoRegionId: eco.id, // Track eco-region ID for completion status
+            };
+          });
           setEcoRegionPins(pins);
           console.log(`✅ Loaded ${pins.length} WWF ecoregions from database`);
         }
@@ -664,6 +670,10 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
         };
         setChatHistory(prev => [...prev, imageMessage]);
 
+        // Auto-select the mascot species in the carousel for visual connection
+        console.log('🎯 Auto-selecting mascot in carousel:', randomSpecies.commonName);
+        setSelectedCarouselSpecies(randomSpecies);
+
         // Step 2: After laser-in completes (2.5s), clear loading and start streaming character sheet
         setTimeout(() => {
           // Stop loading message cycling
@@ -876,14 +886,14 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
       return;
     }
 
-    if (chatHistory.length > 0 && isChatHistoryExpanded) {
+    // Only update quick replies when chat history changes (not when toggling expand/collapse)
+    // This preserves manually-set quick replies (like "Help Find Species" button)
+    if (chatHistory.length > 0) {
       const lastMessage = chatHistory[chatHistory.length - 1];
       const newReplies = generateQuickReplies(lastMessage);
       setQuickReplies(newReplies);
-    } else {
-      setQuickReplies([]);
     }
-  }, [chatHistory, isChatHistoryExpanded, lastTriviaAnswer, isFoodWebGameActive, isAISelecting, isSpinningWheel]);
+  }, [chatHistory, lastTriviaAnswer, isFoodWebGameActive, isAISelecting, isSpinningWheel]);
 
   // 🎯 HANDLE ECO-REGION CLICK: Switch to 2D map view centered on region
 
@@ -958,6 +968,10 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
   const handleEcoRegionClick = async (point: any) => {
     console.log('Eco-region clicked:', point.name);
     setHasInteracted(true);
+
+    // 🗺️ Store current eco-region ID for game completion tracking
+    setCurrentEcoRegionId(point.ecoRegionId || null);
+    console.log('📍 Current eco-region ID:', point.ecoRegionId);
 
     // ✅ Reset chat history and food web game for new ecoregion
     setChatHistory([]);
@@ -2829,6 +2843,38 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
         // GAME COMPLETE!
         console.log('🎉 All 3 species found! Game complete!');
 
+        // 🎮 Mark Food Web Trivia as complete for this eco-region
+        if (currentEcoRegionId) {
+          markFoodWebTriviaComplete(currentEcoRegionId);
+          console.log('💾 Saved Food Web Trivia completion for eco-region:', currentEcoRegionId);
+
+          // Reload eco-region pins to update the emoji from 💩 to 📍 (or keep as 💩 if 2D Pixel Game not done)
+          const { supabase } = await import('@/integrations/supabase/client');
+          const { data: ecoregions } = await supabase
+            .from('ecoregions')
+            .select('*')
+            .order('name');
+
+          if (ecoregions) {
+            const pins = ecoregions.map(eco => {
+              const isCompleted = isEcoRegionCompleted(eco.id);
+              return {
+                lat: eco.center_lat,
+                lng: eco.center_lng,
+                species: eco.name,
+                name: eco.name,
+                size: 1.2,
+                color: eco.realm === 'Marine' ? '#3b82f6' : '#22c55e',
+                type: 'habitat' as const,
+                emoji: isCompleted ? '📍' : '💩',
+                ecoRegionId: eco.id,
+              };
+            });
+            setEcoRegionPins(pins);
+            console.log('🔄 Reloaded eco-region pins with updated completion status');
+          }
+        }
+
         // Reset game state
         setIsFoodWebGameActive(false);
 
@@ -2858,6 +2904,36 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
           description: `Now find the ${nextPhase === 2 ? foodWebTargetSpecies.herbivoreOmnivore?.commonName : foodWebTargetSpecies.carnivore?.commonName}!`,
         });
       }
+
+      // 🎮 TODO: 2D PIXEL GAME INTEGRATION
+      // When the 2D Pixel Game is implemented, add completion tracking here.
+      // Example implementation when 2D Pixel Game is complete:
+      //
+      // const handle2DPixelGameComplete = async () => {
+      //   if (currentEcoRegionId) {
+      //     markPixelGameComplete(currentEcoRegionId);
+      //     console.log('💾 Saved 2D Pixel Game completion for eco-region:', currentEcoRegionId);
+      //
+      //     // Reload eco-region pins to update emoji from 💩 to 📍
+      //     const { supabase } = await import('@/integrations/supabase/client');
+      //     const { data: ecoregions } = await supabase.from('ecoregions').select('*').order('name');
+      //     if (ecoregions) {
+      //       const pins = ecoregions.map(eco => ({
+      //         lat: eco.center_lat,
+      //         lng: eco.center_lng,
+      //         species: eco.name,
+      //         name: eco.name,
+      //         size: 1.2,
+      //         color: eco.realm === 'Marine' ? '#3b82f6' : '#22c55e',
+      //         type: 'habitat' as const,
+      //         emoji: isEcoRegionCompleted(eco.id) ? '📍' : '💩',
+      //         ecoRegionId: eco.id,
+      //       }));
+      //       setEcoRegionPins(pins);
+      //     }
+      //   }
+      // };
+
     } else {
       // ❌ WRONG SELECTION
       console.log('❌ Wrong! That is not:', validation.targetName);
@@ -4625,8 +4701,8 @@ ${question.choices.join('\n')}`;
               )
             ]}
             onPointClick={(point) => {
-              // Check if this is an ecoregion pin (has emoji 🟢)
-              if (point.emoji === '🟢') {
+              // Check if this is an ecoregion pin (has ecoRegionId property)
+              if (point.ecoRegionId) {
                 handleEcoRegionClick(point);
               } else {
                 handlePointClick(point);
@@ -4634,8 +4710,8 @@ ${question.choices.join('\n')}`;
             }}
             onDoubleGlobeClick={handleDoubleGlobeClick}
             onImageMarkerClick={(point) => {
-              // Check if this is an ecoregion pin (has emoji 🟢)
-              if (point.emoji === '🟢') {
+              // Check if this is an ecoregion pin (has ecoRegionId property)
+              if (point.ecoRegionId) {
                 handleEcoRegionClick(point);
               } else {
                 handleImageMarkerClick(point);
