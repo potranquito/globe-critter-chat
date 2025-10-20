@@ -12,6 +12,8 @@ export interface ChatMessage {
   timestamp: Date;
   status?: 'sending' | 'sent' | 'error';
   errorMessage?: string;
+  characterEmoji?: string;  // Character emoji (e.g. 🤖, 💩👑)
+  characterName?: string;   // Character name (e.g. "Guardian AI", "Poopy Pants")
 }
 
 interface ChatTheme {
@@ -110,7 +112,7 @@ const ChatHistory = ({
         className
       )}
       style={{
-        maxHeight: isExpanded ? 'calc(100vh - 350px)' : '0',
+        maxHeight: isExpanded ? '400px' : '0',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         backgroundColor: withAlpha(currentTheme.background, 0.95),
         borderColor: withAlpha(currentTheme.primary, 0.3),
@@ -161,7 +163,7 @@ const ChatHistory = ({
       {/* Terminal Output */}
       <div
         className="overflow-y-auto p-4 space-y-2 custom-scrollbar"
-        style={{ maxHeight: 'calc(100vh - 400px)' }}
+        style={{ maxHeight: '340px' }}
       >
         {messages.map((message, index) => {
           const isCurrentlyStreaming = isLastMessageStreaming && index === messages.length - 1;
@@ -215,6 +217,19 @@ const ChatHistory = ({
                   )}
 
                   <div className="flex-1">
+                    {/* Character Info (if available) */}
+                    {(message.characterEmoji || message.characterName) && (
+                      <div className="flex items-center gap-2 mb-1">
+                        {message.characterEmoji && (
+                          <span className="text-lg">{message.characterEmoji}</span>
+                        )}
+                        {message.characterName && (
+                          <span className="text-xs font-semibold" style={{ color: withAlpha(currentTheme.secondary, 0.8) }}>
+                            {message.characterName}
+                          </span>
+                        )}
+                      </div>
+                    )}
                     <div className="text-sm text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
                       {(() => {
                         const content = message.content || (showSpinner ? 'Processing...' : '');
