@@ -112,7 +112,7 @@ const ChatHistory = ({
         className
       )}
       style={{
-        maxHeight: isExpanded ? '400px' : '0',
+        maxHeight: isExpanded ? '550px' : '0',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
         backgroundColor: withAlpha(currentTheme.background, 0.95),
         borderColor: withAlpha(currentTheme.primary, 0.3),
@@ -163,7 +163,7 @@ const ChatHistory = ({
       {/* Terminal Output */}
       <div
         className="overflow-y-auto p-4 space-y-2 custom-scrollbar"
-        style={{ maxHeight: '340px' }}
+        style={{ maxHeight: '490px' }}
       >
         {messages.map((message, index) => {
           const isCurrentlyStreaming = isLastMessageStreaming && index === messages.length - 1;

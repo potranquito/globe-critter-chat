@@ -20,6 +20,8 @@ interface TriviaPageLocationState {
   regionName: string;
   parkId: string;
   parkName: string;
+  lat: number;
+  lng: number;
   chatHistory: ChatMessage[];
   selectedFoodWebSpecies: {
     carnivore: any;
@@ -837,8 +839,8 @@ Return to the globe to see your completed region marked with a red pin 📍`;
     const params = new URLSearchParams({
       ecoRegionId: state.ecoRegionId,
       regionName: state.regionName,
-      lat: '0', // Will be set from eco-region data
-      lng: '0',
+      lat: state.lat?.toString() || '0',
+      lng: state.lng?.toString() || '0',
     });
     navigate(`/park-select?${params.toString()}`);
   };
@@ -874,7 +876,7 @@ Return to the globe to see your completed region marked with a red pin 📍`;
           <Button
             onClick={handleBackToPark}
             variant="outline"
-            className="bg-white/90 hover:bg-white"
+            className="glass-panel hover:bg-accent rounded-xl h-12"
           >
             ← Back to Park
           </Button>
@@ -887,7 +889,7 @@ Return to the globe to see your completed region marked with a red pin 📍`;
           {/* Sign In - Far Right */}
           <Button
             variant="outline"
-            className="bg-white/90 hover:bg-white"
+            className="glass-panel hover:bg-accent rounded-xl h-12"
           >
             Sign In
           </Button>
