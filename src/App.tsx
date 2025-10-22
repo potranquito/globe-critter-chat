@@ -7,6 +7,11 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import AuthCallback from "./pages/auth/callback";
 import SpinWheelDemo from "./pages/SpinWheelDemo";
+import PacmanDemo from "./pages/PacmanDemo";
+import WhackAMoleDemo from "./pages/WhackAMoleDemo";
+import PixelGamePage from "./pages/PixelGamePage";
+import TriviaPage from "./pages/TriviaPage";
+import ParkSelectionPage from "./pages/ParkSelectionPage";
 
 const queryClient = new QueryClient();
 
@@ -18,7 +23,12 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/park-select" element={<ParkSelectionPage />} />
+          <Route path="/trivia" element={<TriviaPage />} />
+          <Route path="/pixel-game" element={<PixelGamePage />} />
           <Route path="/spin-demo" element={<SpinWheelDemo />} />
+          <Route path="/pacman-demo" element={<PacmanDemo />} />
+          <Route path="/whack-a-mole-demo" element={<WhackAMoleDemo />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

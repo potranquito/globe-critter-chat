@@ -32,6 +32,14 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // 🎯 Auto-focus input on mount (terminal-like behavior)
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+      setIsFocused(true); // Show cursor immediately
+    }
+  }, []);
+
   // Default theme if none provided (emerald theme)
   const currentTheme = theme || {
     primary: 'hsl(160, 84%, 39%)',
@@ -106,13 +114,13 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
       }}
     >
       <div
-        className={`relative backdrop-blur-sm border w-full shadow-2xl ${
+        className={`relative backdrop-blur-lg border w-full ${
           hasMessages ? 'rounded-b-lg border-t-0' : 'rounded-lg'
         }`}
         style={{
-          maxWidth: '912px',
-          backgroundColor: withAlpha(currentTheme.background, 0.95),
-          borderColor: withAlpha(currentTheme.primary, 0.3),
+          backgroundColor: withAlpha(currentTheme.background, 0.5),
+          borderColor: currentTheme.secondary,
+          animation: 'gentle-glow 3s ease-in-out infinite'
         }}
       >
         {/* Expand History Button - Show when messages exist but history is minimized */}
@@ -188,7 +196,7 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
         <div
           className="flex items-center justify-between px-4 py-1.5 border-t text-xs"
           style={{
-            backgroundColor: withAlpha(currentTheme.background, 0.7),
+            backgroundColor: withAlpha(currentTheme.background, 0.4),
             borderColor: withAlpha(currentTheme.primary, 0.3),
           }}
         >

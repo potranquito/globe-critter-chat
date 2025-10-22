@@ -141,6 +141,15 @@ All colors MUST be HSL.
     animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 
+  @keyframes gentle-glow {
+    0%, 100% {
+      box-shadow: 0 0 15px hsla(158, 64%, 52%, 0.25), 0 0 30px hsla(158, 64%, 52%, 0.12);
+    }
+    50% {
+      box-shadow: 0 0 20px hsla(158, 64%, 52%, 0.4), 0 0 40px hsla(158, 64%, 52%, 0.2);
+    }
+  }
+
   @keyframes shimmer {
     0% {
       transform: translateX(-100%);

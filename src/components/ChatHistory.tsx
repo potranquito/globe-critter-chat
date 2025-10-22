@@ -14,6 +14,7 @@ export interface ChatMessage {
   errorMessage?: string;
   characterEmoji?: string;  // Character emoji (e.g. 🤖, 💩👑)
   characterName?: string;   // Character name (e.g. "Guardian AI", "Poopy Pants")
+  isImage?: boolean;        // Indicates if the content is an image URL
 }
 
 interface ChatTheme {
@@ -34,6 +35,8 @@ interface ChatHistoryProps {
   quickReplies?: QuickReply[];
   onQuickReply?: (reply: QuickReply) => void;
   theme?: ChatTheme;
+  hasBooted?: boolean;
+  bootLoadingStatus?: string;
 }
 
 const ChatHistory = ({
@@ -45,7 +48,9 @@ const ChatHistory = ({
   onRetry,
   quickReplies = [],
   onQuickReply,
-  theme
+  theme,
+  hasBooted = false,
+  bootLoadingStatus = ''
 }: ChatHistoryProps) => {
   const [shouldRender, setShouldRender] = useState(isExpanded);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -96,7 +101,7 @@ const ChatHistory = ({
     }
   }, [messages, isTyping, quickReplies]);
 
-  if (!shouldRender || messages.length === 0) {
+  if (messages.length === 0) {
     return null;
   }
 
@@ -107,14 +112,14 @@ const ChatHistory = ({
   return (
     <div
       className={cn(
-        "relative rounded-t-lg overflow-hidden transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-sm border-x border-t",
+        "relative rounded-t-lg overflow-hidden transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-lg border-x border-t w-full",
         isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none",
         className
       )}
       style={{
         maxHeight: isExpanded ? '550px' : '0',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        backgroundColor: withAlpha(currentTheme.background, 0.95),
+        backgroundColor: withAlpha(currentTheme.background, 0.5),
         borderColor: withAlpha(currentTheme.primary, 0.3),
       }}
     >
@@ -122,17 +127,29 @@ const ChatHistory = ({
       <div
         className="flex items-center justify-between px-4 py-2 border-b"
         style={{
-          backgroundColor: withAlpha(currentTheme.background, 0.9),
+          backgroundColor: withAlpha(currentTheme.background, 0.4),
           borderColor: withAlpha(currentTheme.primary, 0.2),
         }}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">🤖</span>
+          <span className="text-lg">🌍</span>
           <span
-            className="text-xs font-semibold ml-1"
-            style={{ color: currentTheme.secondary }}
+            className="text-xs font-semibold"
+            style={{
+              color: currentTheme.secondary,
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+            }}
           >
             wildlife-terminal
+          </span>
+          <span
+            className="text-xs font-bold tracking-wide"
+            style={{
+              color: bootLoadingStatus ? '#fbbf24' : (hasBooted ? '#10b981' : '#ef4444'),
+              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
+            }}
+          >
+            {bootLoadingStatus || (hasBooted ? 'online' : 'offline')}
           </span>
         </div>
 
@@ -233,6 +250,23 @@ const ChatHistory = ({
                     <div className="text-sm text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
                       {(() => {
                         const content = message.content || (showSpinner ? 'Processing...' : '');
+
+                        // Check if this is an image message (species photo, etc.)
+                        if (message.isImage && content) {
+                          return (
+                            <img
+                              src={content}
+                              alt="Species"
+                              className="max-w-full h-auto rounded-lg my-2 ascii-laser-in"
+                              style={{
+                                maxHeight: '300px',
+                                objectFit: 'contain',
+                                backgroundColor: 'transparent',
+                                imageRendering: 'auto'
+                              }}
+                            />
+                          );
+                        }
 
                         // Check if content contains ANSI escape codes
                         const hasAnsi = content.includes('\x1b[') || content.includes('\u001b[');

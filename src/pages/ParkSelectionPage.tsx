@@ -54,23 +54,58 @@ const ParkSelectionPage = () => {
         const { supabase } = await import('@/integrations/supabase/client');
 
         // Load parks for this eco-region using MCP server
-        const boundsRadius = 10; // degrees (~1100km)
+        // Use larger radius for high-latitude regions (Arctic/Antarctic) where parks are sparse
+        const isHighLatitude = Math.abs(lat) > 60;
+        const boundsRadius = isHighLatitude ? 25 : 10; // degrees (Arctic: ~2750km, others: ~1100km)
+
+        console.log('🏞️ Park search params:', {
+          regionName,
+          centerLat: lat,
+          centerLng: lng,
+          isHighLatitude,
+          boundsRadius,
+          searchArea: {
+            minLat: lat - boundsRadius,
+            maxLat: lat + boundsRadius,
+            minLng: isHighLatitude ? 'ALL (Arctic wraps around)' : lng - boundsRadius,
+            maxLng: isHighLatitude ? 'ALL (Arctic wraps around)' : lng + boundsRadius,
+          }
+        });
 
         // Query parks from database
-        const { data: parksData, error: parksError } = await supabase
+        // For Arctic/Antarctic, search by latitude only (since they wrap around all longitudes)
+        let parksQuery = supabase
           .from('parks')
           .select('id, name, center_lat, center_lng, park_type, size_km2, wdpa_id, protection_status, image_url, image_attribution')
           .gte('center_lat', lat - boundsRadius)
           .lte('center_lat', lat + boundsRadius)
-          .gte('center_lng', lng - boundsRadius)
-          .lte('center_lng', lng + boundsRadius)
           .not('center_lat', 'is', null)
-          .not('center_lng', 'is', null)
+          .not('center_lng', 'is', null);
+
+        // Only filter by longitude for non-polar regions
+        if (!isHighLatitude) {
+          parksQuery = parksQuery
+            .gte('center_lng', lng - boundsRadius)
+            .lte('center_lng', lng + boundsRadius);
+        }
+
+        const { data: parksData, error: parksError } = await parksQuery
           .order('size_km2', { ascending: false })
           .limit(50);
 
+        if (parksError) {
+          console.error('❌ Park query error:', parksError);
+        }
+
         if (!parksError && parksData) {
-          console.log(`Found ${parksData.length} parks`);
+          console.log(`✅ Found ${parksData.length} parks`);
+          if (parksData.length > 0) {
+            console.log('First 3 parks:', parksData.slice(0, 3).map(p => ({
+              name: p.name,
+              lat: p.center_lat,
+              lng: p.center_lng,
+            })));
+          }
           // Transform to the format GoogleEarthMap expects
           const parks = parksData.map(park => ({
             ...park,
@@ -78,6 +113,8 @@ const ParkSelectionPage = () => {
             lng: park.center_lng,
           }));
           setWildlifePlaces(parks);
+        } else {
+          console.warn('⚠️ No parks found or error occurred');
         }
 
         // Load species using MCP server
@@ -140,11 +177,6 @@ const ParkSelectionPage = () => {
         }
 
         setIsLoading(false);
-
-        toast({
-          title: `📍 ${regionName}`,
-          description: `Found ${parksData?.length || 0} protected areas`,
-        });
 
       } catch (error) {
         console.error('Failed to load eco-region data:', error);
@@ -473,14 +505,14 @@ const ParkSelectionPage = () => {
             {/* Chat History - Semi-transparent with backdrop blur */}
             {chatHistory.length > 0 && (
               <div
-                className="pointer-events-none"
+                className="pointer-events-none w-full"
                 style={{
                   backgroundColor: isChatHistoryExpanded ? 'rgba(15, 23, 42, 0.75)' : 'transparent',
                   backdropFilter: isChatHistoryExpanded ? 'blur(12px)' : 'none',
                   transition: 'all 0.3s ease'
                 }}
               >
-                <div className="pointer-events-auto">
+                <div className="pointer-events-auto w-full">
                   <ChatHistory
                     messages={chatHistory}
                     quickReplies={quickReplies}

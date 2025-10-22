@@ -26,7 +26,7 @@ export function GlobalHealthBar() {
 
   // Determine health emoji based on percentage
   const getHealthEmoji = () => {
-    if (healthPercentage < 30) return '💩'; // Sick/poopy earth
+    if (healthPercentage < 30) return '🌍'; // Low health earth
     if (healthPercentage < 90) return '🌍'; // Healing earth
     return '🦸'; // Healthy earth with superhero
   };
@@ -65,7 +65,7 @@ export function GlobalHealthBar() {
               {health?.total_species?.toLocaleString() || 0} Species Tracked
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              💩🦸 Keep cleaning to reach 100%!
+              🌍🦸 Keep cleaning to reach 100%!
             </p>
           </div>
         </TooltipContent>

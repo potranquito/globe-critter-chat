@@ -29,6 +29,7 @@ export interface RegionSpecies {
   conservationStatus: string;
   occurrenceCount: number;
   imageKeyword?: string;
+  imageUrl?: string; // Image URL from database
   // New classification fields (from backend)
   speciesType?: string;
   uiGroup?: string;

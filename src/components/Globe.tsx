@@ -12,6 +12,13 @@ interface HabitatPoint {
   type?: 'species' | 'habitat' | 'threat' | 'protected';
   name?: string;
   title?: string;
+  spriteSheet?: string; // Path to sprite sheet image
+  spriteFrames?: number; // Number of frames in animation (default: 3)
+  spriteRows?: number; // Number of rows in sprite sheet (default: 4)
+  spriteCols?: number; // Number of columns in sprite sheet (default: 3)
+  spriteRow?: number; // Which row to use for animation (0-indexed, default: 0 for front-facing)
+  walkInCircle?: boolean; // Cycle through all 4 directions (rows)
+  photoUrl?: string; // Path to realistic photo image
 }
 
 interface HabitatZoneOverlay {
@@ -87,10 +94,10 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
     console.warn(`🔧 Removed ${validHabitats.length - deduplicatedHabitats.length} duplicate pins (${validHabitats.length} → ${deduplicatedHabitats.length})`);
   }
   
-  const emojiMarkers = deduplicatedHabitats.filter(h => h.emoji);
+  const emojiMarkers = deduplicatedHabitats.filter(h => h.emoji || h.spriteSheet);
   const imageMarkers = deduplicatedHabitats.filter(h => h.imageUrl && h.type === 'species');
   const habitatImageMarkers = deduplicatedHabitats.filter(h => h.imageUrl && h.type === 'habitat');
-  const regularPoints = deduplicatedHabitats.filter(h => !h.emoji && !h.imageUrl);
+  const regularPoints = deduplicatedHabitats.filter(h => !h.emoji && !h.imageUrl && !h.spriteSheet);
 
   // Convert habitat zones to polygon data for Globe.gl
   // Filter out any invalid zones first
@@ -334,9 +341,126 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           const el = document.createElement('div');
           el.className = 'cursor-pointer hover:scale-125 transition-transform';
           el.style.pointerEvents = 'auto';
-          
+
+          // Debug: Log ALL properties of the marker
+          if (d.name && d.name.toLowerCase().includes('coral')) {
+            console.log('🔍 Coral Triangle marker properties:', {
+              name: d.name,
+              type: d.type,
+              photoUrl: d.photoUrl,
+              imageUrl: d.imageUrl,
+              spriteSheet: d.spriteSheet,
+              emoji: d.emoji,
+              allProps: d
+            });
+          }
+
+          // If it's a sprite sheet marker, render animated sprite using canvas
+          if (d.spriteSheet) {
+            const frames = d.spriteFrames || 3;
+            const cols = d.spriteCols || 3;
+            const rows = d.spriteRows || 4;
+            const row = d.spriteRow || 0;
+
+            // Frame dimensions - auto-detect based on sprite sheet
+            // Polar bear: 960×480 (8×4, 120×120), elephant: 288×384 (3×4, 96×96), parrot: 480×448 (4×4, 120×112), chameleon: 600×240 (5×4, 120×60), lionfish: 570×440 (5×4, 114×110), gorilla: 600×162 (5×2, 120×81)
+            let frameWidth = 120;
+            let frameHeight = 120;
+            if (d.spriteSheet.includes('elephant')) {
+              frameWidth = 96;
+              frameHeight = 96;
+            } else if (d.spriteSheet.includes('parrot')) {
+              frameWidth = 120;
+              frameHeight = 112;
+            } else if (d.spriteSheet.includes('chameleon')) {
+              frameWidth = 120;
+              frameHeight = 60;
+            } else if (d.spriteSheet.includes('lionfish')) {
+              frameWidth = 114;
+              frameHeight = 110;
+            } else if (d.spriteSheet.includes('gorilla')) {
+              frameWidth = 120;
+              frameHeight = 81;
+            }
+            const fps = 12; // Designer's intended framerate
+
+            // Create canvas element for smooth animation
+            const canvas = document.createElement('canvas');
+            canvas.width = frameWidth;
+            canvas.height = frameHeight;
+            canvas.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+            canvas.style.imageRendering = 'pixelated';
+
+            // Scale down elephant sprite
+            if (d.spriteSheet.includes('elephant')) {
+              canvas.style.transform = 'scale(0.75)';
+            }
+
+            const ctx = canvas.getContext('2d');
+
+            // Load sprite sheet
+            const img = new Image();
+            img.src = d.spriteSheet;
+
+            // Animation state
+            let currentFrame = 0;
+            let lastFrameTime = 0;
+            const frameDuration = 1000 / fps; // ms per frame
+
+            // Build frame sequence
+            let frameSequence: Array<{col: number, row: number}> = [];
+            if (d.walkInCircle) {
+              // Cycle through all 4 directions
+              const directions = [0, 1, 2, 3]; // down, left, up, right
+              for (const dir of directions) {
+                for (let i = 0; i < frames; i++) {
+                  frameSequence.push({ col: i, row: dir });
+                }
+              }
+            } else {
+              // Single direction
+              for (let i = 0; i < frames; i++) {
+                frameSequence.push({ col: i, row });
+              }
+            }
+
+            // Animation loop using requestAnimationFrame
+            const animate = (timestamp: number) => {
+              if (timestamp - lastFrameTime >= frameDuration) {
+                // Clear canvas
+                ctx?.clearRect(0, 0, frameWidth, frameHeight);
+
+                // Draw current frame
+                const frame = frameSequence[currentFrame];
+                ctx?.drawImage(
+                  img,
+                  frame.col * frameWidth,  // source x
+                  frame.row * frameHeight, // source y
+                  frameWidth,              // source width
+                  frameHeight,             // source height
+                  0,                       // dest x
+                  0,                       // dest y
+                  frameWidth,              // dest width
+                  frameHeight              // dest height
+                );
+
+                // Advance frame
+                currentFrame = (currentFrame + 1) % frameSequence.length;
+                lastFrameTime = timestamp;
+              }
+
+              requestAnimationFrame(animate);
+            };
+
+            // Start animation when image loads
+            img.onload = () => {
+              requestAnimationFrame(animate);
+            };
+
+            el.appendChild(canvas);
+          }
           // If it's an emoji marker, render emoji with effects
-          if (d.emoji) {
+          else if (d.emoji) {
             const isGreenPin = d.emoji === '🟢';
             const isPoopPin = d.emoji === '💩';
             el.innerHTML = `
@@ -375,10 +499,11 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
               </div>
             `;
           }
-          // If it's a habitat image marker (Wikipedia URL), use directly
+          // If it's a habitat image marker (Wikipedia URL or eco-region photo), use directly
           else if (d.imageUrl && d.type === 'habitat') {
+            console.log('🖼️ Rendering habitat image:', d.name, d.imageUrl);
             el.innerHTML = `
-              <div class="w-16 h-16 rounded-lg overflow-hidden border-2 border-white shadow-lg">
+              <div class="w-20 h-20 rounded-lg overflow-hidden border-3 border-black shadow-lg hover:scale-110 transition-transform">
                 <img src="${d.imageUrl}" alt="${d.name || 'Habitat'}" class="w-full h-full object-cover" />
               </div>
             `;
@@ -417,7 +542,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
           
           el.onclick = (e) => {
             e.stopPropagation();
-            console.log('HTML element clicked:', d);
+            console.log('🖱️ HTML element clicked:', d.name, 'ecoRegionId:', d.ecoRegionId);
             if (globeEl.current) {
               globeEl.current.pointOfView(
                 { lat: d.lat, lng: d.lng, altitude: 1.2 },

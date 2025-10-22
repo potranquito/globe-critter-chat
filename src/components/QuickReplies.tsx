@@ -4,7 +4,7 @@ export interface QuickReply {
   id: string;
   label: string;
   emoji: string;
-  action: 'answer' | 'trivia' | 'facts' | 'conservation' | 'explain' | 'hint' | 'help-find-species' | 'play-food-web-game';
+  action: 'answer' | 'trivia' | 'facts' | 'conservation' | 'explain' | 'hint' | 'help-find-species' | 'play-food-web-game' | 'play-park' | 'start-trivia' | 'go-back-to-park' | 'play-poopy-minion' | 'battle-poopy-pants' | 'return-to-globe';
   value?: string; // For A/B/C/D answers
 }
 
@@ -40,7 +40,8 @@ export const QuickReplies = ({ replies, onSelect, disabled = false, theme }: Qui
     return hslColor.replace('hsl(', 'hsla(').replace(')', `, ${alpha})`);
   };
 
-  const isHelpButton = (action: string) => action === 'help-find-species';
+  const shouldGlow = (action: string) => action === 'help-find-species' || action === 'play-park' || action === 'start-trivia';
+  const isRedButton = (action: string) => action === 'go-back-to-park';
 
   return (
     <>
@@ -74,30 +75,48 @@ export const QuickReplies = ({ replies, onSelect, disabled = false, theme }: Qui
               transition-all duration-300
               hover:scale-105
               text-sm px-4 py-2.5 h-auto rounded-xl
-              ${isHelpButton(reply.action) ? 'throb-glow-effect' : ''}
+              ${shouldGlow(reply.action) ? 'throb-glow-effect' : ''}
             `}
             style={{
               backgroundColor: withAlpha(currentTheme.background, 0.4),
               borderWidth: '2px',
-              borderColor: withAlpha(currentTheme.primary, isHelpButton(reply.action) ? 0.6 : 0.4),
-              color: withAlpha(currentTheme.text, 0.9),
-              boxShadow: isHelpButton(reply.action)
+              borderColor: isRedButton(reply.action)
+                ? 'rgba(239, 68, 68, 0.6)'
+                : withAlpha(currentTheme.primary, shouldGlow(reply.action) ? 0.6 : 0.4),
+              color: isRedButton(reply.action)
+                ? 'rgb(239, 68, 68)'
+                : withAlpha(currentTheme.text, 0.9),
+              boxShadow: shouldGlow(reply.action)
                 ? `0 4px 6px -1px ${withAlpha(currentTheme.primary, 0.2)}, 0 0 20px ${withAlpha(currentTheme.primary, 0.3)}`
                 : `0 4px 6px -1px ${withAlpha(currentTheme.primary, 0.2)}`,
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = withAlpha(currentTheme.primary, 0.1);
-              e.currentTarget.style.borderColor = withAlpha(currentTheme.primary, 0.8);
-              e.currentTarget.style.color = currentTheme.text;
-              e.currentTarget.style.boxShadow = `0 20px 25px -5px ${withAlpha(currentTheme.primary, 0.3)}`;
+              if (isRedButton(reply.action)) {
+                e.currentTarget.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+                e.currentTarget.style.borderColor = 'rgb(239, 68, 68)';
+                e.currentTarget.style.color = 'rgb(239, 68, 68)';
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(239, 68, 68, 0.3)';
+              } else {
+                e.currentTarget.style.backgroundColor = withAlpha(currentTheme.primary, 0.1);
+                e.currentTarget.style.borderColor = withAlpha(currentTheme.primary, 0.8);
+                e.currentTarget.style.color = currentTheme.text;
+                e.currentTarget.style.boxShadow = `0 20px 25px -5px ${withAlpha(currentTheme.primary, 0.3)}`;
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = withAlpha(currentTheme.background, 0.4);
-              e.currentTarget.style.borderColor = withAlpha(currentTheme.primary, isHelpButton(reply.action) ? 0.6 : 0.4);
-              e.currentTarget.style.color = withAlpha(currentTheme.text, 0.9);
-              e.currentTarget.style.boxShadow = isHelpButton(reply.action)
-                ? `0 4px 6px -1px ${withAlpha(currentTheme.primary, 0.2)}, 0 0 20px ${withAlpha(currentTheme.primary, 0.3)}`
-                : `0 4px 6px -1px ${withAlpha(currentTheme.primary, 0.2)}`;
+              if (isRedButton(reply.action)) {
+                e.currentTarget.style.backgroundColor = withAlpha(currentTheme.background, 0.4);
+                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.6)';
+                e.currentTarget.style.color = 'rgb(239, 68, 68)';
+                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(239, 68, 68, 0.2)';
+              } else {
+                e.currentTarget.style.backgroundColor = withAlpha(currentTheme.background, 0.4);
+                e.currentTarget.style.borderColor = withAlpha(currentTheme.primary, shouldGlow(reply.action) ? 0.6 : 0.4);
+                e.currentTarget.style.color = withAlpha(currentTheme.text, 0.9);
+                e.currentTarget.style.boxShadow = shouldGlow(reply.action)
+                  ? `0 4px 6px -1px ${withAlpha(currentTheme.primary, 0.2)}, 0 0 20px ${withAlpha(currentTheme.primary, 0.3)}`
+                  : `0 4px 6px -1px ${withAlpha(currentTheme.primary, 0.2)}`;
+              }
             }}
           >
             {/* Glow effect on hover */}

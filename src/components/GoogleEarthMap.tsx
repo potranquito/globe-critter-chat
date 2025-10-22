@@ -19,6 +19,12 @@ interface HabitatPoint {
   name?: string;
   title?: string;
   description?: string;
+  spriteSheet?: string; // Path to sprite sheet image
+  spriteFrames?: number; // Number of frames in animation (default: 3)
+  spriteRows?: number; // Number of rows in sprite sheet (default: 4)
+  spriteCols?: number; // Number of columns in sprite sheet (default: 3)
+  spriteRow?: number; // Which row to use for animation (0-indexed, default: 0 for front-facing)
+  walkInCircle?: boolean; // Cycle through all 4 directions (rows)
 }
 
 interface GoogleEarthMapProps {
@@ -31,6 +37,7 @@ interface GoogleEarthMapProps {
   wildlifePlaces?: any[];
   protectedAreas?: any[];
   locationName?: string;
+  disableMarkerZoom?: boolean; // Disable auto-zoom on marker click
 }
 
 // Helper component to access map instance and add event listeners
@@ -67,7 +74,8 @@ const GoogleEarthMap = ({
   zoom = 3,
   wildlifePlaces = [],
   protectedAreas = [],
-  locationName
+  locationName,
+  disableMarkerZoom = false
 }: GoogleEarthMapProps) => {
   const { apiKey, loading, usage, error } = useGoogleMapsApi();
   const [mapLoaded, setMapLoaded] = useState(false);
@@ -248,7 +256,7 @@ const GoogleEarthMap = ({
                 key={`wildlife-${idx}`}
                 position={{ lat: place.lat, lng: place.lng }}
                 onClick={() => {
-                  if (mapRef.current) {
+                  if (mapRef.current && !disableMarkerZoom) {
                     mapRef.current.panTo({ lat: place.lat, lng: place.lng });
                     mapRef.current.setZoom(15);
                   }
