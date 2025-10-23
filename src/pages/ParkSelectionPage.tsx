@@ -7,11 +7,13 @@ import type { RegionSpecies } from '@/services/regionService';
 import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
 import { SpeciesTypeFilter, type SpeciesTypeFilter as SpeciesTypeFilterType } from '@/components/SpeciesTypeFilter';
 import { InfoCard } from '@/components/InfoCard';
-import ChatInput, { ChatContext } from '@/components/ChatInput';
+import ChatInput, { ChatContext, ChatTheme } from '@/components/ChatInput';
 import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
 import { QuickReply } from '@/components/QuickReplies';
 import { ParkList } from '@/components/ParkList';
 import { GlobalHealthBar } from '@/components/GlobalHealthBar';
+import { generateColorTheme } from '@/services/mcpClient';
+import { getAnimalForRegion } from '@/config/ecoRegionAnimals';
 
 const ParkSelectionPage = () => {
   const navigate = useNavigate();
@@ -31,11 +33,24 @@ const ParkSelectionPage = () => {
   const [selectedCarouselSpecies, setSelectedCarouselSpecies] = useState<RegionSpecies | null>(null);
   const [speciesTypeFilter, setSpeciesTypeFilter] = useState<SpeciesTypeFilterType>('all');
 
+  // Map center state - will be updated based on park locations
+  const [mapCenter, setMapCenter] = useState({ lat, lng });
+  const [mapZoom, setMapZoom] = useState(4);
+
   // Chat state
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [isChatHistoryExpanded, setIsChatHistoryExpanded] = useState(false);
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
+
+  // Chameleon theme state
+  const [chatTheme, setChatTheme] = useState<ChatTheme>({
+    primary: 'hsl(160, 84%, 39%)',
+    secondary: 'hsl(158, 64%, 52%)',
+    background: 'hsl(222, 47%, 11%)',
+    text: 'hsl(152, 76%, 80%)',
+    accent: 'hsl(160, 100%, 70%)'
+  });
 
   useEffect(() => {
     if (!ecoRegionId || !regionName) {
@@ -52,6 +67,20 @@ const ParkSelectionPage = () => {
       try {
         setIsLoading(true);
         const { supabase } = await import('@/integrations/supabase/client');
+
+        // 🎨 Generate chameleon color theme for this eco-region
+        console.log('🎨 Generating chameleon theme for:', regionName);
+        try {
+          const themeResult = await generateColorTheme({ ecoregionName: regionName || '' });
+          if (themeResult.success && themeResult.theme) {
+            console.log('✅ Chameleon theme applied:', themeResult.theme);
+            setChatTheme(themeResult.theme);
+          } else {
+            console.warn('[Theme] ⚠️ MCP color theme generation failed, using default');
+          }
+        } catch (themeError) {
+          console.error('[Theme] ❌ Error generating color theme:', themeError);
+        }
 
         // Load parks for this eco-region using MCP server
         // Use larger radius for high-latitude regions (Arctic/Antarctic) where parks are sparse
@@ -113,6 +142,28 @@ const ParkSelectionPage = () => {
             lng: park.center_lng,
           }));
           setWildlifePlaces(parks);
+
+          // Calculate optimal map center based on park locations
+          if (parks.length > 0) {
+            const validParks = parks.filter(p => p.lat && p.lng);
+            if (validParks.length > 0) {
+              // Calculate the center point of all parks
+              const avgLat = validParks.reduce((sum, p) => sum + p.lat, 0) / validParks.length;
+              const avgLng = validParks.reduce((sum, p) => sum + p.lng, 0) / validParks.length;
+
+              // Adjust zoom based on park spread (Arctic regions need lower zoom)
+              const isHighLatitude = Math.abs(avgLat) > 60;
+
+              // Pan south a bit to ensure top of map is within bounds (shows ocean blue)
+              // For high latitude regions, subtract more degrees to account for curvature
+              const latitudeOffset = isHighLatitude ? 8 : 3;
+              const adjustedLat = avgLat - latitudeOffset;
+
+              console.log(`🎯 Centering map on parks: lat=${adjustedLat.toFixed(2)}, lng=${avgLng.toFixed(2)} (offset: -${latitudeOffset}°)`);
+              setMapCenter({ lat: adjustedLat, lng: avgLng });
+              setMapZoom(isHighLatitude ? 3 : 5);
+            }
+          }
         } else {
           console.warn('⚠️ No parks found or error occurred');
         }
@@ -195,10 +246,14 @@ const ParkSelectionPage = () => {
   // Send welcome message when page loads
   useEffect(() => {
     if (!isLoading && regionSpecies.length > 0 && chatHistory.length === 0) {
+      // Get ASCII art animal for this region
+      const animalData = getAnimalForRegion(regionName || '');
+      const asciiArt = animalData.frames[0]; // Use first frame of animation
+
       const welcomeMessage: ChatMessage = {
         id: `welcome-${Date.now()}`,
         role: 'assistant',
-        content: `🌍 Welcome to **${regionName}**!\n\nI'm your learning guide. Click on any species in the carousel to learn about them, or select a protected area on the map to start playing!\n\n**${regionSpecies.length} species** are waiting to be discovered.`,
+        content: `🌍 Welcome to **${regionName}**!\n\n\`\`\`\n${asciiArt}\n\`\`\`\n\nI'm your learning guide. Click on any species in the carousel to learn about them, or select a protected area on the map to start playing!\n\n**${regionSpecies.length} species** are waiting to be discovered.`,
         timestamp: new Date(),
         status: 'sent'
       };
@@ -410,8 +465,8 @@ const ParkSelectionPage = () => {
           onPointClick={handleParkClick}
           onDoubleGlobeClick={handleDoubleClick}
           onImageMarkerClick={handleParkClick}
-          center={{ lat, lng }}
-          zoom={4}
+          center={mapCenter}
+          zoom={mapZoom}
           wildlifePlaces={wildlifePlaces}
           protectedAreas={protectedAreas}
           locationName={regionName || ''}
@@ -507,8 +562,9 @@ const ParkSelectionPage = () => {
               <div
                 className="pointer-events-none w-full"
                 style={{
-                  backgroundColor: isChatHistoryExpanded ? 'rgba(15, 23, 42, 0.75)' : 'transparent',
+                  backgroundColor: isChatHistoryExpanded ? 'rgba(15, 23, 42, 0.4)' : 'transparent', // More transparent
                   backdropFilter: isChatHistoryExpanded ? 'blur(12px)' : 'none',
+                  borderRadius: '0.5rem 0.5rem 0 0', // rounded-t-lg to match ChatHistory
                   transition: 'all 0.3s ease'
                 }}
               >
@@ -520,6 +576,7 @@ const ParkSelectionPage = () => {
                     isExpanded={isChatHistoryExpanded}
                     onMinimize={() => setIsChatHistoryExpanded(false)}
                     isTyping={isLoadingResponse}
+                    theme={chatTheme}
                   />
                 </div>
               </div>
@@ -532,6 +589,7 @@ const ParkSelectionPage = () => {
               placeholder="Ask about species or ecosystems..."
               hasMessages={chatHistory.length > 0}
               onExpandHistory={() => setIsChatHistoryExpanded(true)}
+              theme={chatTheme}
             />
           </div>
         </div>

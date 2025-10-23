@@ -112,14 +112,15 @@ const ChatHistory = ({
   return (
     <div
       className={cn(
-        "relative rounded-t-lg overflow-hidden transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-lg border-x border-t w-full",
+        "relative overflow-hidden transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-lg border-x border-t w-full",
         isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none",
         className
       )}
       style={{
+        borderRadius: '0.5rem 0.5rem 0 0', // rounded-t-lg - explicit for consistency
         maxHeight: isExpanded ? '550px' : '0',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        backgroundColor: withAlpha(currentTheme.background, 0.5),
+        backgroundColor: withAlpha(currentTheme.background, 0.3), // More transparent
         borderColor: withAlpha(currentTheme.primary, 0.3),
       }}
     >

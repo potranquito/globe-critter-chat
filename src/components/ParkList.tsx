@@ -45,24 +45,53 @@ export const ParkList = ({ parks, selectedPark, onParkClick }: ParkListProps) =>
                 : 'border-l-4 border-l-transparent'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 pointer-events-none">
+            <div className="flex items-center justify-between gap-3 pointer-events-none">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">
                   {park.name}
                 </p>
-                {park.park_type && (
+                {park.size_km2 && (
                   <p className="text-xs text-muted-foreground truncate">
-                    {park.park_type}
+                    {park.size_km2.toLocaleString()} km²
                   </p>
                 )}
               </div>
-              {park.size_km2 && (
-                <div className="shrink-0">
-                  <p className="text-xs text-primary font-semibold">
-                    {park.size_km2.toLocaleString()} km²
-                  </p>
+              {/* Star tracking circle for trivia gamification */}
+              <div className="shrink-0 relative" style={{ width: '40px', height: '40px' }}>
+                {/* Circle background */}
+                <svg width="40" height="40" viewBox="0 0 40 40" className="absolute inset-0">
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="18"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    className="text-muted-foreground/30"
+                  />
+                </svg>
+                {/* Three stars positioned on top of circle */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="flex gap-0.5">
+                    {[0, 1, 2].map((index) => (
+                      <svg
+                        key={index}
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-muted-foreground/40"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </button>
         ))}

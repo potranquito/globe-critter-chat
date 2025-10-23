@@ -251,6 +251,9 @@ const GoogleEarthMap = ({
               ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photoReference}&key=${apiKey}`
               : null;
 
+            // Support both snake_case (from database) and camelCase (from other sources)
+            const imageUrl = place.image_url || place.imageUrl;
+
             return (
               <AdvancedMarker
                 key={`wildlife-${idx}`}
@@ -264,24 +267,32 @@ const GoogleEarthMap = ({
                   onImageMarkerClick?.({
                     ...place,
                     type: 'wildlife-park',
-                    imageUrl: place.imageUrl
+                    imageUrl: imageUrl
                   });
                 }}
               >
                 <div className="cursor-pointer hover:scale-110 transition-transform group">
-                  {photoUrl || place.imageUrl ? (
+                  {photoUrl || imageUrl ? (
                     <div className="relative">
                       <img
-                        src={photoUrl || place.imageUrl}
+                        src={photoUrl || imageUrl}
                         alt={place.name}
-                        className="w-16 h-16 rounded-lg border-2 border-emerald-400 shadow-lg object-cover"
+                        className="w-16 h-16 rounded-lg border-2 border-emerald-400 object-cover"
+                        style={{
+                          boxShadow: '0 0 15px rgba(52, 211, 153, 0.5), 0 0 30px rgba(52, 211, 153, 0.3), 0 4px 10px rgba(0, 0, 0, 0.3)'
+                        }}
                       />
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
                         {place.name}
                       </div>
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-lg border-2 border-emerald-400 shadow-lg bg-emerald-500/20 flex items-center justify-center">
+                    <div
+                      className="w-16 h-16 rounded-lg border-2 border-emerald-400 bg-emerald-500/20 flex items-center justify-center"
+                      style={{
+                        boxShadow: '0 0 15px rgba(52, 211, 153, 0.5), 0 0 30px rgba(52, 211, 153, 0.3), 0 4px 10px rgba(0, 0, 0, 0.3)'
+                      }}
+                    >
                       🌳
                     </div>
                   )}
@@ -290,7 +301,7 @@ const GoogleEarthMap = ({
             );
           })}
 
-          {/* Protected areas as green dots */}
+          {/* Protected areas with images or green dots */}
           {protectedAreas.slice(0, 3).map((area, idx) => (
             <AdvancedMarker
               key={`protected-${idx}`}
@@ -305,22 +316,42 @@ const GoogleEarthMap = ({
                 });
               }}
             >
-              <div
-                className="cursor-pointer hover:scale-125 transition-transform relative group"
-                style={{
-                  width: '24px',
-                  height: '24px',
-                  backgroundColor: '#22c55e',
-                  borderRadius: '50%',
-                  border: '3px solid white',
-                  boxShadow: '0 2px 10px rgba(34, 197, 94, 0.5)',
-                }}
-              >
-                {/* Tooltip on hover */}
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10 min-w-max">
-                  <div className="font-semibold">{area.name}</div>
-                  {area.designation && <div className="text-muted-foreground text-[10px]">{area.designation}</div>}
-                </div>
+              <div className="cursor-pointer hover:scale-110 transition-transform group">
+                {area.image_url ? (
+                  <div className="relative">
+                    <img
+                      src={area.image_url}
+                      alt={area.name}
+                      className="w-16 h-16 rounded-lg border-2 border-emerald-400 object-cover"
+                      style={{
+                        boxShadow: '0 0 15px rgba(52, 211, 153, 0.5), 0 0 30px rgba(52, 211, 153, 0.3), 0 4px 10px rgba(0, 0, 0, 0.3)'
+                      }}
+                    />
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10 min-w-max">
+                      <div className="font-semibold">{area.name}</div>
+                      {area.designation && <div className="text-muted-foreground text-[10px]">{area.designation}</div>}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <div
+                      className="hover:scale-125 transition-transform"
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: '#22c55e',
+                        borderRadius: '50%',
+                        border: '3px solid white',
+                        boxShadow: '0 0 10px rgba(52, 211, 153, 0.6), 0 0 20px rgba(52, 211, 153, 0.4), 0 2px 10px rgba(34, 197, 94, 0.5)',
+                      }}
+                    />
+                    {/* Tooltip on hover */}
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-background/95 backdrop-blur-sm px-3 py-1.5 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-10 min-w-max">
+                      <div className="font-semibold">{area.name}</div>
+                      {area.designation && <div className="text-muted-foreground text-[10px]">{area.designation}</div>}
+                    </div>
+                  </div>
+                )}
               </div>
             </AdvancedMarker>
           ))}

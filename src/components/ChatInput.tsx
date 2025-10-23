@@ -115,12 +115,12 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
     >
       <div
         className={`relative backdrop-blur-lg border w-full ${
-          hasMessages ? 'rounded-b-lg border-t-0' : 'rounded-lg'
+          hasMessages ? 'border-t-0' : ''
         }`}
         style={{
+          borderRadius: hasMessages ? '0 0 0.5rem 0.5rem' : '0.5rem', // rounded-b-lg or rounded-lg - explicit for consistency
           backgroundColor: withAlpha(currentTheme.background, 0.5),
-          borderColor: currentTheme.secondary,
-          animation: 'gentle-glow 3s ease-in-out infinite'
+          borderColor: withAlpha(currentTheme.primary, 0.3)
         }}
       >
         {/* Expand History Button - Show when messages exist but history is minimized */}
