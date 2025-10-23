@@ -259,3 +259,27 @@ export async function generateCartoonAscii(
 ): Promise<GenerateCartoonAsciiResult> {
   return callMCPTool<GenerateCartoonAsciiResult>('generate_cartoon_ascii', args);
 }
+
+export interface GenerateFastVisualDescriptionArgs {
+  scientificName: string;
+  commonName: string;
+  animalType: string;
+  ecoregion?: string;
+}
+
+export interface GenerateFastVisualDescriptionResult {
+  success: boolean;
+  description?: string;
+  method?: string;
+  timestamp?: string;
+  error?: string;
+}
+
+/**
+ * Generate fast visual description for a species (2-3s)
+ */
+export async function generateFastVisualDescription(
+  args: GenerateFastVisualDescriptionArgs
+): Promise<GenerateFastVisualDescriptionResult> {
+  return callMCPTool<GenerateFastVisualDescriptionResult>('generate_fast_visual_description', args);
+}

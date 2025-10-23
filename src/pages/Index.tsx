@@ -259,6 +259,9 @@ const Index = () => {
   // ✅ NEW: Education context tracks the current card for context-aware chat
   const [educationContext, setEducationContext] = useState<EducationContext | null>(null);
 
+  // 📚 NEW: Track if species learning is in progress (prevents clicking next species too quickly)
+  const [isSpeciesLearningInProgress, setIsSpeciesLearningInProgress] = useState(false);
+
   // 🎮 NEW: Food web game - selected species for trivia
   interface SelectedFoodWebSpecies {
     carnivore: RegionSpecies | null;
@@ -1453,7 +1456,7 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
           return;
         }
 
-        // 🚀 BOOT SEQUENCE: Loading status in header + ant animation in message
+        // 🚀 BOOT SEQUENCE: Loading status in header + mascot image in message
         const loadingSteps = [
           'Booting up system...',
           'Geolocating ecoregions...',
@@ -1463,43 +1466,10 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
           'Wildlife AI startup complete'
         ];
 
-        const antFrames = [
-          // 🐜 Crawling RIGHT (ant moves across terminal) - 8 frames
-          `   __\n:@.o.(__)\n /  |  \\`,           // Frame 1
-          `    __\n :@.o.(__)\n  /  |  \\`,        // Frame 2
-          `     __\n  :@.o.(__)\n   /  |  \\`,     // Frame 3
-          `      __\n   :@.o.(__)\n    /  |  \\`,  // Frame 4
-          `       __\n    :@.o.(__)\n     /  |  \\`, // Frame 5
-          `        __\n     :@.o.(__)\n      /  |  \\`, // Frame 6
-          `         __\n      :@.o.(__)\n       /  |  \\`, // Frame 7
-          `          __\n       :@.o.(__)\n        /  |  \\`, // Frame 8
-
-          // 🐜 Crawling LEFT (ant returns) - 8 frames
-          `         __\n      (__).o.@:\n       /  |  \\`, // Frame 9
-          `        __\n     (__).o.@:\n      /  |  \\`, // Frame 10
-          `       __\n    (__).o.@:\n     /  |  \\`,  // Frame 11
-          `      __\n   (__).o.@:\n    /  |  \\`,   // Frame 12
-          `     __\n  (__).o.@:\n   /  |  \\`,    // Frame 13
-          `    __\n (__).o.@:\n  /  |  \\`,     // Frame 14
-          `   __\n(__).o.@:\n /  |  \\`,      // Frame 15
-          `  __\n(__).o.@:\n /  |  \\`,       // Frame 16
-
-          // 🐜 Standing transitions (ant settles) - 4 frames
-          `  \\  /\n (o_o)\n<|> <|>`,        // Frame 17: Arms down, normal
-          `   /  \\\n (o_o)\n<|> <|>`,       // Frame 18: Arms up, normal
-          `  \\  /\n (O_o)\n<|> <|>`,        // Frame 19: Arms down, wink left
-          `  /  \\\n (o_O)\n<|> <|>`         // Frame 20: Arms up, wink right
-        ];
-
         const bootMessageId = `boot-${Date.now()}`;
-        let antFrameIndex = 0;
         let loadingStepIndex = 0;
 
-        const introText = `
-
-🌍 Wildlife Terminal v1.0 ONLINE
-
-Hello. I'm the wildlife terminal. I'm designed to help you save the earth.
+        const introText = `Hello. I'm the wildlife terminal. I'm designed to help you save the earth.
 
 Click any region on the globe to discover its ecosystems,
 biodiversity, and conservation efforts.
@@ -1511,11 +1481,11 @@ Type 'help' for available commands or ask me anything!`;
 
         // 🚀 START ALL THREE PROCESSES SIMULTANEOUSLY
 
-        // Show initial state: first ant frame + start text streaming
+        // Show initial state: mascot character
         setChatHistory([{
           id: bootMessageId,
           role: 'assistant',
-          content: `\x1b[32m${antFrames[0]}\x1b[0m`,
+          content: `![Wildlife Mascot](/images/pixel-character-landing.png)`,
           timestamp: new Date(),
           status: 'sent'
         }]);
@@ -1523,26 +1493,6 @@ Type 'help' for available commands or ask me anything!`;
 
         // Start first loading step
         setBootLoadingStatus(loadingSteps[0]);
-
-        // 1️⃣ Ant animation (100ms per frame = 2 seconds total for 20 frames)
-        const antInterval = setInterval(() => {
-          antFrameIndex++;
-
-          if (antFrameIndex >= antFrames.length) {
-            // Ant animation complete - keep showing last frame
-            clearInterval(antInterval);
-            return;
-          }
-
-          // Update ant frame while preserving text content
-          setChatHistory([{
-            id: bootMessageId,
-            role: 'assistant',
-            content: `\x1b[32m${antFrames[antFrameIndex]}\x1b[0m${currentText}`,
-            timestamp: new Date(),
-            status: 'sent'
-          }]);
-        }, 100); // 100ms per frame = 2 seconds for 20 frames
 
         // 2️⃣ Loading indicators (800ms per step)
         const loadingInterval = setInterval(() => {
@@ -1561,7 +1511,7 @@ Type 'help' for available commands or ask me anything!`;
           setBootLoadingStatus(loadingSteps[loadingStepIndex]);
         }, 800); // 800ms per step × 6 steps = 4.8 seconds total
 
-        // 3️⃣ Text streaming (6ms per character)
+        // 2️⃣ Text streaming (6ms per character)
         const streamInterval = setInterval(() => {
           if (charIndex >= introText.length) {
             // Streaming complete
@@ -1573,13 +1523,10 @@ Type 'help' for available commands or ask me anything!`;
           currentText += introText[charIndex];
           charIndex++;
 
-          // Get current ant frame (use last frame if animation finished)
-          const currentAntFrame = antFrames[Math.min(antFrameIndex, antFrames.length - 1)];
-
           setChatHistory([{
             id: bootMessageId,
             role: 'assistant',
-            content: `\x1b[32m${currentAntFrame}\x1b[0m${currentText}`,
+            content: `![Wildlife Mascot](/images/pixel-character-landing.png)\n${currentText}`,
             timestamp: new Date(),
             status: 'sent'
           }]);
@@ -2877,19 +2824,47 @@ Type 'help' for available commands or ask me anything!`;
     }
   };
 
-  const handleCarouselSpeciesSelect = async (species: RegionSpecies) => {
+  const handleCarouselSpeciesSelect = async (species: RegionSpecies, learningTopic?: string) => {
     console.log('🎯 Carousel species clicked:', species.commonName, '| Game Active:', isFoodWebGameActive);
     console.log('🔍 Species data:', species);
+
+    // 🚫 BLOCK: If species learning is already in progress, don't allow another click
+    if (isSpeciesLearningInProgress) {
+      console.log('⏳ Species learning in progress - blocking new selection');
+      toast({
+        title: "Please wait",
+        description: "Let the current species information finish loading first!",
+        variant: "default"
+      });
+      return;
+    }
 
     // 📚 NORMAL MODE: Show species image and stream character sheet
     if (!isFoodWebGameActive) {
       console.log('📚 Normal mode: Showing species character sheet in CHAT');
       console.log('📸 Species image URL:', species.imageUrl);
 
+      // 🎓 Set learning in progress state
+      setIsSpeciesLearningInProgress(true);
+
       setIsChatHistoryExpanded(true);
 
       // Clear any selected carousel species to hide the right panel
       setSelectedCarouselSpecies(null);
+
+      // 📢 If a learning topic was provided, announce it first
+      if (learningTopic) {
+        const topicMessage: ChatMessage = {
+          id: `learning-topic-${Date.now()}`,
+          role: 'assistant',
+          content: `📚 **Learning Topic: ${learningTopic}**\n\nLet me teach you about species in this category!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, topicMessage]);
+        // Brief pause to let user see the topic announcement
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
 
       // 1️⃣ Show species image in chat first
       if (species.imageUrl) {
@@ -2954,6 +2929,13 @@ Type 'help' for available commands or ask me anything!`;
             clearInterval(streamInterval);
             setIsLoading(false);
             console.log('✅ Character sheet streaming complete');
+
+            // ⏱️ Wait 1.5 seconds after text completes before allowing next species
+            setTimeout(() => {
+              setIsSpeciesLearningInProgress(false);
+              console.log('✅ Species learning complete - ready for next selection');
+            }, 1500);
+
             return;
           }
 

@@ -12,7 +12,7 @@ import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
 import { QuickReply } from '@/components/QuickReplies';
 import { ParkList } from '@/components/ParkList';
 import { GlobalHealthBar } from '@/components/GlobalHealthBar';
-import { generateColorTheme } from '@/services/mcpClient';
+import { generateColorTheme, generateFastVisualDescription } from '@/services/mcpClient';
 import { getAnimalForRegion } from '@/config/ecoRegionAnimals';
 
 const ParkSelectionPage = () => {
@@ -42,6 +42,13 @@ const ParkSelectionPage = () => {
   const [isChatHistoryExpanded, setIsChatHistoryExpanded] = useState(false);
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
+
+  // Learning mode state
+  const [isLearningMode, setIsLearningMode] = useState(false);
+  const [learningFilters, setLearningFilters] = useState<string[]>([]);
+  const [learningSessionCount, setLearningSessionCount] = useState(0);
+  const [currentLearningTopic, setCurrentLearningTopic] = useState<string>('');
+  const [isSpeciesStreamingInProgress, setIsSpeciesStreamingInProgress] = useState(false); // Prevents next species from loading too soon
 
   // Chameleon theme state
   const [chatTheme, setChatTheme] = useState<ChatTheme>({
@@ -259,6 +266,16 @@ const ParkSelectionPage = () => {
       };
       setChatHistory([welcomeMessage]);
       setIsChatHistoryExpanded(true);
+
+      // Add "Start Learning" quick reply
+      setQuickReplies([
+        {
+          id: 'start-learning',
+          label: '🎓 Start Learning',
+          emoji: '🎓',
+          action: 'start-learning' as const
+        }
+      ]);
     }
   }, [isLoading, regionSpecies.length, chatHistory.length, regionName]);
 
@@ -347,13 +364,573 @@ const ParkSelectionPage = () => {
     return descriptions[species.dietaryCategory?.toLowerCase() || ''] || 'This species is an important part of the ecosystem.';
   };
 
+  // Filter species based on learning filters
+  const getFilteredSpecies = () => {
+    if (learningFilters.length === 0) return regionSpecies;
+    if (learningFilters.includes('all')) return regionSpecies; // 'all' returns everything
+
+    const filtered = regionSpecies.filter(species => {
+      return learningFilters.every(filter => { // Use 'every' for AND logic when multiple filters
+        const filterLower = filter.toLowerCase();
+        const taxonomicGroup = (species.taxonomicGroup || '').toLowerCase();
+        const animalType = (species.animalType || '').toLowerCase();
+        const dietaryCategory = (species.dietaryCategory || '').toLowerCase();
+
+        // Special Categories
+        if (filterLower === 'invasive') return species.isInvasive === true;
+        if (filterLower === 'venomous') return species.isVenomous === true;
+        if (filterLower === 'native') return !species.isInvasive; // Assume non-invasive = native
+
+        // Conservation Status
+        if (filterLower === 'endangered') return species.conservationStatus?.toLowerCase().includes('endangered');
+        if (filterLower === 'critical') return species.conservationStatus?.toLowerCase().includes('critical');
+        if (filterLower === 'vulnerable') return species.conservationStatus?.toLowerCase().includes('vulnerable');
+
+        // Animal Types - check both taxonomicGroup and animalType
+        if (filterLower === 'mammal') return animalType === 'mammal' || animalType.includes('mammal') || taxonomicGroup.includes('mammal');
+        if (filterLower === 'bird') return taxonomicGroup === 'birds' || animalType.includes('bird') || animalType.includes('aves');
+        if (filterLower === 'reptile') return animalType.includes('reptile') || taxonomicGroup.includes('reptile');
+        if (filterLower === 'amphibian') return animalType.includes('amphibian') || taxonomicGroup.includes('amphibian');
+        if (filterLower === 'fish') return animalType.includes('fish') || taxonomicGroup.includes('fish');
+        if (filterLower === 'insect') return animalType.includes('insect') || taxonomicGroup.includes('insect');
+
+        // Plant Types
+        if (filterLower === 'plant') return animalType.includes('plant') || taxonomicGroup.includes('plant');
+        if (filterLower === 'tree') return animalType.includes('tree') || taxonomicGroup.includes('tree');
+        if (filterLower === 'flower') return animalType.includes('flower') || taxonomicGroup.includes('flower');
+
+        // Dietary Categories (use dietaryCategory field)
+        if (filterLower === 'carnivore-diet') return dietaryCategory.includes('carnivore');
+        if (filterLower === 'herbivore-diet') return dietaryCategory.includes('herbivore');
+        if (filterLower === 'omnivore-diet') return dietaryCategory.includes('omnivore');
+        if (filterLower === 'producer-diet') return dietaryCategory.includes('producer');
+
+        // Behavioral (these would need database fields - for now return false)
+        if (filterLower === 'nocturnal') return false; // TODO: Add nocturnal field to database
+        if (filterLower === 'migratory') return false; // TODO: Add migratory field to database
+        if (filterLower === 'apex') return dietaryCategory.includes('carnivore'); // Approximate
+        if (filterLower === 'pollinator') return false; // TODO: Add pollinator field to database
+
+        return true; // Default: include species if filter not recognized
+      });
+    });
+
+    console.log(`🔍 Filter "${learningFilters.join(', ')}" found ${filtered.length} species out of ${regionSpecies.length} total`);
+    return filtered;
+  };
+
+  // Select and display a random species for learning
+  const selectRandomSpecies = () => {
+    // 🚫 Don't load next species if current one is still streaming
+    if (isSpeciesStreamingInProgress) {
+      console.log('⏳ Species streaming in progress - skipping selection');
+      return;
+    }
+
+    const availableSpecies = getFilteredSpecies();
+    if (availableSpecies.length === 0) return;
+
+    // Check if we've reached 5 species
+    if (learningSessionCount >= 5) {
+      console.log('🎉 Reached 5 species - showing topic selection');
+
+      // Show topic selection for next session
+      showTopicSelection();
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * availableSpecies.length);
+    const species = availableSpecies[randomIndex];
+
+    // 🎓 Set streaming in progress to prevent next species from loading
+    setIsSpeciesStreamingInProgress(true);
+    console.log('✨ Starting species learning for:', species.commonName);
+
+    // Increment session count
+    setLearningSessionCount(prev => {
+      const newCount = prev + 1;
+      console.log(`📊 Learning session: ${newCount}/5`);
+      return newCount;
+    });
+
+    // Highlight in carousel
+    setSelectedCarouselSpecies(species);
+
+    // Create educational chat message with image first
+    const messageId = `learn-${Date.now()}`;
+    const imageContent = species.imageUrl ? `![${species.commonName}](${species.imageUrl})` : '';
+
+    const initialMessage: ChatMessage = {
+      id: messageId,
+      role: 'assistant',
+      content: imageContent,
+      timestamp: new Date(),
+      status: 'sending'
+    };
+
+    setChatHistory(prev => [...prev, initialMessage]);
+
+    // Stream educational text after image "loads" (simulate 1 second load)
+    setTimeout(async () => {
+      const baseInfo = `\n\n📚 Learning Session ${learningSessionCount + 1}/5\n\n**Common Name:** ${species.commonName}\n**Scientific Name:** ${species.scientificName}\n**Type:** ${species.animalType}\n**Conservation Status:** ${species.conservationStatus || 'Not Evaluated'}\n**Invasive Species:** ${species.isInvasive ? 'Yes' : 'No'}\n**Venomous:** ${species.isVenomous ? 'Yes' : 'No'}\n\n**Visual Description:** `;
+
+      // Stream base info first
+      let currentText = '';
+      let charIndex = 0;
+      const streamInterval = setInterval(() => {
+        if (charIndex >= baseInfo.length) {
+          clearInterval(streamInterval);
+          // Now fetch and stream the description
+          fetchAndStreamDescription();
+          return;
+        }
+
+        currentText += baseInfo[charIndex];
+        charIndex++;
+
+        setChatHistory(prev => {
+          const updated = [...prev];
+          const lastIndex = updated.findIndex(m => m.id === messageId);
+          if (lastIndex !== -1) {
+            updated[lastIndex] = {
+              ...updated[lastIndex],
+              content: imageContent + currentText,
+              status: 'sent'
+            };
+          }
+          return updated;
+        });
+      }, 60);
+
+      // Fetch fast visual description from MCP
+      const fetchAndStreamDescription = async () => {
+        try {
+          const descResult = await generateFastVisualDescription({
+            scientificName: species.scientificName,
+            commonName: species.commonName,
+            animalType: species.animalType,
+            ecoregion: regionName || undefined
+          });
+
+          const description = descResult.success
+            ? descResult.description || 'Description not available.'
+            : 'Description not available.';
+
+          const finalText = `${description}\n\n📝 Study this for the trivia game!`;
+
+          // Stream the description
+          let descText = '';
+          let descIndex = 0;
+          const descInterval = setInterval(() => {
+            if (descIndex >= finalText.length) {
+              clearInterval(descInterval);
+
+              // ⏱️ Wait 1.5 seconds after streaming completes, then trigger next species
+              setTimeout(() => {
+                setIsSpeciesStreamingInProgress(false);
+                console.log('✅ Species learning complete - ready for next');
+
+                // 🔄 Automatically trigger next species
+                selectRandomSpecies();
+              }, 1500);
+
+              return;
+            }
+
+            descText += finalText[descIndex];
+            descIndex++;
+
+            setChatHistory(prev => {
+              const updated = [...prev];
+              const lastIndex = updated.findIndex(m => m.id === messageId);
+              if (lastIndex !== -1) {
+                updated[lastIndex] = {
+                  ...updated[lastIndex],
+                  content: imageContent + baseInfo + descText,
+                  status: 'sent'
+                };
+              }
+              return updated;
+            });
+          }, 60);
+        } catch (error) {
+          console.error('[Learning Mode] Description fetch failed:', error);
+          // Fallback text
+          const fallbackText = 'Unable to generate description.\n\n📝 Study this for the trivia game!';
+          setChatHistory(prev => {
+            const updated = [...prev];
+            const lastIndex = updated.findIndex(m => m.id === messageId);
+            if (lastIndex !== -1) {
+              updated[lastIndex] = {
+                ...updated[lastIndex],
+                content: imageContent + baseInfo + fallbackText,
+                status: 'sent'
+              };
+            }
+            return updated;
+          });
+
+          // ⏱️ Also clear flag on error after 1.5 second delay, then trigger next species
+          setTimeout(() => {
+            setIsSpeciesStreamingInProgress(false);
+            console.log('✅ Species learning complete (error fallback) - ready for next');
+
+            // 🔄 Automatically trigger next species
+            selectRandomSpecies();
+          }, 1500);
+        }
+      };
+    }, 1000);
+  };
+
+  // Comprehensive topic definitions
+  const LEARNING_TOPICS = {
+    // Animal Types
+    mammals: { label: 'Mammals', emoji: '🐾', filters: ['mammal'] },
+    birds: { label: 'Birds', emoji: '🦜', filters: ['bird'] },
+    reptiles: { label: 'Reptiles', emoji: '🦎', filters: ['reptile'] },
+    amphibians: { label: 'Amphibians', emoji: '🐸', filters: ['amphibian'] },
+    fish: { label: 'Fish', emoji: '🐟', filters: ['fish'] },
+    insects: { label: 'Insects', emoji: '🦋', filters: ['insect'] },
+
+    // Plant Types
+    plants: { label: 'Plants', emoji: '🌱', filters: ['plant'] },
+    trees: { label: 'Trees', emoji: '🌳', filters: ['tree'] },
+    flowers: { label: 'Flowers', emoji: '🌸', filters: ['flower'] },
+
+    // Ecological Roles
+    carnivores: { label: 'Carnivores', emoji: '🦁', filters: ['carnivore-diet'] },
+    herbivores: { label: 'Herbivores', emoji: '🦌', filters: ['herbivore-diet'] },
+    omnivores: { label: 'Omnivores', emoji: '🐻', filters: ['omnivore-diet'] },
+    producers: { label: 'Producers', emoji: '☀️', filters: ['producer-diet'] },
+
+    // Conservation Status
+    endangered_species: { label: 'Endangered Species', emoji: '🦅', filters: ['endangered'] },
+    critically_endangered: { label: 'Critically Endangered', emoji: '⚠️', filters: ['critical'] },
+    vulnerable_species: { label: 'Vulnerable Species', emoji: '⚡', filters: ['vulnerable'] },
+
+    // Special Categories
+    invasive_species: { label: 'Invasive Species', emoji: '🌿', filters: ['invasive'] },
+    invasive_plants: { label: 'Invasive Plants', emoji: '🌾', filters: ['invasive', 'plant'] },
+    venomous: { label: 'Venomous Species', emoji: '☠️', filters: ['venomous'] },
+    native_species: { label: 'Native Species', emoji: '🏡', filters: ['native'] },
+
+    // Relationships
+    food_web: { label: 'Food Web', emoji: '🕸️', filters: ['all'] },
+    apex_predators: { label: 'Apex Predators', emoji: '👑', filters: ['apex'] },
+    pollinators: { label: 'Pollinators', emoji: '🐝', filters: ['pollinator'] },
+
+    // Behavior
+    nocturnal: { label: 'Nocturnal Species', emoji: '🌙', filters: ['nocturnal'] },
+    migratory: { label: 'Migratory Species', emoji: '✈️', filters: ['migratory'] },
+  };
+
+  // Show topic selection BEFORE learning starts
+  const showTopicSelectionBeforeLearning = () => {
+    // Add message asking to choose a topic
+    const topicSelectionMessage: ChatMessage = {
+      id: `topic-selection-${Date.now()}`,
+      role: 'assistant',
+      content: '🎓 **Choose Your Learning Mode**\n\nHow would you like to explore?',
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, topicSelectionMessage]);
+
+    // Show Random Topic and Topics List buttons
+    setQuickReplies([
+      {
+        id: 'random-topic',
+        label: '🎲 Random Topic',
+        emoji: '🎲',
+        action: '/random_topic' as const
+      },
+      {
+        id: 'topics-list',
+        label: '📋 Topics List',
+        emoji: '📋',
+        action: '/topics_list' as const
+      }
+    ]);
+  };
+
+  // Show topic selection after 5 species
+  const showTopicSelection = () => {
+    // Add completion message
+    const completionMessage: ChatMessage = {
+      id: `learning-complete-${Date.now()}`,
+      role: 'assistant',
+      content: '🎉 **Session Complete!**\n\nYou\'ve studied 5 species. Great work!\n\nChoose a topic for your next learning session:',
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, completionMessage]);
+
+    // Generate topic quick replies based on available species
+    const topics: QuickReply[] = [];
+
+    // Check what types of species we have
+    const hasInvasive = regionSpecies.some(s => s.isInvasive);
+    const hasVenomous = regionSpecies.some(s => s.isVenomous);
+    const hasEndangered = regionSpecies.some(s =>
+      s.conservationStatus?.toLowerCase().includes('endangered') ||
+      s.conservationStatus?.toLowerCase().includes('critical')
+    );
+    const hasMammals = regionSpecies.some(s => s.animalType === 'Mammal');
+    const hasBirds = regionSpecies.some(s => s.animalType === 'Bird');
+    const hasPlants = regionSpecies.some(s => s.animalType === 'Plant');
+
+    // Add available topics
+    if (hasInvasive) {
+      topics.push({
+        id: 'topic-invasive',
+        label: '🌿 Invasive Species',
+        emoji: '🌿',
+        action: 'learn-topic-invasive' as const
+      });
+    }
+
+    if (hasEndangered) {
+      topics.push({
+        id: 'topic-endangered',
+        label: '🦅 Endangered Species',
+        emoji: '🦅',
+        action: 'learn-topic-endangered' as const
+      });
+    }
+
+    if (hasMammals) {
+      topics.push({
+        id: 'topic-mammals',
+        label: '🐾 Mammals',
+        emoji: '🐾',
+        action: 'learn-topic-mammals' as const
+      });
+    }
+
+    if (hasBirds) {
+      topics.push({
+        id: 'topic-birds',
+        label: '🦜 Birds',
+        emoji: '🦜',
+        action: 'learn-topic-birds' as const
+      });
+    }
+
+    // Limit to 3 topics max for clean UI
+    setQuickReplies(topics.slice(0, 3));
+  };
+
+  // Start learning mode
+  const startLearningMode = (topic: string = 'general') => {
+    setIsLearningMode(true);
+    setQuickReplies([]); // Clear quick replies
+    setLearningSessionCount(0); // Reset session counter
+    setCurrentLearningTopic(topic);
+
+    // Add confirmation message
+    const confirmMessage: ChatMessage = {
+      id: `learning-start-${Date.now()}`,
+      role: 'assistant',
+      content: `🎓 **Learning Mode Activated!**${topic !== 'general' ? `\n📖 Topic: ${topic}` : ''}\n\nI\'ll show you 5 species to study. Watch for each species description to complete before the next one appears!`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, confirmMessage]);
+
+    // Select first species after a short delay
+    setTimeout(() => selectRandomSpecies(), 1500);
+  };
+
+  // Handle random topic selection
+  const handleRandomTopic = () => {
+    const availableTopics = Object.entries(LEARNING_TOPICS).filter(([_, config]) => {
+      // Check if region has species matching this topic's filters
+      const testFilters = config.filters;
+      setLearningFilters(testFilters);
+      const matches = getFilteredSpecies();
+      return matches.length > 0;
+    });
+
+    if (availableTopics.length === 0) {
+      toast({
+        title: "No topics available",
+        description: "This region doesn't have enough species variety.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Pick random topic
+    const randomTopic = availableTopics[Math.floor(Math.random() * availableTopics.length)];
+    const [topicKey, topicConfig] = randomTopic;
+
+    // Show random topic selected message
+    const randomMessage: ChatMessage = {
+      id: `random-topic-${Date.now()}`,
+      role: 'assistant',
+      content: `🎲 **Random Topic Selected!**\n\n${topicConfig.emoji} **${topicConfig.label}**\n\nLet's learn about ${topicConfig.label.toLowerCase()}!`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, randomMessage]);
+
+    // Start learning with this topic
+    setLearningFilters(topicConfig.filters);
+    setTimeout(() => startLearningMode(topicConfig.label), 1000);
+  };
+
+  // Show comprehensive topics list
+  const showTopicsList = () => {
+    const topicsListMessage: ChatMessage = {
+      id: `topics-list-${Date.now()}`,
+      role: 'assistant',
+      content: `📋 **All Learning Topics**\n\nType any command to start learning:\n\n**🐾 Animals**\n/mammals, /birds, /reptiles, /amphibians, /fish, /insects\n\n**🌱 Plants**\n/plants, /trees, /flowers\n\n**🍽️ Dietary Roles**\n/carnivores, /herbivores, /omnivores, /producers\n\n**🦅 Conservation**\n/endangered_species, /critically_endangered, /vulnerable_species\n\n**⚠️ Special**\n/invasive_species, /invasive_plants, /venomous, /native_species\n\n**🕸️ Ecology**\n/food_web, /apex_predators, /pollinators\n\n**🌙 Behavior**\n/nocturnal, /migratory`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, topicsListMessage]);
+    setQuickReplies([]); // Clear quick replies so user can type commands
+  };
+
   const handleQuickReplyClick = (reply: QuickReply) => {
     if (reply.action === 'play-park') {
       handleStartTrivia();
+    } else if (reply.action === 'start-learning') {
+      // Show topic selection instead of starting immediately
+      showTopicSelectionBeforeLearning();
+    } else if (reply.action === '/random_topic') {
+      handleRandomTopic();
+    } else if (reply.action === '/topics_list') {
+      showTopicsList();
+    } else if (reply.action?.toString().startsWith('learn-topic-')) {
+      // Legacy topic handling (keep for backwards compatibility)
+      const topic = reply.action.toString().replace('learn-topic-', '');
+      if (topic === 'invasive') {
+        setLearningFilters(['invasive']);
+        startLearningMode('Invasive Species');
+      } else if (topic === 'endangered') {
+        setLearningFilters(['endangered']);
+        startLearningMode('Endangered Species');
+      } else if (topic === 'mammals') {
+        setLearningFilters(['mammal']);
+        startLearningMode('Mammals');
+      } else if (topic === 'birds') {
+        setLearningFilters(['bird']);
+        startLearningMode('Birds');
+      } else if (topic === 'all') {
+        setLearningFilters(['all']);
+        startLearningMode('All Species');
+      }
     }
   };
 
   const handleChatSubmit = async (query: string) => {
+    const queryLower = query.toLowerCase().trim();
+
+    // Check for topic commands (e.g., /birds, /plants, /invasive_species)
+    if (queryLower.startsWith('/')) {
+      const command = queryLower.substring(1); // Remove leading /
+
+      // Add user message first
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: query,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, userMessage]);
+
+      // Handle /random_topic
+      if (command === 'random_topic') {
+        handleRandomTopic();
+        return;
+      }
+
+      // Handle /topics_list
+      if (command === 'topics_list') {
+        showTopicsList();
+        return;
+      }
+
+      // Check if command matches a learning topic
+      const topicKey = command as keyof typeof LEARNING_TOPICS;
+      if (LEARNING_TOPICS[topicKey]) {
+        const topicConfig = LEARNING_TOPICS[topicKey];
+
+        // Stop current learning if active
+        setIsSpeciesStreamingInProgress(false);
+        setLearningSessionCount(0);
+
+        // Show confirmation message
+        const confirmMessage: ChatMessage = {
+          id: `command-${Date.now()}`,
+          role: 'assistant',
+          content: `${topicConfig.emoji} **Starting: ${topicConfig.label}**\n\nSwitching to this topic now!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, confirmMessage]);
+
+        // Start learning with this topic
+        setLearningFilters(topicConfig.filters);
+        setTimeout(() => startLearningMode(topicConfig.label), 1000);
+        return;
+      }
+
+      // Unknown command
+      const errorMessage: ChatMessage = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: `❌ Unknown command: ${query}\n\nType **/topics_list** to see all available topics.`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    // Check for filter slash commands in learning mode
+    if (isLearningMode && query.startsWith('/filter ')) {
+      const filterType = query.replace('/filter ', '').trim().toLowerCase();
+
+      // Add user message
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: query,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, userMessage]);
+
+      let responseContent = '';
+      if (filterType === 'all') {
+        setLearningFilters([]);
+        responseContent = '✅ **Filter Reset**\n\nShowing all species now.';
+      } else if (['invasive', 'venomous', 'endangered', 'critical', 'vulnerable'].includes(filterType)) {
+        setLearningFilters([filterType]);
+        responseContent = `✅ **Filter Applied**\n\nNow showing only ${filterType} species.`;
+      } else {
+        responseContent = '❌ **Unknown Filter**\n\nAvailable filters: invasive, venomous, endangered, critical, vulnerable, all';
+      }
+
+      const responseMessage: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: responseContent,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+
+      setTimeout(() => {
+        setChatHistory(prev => [...prev, responseMessage]);
+      }, 300);
+
+      return;
+    }
+
     // Add user message
     const userMessage: ChatMessage = {
       id: `user-${Date.now()}`,
@@ -533,6 +1110,11 @@ const ParkSelectionPage = () => {
             regionName={regionName || 'Unknown Region'}
             speciesCount={regionSpecies.length}
             locationCount={wildlifePlaces.length + protectedAreas.length}
+            imageUrl={
+              regionName?.toLowerCase().includes('arctic')
+                ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Arctic_%28orthographic_projection_with_highlights%29.svg/330px-Arctic_%28orthographic_projection_with_highlights%29.svg.png'
+                : undefined
+            }
           />
 
           {/* Glowing Call-to-Action Banner */}

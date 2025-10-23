@@ -258,12 +258,12 @@ const ChatHistory = ({
                             <img
                               src={content}
                               alt="Species"
-                              className="max-w-full h-auto rounded-lg my-2 ascii-laser-in"
+                              className="max-w-full h-auto rounded-lg my-1 ascii-laser-in"
                               style={{
-                                maxHeight: '300px',
+                                maxHeight: '120px',
                                 objectFit: 'contain',
                                 backgroundColor: 'transparent',
-                                imageRendering: 'auto'
+                                imageRendering: 'pixelated'
                               }}
                             />
                           );
@@ -304,20 +304,41 @@ const ChatHistory = ({
                           // Add the image with laser-in animation (transparent background for sticker effect)
                           const alt = match[1];
                           const url = match[2];
-                          parts.push(
-                            <img
-                              key={`img-${match.index}`}
-                              src={url}
-                              alt={alt}
-                              className="max-w-full h-auto rounded-lg my-2 ascii-laser-in"
-                              style={{
-                                maxHeight: '300px',
-                                objectFit: 'contain',
-                                backgroundColor: 'transparent',
-                                imageRendering: 'auto'
-                              }}
-                            />
-                          );
+
+                          // Check if this is a sprite sheet animation (8 frames horizontal)
+                          const isSpriteSheet = url.includes('spritesheet');
+
+                          if (isSpriteSheet) {
+                            parts.push(
+                              <div
+                                key={`sprite-${match.index}`}
+                                className="sprite-animation my-1"
+                                style={{
+                                  width: '120px',
+                                  height: '120px',
+                                  backgroundImage: `url(${url})`,
+                                  backgroundSize: '800% 100%', // 8 frames horizontally
+                                  backgroundRepeat: 'no-repeat',
+                                  imageRendering: 'pixelated',
+                                }}
+                              />
+                            );
+                          } else {
+                            parts.push(
+                              <img
+                                key={`img-${match.index}`}
+                                src={url}
+                                alt={alt}
+                                className="max-w-full h-auto rounded-lg my-1"
+                                style={{
+                                  maxHeight: '120px',
+                                  objectFit: 'contain',
+                                  backgroundColor: 'transparent',
+                                  imageRendering: 'pixelated'
+                                }}
+                              />
+                            );
+                          }
 
                           lastIndex = match.index + match[0].length;
                         }
@@ -417,6 +438,16 @@ const ChatHistory = ({
 
         .ascii-laser-in {
           animation: laserIn 4s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+        }
+
+        /* Sprite sheet animation - 8 frames horizontal, swings back and forth like a pendulum */
+        @keyframes spriteSwing {
+          0% { background-position: 0 0; }
+          100% { background-position: -700% 0; }
+        }
+
+        .sprite-animation {
+          animation: spriteSwing 1600ms steps(7) 2 alternate;
         }
       `}</style>
     </div>
