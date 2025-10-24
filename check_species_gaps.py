@@ -19,8 +19,8 @@ if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
 supabase = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
 # Target minimum per taxonomic group
-MIN_SPECIES_PER_GROUP = 10
-GOOD_SPECIES_COUNT = 15
+MIN_SPECIES_PER_GROUP = 20  # Goal: 20 curated species per major taxonomic group
+GOOD_SPECIES_COUNT = 20
 
 def get_species_distribution():
     """Fetch all curated species and group by ecoregion and class"""
