@@ -35,6 +35,9 @@ export interface RegionSpecies {
   uiGroup?: string;
   trophicRole?: string;
   dietaryCategory?: string; // New: Carnivore, Herbivore, Omnivore, Producer
+  description?: string; // Visual description for learning mode
+  isInvasive?: boolean; // Is this an invasive species
+  isVenomous?: boolean; // Is this a venomous species
 }
 
 /**

@@ -228,6 +228,9 @@ const ParkSelectionPage = () => {
                 dietaryCategory: species.dietary_category || undefined,
                 imageKeyword: species.common_name || species.scientific_name,
                 imageUrl: species.image_url || undefined, // Include image URL
+                description: species.description || undefined, // Include description for fast learning mode
+                isInvasive: species.is_invasive || false,
+                isVenomous: species.is_venomous || false,
               }));
 
               console.log('🗺️ Mapped species:', mappedSpecies);
@@ -552,18 +555,22 @@ const ParkSelectionPage = () => {
       // Fetch fast visual description from MCP
       const fetchAndStreamDescription = async () => {
         try {
-          const descResult = await generateFastVisualDescription({
-            scientificName: species.scientificName,
-            commonName: species.commonName,
-            animalType: species.animalType,
-            ecoregion: regionName || undefined
-          });
+          // 🚀 FAST PATH: Use database description if available (instant!)
+          const finalText = species.description
+            ? species.description
+            : await (async () => {
+                // 🐌 SLOW PATH: Generate from OpenAI only if no database description
+                const descResult = await generateFastVisualDescription({
+                  scientificName: species.scientificName,
+                  commonName: species.commonName,
+                  animalType: species.animalType,
+                  ecoregion: regionName || undefined
+                });
 
-          const description = descResult.success
-            ? descResult.description || 'Description not available.'
-            : 'Description not available.';
-
-          const finalText = description;
+                return descResult.success
+                  ? descResult.description || 'Description not available.'
+                  : 'Description not available.';
+              })();
 
           // Stream the description
           let descText = '';
