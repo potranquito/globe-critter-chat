@@ -32,6 +32,7 @@ const ParkSelectionPage = () => {
   const [regionSpecies, setRegionSpecies] = useState<RegionSpecies[]>([]);
   const [selectedCarouselSpecies, setSelectedCarouselSpecies] = useState<RegionSpecies | null>(null);
   const [speciesTypeFilter, setSpeciesTypeFilter] = useState<SpeciesTypeFilterType>('all');
+  const [ecoregionData, setEcoregionData] = useState<any>(null);
 
   // Map center state - will be updated based on park locations
   const [mapCenter, setMapCenter] = useState({ lat, lng });
@@ -49,6 +50,7 @@ const ParkSelectionPage = () => {
   const [learningSessionCount, setLearningSessionCount] = useState(0);
   const [currentLearningTopic, setCurrentLearningTopic] = useState<string>('');
   const [isSpeciesStreamingInProgress, setIsSpeciesStreamingInProgress] = useState(false); // Prevents next species from loading too soon
+  const [shownSpeciesInSession, setShownSpeciesInSession] = useState<string[]>([]); // Track species shown in current session to avoid duplicates
 
   // Chameleon theme state
   const [chatTheme, setChatTheme] = useState<ChatTheme>({
@@ -87,6 +89,25 @@ const ParkSelectionPage = () => {
           }
         } catch (themeError) {
           console.error('[Theme] ❌ Error generating color theme:', themeError);
+        }
+
+        // 🌍 Fetch ecoregion data from database (for image_url, etc.)
+        console.log('🌍 Fetching ecoregion data for:', regionName);
+        try {
+          const ecoregionResult = await supabase
+            .from('ecoregions')
+            .select('id, name, image_url, image_attribution')
+            .ilike('name', `%${regionName}%`)
+            .single();
+
+          if (ecoregionResult.data) {
+            console.log('✅ Ecoregion data loaded:', ecoregionResult.data);
+            setEcoregionData(ecoregionResult.data);
+          } else {
+            console.warn('⚠️ Ecoregion not found in database:', regionName);
+          }
+        } catch (ecoregionError) {
+          console.error('[Ecoregion] ❌ Error fetching ecoregion data:', ecoregionError);
         }
 
         // Load parks for this eco-region using MCP server
@@ -364,13 +385,13 @@ const ParkSelectionPage = () => {
     return descriptions[species.dietaryCategory?.toLowerCase() || ''] || 'This species is an important part of the ecosystem.';
   };
 
-  // Filter species based on learning filters
-  const getFilteredSpecies = () => {
-    if (learningFilters.length === 0) return regionSpecies;
-    if (learningFilters.includes('all')) return regionSpecies; // 'all' returns everything
+  // Filter species based on learning filters (helper that takes filters as param)
+  const getFilteredSpeciesWithFilters = (filters: string[]) => {
+    if (filters.length === 0) return regionSpecies;
+    if (filters.includes('all')) return regionSpecies; // 'all' returns everything
 
     const filtered = regionSpecies.filter(species => {
-      return learningFilters.every(filter => { // Use 'every' for AND logic when multiple filters
+      return filters.every(filter => { // Use 'every' for AND logic when multiple filters
         const filterLower = filter.toLowerCase();
         const taxonomicGroup = (species.taxonomicGroup || '').toLowerCase();
         const animalType = (species.animalType || '').toLowerCase();
@@ -415,23 +436,51 @@ const ParkSelectionPage = () => {
       });
     });
 
-    console.log(`🔍 Filter "${learningFilters.join(', ')}" found ${filtered.length} species out of ${regionSpecies.length} total`);
+    console.log(`🔍 Filter "${filters.join(', ')}" found ${filtered.length} species out of ${regionSpecies.length} total`);
     return filtered;
   };
 
+  // Filter species based on learning filters
+  const getFilteredSpecies = () => {
+    return getFilteredSpeciesWithFilters(learningFilters);
+  };
+
   // Select and display a random species for learning
-  const selectRandomSpecies = () => {
+  const selectRandomSpecies = (filtersToUse?: string[], sessionCount?: number, alreadyShown?: string[]) => {
     // 🚫 Don't load next species if current one is still streaming
     if (isSpeciesStreamingInProgress) {
       console.log('⏳ Species streaming in progress - skipping selection');
       return;
     }
 
-    const availableSpecies = getFilteredSpecies();
-    if (availableSpecies.length === 0) return;
+    // Use provided filters or fall back to state (but prefer provided for accuracy)
+    const activeFilters = filtersToUse !== undefined ? filtersToUse : learningFilters;
+    const shownSpecies = alreadyShown !== undefined ? alreadyShown : shownSpeciesInSession;
+    console.log('🔍 selectRandomSpecies called with filters:', activeFilters);
+    console.log('🔍 Already shown species:', shownSpecies);
 
-    // Check if we've reached 5 species
-    if (learningSessionCount >= 5) {
+    // Filter species and exclude already shown ones
+    const filteredSpecies = getFilteredSpeciesWithFilters(activeFilters);
+    const availableSpecies = filteredSpecies.filter(s => !shownSpecies.includes(s.scientificName));
+
+    console.log(`🔍 Filtered species count: ${filteredSpecies.length} out of ${regionSpecies.length}`);
+    console.log(`🔍 Available (not shown) species count: ${availableSpecies.length}`);
+    if (availableSpecies.length > 0) {
+      console.log('🔍 First 3 available species:', availableSpecies.slice(0, 3).map(s => `${s.commonName} (${s.animalType})`));
+    }
+    if (availableSpecies.length === 0) {
+      console.log('⚠️ No more unique species available for this topic');
+      return;
+    }
+
+    // Increment session count and capture the new value (use provided count to avoid closure issues)
+    const previousCount = sessionCount !== undefined ? sessionCount : learningSessionCount;
+    const currentSessionNumber = previousCount + 1;
+    setLearningSessionCount(currentSessionNumber);
+    console.log(`📊 Learning session: ${currentSessionNumber}/5 (previous: ${previousCount})`);
+
+    // Check if we've reached 5 species (check AFTER incrementing)
+    if (currentSessionNumber > 5) {
       console.log('🎉 Reached 5 species - showing topic selection');
 
       // Show topic selection for next session
@@ -446,12 +495,10 @@ const ParkSelectionPage = () => {
     setIsSpeciesStreamingInProgress(true);
     console.log('✨ Starting species learning for:', species.commonName);
 
-    // Increment session count
-    setLearningSessionCount(prev => {
-      const newCount = prev + 1;
-      console.log(`📊 Learning session: ${newCount}/5`);
-      return newCount;
-    });
+    // Add this species to the shown list to prevent duplicates
+    const updatedShownSpecies = [...shownSpecies, species.scientificName];
+    setShownSpeciesInSession(updatedShownSpecies);
+    console.log('📝 Updated shown species list:', updatedShownSpecies);
 
     // Highlight in carousel
     setSelectedCarouselSpecies(species);
@@ -472,7 +519,7 @@ const ParkSelectionPage = () => {
 
     // Stream educational text after image "loads" (simulate 1 second load)
     setTimeout(async () => {
-      const baseInfo = `\n\n📚 Learning Session ${learningSessionCount + 1}/5\n\n**Common Name:** ${species.commonName}\n**Scientific Name:** ${species.scientificName}\n**Type:** ${species.animalType}\n**Conservation Status:** ${species.conservationStatus || 'Not Evaluated'}\n**Invasive Species:** ${species.isInvasive ? 'Yes' : 'No'}\n**Venomous:** ${species.isVenomous ? 'Yes' : 'No'}\n\n**Visual Description:** `;
+      const baseInfo = `\n\n**Species ${currentSessionNumber}/5**\n\n**Common Name:** ${species.commonName}\n**Scientific Name:** ${species.scientificName}\n**Type:** ${species.animalType}\n**Conservation Status:** ${species.conservationStatus || 'Not Evaluated'}\n**Invasive Species:** ${species.isInvasive ? 'Yes' : 'No'}\n**Venomous:** ${species.isVenomous ? 'Yes' : 'No'}\n\n**Visual Description:** `;
 
       // Stream base info first
       let currentText = '';
@@ -500,7 +547,7 @@ const ParkSelectionPage = () => {
           }
           return updated;
         });
-      }, 60);
+      }, 30);
 
       // Fetch fast visual description from MCP
       const fetchAndStreamDescription = async () => {
@@ -516,7 +563,7 @@ const ParkSelectionPage = () => {
             ? descResult.description || 'Description not available.'
             : 'Description not available.';
 
-          const finalText = `${description}\n\n📝 Study this for the trivia game!`;
+          const finalText = description;
 
           // Stream the description
           let descText = '';
@@ -530,8 +577,8 @@ const ParkSelectionPage = () => {
                 setIsSpeciesStreamingInProgress(false);
                 console.log('✅ Species learning complete - ready for next');
 
-                // 🔄 Automatically trigger next species
-                selectRandomSpecies();
+                // 🔄 Automatically trigger next species (pass filters, count, and shown species to avoid closure issues)
+                selectRandomSpecies(activeFilters, currentSessionNumber, updatedShownSpecies);
               }, 1500);
 
               return;
@@ -552,11 +599,11 @@ const ParkSelectionPage = () => {
               }
               return updated;
             });
-          }, 60);
+          }, 30);
         } catch (error) {
           console.error('[Learning Mode] Description fetch failed:', error);
           // Fallback text
-          const fallbackText = 'Unable to generate description.\n\n📝 Study this for the trivia game!';
+          const fallbackText = 'Unable to generate description.';
           setChatHistory(prev => {
             const updated = [...prev];
             const lastIndex = updated.findIndex(m => m.id === messageId);
@@ -575,8 +622,8 @@ const ParkSelectionPage = () => {
             setIsSpeciesStreamingInProgress(false);
             console.log('✅ Species learning complete (error fallback) - ready for next');
 
-            // 🔄 Automatically trigger next species
-            selectRandomSpecies();
+            // 🔄 Automatically trigger next species (pass filters, count, and shown species to avoid closure issues)
+            selectRandomSpecies(activeFilters, currentSessionNumber, updatedShownSpecies);
           }, 1500);
         }
       };
@@ -722,10 +769,11 @@ const ParkSelectionPage = () => {
   };
 
   // Start learning mode
-  const startLearningMode = (topic: string = 'general') => {
+  const startLearningMode = (topic: string = 'general', filters?: string[]) => {
     setIsLearningMode(true);
     setQuickReplies([]); // Clear quick replies
     setLearningSessionCount(0); // Reset session counter
+    setShownSpeciesInSession([]); // Reset shown species list
     setCurrentLearningTopic(topic);
 
     // Add confirmation message
@@ -738,17 +786,16 @@ const ParkSelectionPage = () => {
     };
     setChatHistory(prev => [...prev, confirmMessage]);
 
-    // Select first species after a short delay
-    setTimeout(() => selectRandomSpecies(), 1500);
+    // Select first species after a short delay (pass filters, 0 count, and empty shown list to avoid closure issues)
+    setTimeout(() => selectRandomSpecies(filters, 0, []), 1500);
   };
 
   // Handle random topic selection
   const handleRandomTopic = () => {
     const availableTopics = Object.entries(LEARNING_TOPICS).filter(([_, config]) => {
       // Check if region has species matching this topic's filters
-      const testFilters = config.filters;
-      setLearningFilters(testFilters);
-      const matches = getFilteredSpecies();
+      // Use the helper function instead of setting state
+      const matches = getFilteredSpeciesWithFilters(config.filters);
       return matches.length > 0;
     });
 
@@ -777,7 +824,7 @@ const ParkSelectionPage = () => {
 
     // Start learning with this topic
     setLearningFilters(topicConfig.filters);
-    setTimeout(() => startLearningMode(topicConfig.label), 1000);
+    setTimeout(() => startLearningMode(topicConfig.label, topicConfig.filters), 1000);
   };
 
   // Show comprehensive topics list
@@ -807,20 +854,25 @@ const ParkSelectionPage = () => {
       // Legacy topic handling (keep for backwards compatibility)
       const topic = reply.action.toString().replace('learn-topic-', '');
       if (topic === 'invasive') {
-        setLearningFilters(['invasive']);
-        startLearningMode('Invasive Species');
+        const filters = ['invasive'];
+        setLearningFilters(filters);
+        startLearningMode('Invasive Species', filters);
       } else if (topic === 'endangered') {
-        setLearningFilters(['endangered']);
-        startLearningMode('Endangered Species');
+        const filters = ['endangered'];
+        setLearningFilters(filters);
+        startLearningMode('Endangered Species', filters);
       } else if (topic === 'mammals') {
-        setLearningFilters(['mammal']);
-        startLearningMode('Mammals');
+        const filters = ['mammal'];
+        setLearningFilters(filters);
+        startLearningMode('Mammals', filters);
       } else if (topic === 'birds') {
-        setLearningFilters(['bird']);
-        startLearningMode('Birds');
+        const filters = ['bird'];
+        setLearningFilters(filters);
+        startLearningMode('Birds', filters);
       } else if (topic === 'all') {
-        setLearningFilters(['all']);
-        startLearningMode('All Species');
+        const filters = ['all'];
+        setLearningFilters(filters);
+        startLearningMode('All Species', filters);
       }
     }
   };
@@ -875,7 +927,7 @@ const ParkSelectionPage = () => {
 
         // Start learning with this topic
         setLearningFilters(topicConfig.filters);
-        setTimeout(() => startLearningMode(topicConfig.label), 1000);
+        setTimeout(() => startLearningMode(topicConfig.label, topicConfig.filters), 1000);
         return;
       }
 
@@ -1110,11 +1162,8 @@ const ParkSelectionPage = () => {
             regionName={regionName || 'Unknown Region'}
             speciesCount={regionSpecies.length}
             locationCount={wildlifePlaces.length + protectedAreas.length}
-            imageUrl={
-              regionName?.toLowerCase().includes('arctic')
-                ? 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Arctic_%28orthographic_projection_with_highlights%29.svg/330px-Arctic_%28orthographic_projection_with_highlights%29.svg.png'
-                : undefined
-            }
+            imageUrl={ecoregionData?.image_url}
+            imageAttribution={ecoregionData?.image_attribution}
           />
 
           {/* Glowing Call-to-Action Banner */}

@@ -348,14 +348,64 @@ const ChatHistory = ({
                           parts.push(content.substring(lastIndex));
                         }
 
-                        // If no images found, return original content
+                        // Helper function to process markdown bold syntax **text** -> styled HTML
+                        const processBoldMarkdown = (text: string) => {
+                          const boldRegex = /\*\*([^*]+)\*\*/g;
+                          const segments: (string | JSX.Element)[] = [];
+                          let lastIdx = 0;
+                          let boldMatch;
+
+                          while ((boldMatch = boldRegex.exec(text)) !== null) {
+                            // Add text before the bold
+                            if (boldMatch.index > lastIdx) {
+                              segments.push(text.substring(lastIdx, boldMatch.index));
+                            }
+
+                            // Add bold text with bright color styling
+                            segments.push(
+                              <span
+                                key={`bold-${boldMatch.index}`}
+                                style={{
+                                  fontWeight: 'bold',
+                                  color: '#10b981' // Bright green (emerald-500)
+                                }}
+                              >
+                                {boldMatch[1]}
+                              </span>
+                            );
+
+                            lastIdx = boldMatch.index + boldMatch[0].length;
+                          }
+
+                          // Add remaining text
+                          if (lastIdx < text.length) {
+                            segments.push(text.substring(lastIdx));
+                          }
+
+                          return segments.length > 0 ? segments : text;
+                        };
+
+                        // Process parts array to apply bold markdown to text strings
+                        const processedParts = parts.map((part, idx) => {
+                          if (typeof part === 'string') {
+                            const processed = processBoldMarkdown(part);
+                            return Array.isArray(processed) ? (
+                              <span key={`text-${idx}`}>{processed}</span>
+                            ) : processed;
+                          }
+                          return part;
+                        });
+
+                        // If no images found, process the original content for bold markdown
                         if (parts.length === 0) {
-                          return showSpinner && !message.content ? (
-                            <span className="text-slate-500 italic">Processing...</span>
-                          ) : content;
+                          if (showSpinner && !message.content) {
+                            return <span className="text-slate-500 italic">Processing...</span>;
+                          }
+                          const processed = processBoldMarkdown(content);
+                          return Array.isArray(processed) ? <span>{processed}</span> : processed;
                         }
 
-                        return parts;
+                        return processedParts;
                       })()}
                     </div>
                     {message.status === 'error' && message.errorMessage && (

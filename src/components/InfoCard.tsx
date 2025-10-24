@@ -14,6 +14,7 @@ interface EcoRegionInfoCardProps extends BaseInfoCardProps {
   description?: string;
   speciesCount: number;
   locationCount: number;
+  imageAttribution?: string;
 }
 
 interface ParkInfoCardProps extends BaseInfoCardProps {
@@ -71,9 +72,9 @@ export const InfoCard = (props: InfoCardProps) => {
               alt={type === 'ecoregion' ? props.regionName : type === 'park' ? props.parkName : props.commonName}
               className="w-full h-64 object-cover"
             />
-            {type === 'park' && props.imageAttribution && (
+            {((type === 'park' && props.imageAttribution) || (type === 'ecoregion' && props.imageAttribution)) && (
               <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white/80 text-xs px-2 py-1">
-                {props.imageAttribution}
+                {type === 'park' ? props.imageAttribution : type === 'ecoregion' ? props.imageAttribution : ''}
               </div>
             )}
           </div>

@@ -862,9 +862,23 @@ Return to the globe to see your completed region marked with a red pin 📍`;
   }
 
   // Select background image based on region
-  const backgroundImage = state.regionName?.toLowerCase().includes('arctic')
-    ? '/images/arctic-trivia-bg.jpg'
-    : '/images/trivia-bg.avif';
+  const getBackgroundImage = () => {
+    const regionLower = state.regionName?.toLowerCase() || '';
+
+    if (regionLower.includes('arctic')) {
+      return '/images/arctic-trivia-bg.jpg';
+    } else if (regionLower.includes('congo')) {
+      return '/images/congo-basin-trivia-bg.png';
+    } else if (regionLower.includes('madagascar')) {
+      return '/images/madagascar-trivia-bg.png';
+    } else if (regionLower.includes('borneo')) {
+      return '/images/borneo-trivia-bg.png';
+    }
+
+    return '/images/trivia-bg.avif';
+  };
+
+  const backgroundImage = getBackgroundImage();
 
   return (
     <div className="relative w-full h-screen overflow-hidden">
