@@ -1,0 +1,17 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Phyllobates terribilis,Golden poison dart frog,AMPHIBIA,EN,true,false,Rainforest floor
+Amazon and Guianas,Dendrobates tinctorius,Dyeing poison dart frog,AMPHIBIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Oophaga pumilio,Strawberry poison dart frog,AMPHIBIA,LC,true,false,Lowland rainforest
+Amazon and Guianas,Dendrobates auratus,Green and black poison dart frog,AMPHIBIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Dendrobates leucomelas,Yellow-banded poison dart frog,AMPHIBIA,LC,true,false,Savanna and forest
+Amazon and Guianas,Trachycephalus resinifictrix,Amazon milk frog,AMPHIBIA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Agalychnis callidryas,Red-eyed tree frog,AMPHIBIA,LC,false,false,Rainforest trees
+Amazon and Guianas,Hyalinobatrachium fleischmanni,Fleischmann's glass frog,AMPHIBIA,LC,false,false,Streamside vegetation
+Amazon and Guianas,Pipa pipa,Suriname toad,AMPHIBIA,LC,false,false,Slow-moving water
+Amazon and Guianas,Ceratophrys cornuta,Amazon horned frog,AMPHIBIA,LC,false,false,Rainforest floor
+Amazon and Guianas,Phyllomedusa sauvagii,Waxy monkey tree frog,AMPHIBIA,LC,false,false,Dry forest
+Amazon and Guianas,Phyllomedusa bicolor,Giant leaf frog,AMPHIBIA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Rhinella marina,Cane toad,AMPHIBIA,LC,false,true,Various habitats
+Amazon and Guianas,Dendropsophus marmoratus,Marbled tree frog,AMPHIBIA,LC,false,false,Forest ponds
+Amazon and Guianas,Allobates femoralis,Brilliant-thighed poison frog,AMPHIBIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Hymenochirus boettgeri,Congo dwarf clawed frog,AMPHIBIA,LC,false,false,Aquatic

@@ -1,0 +1,8 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Arctic Terrestrial,Lagopus muta,Rock ptarmigan,AVES,LC,false,false,Rocky tundra
+Arctic Terrestrial,Sterna paradisaea,Arctic tern,AVES,LC,false,false,Coastal tundra
+Arctic Terrestrial,Corvus corax,Common raven,AVES,LC,false,false,Tundra and cliffs
+Arctic Terrestrial,Plectrophenax nivalis,Snow bunting,AVES,LC,false,false,Open tundra
+Arctic Terrestrial,Calcarius lapponicus,Lapland longspur,AVES,LC,false,false,Tundra grassland
+Arctic Terrestrial,Acanthis flammea,Common redpoll,AVES,LC,false,false,Shrub tundra
+Arctic Terrestrial,Cygnus columbianus,Tundra swan,AVES,LC,false,false,Wetlands and lakes

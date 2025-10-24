@@ -1,0 +1,14 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Borneo,Buceros rhinoceros,Rhinoceros hornbill,AVES,VU,false,false,Lowland rainforest
+Borneo,Rhinoplax vigil,Helmeted hornbill,AVES,CR,false,false,Primary rainforest
+Borneo,Calyptomena whiteheadi,Whitehead's broadbill,AVES,NT,false,false,Montane forest
+Borneo,Calyptomena hosii,Hose's broadbill,AVES,NT,false,false,Montane forest
+Borneo,Harpactes whiteheadi,Whitehead's trogon,AVES,NT,false,false,Montane forest
+Borneo,Psilopogon eximius,Bornean barbet,AVES,LC,false,false,Montane forest
+Borneo,Psilopogon chrysopogon,Gold-whiskered barbet,AVES,LC,false,false,Lowland forest
+Borneo,Alcedo euryzona,Blue-banded kingfisher,AVES,LC,false,false,Forest streams
+Borneo,Actenoides concretus,Rufous-collared kingfisher,AVES,LC,false,false,Dense forest
+Borneo,Pityriasis gymnocephala,Bornean bristlehead,AVES,NT,false,false,Lowland rainforest
+Borneo,Arachnothera everetti,Bornean spiderhunter,AVES,LC,false,false,Montane forest
+Borneo,Hydrornis baudii,Blue-headed pitta,AVES,VU,false,false,Lowland forest floor
+Borneo,Polyplectron schleiermacheri,Bornean peacock-pheasant,AVES,EN,false,false,Hill forest

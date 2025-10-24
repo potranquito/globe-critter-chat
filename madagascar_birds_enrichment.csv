@@ -1,0 +1,14 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Madagascar,Leptosomus discolor,Cuckoo-roller,AVES,LC,false,false,Rainforest and dry forest
+Madagascar,Atelornis pittoides,Pitta-like ground roller,AVES,LC,false,false,Humid forest floor
+Madagascar,Brachypteracias leptosomus,Short-legged ground roller,AVES,VU,false,false,Rainforest floor
+Madagascar,Coua gigas,Giant coua,AVES,LC,false,false,Dry spiny forest
+Madagascar,Coua caerulea,Blue coua,AVES,LC,false,false,Humid forest
+Madagascar,Coua cristata,Crested coua,AVES,LC,false,false,Dry deciduous forest
+Madagascar,Vanga curvirostris,Hook-billed vanga,AVES,LC,false,false,Forest and woodland
+Madagascar,Falculea palliata,Sickle-billed vanga,AVES,LC,false,false,Dry forest
+Madagascar,Euryceros prevostii,Helmet vanga,AVES,VU,false,false,Rainforest canopy
+Madagascar,Philepitta castanea,Velvet asity,AVES,LC,false,false,Humid forest
+Madagascar,Terpsiphone mutata,Madagascar paradise flycatcher,AVES,LC,false,false,Forest and woodland
+Madagascar,Haliaeetus vociferoides,Madagascar fish eagle,AVES,CR,false,false,Coastal wetlands
+Madagascar,Lophotibis cristata,Madagascar ibis,AVES,NT,false,false,Rainforest floor

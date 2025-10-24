@@ -1,0 +1,15 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Arapaima gigas,Arapaima,ACTINOPTERYGII,DD,false,false,Rivers and lakes
+Amazon and Guianas,Pygocentrus nattereri,Red-bellied piranha,ACTINOPTERYGII,LC,false,false,Rivers and flooded forest
+Amazon and Guianas,Electrophorus electricus,Electric eel,ACTINOPTERYGII,LC,false,false,Muddy rivers and streams
+Amazon and Guianas,Symphysodon aequifasciatus,Blue discus,ACTINOPTERYGII,LC,false,false,Slow-moving water
+Amazon and Guianas,Pterophyllum scalare,Freshwater angelfish,ACTINOPTERYGII,LC,false,false,Rivers and streams
+Amazon and Guianas,Cichla ocellaris,Peacock bass,ACTINOPTERYGII,LC,false,false,Rivers and lakes
+Amazon and Guianas,Colossoma macropomum,Tambaqui,ACTINOPTERYGII,LC,false,false,Flooded forests
+Amazon and Guianas,Hydrolycus scomberoides,Payara vampire fish,ACTINOPTERYGII,LC,false,false,Fast-flowing rivers
+Amazon and Guianas,Vandellia cirrhosa,Candiru,ACTINOPTERYGII,LC,false,false,River bottom
+Amazon and Guianas,Potamotrygon motoro,Ocellate river stingray,ELASMOBRANCHII,DD,true,false,River bottom
+Amazon and Guianas,Paracheirodon innesi,Neon tetra,ACTINOPTERYGII,LC,false,false,Clear water streams
+Amazon and Guianas,Paracheirodon axelrodi,Cardinal tetra,ACTINOPTERYGII,LC,false,false,Blackwater streams
+Amazon and Guianas,Brachyplatystoma filamentosum,Piraíba catfish,ACTINOPTERYGII,LC,false,false,Deep river channels
+Amazon and Guianas,Phractocephalus hemioliopterus,Red-tailed catfish,ACTINOPTERYGII,LC,false,false,Rivers and tributaries

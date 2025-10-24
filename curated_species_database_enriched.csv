@@ -267,3 +267,223 @@ Amazon and Guianas,Iguana iguana,Green iguana,REPTILIA,LC,false,false,Riverbanks
 Amazon and Guianas,Tupinambis teguixin,Gold tegu,REPTILIA,LC,false,false,Rainforest floor
 Amazon and Guianas,Dracaena guianensis,Caiman lizard,REPTILIA,LC,false,false,Rivers and streams
 Amazon and Guianas,Crocodilurus amazonicus,Amazon caiman lizard,REPTILIA,LC,false,false,Rivers and streams
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Arctic Terrestrial,Canis lupus arctos,Arctic wolf,MAMMALIA,LC,false,false,Tundra and ice fields
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Borneo,Nasalis larvatus,Proboscis monkey,MAMMALIA,EN,false,false,Mangrove and riverine forests
+Borneo,Helarctos malayanus,Sun bear,MAMMALIA,VU,false,false,Lowland tropical rainforest
+Borneo,Neofelis diardi,Sunda clouded leopard,MAMMALIA,VU,false,false,Lowland and montane forest
+Borneo,Catopuma badia,Bornean bay cat,MAMMALIA,EN,false,false,Dense tropical rainforest
+Borneo,Elephas maximus borneensis,Borneo pygmy elephant,MAMMALIA,EN,false,false,Lowland forest and floodplains
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Arctic Terrestrial,Lagopus muta,Rock ptarmigan,AVES,LC,false,false,Rocky tundra
+Arctic Terrestrial,Sterna paradisaea,Arctic tern,AVES,LC,false,false,Coastal tundra
+Arctic Terrestrial,Corvus corax,Common raven,AVES,LC,false,false,Tundra and cliffs
+Arctic Terrestrial,Plectrophenax nivalis,Snow bunting,AVES,LC,false,false,Open tundra
+Arctic Terrestrial,Calcarius lapponicus,Lapland longspur,AVES,LC,false,false,Tundra grassland
+Arctic Terrestrial,Acanthis flammea,Common redpoll,AVES,LC,false,false,Shrub tundra
+Arctic Terrestrial,Cygnus columbianus,Tundra swan,AVES,LC,false,false,Wetlands and lakes
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Bertholletia excelsa,Brazil nut tree,MAGNOLIOPSIDA,VU,false,false,Tropical rainforest canopy
+Amazon and Guianas,Theobroma cacao,Cacao tree,MAGNOLIOPSIDA,VU,false,false,Rainforest understory
+Amazon and Guianas,Ceiba pentandra,Kapok tree,MAGNOLIOPSIDA,LC,false,false,Emergent rainforest canopy
+Amazon and Guianas,Euterpe oleracea,Açaí palm,LILIOPSIDA,LC,false,false,Floodplain forests
+Amazon and Guianas,Victoria amazonica,Amazon water lily,MAGNOLIOPSIDA,LC,false,false,Slow-moving rivers and lakes
+Amazon and Guianas,Heliconia rostrata,Hanging lobster claw,LILIOPSIDA,LC,false,false,Rainforest clearings
+Amazon and Guianas,Passiflora edulis,Passion fruit,MAGNOLIOPSIDA,LC,false,false,Forest edges
+Amazon and Guianas,Cattleya violacea,Violet cattleya orchid,LILIOPSIDA,VU,false,false,Rainforest canopy
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Madagascar,Furcifer pardalis,Panther chameleon,REPTILIA,LC,false,false,Coastal lowland forest
+Madagascar,Calumma parsonii,Parson's chameleon,REPTILIA,NT,false,false,Montane rainforest
+Madagascar,Furcifer oustaleti,Malagasy giant chameleon,REPTILIA,LC,false,false,Dry and humid forest
+Madagascar,Uroplatus phantasticus,Satanic leaf-tailed gecko,REPTILIA,LC,false,false,Primary rainforest
+Madagascar,Phelsuma grandis,Giant day gecko,REPTILIA,EN,false,false,Bamboo and palm forest
+Madagascar,Phelsuma standingi,Standing's day gecko,REPTILIA,CR,false,false,Spiny forest
+Madagascar,Uroplatus henkeli,Henkel's leaf-tailed gecko,REPTILIA,VU,false,false,Lowland rainforest
+Madagascar,Uroplatus sikorae,Mossy leaf-tailed gecko,REPTILIA,LC,false,false,Humid forest
+Madagascar,Sanzinia madagascariensis,Madagascar tree boa,REPTILIA,LC,false,false,Tropical forest
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Congo Basin,Python sebae,African rock python,REPTILIA,LC,false,false,Tropical rainforest and savanna
+Congo Basin,Crocodylus niloticus,Nile crocodile,REPTILIA,LC,false,false,Rivers and lakes
+Congo Basin,Osteolaemus tetraspis,Dwarf crocodile,REPTILIA,VU,false,false,Forest streams and swamps
+Congo Basin,Mecistops cataphractus,Slender-snouted crocodile,REPTILIA,CR,false,false,Rivers and wetlands
+Congo Basin,Dendroaspis angusticeps,Eastern green mamba,REPTILIA,LC,true,false,Forest canopy
+Congo Basin,Bitis gabonica,Gaboon viper,REPTILIA,LC,true,false,Rainforest floor
+Congo Basin,Naja melanoleuca,Forest cobra,REPTILIA,LC,true,false,Tropical rainforest
+Congo Basin,Varanus niloticus,Nile monitor,REPTILIA,LC,false,false,Rivers and wetlands
+Congo Basin,Chamaeleo gracilis,Graceful chameleon,REPTILIA,LC,false,false,Forest and woodland
+Congo Basin,Agama agama,Rainbow agama,REPTILIA,LC,false,false,Forest clearings and rocks
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Congo Basin,Psittacus erithacus,African grey parrot,AVES,EN,false,false,Lowland rainforest
+Congo Basin,Corythaeola cristata,Great blue turaco,AVES,LC,false,false,Rainforest canopy
+Congo Basin,Ceratogymna atrata,Black-casqued hornbill,AVES,LC,false,false,Primary rainforest
+Congo Basin,Bycanistes albotibialis,White-thighed hornbill,AVES,LC,false,false,Dense forest
+Congo Basin,Dryotriorchis spectabilis,Congo serpent-eagle,AVES,LC,false,false,Rainforest
+Congo Basin,Agapornis swindernianus,Black-collared lovebird,AVES,LC,false,false,Forest edges
+Congo Basin,Tauraco macrorhynchus,Yellow-billed turaco,AVES,LC,false,false,Forest canopy
+Congo Basin,Lophoceros fasciatus,African pied hornbill,AVES,LC,false,false,Forest and woodland
+Congo Basin,Halcyon leucocephala,Grey-headed kingfisher,AVES,LC,false,false,Forest streams
+Congo Basin,Afropavo congensis,Congo peafowl,AVES,VU,false,false,Dense rainforest floor
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Ara macao,Scarlet macaw,AVES,LC,false,false,Rainforest canopy
+Amazon and Guianas,Ara ararauna,Blue-and-yellow macaw,AVES,LC,false,false,Forest and woodland
+Amazon and Guianas,Harpia harpyja,Harpy eagle,AVES,VU,false,false,Emergent canopy
+Amazon and Guianas,Ramphastos toco,Toco toucan,AVES,LC,false,false,Forest edges
+Amazon and Guianas,Ramphastos sulfuratus,Keel-billed toucan,AVES,LC,false,false,Lowland rainforest
+Amazon and Guianas,Baryphthengus martii,Rufous motmot,AVES,LC,false,false,Dense forest understory
+Amazon and Guianas,Opisthocomus hoazin,Hoatzin,AVES,LC,false,false,Riverine forest
+Amazon and Guianas,Topaza pella,Crimson topaz,AVES,LC,false,false,Forest streams
+Amazon and Guianas,Trogon curucui,Blue-crowned trogon,AVES,LC,false,false,Forest and woodland
+Amazon and Guianas,Chloroceryle americana,Green kingfisher,AVES,LC,false,false,Rivers and streams
+Amazon and Guianas,Cotinga cayana,Spangled cotinga,AVES,LC,false,false,Rainforest canopy
+Amazon and Guianas,Nyctibius grandis,Great potoo,AVES,LC,false,false,Forest and savanna
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Morpho menelaus,Blue morpho butterfly,INSECTA,LC,false,false,Rainforest understory
+Amazon and Guianas,Caligo memnon,Owl butterfly,INSECTA,LC,false,false,Forest floor
+Amazon and Guianas,Heliconius melpomene,Postman butterfly,INSECTA,LC,false,false,Forest edges and clearings
+Amazon and Guianas,Titanus giganteus,Titan beetle,INSECTA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Megasoma elephas,Elephant beetle,INSECTA,VU,false,false,Rainforest
+Amazon and Guianas,Paraponera clavata,Bullet ant,INSECTA,LC,true,false,Forest floor
+Amazon and Guianas,Atta cephalotes,Leafcutter ant,INSECTA,LC,false,false,Forest floor and trails
+Amazon and Guianas,Eciton burchellii,Army ant,INSECTA,LC,false,false,Forest floor
+Amazon and Guianas,Eulaema meriana,Blue orchid bee,INSECTA,LC,false,false,Forest flowers
+Amazon and Guianas,Stilpnochlora couloniana,Giant katydid,INSECTA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Mantis religiosa,Praying mantis,INSECTA,LC,false,false,Forest vegetation
+Amazon and Guianas,Bacteria ferratoi,Amazon walking stick,INSECTA,LC,false,false,Rainforest branches
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Borneo,Rafflesia arnoldii,Rafflesia,MAGNOLIOPSIDA,EN,false,false,Rainforest floor
+Borneo,Nepenthes rajah,Rajah pitcher plant,MAGNOLIOPSIDA,EN,false,false,Montane forest
+Borneo,Nepenthes lowii,Low's pitcher plant,MAGNOLIOPSIDA,NT,false,false,Montane forest
+Borneo,Paphiopedilum rothschildianum,Rothschild's slipper orchid,LILIOPSIDA,EN,false,false,Limestone cliffs
+Borneo,Eusideroxylon zwageri,Borneo ironwood,MAGNOLIOPSIDA,VU,false,false,Lowland rainforest
+Borneo,Calamus manan,Manan rattan,LILIOPSIDA,LC,false,false,Rainforest
+Borneo,Dipterocarpus conformis,Borneo camphorwood,MAGNOLIOPSIDA,EN,false,false,Mixed dipterocarp forest
+Borneo,Ficus benjamina,Weeping fig,MAGNOLIOPSIDA,LC,false,false,Rainforest
+Borneo,Bulbophyllum beccarii,Moonrat orchid,LILIOPSIDA,LC,false,false,Rainforest trees
+Borneo,Pinanga beccarii,Beccari's palm,LILIOPSIDA,LC,false,false,Forest understory
+Borneo,Begonia diadema,Diadem begonia,MAGNOLIOPSIDA,LC,false,false,Forest floor
+Borneo,Gigantochloa wrayi,Wray's giant bamboo,LILIOPSIDA,LC,false,false,Forest clearings
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Arapaima gigas,Arapaima,ACTINOPTERYGII,DD,false,false,Rivers and lakes
+Amazon and Guianas,Pygocentrus nattereri,Red-bellied piranha,ACTINOPTERYGII,LC,false,false,Rivers and flooded forest
+Amazon and Guianas,Electrophorus electricus,Electric eel,ACTINOPTERYGII,LC,false,false,Muddy rivers and streams
+Amazon and Guianas,Symphysodon aequifasciatus,Blue discus,ACTINOPTERYGII,LC,false,false,Slow-moving water
+Amazon and Guianas,Pterophyllum scalare,Freshwater angelfish,ACTINOPTERYGII,LC,false,false,Rivers and streams
+Amazon and Guianas,Cichla ocellaris,Peacock bass,ACTINOPTERYGII,LC,false,false,Rivers and lakes
+Amazon and Guianas,Colossoma macropomum,Tambaqui,ACTINOPTERYGII,LC,false,false,Flooded forests
+Amazon and Guianas,Hydrolycus scomberoides,Payara vampire fish,ACTINOPTERYGII,LC,false,false,Fast-flowing rivers
+Amazon and Guianas,Vandellia cirrhosa,Candiru,ACTINOPTERYGII,LC,false,false,River bottom
+Amazon and Guianas,Potamotrygon motoro,Ocellate river stingray,ELASMOBRANCHII,DD,true,false,River bottom
+Amazon and Guianas,Paracheirodon innesi,Neon tetra,ACTINOPTERYGII,LC,false,false,Clear water streams
+Amazon and Guianas,Paracheirodon axelrodi,Cardinal tetra,ACTINOPTERYGII,LC,false,false,Blackwater streams
+Amazon and Guianas,Brachyplatystoma filamentosum,Piraíba catfish,ACTINOPTERYGII,LC,false,false,Deep river channels
+Amazon and Guianas,Phractocephalus hemioliopterus,Red-tailed catfish,ACTINOPTERYGII,LC,false,false,Rivers and tributaries
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Congo Basin,Hydrocynus goliath,Goliath tigerfish,ACTINOPTERYGII,LC,false,false,Large rivers and lakes
+Congo Basin,Protopterus annectens,African lungfish,ACTINOPTERYGII,LC,false,false,Swamps and slow rivers
+Congo Basin,Oreochromis niloticus,Nile tilapia,ACTINOPTERYGII,LC,false,false,Rivers and lakes
+Congo Basin,Coptodon zillii,Redbelly tilapia,ACTINOPTERYGII,LC,false,false,Shallow waters
+Congo Basin,Schilbe mystus,African butter catfish,ACTINOPTERYGII,LC,false,false,Rivers and streams
+Congo Basin,Clarias gariepinus,African sharptooth catfish,ACTINOPTERYGII,LC,false,false,Rivers and wetlands
+Congo Basin,Phenacogrammus interruptus,Congo tetra,ACTINOPTERYGII,LC,false,false,Forest streams
+Congo Basin,Synodontis nigriventris,Upside-down catfish,ACTINOPTERYGII,LC,false,false,Rivers and pools
+Congo Basin,Gnathonemus petersii,Elephant nose fish,ACTINOPTERYGII,LC,false,false,Muddy rivers
+Congo Basin,Heterotis niloticus,African arowana,ACTINOPTERYGII,LC,false,false,Swamps and rivers
+Congo Basin,Hepsetus odoe,African pike,ACTINOPTERYGII,LC,false,false,Rivers and lakes
+Congo Basin,Pseudotropheus demasoni,Demasoni cichlid,ACTINOPTERYGII,EN,false,false,Rocky areas
+Congo Basin,Distichodus sexfasciatus,Six-banded distichodus,ACTINOPTERYGII,LC,false,false,Rivers and streams
+Congo Basin,Mormyrus rume,Rume mormyrid,ACTINOPTERYGII,LC,false,false,Large rivers
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Phyllobates terribilis,Golden poison dart frog,AMPHIBIA,EN,true,false,Rainforest floor
+Amazon and Guianas,Dendrobates tinctorius,Dyeing poison dart frog,AMPHIBIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Oophaga pumilio,Strawberry poison dart frog,AMPHIBIA,LC,true,false,Lowland rainforest
+Amazon and Guianas,Dendrobates auratus,Green and black poison dart frog,AMPHIBIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Dendrobates leucomelas,Yellow-banded poison dart frog,AMPHIBIA,LC,true,false,Savanna and forest
+Amazon and Guianas,Trachycephalus resinifictrix,Amazon milk frog,AMPHIBIA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Agalychnis callidryas,Red-eyed tree frog,AMPHIBIA,LC,false,false,Rainforest trees
+Amazon and Guianas,Hyalinobatrachium fleischmanni,Fleischmann's glass frog,AMPHIBIA,LC,false,false,Streamside vegetation
+Amazon and Guianas,Pipa pipa,Suriname toad,AMPHIBIA,LC,false,false,Slow-moving water
+Amazon and Guianas,Ceratophrys cornuta,Amazon horned frog,AMPHIBIA,LC,false,false,Rainforest floor
+Amazon and Guianas,Phyllomedusa sauvagii,Waxy monkey tree frog,AMPHIBIA,LC,false,false,Dry forest
+Amazon and Guianas,Phyllomedusa bicolor,Giant leaf frog,AMPHIBIA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Rhinella marina,Cane toad,AMPHIBIA,LC,false,true,Various habitats
+Amazon and Guianas,Dendropsophus marmoratus,Marbled tree frog,AMPHIBIA,LC,false,false,Forest ponds
+Amazon and Guianas,Allobates femoralis,Brilliant-thighed poison frog,AMPHIBIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Hymenochirus boettgeri,Congo dwarf clawed frog,AMPHIBIA,LC,false,false,Aquatic
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Arctic Terrestrial,Boreogadus saida,Arctic cod,ACTINOPTERYGII,VU,false,false,Coastal and offshore waters
+Arctic Terrestrial,Reinhardtius hippoglossoides,Greenland halibut,ACTINOPTERYGII,LC,false,false,Deep cold waters
+Arctic Terrestrial,Salvelinus alpinus,Arctic char,ACTINOPTERYGII,LC,false,false,Lakes and coastal waters
+Arctic Terrestrial,Salmo salar,Atlantic salmon,ACTINOPTERYGII,LC,false,false,Rivers and ocean
+Arctic Terrestrial,Oncorhynchus gorbuscha,Pink salmon,ACTINOPTERYGII,LC,false,false,Coastal waters and rivers
+Arctic Terrestrial,Thymallus arcticus,Arctic grayling,ACTINOPTERYGII,LC,false,false,Clear streams and lakes
+Arctic Terrestrial,Myoxocephalus scorpioides,Arctic sculpin,ACTINOPTERYGII,LC,false,false,Coastal waters
+Arctic Terrestrial,Liparis fabricii,Gelatinous snailfish,ACTINOPTERYGII,LC,false,false,Deep waters
+Arctic Terrestrial,Arctogadus glacialis,Polar cod,ACTINOPTERYGII,LC,false,false,Under sea ice
+Arctic Terrestrial,Mallotus villosus,Capelin,ACTINOPTERYGII,LC,false,false,Coastal and offshore
+Arctic Terrestrial,Amblyraja hyperborea,Arctic skate,ELASMOBRANCHII,VU,false,false,Deep waters
+Arctic Terrestrial,Anarhichas lupus,Atlantic wolffish,ACTINOPTERYGII,VU,false,false,Rocky bottom
+Arctic Terrestrial,Cyclopterus lumpus,Lumpfish,ACTINOPTERYGII,LC,false,false,Coastal waters
+Arctic Terrestrial,Liopsetta glacialis,Arctic flounder,ACTINOPTERYGII,LC,false,false,Shallow coastal waters
+Arctic Terrestrial,Myoxocephalus scorpius,Shorthorn sculpin,ACTINOPTERYGII,LC,false,false,Coastal waters
+Arctic Terrestrial,Myoxocephalus quadricornis,Fourhorn sculpin,ACTINOPTERYGII,LC,false,false,Coastal and brackish waters
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Madagascar,Ravenala madagascariensis,Traveler's tree,LILIOPSIDA,LC,false,false,Rainforest and disturbed areas
+Madagascar,Adansonia grandidieri,Grandidier's baobab,MAGNOLIOPSIDA,EN,false,false,Dry deciduous forest
+Madagascar,Adansonia za,Za baobab,MAGNOLIOPSIDA,EN,false,false,Dry forest and scrubland
+Madagascar,Dypsis decaryi,Triangle palm,LILIOPSIDA,CR,false,false,Dry forest
+Madagascar,Bismarckia nobilis,Bismarck palm,LILIOPSIDA,LC,false,false,Savanna and open woodland
+Madagascar,Catharanthus roseus,Madagascar periwinkle,MAGNOLIOPSIDA,EN,false,false,Forest edges
+Madagascar,Angraecum sesquipedale,Comet orchid,LILIOPSIDA,EN,false,false,Rainforest trees
+Madagascar,Pachypodium lamerei,Madagascar palm,MAGNOLIOPSIDA,LC,false,false,Dry spiny forest
+Madagascar,Alluaudia procera,Octopus tree,MAGNOLIOPSIDA,LC,false,false,Spiny forest
+Madagascar,Didierea madagascariensis,Didiereia,MAGNOLIOPSIDA,LC,false,false,Spiny forest
+Madagascar,Ensete perrieri,Perrieri banana,LILIOPSIDA,CR,false,false,Dry forest
+Madagascar,Ravenea rivularis,Majesty palm,LILIOPSIDA,CR,false,false,Riverine forest
+Madagascar,Tahina spectabilis,Tahina palm,LILIOPSIDA,CR,false,false,Remote forest
+Madagascar,Dracaena marginata,Madagascar dragon tree,LILIOPSIDA,LC,false,false,Dry forest
+Madagascar,Aloe suzannae,Suzanne's aloe,LILIOPSIDA,EN,false,false,Spiny desert
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Madagascar,Leptosomus discolor,Cuckoo-roller,AVES,LC,false,false,Rainforest and dry forest
+Madagascar,Atelornis pittoides,Pitta-like ground roller,AVES,LC,false,false,Humid forest floor
+Madagascar,Brachypteracias leptosomus,Short-legged ground roller,AVES,VU,false,false,Rainforest floor
+Madagascar,Coua gigas,Giant coua,AVES,LC,false,false,Dry spiny forest
+Madagascar,Coua caerulea,Blue coua,AVES,LC,false,false,Humid forest
+Madagascar,Coua cristata,Crested coua,AVES,LC,false,false,Dry deciduous forest
+Madagascar,Vanga curvirostris,Hook-billed vanga,AVES,LC,false,false,Forest and woodland
+Madagascar,Falculea palliata,Sickle-billed vanga,AVES,LC,false,false,Dry forest
+Madagascar,Euryceros prevostii,Helmet vanga,AVES,VU,false,false,Rainforest canopy
+Madagascar,Philepitta castanea,Velvet asity,AVES,LC,false,false,Humid forest
+Madagascar,Terpsiphone mutata,Madagascar paradise flycatcher,AVES,LC,false,false,Forest and woodland
+Madagascar,Haliaeetus vociferoides,Madagascar fish eagle,AVES,CR,false,false,Coastal wetlands
+Madagascar,Lophotibis cristata,Madagascar ibis,AVES,NT,false,false,Rainforest floor
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Borneo,Buceros rhinoceros,Rhinoceros hornbill,AVES,VU,false,false,Lowland rainforest
+Borneo,Rhinoplax vigil,Helmeted hornbill,AVES,CR,false,false,Primary rainforest
+Borneo,Calyptomena whiteheadi,Whitehead's broadbill,AVES,NT,false,false,Montane forest
+Borneo,Calyptomena hosii,Hose's broadbill,AVES,NT,false,false,Montane forest
+Borneo,Harpactes whiteheadi,Whitehead's trogon,AVES,NT,false,false,Montane forest
+Borneo,Psilopogon eximius,Bornean barbet,AVES,LC,false,false,Montane forest
+Borneo,Psilopogon chrysopogon,Gold-whiskered barbet,AVES,LC,false,false,Lowland forest
+Borneo,Alcedo euryzona,Blue-banded kingfisher,AVES,LC,false,false,Forest streams
+Borneo,Actenoides concretus,Rufous-collared kingfisher,AVES,LC,false,false,Dense forest
+Borneo,Pityriasis gymnocephala,Bornean bristlehead,AVES,NT,false,false,Lowland rainforest
+Borneo,Arachnothera everetti,Bornean spiderhunter,AVES,LC,false,false,Montane forest
+Borneo,Hydrornis baudii,Blue-headed pitta,AVES,VU,false,false,Lowland forest floor
+Borneo,Polyplectron schleiermacheri,Bornean peacock-pheasant,AVES,EN,false,false,Hill forest
+Arctic Terrestrial,Salix arctica,Arctic willow,MAGNOLIOPSIDA,LC,false,false,Tundra and rocky slopes
+Arctic Terrestrial,Saxifraga oppositifolia,Purple saxifrage,MAGNOLIOPSIDA,LC,false,false,Rocky tundra
+Arctic Terrestrial,Papaver radicatum,Arctic poppy,MAGNOLIOPSIDA,LC,false,false,Gravelly tundra
+Arctic Terrestrial,Rhododendron tomentosum,Labrador tea,MAGNOLIOPSIDA,LC,false,false,Wet tundra
+Arctic Terrestrial,Arctostaphylos alpina,Alpine bearberry,MAGNOLIOPSIDA,LC,false,false,Tundra and heath
+Arctic Terrestrial,Eriophorum angustifolium,Cottongrass,LILIOPSIDA,LC,false,false,Wet tundra
+Arctic Terrestrial,Dryas octopetala,Mountain avens,MAGNOLIOPSIDA,LC,false,false,Rocky tundra
+Arctic Terrestrial,Silene acaulis,Moss campion,MAGNOLIOPSIDA,LC,false,false,Rocky slopes
+Arctic Terrestrial,Calliergon giganteum,Arctic moss,BRYOPHYTA,LC,false,false,Lakes and bogs
+Arctic Terrestrial,Cladonia rangiferina,Caribou lichen,LICHENOPHYTA,LC,false,false,Dry tundra
+Arctic Terrestrial,Betula nana,Dwarf birch,MAGNOLIOPSIDA,LC,false,false,Tundra shrubland
+Arctic Terrestrial,Cassiope tetragona,Arctic bell-heather,MAGNOLIOPSIDA,LC,false,false,Rocky tundra
+Arctic Terrestrial,Saxifraga cespitosa,Tufted saxifrage,MAGNOLIOPSIDA,LC,false,false,Rocky areas
+Arctic Terrestrial,Lupinus arcticus,Arctic lupine,MAGNOLIOPSIDA,LC,false,false,Gravelly tundra
+Arctic Terrestrial,Oxyria digyna,Mountain sorrel,MAGNOLIOPSIDA,LC,false,false,Rocky slopes
+Arctic Terrestrial,Rubus chamaemorus,Cloudberry,MAGNOLIOPSIDA,LC,false,false,Wet tundra

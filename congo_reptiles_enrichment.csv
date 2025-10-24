@@ -1,0 +1,11 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Congo Basin,Python sebae,African rock python,REPTILIA,LC,false,false,Tropical rainforest and savanna
+Congo Basin,Crocodylus niloticus,Nile crocodile,REPTILIA,LC,false,false,Rivers and lakes
+Congo Basin,Osteolaemus tetraspis,Dwarf crocodile,REPTILIA,VU,false,false,Forest streams and swamps
+Congo Basin,Mecistops cataphractus,Slender-snouted crocodile,REPTILIA,CR,false,false,Rivers and wetlands
+Congo Basin,Dendroaspis angusticeps,Eastern green mamba,REPTILIA,LC,true,false,Forest canopy
+Congo Basin,Bitis gabonica,Gaboon viper,REPTILIA,LC,true,false,Rainforest floor
+Congo Basin,Naja melanoleuca,Forest cobra,REPTILIA,LC,true,false,Tropical rainforest
+Congo Basin,Varanus niloticus,Nile monitor,REPTILIA,LC,false,false,Rivers and wetlands
+Congo Basin,Chamaeleo gracilis,Graceful chameleon,REPTILIA,LC,false,false,Forest and woodland
+Congo Basin,Agama agama,Rainbow agama,REPTILIA,LC,false,false,Forest clearings and rocks

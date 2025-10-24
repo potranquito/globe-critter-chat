@@ -1,0 +1,11 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Congo Basin,Psittacus erithacus,African grey parrot,AVES,EN,false,false,Lowland rainforest
+Congo Basin,Corythaeola cristata,Great blue turaco,AVES,LC,false,false,Rainforest canopy
+Congo Basin,Ceratogymna atrata,Black-casqued hornbill,AVES,LC,false,false,Primary rainforest
+Congo Basin,Bycanistes albotibialis,White-thighed hornbill,AVES,LC,false,false,Dense forest
+Congo Basin,Dryotriorchis spectabilis,Congo serpent-eagle,AVES,LC,false,false,Rainforest
+Congo Basin,Agapornis swindernianus,Black-collared lovebird,AVES,LC,false,false,Forest edges
+Congo Basin,Tauraco macrorhynchus,Yellow-billed turaco,AVES,LC,false,false,Forest canopy
+Congo Basin,Lophoceros fasciatus,African pied hornbill,AVES,LC,false,false,Forest and woodland
+Congo Basin,Halcyon leucocephala,Grey-headed kingfisher,AVES,LC,false,false,Forest streams
+Congo Basin,Afropavo congensis,Congo peafowl,AVES,VU,false,false,Dense rainforest floor

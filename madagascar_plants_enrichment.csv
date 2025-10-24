@@ -1,0 +1,16 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Madagascar,Ravenala madagascariensis,Traveler's tree,LILIOPSIDA,LC,false,false,Rainforest and disturbed areas
+Madagascar,Adansonia grandidieri,Grandidier's baobab,MAGNOLIOPSIDA,EN,false,false,Dry deciduous forest
+Madagascar,Adansonia za,Za baobab,MAGNOLIOPSIDA,EN,false,false,Dry forest and scrubland
+Madagascar,Dypsis decaryi,Triangle palm,LILIOPSIDA,CR,false,false,Dry forest
+Madagascar,Bismarckia nobilis,Bismarck palm,LILIOPSIDA,LC,false,false,Savanna and open woodland
+Madagascar,Catharanthus roseus,Madagascar periwinkle,MAGNOLIOPSIDA,EN,false,false,Forest edges
+Madagascar,Angraecum sesquipedale,Comet orchid,LILIOPSIDA,EN,false,false,Rainforest trees
+Madagascar,Pachypodium lamerei,Madagascar palm,MAGNOLIOPSIDA,LC,false,false,Dry spiny forest
+Madagascar,Alluaudia procera,Octopus tree,MAGNOLIOPSIDA,LC,false,false,Spiny forest
+Madagascar,Didierea madagascariensis,Didiereia,MAGNOLIOPSIDA,LC,false,false,Spiny forest
+Madagascar,Ensete perrieri,Perrieri banana,LILIOPSIDA,CR,false,false,Dry forest
+Madagascar,Ravenea rivularis,Majesty palm,LILIOPSIDA,CR,false,false,Riverine forest
+Madagascar,Tahina spectabilis,Tahina palm,LILIOPSIDA,CR,false,false,Remote forest
+Madagascar,Dracaena marginata,Madagascar dragon tree,LILIOPSIDA,LC,false,false,Dry forest
+Madagascar,Aloe suzannae,Suzanne's aloe,LILIOPSIDA,EN,false,false,Spiny desert

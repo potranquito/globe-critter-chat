@@ -1,0 +1,6 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Borneo,Nasalis larvatus,Proboscis monkey,MAMMALIA,EN,false,false,Mangrove and riverine forests
+Borneo,Helarctos malayanus,Sun bear,MAMMALIA,VU,false,false,Lowland tropical rainforest
+Borneo,Neofelis diardi,Sunda clouded leopard,MAMMALIA,VU,false,false,Lowland and montane forest
+Borneo,Catopuma badia,Bornean bay cat,MAMMALIA,EN,false,false,Dense tropical rainforest
+Borneo,Elephas maximus borneensis,Borneo pygmy elephant,MAMMALIA,EN,false,false,Lowland forest and floodplains

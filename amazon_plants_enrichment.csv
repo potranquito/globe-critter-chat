@@ -1,0 +1,9 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Bertholletia excelsa,Brazil nut tree,MAGNOLIOPSIDA,VU,false,false,Tropical rainforest canopy
+Amazon and Guianas,Theobroma cacao,Cacao tree,MAGNOLIOPSIDA,VU,false,false,Rainforest understory
+Amazon and Guianas,Ceiba pentandra,Kapok tree,MAGNOLIOPSIDA,LC,false,false,Emergent rainforest canopy
+Amazon and Guianas,Euterpe oleracea,Açaí palm,LILIOPSIDA,LC,false,false,Floodplain forests
+Amazon and Guianas,Victoria amazonica,Amazon water lily,MAGNOLIOPSIDA,LC,false,false,Slow-moving rivers and lakes
+Amazon and Guianas,Heliconia rostrata,Hanging lobster claw,LILIOPSIDA,LC,false,false,Rainforest clearings
+Amazon and Guianas,Passiflora edulis,Passion fruit,MAGNOLIOPSIDA,LC,false,false,Forest edges
+Amazon and Guianas,Cattleya violacea,Violet cattleya orchid,LILIOPSIDA,VU,false,false,Rainforest canopy

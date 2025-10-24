@@ -1,0 +1,17 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Arctic Terrestrial,Boreogadus saida,Arctic cod,ACTINOPTERYGII,VU,false,false,Coastal and offshore waters
+Arctic Terrestrial,Reinhardtius hippoglossoides,Greenland halibut,ACTINOPTERYGII,LC,false,false,Deep cold waters
+Arctic Terrestrial,Salvelinus alpinus,Arctic char,ACTINOPTERYGII,LC,false,false,Lakes and coastal waters
+Arctic Terrestrial,Salmo salar,Atlantic salmon,ACTINOPTERYGII,LC,false,false,Rivers and ocean
+Arctic Terrestrial,Oncorhynchus gorbuscha,Pink salmon,ACTINOPTERYGII,LC,false,false,Coastal waters and rivers
+Arctic Terrestrial,Thymallus arcticus,Arctic grayling,ACTINOPTERYGII,LC,false,false,Clear streams and lakes
+Arctic Terrestrial,Myoxocephalus scorpioides,Arctic sculpin,ACTINOPTERYGII,LC,false,false,Coastal waters
+Arctic Terrestrial,Liparis fabricii,Gelatinous snailfish,ACTINOPTERYGII,LC,false,false,Deep waters
+Arctic Terrestrial,Arctogadus glacialis,Polar cod,ACTINOPTERYGII,LC,false,false,Under sea ice
+Arctic Terrestrial,Mallotus villosus,Capelin,ACTINOPTERYGII,LC,false,false,Coastal and offshore
+Arctic Terrestrial,Amblyraja hyperborea,Arctic skate,ELASMOBRANCHII,VU,false,false,Deep waters
+Arctic Terrestrial,Anarhichas lupus,Atlantic wolffish,ACTINOPTERYGII,VU,false,false,Rocky bottom
+Arctic Terrestrial,Cyclopterus lumpus,Lumpfish,ACTINOPTERYGII,LC,false,false,Coastal waters
+Arctic Terrestrial,Liopsetta glacialis,Arctic flounder,ACTINOPTERYGII,LC,false,false,Shallow coastal waters
+Arctic Terrestrial,Myoxocephalus scorpius,Shorthorn sculpin,ACTINOPTERYGII,LC,false,false,Coastal waters
+Arctic Terrestrial,Myoxocephalus quadricornis,Fourhorn sculpin,ACTINOPTERYGII,LC,false,false,Coastal and brackish waters

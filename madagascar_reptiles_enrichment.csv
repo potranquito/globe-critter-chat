@@ -1,0 +1,10 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Madagascar,Furcifer pardalis,Panther chameleon,REPTILIA,LC,false,false,Coastal lowland forest
+Madagascar,Calumma parsonii,Parson's chameleon,REPTILIA,NT,false,false,Montane rainforest
+Madagascar,Furcifer oustaleti,Malagasy giant chameleon,REPTILIA,LC,false,false,Dry and humid forest
+Madagascar,Uroplatus phantasticus,Satanic leaf-tailed gecko,REPTILIA,LC,false,false,Primary rainforest
+Madagascar,Phelsuma grandis,Giant day gecko,REPTILIA,EN,false,false,Bamboo and palm forest
+Madagascar,Phelsuma standingi,Standing's day gecko,REPTILIA,CR,false,false,Spiny forest
+Madagascar,Uroplatus henkeli,Henkel's leaf-tailed gecko,REPTILIA,VU,false,false,Lowland rainforest
+Madagascar,Uroplatus sikorae,Mossy leaf-tailed gecko,REPTILIA,LC,false,false,Humid forest
+Madagascar,Sanzinia madagascariensis,Madagascar tree boa,REPTILIA,LC,false,false,Tropical forest

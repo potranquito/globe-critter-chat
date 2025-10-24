@@ -1,0 +1,17 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Arctic Terrestrial,Salix arctica,Arctic willow,MAGNOLIOPSIDA,LC,false,false,Tundra and rocky slopes
+Arctic Terrestrial,Saxifraga oppositifolia,Purple saxifrage,MAGNOLIOPSIDA,LC,false,false,Rocky tundra
+Arctic Terrestrial,Papaver radicatum,Arctic poppy,MAGNOLIOPSIDA,LC,false,false,Gravelly tundra
+Arctic Terrestrial,Rhododendron tomentosum,Labrador tea,MAGNOLIOPSIDA,LC,false,false,Wet tundra
+Arctic Terrestrial,Arctostaphylos alpina,Alpine bearberry,MAGNOLIOPSIDA,LC,false,false,Tundra and heath
+Arctic Terrestrial,Eriophorum angustifolium,Cottongrass,LILIOPSIDA,LC,false,false,Wet tundra
+Arctic Terrestrial,Dryas octopetala,Mountain avens,MAGNOLIOPSIDA,LC,false,false,Rocky tundra
+Arctic Terrestrial,Silene acaulis,Moss campion,MAGNOLIOPSIDA,LC,false,false,Rocky slopes
+Arctic Terrestrial,Calliergon giganteum,Arctic moss,BRYOPHYTA,LC,false,false,Lakes and bogs
+Arctic Terrestrial,Cladonia rangiferina,Caribou lichen,LICHENOPHYTA,LC,false,false,Dry tundra
+Arctic Terrestrial,Betula nana,Dwarf birch,MAGNOLIOPSIDA,LC,false,false,Tundra shrubland
+Arctic Terrestrial,Cassiope tetragona,Arctic bell-heather,MAGNOLIOPSIDA,LC,false,false,Rocky tundra
+Arctic Terrestrial,Saxifraga cespitosa,Tufted saxifrage,MAGNOLIOPSIDA,LC,false,false,Rocky areas
+Arctic Terrestrial,Lupinus arcticus,Arctic lupine,MAGNOLIOPSIDA,LC,false,false,Gravelly tundra
+Arctic Terrestrial,Oxyria digyna,Mountain sorrel,MAGNOLIOPSIDA,LC,false,false,Rocky slopes
+Arctic Terrestrial,Rubus chamaemorus,Cloudberry,MAGNOLIOPSIDA,LC,false,false,Wet tundra

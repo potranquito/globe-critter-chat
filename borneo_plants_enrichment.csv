@@ -1,0 +1,13 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Borneo,Rafflesia arnoldii,Rafflesia,MAGNOLIOPSIDA,EN,false,false,Rainforest floor
+Borneo,Nepenthes rajah,Rajah pitcher plant,MAGNOLIOPSIDA,EN,false,false,Montane forest
+Borneo,Nepenthes lowii,Low's pitcher plant,MAGNOLIOPSIDA,NT,false,false,Montane forest
+Borneo,Paphiopedilum rothschildianum,Rothschild's slipper orchid,LILIOPSIDA,EN,false,false,Limestone cliffs
+Borneo,Eusideroxylon zwageri,Borneo ironwood,MAGNOLIOPSIDA,VU,false,false,Lowland rainforest
+Borneo,Calamus manan,Manan rattan,LILIOPSIDA,LC,false,false,Rainforest
+Borneo,Dipterocarpus conformis,Borneo camphorwood,MAGNOLIOPSIDA,EN,false,false,Mixed dipterocarp forest
+Borneo,Ficus benjamina,Weeping fig,MAGNOLIOPSIDA,LC,false,false,Rainforest
+Borneo,Bulbophyllum beccarii,Moonrat orchid,LILIOPSIDA,LC,false,false,Rainforest trees
+Borneo,Pinanga beccarii,Beccari's palm,LILIOPSIDA,LC,false,false,Forest understory
+Borneo,Begonia diadema,Diadem begonia,MAGNOLIOPSIDA,LC,false,false,Forest floor
+Borneo,Gigantochloa wrayi,Wray's giant bamboo,LILIOPSIDA,LC,false,false,Forest clearings

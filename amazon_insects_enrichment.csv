@@ -1,0 +1,13 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Morpho menelaus,Blue morpho butterfly,INSECTA,LC,false,false,Rainforest understory
+Amazon and Guianas,Caligo memnon,Owl butterfly,INSECTA,LC,false,false,Forest floor
+Amazon and Guianas,Heliconius melpomene,Postman butterfly,INSECTA,LC,false,false,Forest edges and clearings
+Amazon and Guianas,Titanus giganteus,Titan beetle,INSECTA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Megasoma elephas,Elephant beetle,INSECTA,VU,false,false,Rainforest
+Amazon and Guianas,Paraponera clavata,Bullet ant,INSECTA,LC,true,false,Forest floor
+Amazon and Guianas,Atta cephalotes,Leafcutter ant,INSECTA,LC,false,false,Forest floor and trails
+Amazon and Guianas,Eciton burchellii,Army ant,INSECTA,LC,false,false,Forest floor
+Amazon and Guianas,Eulaema meriana,Blue orchid bee,INSECTA,LC,false,false,Forest flowers
+Amazon and Guianas,Stilpnochlora couloniana,Giant katydid,INSECTA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Mantis religiosa,Praying mantis,INSECTA,LC,false,false,Forest vegetation
+Amazon and Guianas,Bacteria ferratoi,Amazon walking stick,INSECTA,LC,false,false,Rainforest branches
