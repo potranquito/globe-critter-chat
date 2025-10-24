@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Loader2, ChevronUp } from 'lucide-react';
+import { Loader2, ChevronUp, ChevronDown } from 'lucide-react';
 
 export interface ChatContext {
   type: 'species' | 'habitat' | 'wildlife-park' | 'threat' | 'ecosystem' | 'region-species' | 'default';
@@ -24,10 +24,11 @@ interface ChatInputProps {
   onBlur?: () => void;
   hasMessages?: boolean;
   onExpandHistory?: () => void;
+  isChatHistoryExpanded?: boolean;
   theme?: ChatTheme;
 }
 
-const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus, onBlur, hasMessages = false, onExpandHistory, theme }: ChatInputProps) => {
+const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus, onBlur, hasMessages = false, onExpandHistory, isChatHistoryExpanded = false, theme }: ChatInputProps) => {
   const [message, setMessage] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -123,7 +124,7 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
           borderColor: withAlpha(currentTheme.primary, 0.3)
         }}
       >
-        {/* Expand History Button - Show when messages exist but history is minimized */}
+        {/* Toggle History Button - Show when messages exist */}
         {hasMessages && onExpandHistory && (
           <div
             className="flex items-center justify-between px-4 py-2 border-b"
@@ -140,10 +141,21 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
               onMouseEnter={(e) => { e.currentTarget.style.color = currentTheme.secondary; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = 'rgb(148, 163, 184)'; }}
             >
-              <ChevronUp className="h-3 w-3" />
-              <span>Show chat history</span>
+              {isChatHistoryExpanded ? (
+                <>
+                  <ChevronDown className="h-3 w-3" />
+                  <span>Hide chat history</span>
+                </>
+              ) : (
+                <>
+                  <ChevronUp className="h-3 w-3" />
+                  <span>Show chat history</span>
+                </>
+              )}
             </button>
-            <span className="text-xs text-slate-600">Click to expand</span>
+            <span className="text-xs text-slate-600">
+              {isChatHistoryExpanded ? 'Click to minimize' : 'Click to expand'}
+            </span>
           </div>
         )}
 

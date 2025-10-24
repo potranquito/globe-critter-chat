@@ -13,6 +13,7 @@ interface ScatteredSpeciesImagesProps {
   isClickable: boolean;
   correctAnswer?: string; // scientific name of correct answer
   wrongAnswer?: string; // scientific name of wrong answer
+  questionKey?: number; // Changes with each question to trigger re-randomization
 }
 
 interface PositionConfig {
@@ -26,32 +27,41 @@ export const ScatteredSpeciesImages = ({
   onSpeciesClick,
   isClickable,
   correctAnswer,
-  wrongAnswer
+  wrongAnswer,
+  questionKey
 }: ScatteredSpeciesImagesProps) => {
   const [positions, setPositions] = useState<PositionConfig[]>([]);
 
-  // Generate random positions within safe zones
+  // Generate random positions within safe zones - randomized each time
   useEffect(() => {
-    // Define 5 zones that avoid:
+    // Define 5 base zones that avoid:
     // - Top: Header + timer (0-100px from top)
     // - Left: Species carousel (0-300px from left)
     // - Bottom: Chat (0-140px from bottom)
+    // Keep cards more centered (35-60% from left) instead of far right
 
-    const zones = [
+    const baseZones = [
+      // Top-left area
+      { topBase: 15, leftBase: 38, topRange: 5, leftRange: 5 },
+      // Middle-center area
+      { topBase: 38, leftBase: 50, topRange: 5, leftRange: 5 },
+      // Bottom-center area
+      { topBase: 58, leftBase: 42, topRange: 5, leftRange: 5 },
       // Top-right area
-      { top: '12%', left: '35%', rotation: Math.random() * 30 - 15 },
+      { topBase: 20, leftBase: 60, topRange: 5, leftRange: 5 },
       // Middle-right area
-      { top: '35%', left: '65%', rotation: Math.random() * 30 - 15 },
-      // Center-right area
-      { top: '50%', left: '45%', rotation: Math.random() * 30 - 15 },
-      // Bottom-right area
-      { top: '65%', left: '70%', rotation: Math.random() * 30 - 15 },
-      // Far-right area
-      { top: '25%', left: '80%', rotation: Math.random() * 30 - 15 },
+      { topBase: 48, leftBase: 58, topRange: 5, leftRange: 5 },
     ];
 
-    setPositions(zones);
-  }, []);
+    // Randomize positions within each zone
+    const randomizedZones = baseZones.map(zone => ({
+      top: `${zone.topBase + (Math.random() * zone.topRange - zone.topRange / 2)}%`,
+      left: `${zone.leftBase + (Math.random() * zone.leftRange - zone.leftRange / 2)}%`,
+      rotation: Math.random() * 30 - 15,
+    }));
+
+    setPositions(randomizedZones);
+  }, [questionKey]); // Re-randomize when question changes
 
   // Map species to array with their slot types
   const speciesArray = useMemo(() => {
@@ -98,7 +108,7 @@ export const ScatteredSpeciesImages = ({
             <div
               className={`
                 relative
-                w-44 h-44
+                w-32 h-32
                 rounded-2xl
                 overflow-hidden
                 backdrop-blur-sm
@@ -120,30 +130,9 @@ export const ScatteredSpeciesImages = ({
               {/* Species Image */}
               <img
                 src={s.imageUrl || '/placeholder-species.png'}
-                alt={s.commonName}
+                alt="Species"
                 className="w-full h-full object-cover"
               />
-
-              {/* Hover Overlay with Species Name */}
-              <div
-                className={`
-                  absolute inset-0
-                  bg-gradient-to-t from-black/80 via-black/40 to-transparent
-                  opacity-0 group-hover:opacity-100
-                  transition-opacity duration-300
-                  flex items-end justify-center
-                  pb-3
-                `}
-              >
-                <div className="text-center px-2">
-                  <p className="text-white font-bold text-sm drop-shadow-lg">
-                    {s.commonName}
-                  </p>
-                  <p className="text-gray-300 text-xs italic">
-                    {s.scientificName}
-                  </p>
-                </div>
-              </div>
 
               {/* Glow effect for correct answer */}
               {isCorrect && (

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import GoogleEarthMap from '@/components/GoogleEarthMap';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,117 @@ import { ParkList } from '@/components/ParkList';
 import { GlobalHealthBar } from '@/components/GlobalHealthBar';
 import { generateColorTheme, generateFastVisualDescription } from '@/services/mcpClient';
 import { getAnimalForRegion } from '@/config/ecoRegionAnimals';
+import { useLearningSession } from '@/hooks/useLearningSession';
+import { useParkStars } from '@/hooks/useParkStars';
+import { getPhaseDisplayName, getPhaseEmoji, getNextPhase, type LearningPhase } from '@/types/learning';
+
+/**
+ * Get filters for a specific learning phase
+ */
+function getFiltersForPhase(phase: LearningPhase): string[] {
+  switch (phase) {
+    case 'plants':
+      return ['producer-diet', 'plant'];
+    case 'birds':
+      return ['bird'];
+    case 'predators':
+      return ['carnivore-diet'];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Map IUCN conservation status codes to full names
+ */
+function getConservationStatusFullName(code: string | undefined): string {
+  if (!code) return 'Not Evaluated';
+
+  const statusMap: Record<string, string> = {
+    'LC': 'Least Concern',
+    'NT': 'Near Threatened',
+    'VU': 'Vulnerable',
+    'EN': 'Endangered',
+    'CR': 'Critically Endangered',
+    'EW': 'Extinct in the Wild',
+    'EX': 'Extinct',
+    'DD': 'Data Deficient',
+    'NE': 'Not Evaluated'
+  };
+
+  return statusMap[code.toUpperCase()] || code;
+}
+
+/**
+ * Get more specific species subtype (flower, tree, mammal, bird, etc.)
+ * Uses animalType and speciesType fields to determine subtype
+ */
+function getSpeciesSubtype(species: RegionSpecies): string {
+  const animalType = species.animalType?.toLowerCase() || '';
+  const speciesType = species.speciesType?.toLowerCase() || '';
+
+  // Plants
+  if (speciesType === 'plant' || species.dietaryCategory === 'Producer') {
+    // Try to determine plant subtype from name or animalType
+    if (animalType.includes('tree') || species.commonName?.toLowerCase().includes('tree')) {
+      return 'tree';
+    }
+    if (animalType.includes('flower') || animalType.includes('saxifrage') || species.commonName?.toLowerCase().includes('flower')) {
+      return 'flower';
+    }
+    if (animalType.includes('bush') || animalType.includes('shrub') || species.commonName?.toLowerCase().includes('bush')) {
+      return 'bush';
+    }
+    if (animalType.includes('grass') || species.commonName?.toLowerCase().includes('grass')) {
+      return 'grass';
+    }
+    if (animalType.includes('moss') || species.commonName?.toLowerCase().includes('moss')) {
+      return 'moss';
+    }
+    if (animalType.includes('lichen') || species.commonName?.toLowerCase().includes('lichen')) {
+      return 'lichen';
+    }
+    return 'plant'; // Default for plants
+  }
+
+  // Birds
+  if (speciesType === 'bird' || animalType.includes('bird') || animalType.includes('aves')) {
+    return 'bird';
+  }
+
+  // Mammals
+  if (speciesType === 'mammal' || animalType.includes('mammal')) {
+    return 'mammal';
+  }
+
+  // Reptiles
+  if (speciesType === 'reptile' || animalType.includes('reptile') || animalType.includes('snake') || animalType.includes('lizard')) {
+    return 'reptile';
+  }
+
+  // Amphibians
+  if (speciesType === 'amphibian' || animalType.includes('amphibian') || animalType.includes('frog') || animalType.includes('toad')) {
+    return 'amphibian';
+  }
+
+  // Fish
+  if (speciesType === 'fish' || animalType.includes('fish')) {
+    return 'fish';
+  }
+
+  // Insects
+  if (speciesType === 'insect' || animalType.includes('insect') || animalType.includes('beetle') || animalType.includes('butterfly')) {
+    return 'insect';
+  }
+
+  // Invertebrates
+  if (animalType.includes('invertebrate') || animalType.includes('coral') || animalType.includes('jellyfish')) {
+    return 'invertebrate';
+  }
+
+  // Default: use animalType or speciesType as-is
+  return animalType || speciesType || 'organism';
+}
 
 const ParkSelectionPage = () => {
   const navigate = useNavigate();
@@ -24,6 +135,8 @@ const ParkSelectionPage = () => {
   const regionName = searchParams.get('regionName');
   const lat = parseFloat(searchParams.get('lat') || '0');
   const lng = parseFloat(searchParams.get('lng') || '0');
+  const triviaCompleted = searchParams.get('triviaCompleted');
+  const triviaResultsParam = searchParams.get('triviaResults');
 
   const [wildlifePlaces, setWildlifePlaces] = useState<any[]>([]);
   const [protectedAreas, setProtectedAreas] = useState<any[]>([]);
@@ -44,13 +157,31 @@ const ParkSelectionPage = () => {
   const [isLoadingResponse, setIsLoadingResponse] = useState(false);
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
 
+  // Park stars for trivia gamification
+  const { resetAll: resetParkStars } = useParkStars();
+
   // Learning mode state
   const [isLearningMode, setIsLearningMode] = useState(false);
   const [learningFilters, setLearningFilters] = useState<string[]>([]);
   const [learningSessionCount, setLearningSessionCount] = useState(0);
   const [currentLearningTopic, setCurrentLearningTopic] = useState<string>('');
   const [isSpeciesStreamingInProgress, setIsSpeciesStreamingInProgress] = useState(false); // Prevents next species from loading too soon
-  const [shownSpeciesInSession, setShownSpeciesInSession] = useState<string[]>([]); // Track species shown in current session to avoid duplicates
+  const [parkListKey, setParkListKey] = useState(0); // Force ParkList re-mount when trivia completes
+
+  // Track processed trivia results to avoid duplicate processing
+  const processedTriviaResultsRef = useRef<string | null>(null);
+
+  // 3-Phase Learning Session (Plants → Birds → Predators)
+  const learningSession = useLearningSession(selectedPark?.id || ecoRegionId || '', regionName || '');
+
+  // Synchronous tracking with refs (prevents closure/timing issues)
+  const taughtSpeciesRef = useRef<any[]>([]); // Taught species for trivia
+  const shownSpeciesRef = useRef<string[]>([]); // Shown species to prevent duplicates
+
+  // Streaming intervals/timeouts to clean up on /end
+  const streamingIntervalsRef = useRef<NodeJS.Timeout[]>([]);
+  const streamingTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const currentPhaseRef = useRef<LearningPhase>('plants'); // Current phase tracker
 
   // Chameleon theme state
   const [chatTheme, setChatTheme] = useState<ChatTheme>({
@@ -231,6 +362,7 @@ const ParkSelectionPage = () => {
                 description: species.description || undefined, // Include description for fast learning mode
                 isInvasive: species.is_invasive || false,
                 isVenomous: species.is_venomous || false,
+                habitatInfo: species.habitat_info || undefined, // Include habitat description
               }));
 
               console.log('🗺️ Mapped species:', mappedSpecies);
@@ -274,9 +406,48 @@ const ParkSelectionPage = () => {
     loadEcoRegionData();
   }, [ecoRegionId, regionName, lat, lng, navigate, toast]);
 
+  // Handle trivia completion results
+  useEffect(() => {
+    // Check if we have trivia results AND haven't processed them yet
+    if (triviaCompleted && triviaResultsParam && processedTriviaResultsRef.current !== triviaResultsParam) {
+      try {
+        const results = JSON.parse(triviaResultsParam);
+        const correctCount = results.filter((r: any) => r.isCorrect).length;
+        const totalCount = results.length;
+
+        // Star emoji based on score
+        const starEmoji = correctCount === 3 ? '⭐⭐⭐' : correctCount === 2 ? '⭐⭐' : correctCount === 1 ? '⭐' : '';
+
+        const completionMessage: ChatMessage = {
+          id: `trivia-complete-${Date.now()}`,
+          role: 'assistant',
+          content: `🎉 **Trivia Complete!**\n\nYou answered **${correctCount} out of ${totalCount}** questions correctly!\n\n${starEmoji}\n\nYour stars have been saved to the park. Check the park list on the right to see your progress!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, completionMessage]);
+        setIsChatHistoryExpanded(true);
+
+        // Force ParkList to re-mount and reload stars from localStorage
+        setParkListKey(prev => prev + 1);
+
+        // Mark these results as processed
+        processedTriviaResultsRef.current = triviaResultsParam;
+
+        // Clean up URL params after showing message
+        const params = new URLSearchParams(window.location.search);
+        params.delete('triviaCompleted');
+        params.delete('triviaResults');
+        window.history.replaceState({}, '', `${window.location.pathname}?${params.toString()}`);
+      } catch (error) {
+        console.error('Failed to parse trivia results:', error);
+      }
+    }
+  }, [triviaCompleted, triviaResultsParam]);
+
   // Send welcome message when page loads
   useEffect(() => {
-    if (!isLoading && regionSpecies.length > 0 && chatHistory.length === 0) {
+    if (!isLoading && regionSpecies.length > 0 && chatHistory.length === 0 && !triviaCompleted) {
       // Get ASCII art animal for this region
       const animalData = getAnimalForRegion(regionName || '');
       const asciiArt = animalData.frames[0]; // Use first frame of animation
@@ -301,10 +472,22 @@ const ParkSelectionPage = () => {
         }
       ]);
     }
-  }, [isLoading, regionSpecies.length, chatHistory.length, regionName]);
+  }, [isLoading, regionSpecies.length, chatHistory.length, regionName, triviaCompleted]);
 
   const handleParkClick = (point: any) => {
     console.log('Park clicked:', point);
+
+    // Terminate learning mode if active
+    if (isLearningMode) {
+      setIsLearningMode(false);
+      setIsSpeciesStreamingInProgress(false);
+      setQuickReplies([]);
+      streamingIntervalsRef.current.forEach(interval => clearInterval(interval));
+      streamingTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      streamingIntervalsRef.current = [];
+      streamingTimeoutsRef.current = [];
+    }
+
     // Select the park
     setSelectedPark(point);
     // Deselect species when park is selected
@@ -342,6 +525,18 @@ const ParkSelectionPage = () => {
 
   const handleSpeciesClick = (species: RegionSpecies) => {
     console.log('Species clicked:', species);
+
+    // Terminate learning mode if active
+    if (isLearningMode) {
+      setIsLearningMode(false);
+      setIsSpeciesStreamingInProgress(false);
+      setQuickReplies([]);
+      streamingIntervalsRef.current.forEach(interval => clearInterval(interval));
+      streamingTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      streamingIntervalsRef.current = [];
+      streamingTimeoutsRef.current = [];
+    }
+
     // Select the species for carousel highlighting
     setSelectedCarouselSpecies(species);
     // Deselect park when species is selected
@@ -458,7 +653,7 @@ const ParkSelectionPage = () => {
 
     // Use provided filters or fall back to state (but prefer provided for accuracy)
     const activeFilters = filtersToUse !== undefined ? filtersToUse : learningFilters;
-    const shownSpecies = alreadyShown !== undefined ? alreadyShown : shownSpeciesInSession;
+    const shownSpecies = alreadyShown !== undefined ? alreadyShown : shownSpeciesRef.current;
     console.log('🔍 selectRandomSpecies called with filters:', activeFilters);
     console.log('🔍 Already shown species:', shownSpecies);
 
@@ -482,12 +677,56 @@ const ParkSelectionPage = () => {
     setLearningSessionCount(currentSessionNumber);
     console.log(`📊 Learning session: ${currentSessionNumber}/5 (previous: ${previousCount})`);
 
-    // Check if we've reached 5 species (check AFTER incrementing)
+    // Check if we've reached 5 species in current phase (check AFTER incrementing)
     if (currentSessionNumber > 5) {
-      console.log('🎉 Reached 5 species - showing topic selection');
+      console.log(`🎉 Reached 5 species in ${learningSession.currentPhase} phase`);
 
-      // Show topic selection for next session
-      showTopicSelection();
+      // Check if all 3 phases are complete
+      if (learningSession.isAllPhasesComplete()) {
+        console.log('🎓 All 3 phases complete!');
+
+        // Show congratulations message
+        const congratsMessage: ChatMessage = {
+          id: `all-complete-${Date.now()}`,
+          role: 'assistant',
+          content: `🎉 **Congratulations!**\n\nYou've completed all 3 learning phases!\n\n✅ Plants (5 species)\n✅ Birds (5 species)\n✅ Predators (5 species)\n\nReady to test your knowledge?`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, congratsMessage]);
+
+        // Show "Play Trivia Game" button
+        setQuickReplies([
+          {
+            id: 'start-trivia-game',
+            label: 'Play Trivia Game',
+            emoji: '🎮',
+            action: 'start-trivia-game' as const
+          }
+        ]);
+        return;
+      }
+
+      // Show "Continue" button to advance to next phase
+      const currentPhaseDisplay = getPhaseDisplayName(currentPhaseRef.current);
+      const completionMessage: ChatMessage = {
+        id: `phase-complete-${Date.now()}`,
+        role: 'assistant',
+        content: `🎉 **Phase Complete!**\n\nYou've learned about 5 ${currentPhaseDisplay.toLowerCase()} species. Ready for the next lesson?`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, completionMessage]);
+
+      // Show "Continue" button (or "Play Trivia" if all phases done)
+      setQuickReplies([
+        {
+          id: 'continue-next-phase',
+          label: 'Continue',
+          emoji: '▶️',
+          action: 'continue-next-phase' as const
+        }
+      ]);
       return;
     }
 
@@ -498,10 +737,23 @@ const ParkSelectionPage = () => {
     setIsSpeciesStreamingInProgress(true);
     console.log('✨ Starting species learning for:', species.commonName);
 
-    // Add this species to the shown list to prevent duplicates
-    const updatedShownSpecies = [...shownSpecies, species.scientificName];
-    setShownSpeciesInSession(updatedShownSpecies);
-    console.log('📝 Updated shown species list:', updatedShownSpecies);
+    // 📚 Track taught species in learning session
+    learningSession.addTaughtSpecies(species);
+
+    // Also track synchronously in ref for reliable navigation
+    taughtSpeciesRef.current.push({
+      id: species.id,
+      scientificName: species.scientificName,
+      commonName: species.commonName,
+      imageUrl: species.imageUrl,
+      phase: learningSession.currentPhase
+    });
+
+    console.log(`📚 Added ${species.commonName} to ${learningSession.currentPhase} phase (${learningSession.currentPhaseCount}/5)`);
+
+    // Add this species to the shown list to prevent duplicates (use ref for immediate updates)
+    shownSpeciesRef.current = [...shownSpecies, species.scientificName];
+    console.log('📝 Updated shown species list:', shownSpeciesRef.current);
 
     // Highlight in carousel
     setSelectedCarouselSpecies(species);
@@ -522,7 +774,37 @@ const ParkSelectionPage = () => {
 
     // Stream educational text after image "loads" (simulate 1 second load)
     setTimeout(async () => {
-      const baseInfo = `\n\n**Species ${currentSessionNumber}/5**\n\n**Common Name:** ${species.commonName}\n**Scientific Name:** ${species.scientificName}\n**Type:** ${species.animalType}\n**Conservation Status:** ${species.conservationStatus || 'Not Evaluated'}\n**Invasive Species:** ${species.isInvasive ? 'Yes' : 'No'}\n**Venomous:** ${species.isVenomous ? 'Yes' : 'No'}\n\n**Visual Description:** `;
+      // Get formatted values
+      const speciesSubtype = getSpeciesSubtype(species);
+      const conservationStatus = getConservationStatusFullName(species.conservationStatus);
+
+      // Build species info lines (conditionally include invasive/venomous)
+      const infoLines = [
+        `**${species.commonName} - Species ${currentSessionNumber}/5**`,
+        '',
+        `**Type:** ${speciesSubtype}`,
+        `**Conservation Status:** ${conservationStatus}`
+      ];
+
+      // Add Habitat Info if available (right after Conservation Status)
+      if (species.habitatInfo) {
+        infoLines.push(`**Habitat Info:** ${species.habitatInfo}`);
+      }
+
+      // Only add invasive species line if true
+      if (species.isInvasive) {
+        infoLines.push('**Invasive Species:** Yes');
+      }
+
+      // Only add venomous line if true
+      if (species.isVenomous) {
+        infoLines.push('**Venomous:** Yes');
+      }
+
+      // Add visual description header
+      infoLines.push('', '**Visual Description:** ');
+
+      const baseInfo = '\n\n' + infoLines.join('\n');
 
       // Stream base info first
       let currentText = '';
@@ -551,26 +833,24 @@ const ParkSelectionPage = () => {
           return updated;
         });
       }, 30);
+      // Track interval for cleanup
+      streamingIntervalsRef.current.push(streamInterval);
 
       // Fetch fast visual description from MCP
       const fetchAndStreamDescription = async () => {
         try {
-          // 🚀 FAST PATH: Use database description if available (instant!)
-          const finalText = species.description
-            ? species.description
-            : await (async () => {
-                // 🐌 SLOW PATH: Generate from OpenAI only if no database description
-                const descResult = await generateFastVisualDescription({
-                  scientificName: species.scientificName,
-                  commonName: species.commonName,
-                  animalType: species.animalType,
-                  ecoregion: regionName || undefined
-                });
+          // 🔬 VISION AI: Always generate fresh descriptions using Qwen3 vision
+          const descResult = await generateFastVisualDescription({
+            scientificName: species.scientificName,
+            commonName: species.commonName,
+            animalType: species.animalType,
+            imageUrl: species.imageUrl || undefined, // Pass image for Qwen3 vision AI
+            ecoregion: regionName || undefined
+          });
 
-                return descResult.success
-                  ? descResult.description || 'Description not available.'
-                  : 'Description not available.';
-              })();
+          const finalText = descResult.success
+            ? descResult.description || 'Description not available.'
+            : 'Description not available.';
 
           // Stream the description
           let descText = '';
@@ -580,13 +860,15 @@ const ParkSelectionPage = () => {
               clearInterval(descInterval);
 
               // ⏱️ Wait 1.5 seconds after streaming completes, then trigger next species
-              setTimeout(() => {
+              const nextSpeciesTimeout = setTimeout(() => {
                 setIsSpeciesStreamingInProgress(false);
                 console.log('✅ Species learning complete - ready for next');
 
-                // 🔄 Automatically trigger next species (pass filters, count, and shown species to avoid closure issues)
-                selectRandomSpecies(activeFilters, currentSessionNumber, updatedShownSpecies);
+                // 🔄 Automatically trigger next species (ref has latest shown species list)
+                selectRandomSpecies(activeFilters, currentSessionNumber, shownSpeciesRef.current);
               }, 1500);
+              // Track timeout for cleanup
+              streamingTimeoutsRef.current.push(nextSpeciesTimeout);
 
               return;
             }
@@ -607,6 +889,8 @@ const ParkSelectionPage = () => {
               return updated;
             });
           }, 30);
+          // Track interval for cleanup
+          streamingIntervalsRef.current.push(descInterval);
         } catch (error) {
           console.error('[Learning Mode] Description fetch failed:', error);
           // Fallback text
@@ -780,21 +1064,28 @@ const ParkSelectionPage = () => {
     setIsLearningMode(true);
     setQuickReplies([]); // Clear quick replies
     setLearningSessionCount(0); // Reset session counter
-    setShownSpeciesInSession([]); // Reset shown species list
+    shownSpeciesRef.current = []; // Reset shown species list (use ref)
     setCurrentLearningTopic(topic);
 
-    // Add confirmation message
+    // Reset learning session to start from plants phase
+    learningSession.resetSession();
+    taughtSpeciesRef.current = []; // Reset taught species ref
+    currentPhaseRef.current = 'plants'; // Initialize phase ref to plants
+    const phaseFilters = learningSession.getCurrentPhaseFilters();
+    setLearningFilters(phaseFilters);
+
+    // Add confirmation message with 3-phase system info
     const confirmMessage: ChatMessage = {
       id: `learning-start-${Date.now()}`,
       role: 'assistant',
-      content: `🎓 **Learning Mode Activated!**${topic !== 'general' ? `\n📖 Topic: ${topic}` : ''}\n\nI\'ll show you 5 species to study. Watch for each species description to complete before the next one appears!`,
+      content: `🎓 **3-Phase Learning Mode Activated!**\n\n🌿 **Phase 1:** Plants (5 species)\n🦅 **Phase 2:** Birds (5 species)\n🦁 **Phase 3:** Predators (5 species)\n\nAfter completing all phases, you\'ll take a trivia quiz to test your knowledge!\n\nStarting with Plants...`,
       timestamp: new Date(),
       status: 'sent'
     };
     setChatHistory(prev => [...prev, confirmMessage]);
 
-    // Select first species after a short delay (pass filters, 0 count, and empty shown list to avoid closure issues)
-    setTimeout(() => selectRandomSpecies(filters, 0, []), 1500);
+    // Select first species after a short delay (use phase filters)
+    setTimeout(() => selectRandomSpecies(phaseFilters, 0, []), 1500);
   };
 
   // Handle random topic selection
@@ -848,7 +1139,75 @@ const ParkSelectionPage = () => {
   };
 
   const handleQuickReplyClick = (reply: QuickReply) => {
-    if (reply.action === 'play-park') {
+    if (reply.action === 'start-trivia-game') {
+      // User clicked "Play Trivia Game" after completing all phases
+      setQuickReplies([]); // Clear button
+
+      // Navigate to trivia with taught species data
+      console.log('🎓 Navigating to trivia with taught species:', taughtSpeciesRef.current.length);
+
+      navigate('/trivia', {
+        state: {
+          ecoRegionId,
+          regionName,
+          parkId: selectedPark?.id || ecoRegionId,
+          parkName: selectedPark?.name || regionName,
+          lat,
+          lng,
+          chatHistory,
+          regionSpecies,
+          taughtSpecies: [...taughtSpeciesRef.current] // Use ref for reliable data
+        }
+      });
+    } else if (reply.action === 'continue-next-phase') {
+      // User clicked "Continue" to advance to next phase
+      setQuickReplies([]); // Clear button
+
+      // Get NEXT phase using ref (to avoid React state timing issues)
+      const currentPhase = currentPhaseRef.current;
+      const nextPhase = getNextPhase(currentPhase);
+
+      if (nextPhase) {
+        console.log(`🔄 Advancing from ${currentPhase} to ${nextPhase}`);
+
+        // Update phase ref IMMEDIATELY
+        currentPhaseRef.current = nextPhase;
+
+        // Get filters for the NEXT phase
+        const newFilters = getFiltersForPhase(nextPhase);
+        console.log(`🔍 Filters for ${nextPhase}:`, newFilters);
+
+        // Update state with new filters
+        setLearningFilters(newFilters);
+
+        // Also advance the phase in the hook (for taught species tracking)
+        learningSession.advanceToNextPhase();
+
+        // Reset session count and shown species for new phase
+        setLearningSessionCount(0);
+        shownSpeciesRef.current = []; // Reset shown species for new phase
+
+        // Get display info for the next phase
+        const phaseEmoji = getPhaseEmoji(nextPhase);
+        const phaseName = getPhaseDisplayName(nextPhase);
+
+        // Show phase transition message
+        const transitionMessage: ChatMessage = {
+          id: `phase-transition-${Date.now()}`,
+          role: 'assistant',
+          content: `${phaseEmoji} **Starting ${phaseName} Phase!**\n\nLet's explore 5 ${phaseName.toLowerCase()} species...`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, transitionMessage]);
+
+        // Start next phase with the correct filters
+        setTimeout(() => {
+          console.log(`🎯 Starting species selection for ${nextPhase} with filters:`, newFilters);
+          selectRandomSpecies(newFilters, 0, []);
+        }, 1000);
+      }
+    } else if (reply.action === 'play-park') {
       handleStartTrivia();
     } else if (reply.action === 'start-learning') {
       // Show topic selection instead of starting immediately
@@ -910,6 +1269,91 @@ const ParkSelectionPage = () => {
       // Handle /topics_list
       if (command === 'topics_list') {
         showTopicsList();
+        return;
+      }
+
+      // Handle /end or /stop to end learning mode
+      if (command === 'end' || command === 'stop') {
+        // Clear all active streaming intervals and timeouts
+        streamingIntervalsRef.current.forEach(interval => clearInterval(interval));
+        streamingTimeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+        streamingIntervalsRef.current = [];
+        streamingTimeoutsRef.current = [];
+
+        setIsLearningMode(false);
+        setIsSpeciesStreamingInProgress(false);
+        setQuickReplies([]);
+
+        const stopMessage: ChatMessage = {
+          id: `stop-${Date.now()}`,
+          role: 'assistant',
+          content: `🛑 **Learning mode stopped.**\n\nYou can start a new lesson anytime by typing a command like:\n• /plants\n• /birds\n• /random_topic`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, stopMessage]);
+        return;
+      }
+
+      // Handle /clear to restart learning session
+      if (command === 'clear') {
+        // Reset all learning state
+        setIsLearningMode(false);
+        setIsSpeciesStreamingInProgress(false);
+        setQuickReplies([]);
+        setLearningSessionCount(0);
+        shownSpeciesRef.current = [];
+        currentPhaseRef.current = 'plants';
+        taughtSpeciesRef.current = [];
+        learningSession.resetSession();
+
+        const restartMessage: ChatMessage = {
+          id: `restart-${Date.now()}`,
+          role: 'assistant',
+          content: `🔄 **Learning session restarted.**\n\nYou can start fresh with:\n• /plants\n• /birds\n• /random_topic`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, restartMessage]);
+        return;
+      }
+
+      // Handle /reset-stars to clear trivia progress
+      if (command === 'reset-stars' || command === 'reset_stars') {
+        resetParkStars();
+        setParkListKey(prev => prev + 1); // Force ParkList to re-render
+
+        const resetMessage: ChatMessage = {
+          id: `reset-stars-${Date.now()}`,
+          role: 'assistant',
+          content: `⭐ **Stars Reset!**\n\nAll trivia progress has been cleared. You can now replay trivia games and earn stars again!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, resetMessage]);
+        return;
+      }
+
+      // Handle /learn to show learning options
+      if (command === 'learn') {
+        const learnMessage: ChatMessage = {
+          id: `learn-${Date.now()}`,
+          role: 'assistant',
+          content: `🎓 **Ready to learn about ${regionName}?**\n\nClick the button below to start your learning journey!`,
+          timestamp: new Date(),
+          status: 'sent'
+        };
+        setChatHistory(prev => [...prev, learnMessage]);
+
+        // Show "Start Learning" quick reply
+        setQuickReplies([
+          {
+            id: 'start-learning',
+            label: '🎓 Start Learning',
+            emoji: '🎓',
+            action: 'start-learning' as const
+          }
+        ]);
         return;
       }
 
@@ -1184,6 +1628,7 @@ const ParkSelectionPage = () => {
 
           {/* Park List */}
           <ParkList
+            key={parkListKey}
             parks={[...wildlifePlaces, ...protectedAreas]}
             selectedPark={selectedPark}
             onParkClick={handleParkClick}
@@ -1226,7 +1671,8 @@ const ParkSelectionPage = () => {
               isLoading={isLoadingResponse}
               placeholder="Ask about species or ecosystems..."
               hasMessages={chatHistory.length > 0}
-              onExpandHistory={() => setIsChatHistoryExpanded(true)}
+              onExpandHistory={() => setIsChatHistoryExpanded(!isChatHistoryExpanded)}
+              isChatHistoryExpanded={isChatHistoryExpanded}
               theme={chatTheme}
             />
           </div>

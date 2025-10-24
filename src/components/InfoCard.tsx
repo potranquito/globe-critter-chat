@@ -33,6 +33,7 @@ interface SpeciesInfoCardProps extends BaseInfoCardProps {
   animalType: string;
   conservationStatus: string;
   dietaryCategory?: string;
+  habitatInfo?: string;
 }
 
 type InfoCardProps = EcoRegionInfoCardProps | ParkInfoCardProps | SpeciesInfoCardProps;
@@ -163,6 +164,13 @@ export const InfoCard = (props: InfoCardProps) => {
               <div className="mb-3">
                 <p className="text-xs text-muted-foreground">Diet</p>
                 <p className="text-base font-semibold text-primary capitalize">{props.dietaryCategory}</p>
+              </div>
+            )}
+
+            {props.habitatInfo && (
+              <div className="mb-3">
+                <p className="text-xs text-muted-foreground">Habitat</p>
+                <p className="text-base font-semibold text-primary">{props.habitatInfo}</p>
               </div>
             )}
 

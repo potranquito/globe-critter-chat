@@ -125,6 +125,7 @@ export interface Species {
   conservation_status: string | null;
   image_url: string | null;
   description: string | null;
+  is_curated: boolean;
 }
 
 export interface GetRegionSpeciesResult {
@@ -264,6 +265,7 @@ export interface GenerateFastVisualDescriptionArgs {
   scientificName: string;
   commonName: string;
   animalType: string;
+  imageUrl?: string; // Image URL for vision AI analysis
   ecoregion?: string;
 }
 

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { useParkStars } from '@/hooks/useParkStars';
 
 interface Park {
   id: string;
@@ -17,6 +18,10 @@ interface ParkListProps {
 }
 
 export const ParkList = ({ parks, selectedPark, onParkClick }: ParkListProps) => {
+  // IMPORTANT: We must destructure parkStars even though we don't use it directly,
+  // so React knows to re-render when parkStars state changes
+  const { getStars, parkStars } = useParkStars();
+
   if (parks.length === 0) {
     return null;
   }
@@ -73,22 +78,28 @@ export const ParkList = ({ parks, selectedPark, onParkClick }: ParkListProps) =>
                 {/* Three stars positioned on top of circle */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="flex gap-0.5">
-                    {[0, 1, 2].map((index) => (
-                      <svg
-                        key={index}
-                        width="10"
-                        height="10"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-muted-foreground/40"
-                      >
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                    ))}
+                    {(() => {
+                      const earnedStars = getStars(park.id);
+                      return [0, 1, 2].map((index) => {
+                        const isFilled = index < earnedStars;
+                        return (
+                          <svg
+                            key={index}
+                            width="10"
+                            height="10"
+                            viewBox="0 0 24 24"
+                            fill={isFilled ? "currentColor" : "none"}
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className={isFilled ? "text-yellow-400" : "text-muted-foreground/40"}
+                          >
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                          </svg>
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               </div>

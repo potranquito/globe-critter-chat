@@ -38,6 +38,8 @@ export interface RegionSpecies {
   description?: string; // Visual description for learning mode
   isInvasive?: boolean; // Is this an invasive species
   isVenomous?: boolean; // Is this a venomous species
+  habitatInfo?: string; // Brief habitat description (e.g., "Tropical reefs, 5-40m depth")
+  id?: string; // Species ID from database
 }
 
 /**

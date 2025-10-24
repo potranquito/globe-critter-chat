@@ -404,6 +404,111 @@ function randomSelection(carnivores: any[], herbivores: any[], omnivores: any[],
 }
 
 /**
+ * AI-powered species selection for trivia questions in 3-phase learning system
+ * Selects 4 species of the same type (all plants, all birds, or all predators)
+ * Correct answer MUST be from taught species, wrong answers can be any species
+ */
+export async function selectTriviaSpeciesWithAI(
+  allSpecies: any[],
+  taughtSpecies: any[],
+  questionPhase: 'plants' | 'birds' | 'predators',
+  ecoregionName: string
+): Promise<{
+  correctAnswer: any;
+  wrongAnswers: any[];
+  allOptions: any[];
+  strategy: string;
+}> {
+  console.log('[Trivia AI Selection] Phase:', questionPhase);
+  console.log('[Trivia AI Selection] Received taught species count:', taughtSpecies?.length || 0);
+  console.log('[Trivia AI Selection] Taught species:', taughtSpecies);
+
+  // Filter species by question phase type
+  let filteredPool: any[] = [];
+  if (questionPhase === 'plants') {
+    filteredPool = allSpecies.filter(sp =>
+      sp.dietaryCategory?.toLowerCase() === 'producer' ||
+      sp.speciesType?.toLowerCase() === 'plant' ||
+      sp.animalType?.toLowerCase().includes('plant')
+    );
+  } else if (questionPhase === 'birds') {
+    filteredPool = allSpecies.filter(sp =>
+      sp.speciesType?.toLowerCase() === 'bird' ||
+      sp.animalType?.toLowerCase().includes('bird') ||
+      sp.animalType?.toLowerCase().includes('aves')
+    );
+  } else if (questionPhase === 'predators') {
+    filteredPool = allSpecies.filter(sp =>
+      sp.dietaryCategory?.toLowerCase() === 'carnivore' ||
+      sp.dietaryCategory?.toLowerCase() === 'carnivores'
+    );
+  }
+
+  console.log(`[Trivia AI Selection] Filtered ${filteredPool.length} ${questionPhase} from ${allSpecies.length} total species`);
+  console.log(`[Trivia AI Selection] Sample filtered species:`, filteredPool.slice(0, 3).map(s => ({
+    name: s.commonName || s.common_name,
+    type: s.speciesType,
+    animalType: s.animalType,
+    dietaryCategory: s.dietaryCategory
+  })));
+
+  // Filter taught species to only those matching this phase
+  const taughtInPhase = taughtSpecies.filter(ts =>
+    filteredPool.some(fp => fp.scientificName === ts.scientificName || fp.scientific_name === ts.scientificName)
+  );
+
+  if (taughtInPhase.length === 0) {
+    console.log(`[Trivia AI Selection] No taught species for ${questionPhase} - using random selection`);
+    // Fallback: use random from filtered pool
+    return randomTriviaSelection(filteredPool);
+  }
+
+  // Select correct answer from taught species
+  const correctAnswer = taughtInPhase[Math.floor(Math.random() * taughtInPhase.length)];
+  console.log('[Trivia AI Selection] Correct answer:', correctAnswer.commonName || correctAnswer.common_name);
+
+  // Get wrong answers from filtered pool (excluding correct answer)
+  const wrongAnswerPool = filteredPool.filter(sp =>
+    sp.scientificName !== correctAnswer.scientificName &&
+    sp.scientific_name !== correctAnswer.scientificName
+  );
+
+  // Randomly select 3 wrong answers
+  const shuffled = wrongAnswerPool.sort(() => Math.random() - 0.5);
+  const wrongAnswers = shuffled.slice(0, 3);
+
+  console.log('[Trivia AI Selection] Wrong answers:', wrongAnswers.map(s => s.commonName || s.common_name));
+
+  // Shuffle all 4 options
+  const allOptions = [correctAnswer, ...wrongAnswers].sort(() => Math.random() - 0.5);
+
+  return {
+    correctAnswer,
+    wrongAnswers,
+    allOptions,
+    strategy: 'taught-species-trivia'
+  };
+}
+
+/**
+ * Fallback random trivia selection
+ */
+function randomTriviaSelection(filteredPool: any[]) {
+  const shuffled = filteredPool.sort(() => Math.random() - 0.5);
+  const selected = shuffled.slice(0, 4);
+  const correctAnswer = selected[0];
+  const wrongAnswers = selected.slice(1);
+  const allOptions = selected.sort(() => Math.random() - 0.5);
+
+  return {
+    correctAnswer,
+    wrongAnswers,
+    allOptions,
+    strategy: 'random-trivia-selection'
+  };
+}
+
+/**
  * Initialize target species for the food web game
  * Selects from carousel species (regionSpecies) only to ensure they're available
  */
