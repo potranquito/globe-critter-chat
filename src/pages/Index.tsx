@@ -1469,23 +1469,21 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
         const bootMessageId = `boot-${Date.now()}`;
         let loadingStepIndex = 0;
 
-        const introText = `Hello. I'm the wildlife terminal. I'm designed to help you save the earth.
-
-Click any region on the globe to discover its ecosystems,
-biodiversity, and conservation efforts.
-
-Type 'help' for available commands or ask me anything!`;
+        const introText = `Hello. I'm the wildlife terminal. I'm designed to help you learn about earth. Type /help for available commands or ask me anything!`;
 
         let currentText = '';
         let charIndex = 0;
 
         // 🚀 START ALL THREE PROCESSES SIMULTANEOUSLY
 
-        // Show initial state: mascot character
+        // Show initial state: mascot character with Critter AI text
         setChatHistory([{
           id: bootMessageId,
           role: 'assistant',
-          content: `![Wildlife Mascot](/images/pixel-character-landing.png)`,
+          content: `<div style="display: flex; align-items: center; gap: 1rem;">
+  <img src="/images/critter-ai-mascot.png" alt="Critter AI" style="width: 100px; height: auto;" />
+  <h1 style="color: #10b981; margin: 0;">CRITTER AI</h1>
+</div>`,
           timestamp: new Date(),
           status: 'sent'
         }]);
@@ -1526,11 +1524,16 @@ Type 'help' for available commands or ask me anything!`;
           setChatHistory([{
             id: bootMessageId,
             role: 'assistant',
-            content: `![Wildlife Mascot](/images/pixel-character-landing.png)\n${currentText}`,
+            content: `<div style="display: flex; align-items: center; gap: 1rem;">
+  <img src="/images/critter-ai-mascot.png" alt="Critter AI" style="width: 100px; height: auto;" />
+  <h1 style="color: #10b981; margin: 0;">CRITTER AI</h1>
+</div>
+
+${currentText}`,
             timestamp: new Date(),
             status: 'sent'
           }]);
-        }, 6); // 6ms per character for very fast typing (~1.3 seconds total)
+        }, 25); // 25ms per character for readable typing speed
 
     return;
   }
@@ -5327,7 +5330,8 @@ ${question.choices.join('\n')}`;
                 theme={chatTheme}
                 placeholder="Type /start to begin or enter commands..."
                 hasMessages={chatHistory.length > 0}
-                onExpandHistory={!isChatHistoryExpanded ? () => setIsChatHistoryExpanded(true) : undefined}
+                onExpandHistory={() => setIsChatHistoryExpanded(!isChatHistoryExpanded)}
+                isChatHistoryExpanded={isChatHistoryExpanded}
                 onFocus={() => {
                   // Enable deep dive mode when user focuses on the input with a species/habitat selected
                   if (speciesInfo || currentHabitat) {

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Minimize2, Loader2, CheckCircle2, XCircle, AlertTriangle, RotateCcw } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, AlertTriangle, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import QuickReplies, { QuickReply } from '@/components/QuickReplies';
 import AnsiToHtml from 'ansi-to-html';
@@ -112,7 +112,7 @@ const ChatHistory = ({
   return (
     <div
       className={cn(
-        "relative overflow-hidden transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-lg border-x border-t w-full",
+        "relative overflow-hidden transition-all duration-300 ease-in-out shadow-2xl backdrop-blur-lg border-x w-full",
         isExpanded ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none",
         className
       )}
@@ -120,68 +120,14 @@ const ChatHistory = ({
         borderRadius: '0.5rem 0.5rem 0 0', // rounded-t-lg - explicit for consistency
         maxHeight: isExpanded ? '550px' : '0',
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        backgroundColor: withAlpha(currentTheme.background, 0.3), // More transparent
+        backgroundColor: withAlpha(currentTheme.background, 0.85), // Increased opacity for better readability
         borderColor: withAlpha(currentTheme.primary, 0.3),
       }}
     >
-      {/* Terminal Header */}
-      <div
-        className="flex items-center justify-between px-4 py-2 border-b"
-        style={{
-          backgroundColor: withAlpha(currentTheme.background, 0.4),
-          borderColor: withAlpha(currentTheme.primary, 0.2),
-        }}
-      >
-        <div className="flex items-center gap-2">
-          <span className="text-lg">🌍</span>
-          <span
-            className="text-xs font-semibold"
-            style={{
-              color: currentTheme.secondary,
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
-            }}
-          >
-            wildlife-terminal
-          </span>
-          <span
-            className="text-xs font-bold tracking-wide"
-            style={{
-              color: bootLoadingStatus ? '#fbbf24' : (hasBooted ? '#10b981' : '#ef4444'),
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace'
-            }}
-          >
-            {bootLoadingStatus || (hasBooted ? 'online' : 'offline')}
-          </span>
-        </div>
-
-        {isExpanded && (
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={onMinimize}
-            className="h-7 w-7 rounded"
-            style={{
-              pointerEvents: 'auto',
-              color: withAlpha(currentTheme.secondary, 0.7),
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = withAlpha(currentTheme.primary, 0.1);
-              e.currentTarget.style.color = currentTheme.secondary;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = withAlpha(currentTheme.secondary, 0.7);
-            }}
-          >
-            <Minimize2 className="h-4 w-4" />
-          </Button>
-        )}
-      </div>
-
       {/* Terminal Output */}
       <div
         className="overflow-y-auto p-4 space-y-2 custom-scrollbar"
-        style={{ maxHeight: '490px' }}
+        style={{ maxHeight: '550px' }}
       >
         {messages.map((message, index) => {
           const isCurrentlyStreaming = isLastMessageStreaming && index === messages.length - 1;
@@ -197,7 +143,7 @@ const ChatHistory = ({
                 <div className="flex items-start gap-2 group">
                   <span className="font-bold shrink-0" style={{ color: currentTheme.secondary }}>❯</span>
                   <div className="flex-1">
-                    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed" style={{ color: currentTheme.text }}>
+                    <p className="text-sm whitespace-pre-wrap break-words leading-relaxed" style={{ color: currentTheme.text, textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)' }}>
                       {message.content}
                     </p>
                     {message.status === 'error' && (
@@ -248,7 +194,7 @@ const ChatHistory = ({
                         )}
                       </div>
                     )}
-                    <div className="text-sm text-slate-300 whitespace-pre-wrap break-words leading-relaxed">
+                    <div className="text-sm text-slate-300 whitespace-pre-wrap break-words leading-relaxed" style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)' }}>
                       {(() => {
                         const content = message.content || (showSpinner ? 'Processing...' : '');
 
@@ -265,6 +211,19 @@ const ChatHistory = ({
                                 backgroundColor: 'transparent',
                                 imageRendering: 'pixelated'
                               }}
+                            />
+                          );
+                        }
+
+                        // Check if content contains HTML tags
+                        const hasHtml = content.trim().startsWith('<') && content.includes('>');
+
+                        if (hasHtml) {
+                          // Render HTML content directly
+                          return (
+                            <div
+                              className="laser-in"
+                              dangerouslySetInnerHTML={{ __html: content }}
                             />
                           );
                         }
