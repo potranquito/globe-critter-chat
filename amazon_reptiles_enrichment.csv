@@ -1,0 +1,21 @@
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Boa constrictor,Boa constrictor,REPTILIA,LC,false,false,Tropical rainforest
+Amazon and Guianas,Caiman crocodilus,Spectacled caiman,REPTILIA,LC,false,false,Rivers and wetlands
+Amazon and Guianas,Melanosuchus niger,Black caiman,REPTILIA,LC,false,false,Rivers and lakes
+Amazon and Guianas,Paleosuchus palpebrosus,Cuvier's dwarf caiman,REPTILIA,LC,false,false,Forest streams
+Amazon and Guianas,Paleosuchus trigonatus,Smooth-fronted caiman,REPTILIA,LC,false,false,Forest streams
+Amazon and Guianas,Geochelone denticulata,Yellow-footed tortoise,REPTILIA,VU,false,false,Tropical rainforest floor
+Amazon and Guianas,Podocnemis unifilis,Yellow-spotted river turtle,REPTILIA,VU,false,false,Rivers and lakes
+Amazon and Guianas,Podocnemis expansa,Giant South American river turtle,REPTILIA,LC,false,false,Large rivers
+Amazon and Guianas,Podocnemis erythrocephala,Red-headed Amazon river turtle,REPTILIA,LC,false,false,Rivers and streams
+Amazon and Guianas,Chelus fimbriata,Matamata,REPTILIA,LC,false,false,Slow-moving rivers
+Amazon and Guianas,Eunectes murinus,Green anaconda,REPTILIA,LC,false,false,Swamps and rivers
+Amazon and Guianas,Corallus caninus,Emerald tree boa,REPTILIA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Corallus hortulanus,Amazon tree boa,REPTILIA,LC,false,false,Rainforest trees
+Amazon and Guianas,Epicrates cenchria,Rainbow boa,REPTILIA,LC,false,false,Rainforest floor
+Amazon and Guianas,Bothrops atrox,Common lancehead,REPTILIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Bothriopsis bilineata,Two-striped forest pit viper,REPTILIA,LC,true,false,Rainforest understory
+Amazon and Guianas,Iguana iguana,Green iguana,REPTILIA,LC,false,false,Riverbanks and canopy
+Amazon and Guianas,Tupinambis teguixin,Gold tegu,REPTILIA,LC,false,false,Rainforest floor
+Amazon and Guianas,Dracaena guianensis,Caiman lizard,REPTILIA,LC,false,false,Rivers and streams
+Amazon and Guianas,Crocodilurus amazonicus,Amazon caiman lizard,REPTILIA,LC,false,false,Rivers and streams

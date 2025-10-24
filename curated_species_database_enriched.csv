@@ -246,3 +246,24 @@ Arctic Terrestrial,Purple saxifrage,Purple saxifrage,MAGNOLIOPSIDA,LC,Rocky tund
 Arctic Terrestrial,Arctic poppy,Arctic poppy,MAGNOLIOPSIDA,LC,Tundra slopes,https://upload.wikimedia.org/wikipedia/commons/8/8c/DAB_list_gray.svg,Wikimedia Commons,Arctic poppy is a common name which may refer to the following Papaver species:
 Arctic Terrestrial,Bearberry,Bearberry,MAGNOLIOPSIDA,LC,Heath tundra,https://upload.wikimedia.org/wikipedia/commons/9/95/Arctostaphylos-uva-ursi.JPG,Wikimedia Commons,"Bearberries are dwarf shrubs in the genus Arctostaphylos, especially the species A. uva-ursi, A. alpina, and A. rubra. Unlike most other species of Arctostaphylos, they are adapted to Arctic, subarctic, and alpine/subalpine climates and have a circumpolar distribution in northern North America, Asia and Europe."
 Arctic Terrestrial,Dryas octopetala,Mountain avens,MAGNOLIOPSIDA,LC,Rocky tundra,https://upload.wikimedia.org/wikipedia/commons/b/b0/Dryas_octopetala_LC0327.jpg,Wikimedia Commons,"Dryas octopetala, the mountain avens, eightpetal mountain-avens, white dryas or white dryad, is an Arctic–alpine flowering plant in the family Rosaceae. It is a small prostrate evergreen subshrub forming large colonies. The specific epithet octopetala derives from Greek octo 'eight' and petalon 'petal', referring to the eight petals of the flower, an unusual number in the Rosaceae, where five is the normal number. However, flowers with up to 16 petals also occur naturally."
+ecoregion,scientific_name,common_name,class,conservation_status,is_venomous,is_invasive,habitat_type
+Amazon and Guianas,Boa constrictor,Boa constrictor,REPTILIA,LC,false,false,Tropical rainforest
+Amazon and Guianas,Caiman crocodilus,Spectacled caiman,REPTILIA,LC,false,false,Rivers and wetlands
+Amazon and Guianas,Melanosuchus niger,Black caiman,REPTILIA,LC,false,false,Rivers and lakes
+Amazon and Guianas,Paleosuchus palpebrosus,Cuvier's dwarf caiman,REPTILIA,LC,false,false,Forest streams
+Amazon and Guianas,Paleosuchus trigonatus,Smooth-fronted caiman,REPTILIA,LC,false,false,Forest streams
+Amazon and Guianas,Geochelone denticulata,Yellow-footed tortoise,REPTILIA,VU,false,false,Tropical rainforest floor
+Amazon and Guianas,Podocnemis unifilis,Yellow-spotted river turtle,REPTILIA,VU,false,false,Rivers and lakes
+Amazon and Guianas,Podocnemis expansa,Giant South American river turtle,REPTILIA,LC,false,false,Large rivers
+Amazon and Guianas,Podocnemis erythrocephala,Red-headed Amazon river turtle,REPTILIA,LC,false,false,Rivers and streams
+Amazon and Guianas,Chelus fimbriata,Matamata,REPTILIA,LC,false,false,Slow-moving rivers
+Amazon and Guianas,Eunectes murinus,Green anaconda,REPTILIA,LC,false,false,Swamps and rivers
+Amazon and Guianas,Corallus caninus,Emerald tree boa,REPTILIA,LC,false,false,Rainforest canopy
+Amazon and Guianas,Corallus hortulanus,Amazon tree boa,REPTILIA,LC,false,false,Rainforest trees
+Amazon and Guianas,Epicrates cenchria,Rainbow boa,REPTILIA,LC,false,false,Rainforest floor
+Amazon and Guianas,Bothrops atrox,Common lancehead,REPTILIA,LC,true,false,Rainforest floor
+Amazon and Guianas,Bothriopsis bilineata,Two-striped forest pit viper,REPTILIA,LC,true,false,Rainforest understory
+Amazon and Guianas,Iguana iguana,Green iguana,REPTILIA,LC,false,false,Riverbanks and canopy
+Amazon and Guianas,Tupinambis teguixin,Gold tegu,REPTILIA,LC,false,false,Rainforest floor
+Amazon and Guianas,Dracaena guianensis,Caiman lizard,REPTILIA,LC,false,false,Rivers and streams
+Amazon and Guianas,Crocodilurus amazonicus,Amazon caiman lizard,REPTILIA,LC,false,false,Rivers and streams
