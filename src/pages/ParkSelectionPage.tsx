@@ -235,10 +235,10 @@ const ParkSelectionPage = () => {
 
               console.log('🗺️ Mapped species:', mappedSpecies);
 
-              // Remove duplicates based on imageUrl (keep first occurrence)
+              // Remove duplicates based on imageUrl AND filter out species without images (uncurated)
               const seenImages = new Set<string>();
               const uniqueSpecies = mappedSpecies.filter(species => {
-                if (!species.imageUrl) return true; // Keep species without images
+                if (!species.imageUrl) return false; // 🎯 Skip species without images (uncurated species)
                 if (seenImages.has(species.imageUrl)) {
                   return false; // Skip duplicate image
                 }
