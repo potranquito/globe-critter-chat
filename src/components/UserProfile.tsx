@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
+import { SignInDialog } from '@/components/SignInDialog';
 
 export function UserProfile() {
   const { user, loading, signIn, signOut } = useAuth();
@@ -39,12 +40,13 @@ export function UserProfile() {
   if (!user) {
     return (
       <div className="fixed top-4 right-8 z-[100] pointer-events-auto">
-        <Button
-          onClick={signIn}
-          className="glass-panel rounded-xl h-12 px-6 bg-primary/90 hover:bg-primary text-primary-foreground"
-        >
-          Sign In
-        </Button>
+        <SignInDialog
+          trigger={
+            <Button className="glass-panel rounded-xl h-12 px-6 bg-primary/90 hover:bg-primary text-primary-foreground">
+              Sign In
+            </Button>
+          }
+        />
       </div>
     );
   }

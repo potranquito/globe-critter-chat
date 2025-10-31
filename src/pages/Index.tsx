@@ -5238,7 +5238,7 @@ ${question.choices.join('\n')}`;
 
       {/* Global Health Bar - Top Center */}
       <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex flex-col gap-2 pointer-events-auto items-center">
-        <GlobalHealthBar />
+        <GlobalHealthBar variant="compact" />
 
         {/* 🎮 Food Web Selection Bar - Under Health Bar */}
         {useGoogleMaps && (

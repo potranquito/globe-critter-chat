@@ -1,21 +1,18 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
-import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
-import ChatInput, { ChatContext } from '@/components/ChatInput';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import type { RegionSpecies } from '@/services/regionService';
+import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
+import ChatInput, { ChatTheme } from '@/components/ChatInput';
 import ChatHistory, { ChatMessage } from '@/components/ChatHistory';
 import { QuickReply } from '@/components/QuickReplies';
-import { RegionSpeciesCarousel } from '@/components/RegionSpeciesCarousel';
-import { EcoRegionCard } from '@/components/EcoRegionCard';
 import { ScatteredSpeciesImages } from '@/components/ScatteredSpeciesImages';
-import { QuestionDisplay } from '@/components/QuestionDisplay';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { sendEducationMessage, selectTriviaSpeciesWithAI } from '@/services/educationAgent';
-import { markWhackAMoleComplete, isEcoRegionCompleted, markPixelGameComplete } from '@/utils/ecoRegionProgress';
-import { WhackAMoleGameModal } from '@/components/WhackAMoleGameModal';
-import confetti from 'canvas-confetti';
-import type { RegionSpecies } from '@/services/regionService';
-import type { TaughtSpecies } from '@/types/learning';
+import { useLearningSession } from '@/hooks/useLearningSession';
 import { useParkStars } from '@/hooks/useParkStars';
+import { getPhaseDisplayName, getPhaseEmoji, getNextPhase, type LearningPhase } from '@/types/learning';
+import { generateColorTheme, generateFastVisualDescription } from '@/services/mcpClient';
+import confetti from 'canvas-confetti';
 
 interface TriviaPageLocationState {
   ecoRegionId: string;
@@ -24,112 +21,136 @@ interface TriviaPageLocationState {
   parkName: string;
   lat: number;
   lng: number;
-  chatHistory: ChatMessage[];
-  selectedFoodWebSpecies: {
-    carnivore: any;
-    herbivore: any;
-    omnivore: any;
-    bird: any;
-    plantCoral: any;
-  };
   regionSpecies: RegionSpecies[];
-  taughtSpecies?: TaughtSpecies[]; // Species taught during 3-phase learning
+  parkData: any;
 }
 
-// Question configs - matches 3-phase learning system (Plants → Birds → Predators)
+type PagePhase = 'learning' | 'trivia';
+
+// Question configs matching 3-phase learning
 const QUESTION_CONFIGS = [
   {
     number: 1,
     difficulty: 'easy' as const,
     question: "Which one is the **plant species**?",
     phase: 'plants' as const,
-    requiredCorrectType: 'plant',
-    selectionStrategy: 'plant_and_animals'
   },
   {
     number: 2,
     difficulty: 'medium' as const,
     question: "Which is the **bird species**?",
     phase: 'birds' as const,
-    requiredCorrectType: 'bird',
-    selectionStrategy: 'bird_and_others'
   },
   {
     number: 3,
     difficulty: 'hard' as const,
     question: "Which is the **top predator**?",
     phase: 'predators' as const,
-    requiredCorrectType: 'carnivore',
-    selectionStrategy: 'carnivore_and_others'
   }
 ];
+
+/**
+ * Get filters for a specific learning phase
+ */
+function getFiltersForPhase(phase: LearningPhase): string[] {
+  switch (phase) {
+    case 'plants':
+      return ['producer-diet', 'plant'];
+    case 'birds':
+      return ['bird'];
+    case 'predators':
+      return ['carnivore-diet'];
+    default:
+      return [];
+  }
+}
+
+/**
+ * Get conservation status full name
+ */
+function getConservationStatusFullName(code: string | undefined): string {
+  if (!code) return 'Not Evaluated';
+  const statusMap: Record<string, string> = {
+    'LC': 'Least Concern',
+    'NT': 'Near Threatened',
+    'VU': 'Vulnerable',
+    'EN': 'Endangered',
+    'CR': 'Critically Endangered',
+    'EW': 'Extinct in the Wild',
+    'EX': 'Extinct',
+    'DD': 'Data Deficient',
+    'NE': 'Not Evaluated'
+  };
+  return statusMap[code.toUpperCase()] || code;
+}
+
+/**
+ * Get species subtype (flower, tree, mammal, bird, etc.)
+ */
+function getSpeciesSubtype(species: RegionSpecies): string {
+  const animalType = species.animalType?.toLowerCase() || '';
+  const speciesType = species.speciesType?.toLowerCase() || '';
+
+  if (speciesType === 'plant' || species.dietaryCategory === 'Producer') {
+    if (animalType.includes('tree') || species.commonName?.toLowerCase().includes('tree')) return 'tree';
+    if (animalType.includes('flower') || species.commonName?.toLowerCase().includes('flower')) return 'flower';
+    if (animalType.includes('bush') || animalType.includes('shrub')) return 'bush';
+    if (animalType.includes('grass')) return 'grass';
+    if (animalType.includes('moss')) return 'moss';
+    if (animalType.includes('lichen')) return 'lichen';
+    return 'plant';
+  }
+
+  if (speciesType === 'bird' || animalType.includes('bird')) return 'bird';
+  if (speciesType === 'mammal' || animalType.includes('mammal')) return 'mammal';
+  if (speciesType === 'reptile' || animalType.includes('reptile')) return 'reptile';
+  if (speciesType === 'amphibian' || animalType.includes('amphibian')) return 'amphibian';
+  if (speciesType === 'fish' || animalType.includes('fish')) return 'fish';
+  if (speciesType === 'insect' || animalType.includes('insect')) return 'insect';
+
+  return animalType || speciesType || 'organism';
+}
 
 const TriviaPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { addStar } = useParkStars();
 
-  // Get state from navigation
   const state = location.state as TriviaPageLocationState;
 
-  // Initialize from state or redirect if missing
-  useEffect(() => {
-    if (!state?.ecoRegionId || !state?.regionName) {
-      console.error('Missing required state for TriviaPage');
-      navigate('/');
-    }
-  }, [state, navigate]);
+  // Page phase state
+  const [currentPhase, setCurrentPhase] = useState<PagePhase>('learning');
 
-  // Chat state
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>(state?.chatHistory || []);
+  // Learning phase state
+  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [quickReplies, setQuickReplies] = useState<QuickReply[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isChatHistoryExpanded, setIsChatHistoryExpanded] = useState(true);
-
-  // Food web game state
-  const [selectedFoodWebSpecies, setSelectedFoodWebSpecies] = useState(state?.selectedFoodWebSpecies || {
-    carnivore: null,
-    herbivore: null,
-    omnivore: null,
-    bird: null,
-    plantCoral: null
-  });
-  const [isFoodWebGameActive, setIsFoodWebGameActive] = useState(false);
   const [selectedCarouselSpecies, setSelectedCarouselSpecies] = useState<RegionSpecies | null>(null);
+  const [learningFilters, setLearningFilters] = useState<string[]>([]);
+  const [learningSessionCount, setLearningSessionCount] = useState(0);
+  const [isSpeciesStreamingInProgress, setIsSpeciesStreamingInProgress] = useState(false);
 
-  // Challenge game state
-  const [currentChallengeSpecies, setCurrentChallengeSpecies] = useState<RegionSpecies | null>(null);
-  const [correctAnswerFeedback, setCorrectAnswerFeedback] = useState<string | null>(null);
-  const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState<string | null>(null);
-  const [collectedSpecies, setCollectedSpecies] = useState<RegionSpecies[]>([]);
+  // Learning session hook
+  const learningSession = useLearningSession(state?.parkId || '', state?.parkName || '');
 
-  // Mini-game state
-  const [showWhackAMole, setShowWhackAMole] = useState(false);
-  const [whackAMoleConfig, setWhackAMoleConfig] = useState<any>(null);
+  // Refs for learning
+  const taughtSpeciesRef = useRef<any[]>([]);
+  const shownSpeciesRef = useRef<string[]>([]);
+  const streamingIntervalsRef = useRef<NodeJS.Timeout[]>([]);
+  const streamingTimeoutsRef = useRef<NodeJS.Timeout[]>([]);
+  const currentPhaseRef = useRef<LearningPhase>('plants');
 
-  // Species data
-  const [regionSpecies, setRegionSpecies] = useState<RegionSpecies[]>(state?.regionSpecies || []);
-  const [currentSpeciesIndex, setCurrentSpeciesIndex] = useState(0);
-  const [isInitializing, setIsInitializing] = useState(false);
+  // Chameleon theme
+  const [chatTheme, setChatTheme] = useState<ChatTheme>({
+    primary: 'hsl(160, 84%, 39%)',
+    secondary: 'hsl(158, 64%, 52%)',
+    background: 'hsl(222, 47%, 11%)',
+    text: 'hsl(152, 76%, 80%)',
+    accent: 'hsl(160, 100%, 70%)'
+  });
 
-  // Spin wheel state (5 phases for trivia - all same type)
-  const [isSpinningWheel, setIsSpinningWheel] = useState(false);
-  const [spinPhase, setSpinPhase] = useState<1|2|3|4|5>(1);
-  const [isAISelecting, setIsAISelecting] = useState(false);
-  const spinSelectedSpeciesRef = useRef<any>(null);
-  const triviaSelectionRef = useRef<{
-    correctAnswer: any;
-    wrongAnswers: any[];
-    allOptions: any[];
-  } | null>(null);
-
-  // Timer state - 30 second countdown
-  const [timeRemaining, setTimeRemaining] = useState(30); // 30 seconds
-  const [timerActive, setTimerActive] = useState(false);
-
-  // Game state
+  // Trivia phase state
   const [isGameActive, setIsGameActive] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [correctSpeciesForCurrentQuestion, setCorrectSpeciesForCurrentQuestion] = useState<RegionSpecies | null>(null);
@@ -141,8 +162,126 @@ const TriviaPage = () => {
     correctAnswer: string;
     isCorrect: boolean;
   }>>([]);
+  const [selectedFoodWebSpecies, setSelectedFoodWebSpecies] = useState<any>({
+    carnivore: null,
+    herbivore: null,
+    omnivore: null,
+    bird: null,
+    plantCoral: null
+  });
+  const [correctAnswerFeedback, setCorrectAnswerFeedback] = useState<string | null>(null);
+  const [wrongAnswerFeedback, setWrongAnswerFeedback] = useState<string | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState(30);
+  const [timerActive, setTimerActive] = useState(false);
 
-  // Timer countdown effect
+  // Park-specific species (filtered from region species)
+  const [parkSpecies, setParkSpecies] = useState<RegionSpecies[]>([]);
+
+  // Redirect if missing state
+  useEffect(() => {
+    console.log('🏞️ TriviaPage state:', state);
+    if (!state?.parkId || !state?.regionName) {
+      console.error('❌ Missing required state for TriviaPage');
+      navigate('/');
+    } else {
+      console.log('✅ TriviaPage loaded with:', {
+        parkName: state.parkName,
+        regionName: state.regionName,
+        speciesCount: state.regionSpecies?.length
+      });
+    }
+  }, [state, navigate]);
+
+  // Load park-specific species
+  useEffect(() => {
+    console.log('🔍 Species loading check:', {
+      hasRegionSpecies: !!state?.regionSpecies,
+      regionSpeciesCount: state?.regionSpecies?.length || 0,
+      parkName: state?.parkName,
+      stateKeys: state ? Object.keys(state) : []
+    });
+
+    if (!state?.parkName) {
+      console.log('❌ No park name, skipping species load');
+      return;
+    }
+
+    if (!state?.regionSpecies || state.regionSpecies.length === 0) {
+      console.log('❌ No region species available');
+      return;
+    }
+
+    // TODO: In future, query species by park from database
+    // For now, use all region species (will be filtered during learning)
+    console.log('✅ Loading species for park:', state.parkName, '- Count:', state.regionSpecies.length);
+    setParkSpecies(state.regionSpecies);
+  }, [state?.regionSpecies, state?.parkName]);
+
+  // Generate color theme
+  useEffect(() => {
+    if (!state?.regionName) return;
+
+    const loadTheme = async () => {
+      try {
+        const themeResult = await generateColorTheme({ ecoregionName: state.regionName });
+        if (themeResult.success && themeResult.theme) {
+          setChatTheme(themeResult.theme);
+        }
+      } catch (error) {
+        console.error('Failed to generate theme:', error);
+      }
+    };
+
+    loadTheme();
+  }, [state?.regionName]);
+
+  // Show welcome message when learning starts
+  useEffect(() => {
+    // Don't show welcome until species are loaded
+    if (parkSpecies.length === 0 && state?.regionSpecies?.length > 0) {
+      console.log('⏳ Waiting for species to load...');
+      return;
+    }
+
+    console.log('👋 Welcome message check:', {
+      currentPhase,
+      chatHistoryLength: chatHistory.length,
+      parkSpeciesLength: parkSpecies.length,
+      parkName: state?.parkName,
+      regionSpecies: state?.regionSpecies?.length,
+      shouldShow: currentPhase === 'learning' && parkSpecies.length > 0
+    });
+
+    if (currentPhase === 'learning' && parkSpecies.length > 0 && chatHistory.length === 0) {
+      console.log('✅ Showing welcome message with Start Learning button');
+
+      const welcomeMessage: ChatMessage = {
+        id: `welcome-${Date.now()}`,
+        role: 'assistant',
+        content: `🌍 Welcome to **${state.parkName}** in the **${state.regionName}** eco-region!\n\nI'm your learning guide. We'll explore this park together through a 3-phase learning journey:\n\n🌿 **Phase 1:** Plants (5 species)\n🦅 **Phase 2:** Birds (5 species)\n🦁 **Phase 3:** Predators (5 species)\n\nAfter learning about 15 species, you'll take a trivia quiz to test your knowledge!\n\nReady to begin?`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory([welcomeMessage]);
+
+      setQuickReplies([
+        {
+          id: 'start-learning',
+          label: '🎓 Start Learning',
+          emoji: '🎓',
+          action: 'start-learning' as const
+        },
+        {
+          id: 'go-back',
+          label: '🔙 Go Back',
+          emoji: '🔙',
+          action: 'go-back' as const
+        }
+      ]);
+    }
+  }, [currentPhase, chatHistory.length, parkSpecies.length, state?.parkName, state?.regionName, state?.regionSpecies?.length]);
+
+  // Timer countdown for trivia
   useEffect(() => {
     if (!timerActive) return;
 
@@ -150,27 +289,7 @@ const TriviaPage = () => {
       setTimeRemaining(prev => {
         if (prev <= 1) {
           setTimerActive(false);
-          // Time's up! Restart game
-          const timeoutMessage: ChatMessage = {
-            id: `timeout-${Date.now()}`,
-            role: 'assistant',
-            content: '⏰ **Time\'s up!** Game restarting...',
-            timestamp: new Date(),
-            status: 'sent'
-          };
-          setChatHistory(prev => [...prev, timeoutMessage]);
-
-          toast({
-            title: "⏰ Time's Up!",
-            description: "Restarting the trivia game",
-            variant: "destructive"
-          });
-
-          // Restart game after 2 seconds
-          setTimeout(() => {
-            handleStartGame();
-          }, 2000);
-
+          handleTimeOut();
           return 0;
         }
         return prev - 1;
@@ -178,548 +297,402 @@ const TriviaPage = () => {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timerActive, navigate, toast]);
+  }, [timerActive]);
 
-  // Debug: Log species data
-  useEffect(() => {
-    console.log('🔍 TriviaPage - regionSpecies:', regionSpecies);
-    console.log('🔍 TriviaPage - regionSpecies.length:', regionSpecies?.length);
-    console.log('🔍 TriviaPage - state?.regionSpecies:', state?.regionSpecies);
-  }, [regionSpecies, state?.regionSpecies]);
-
-  // Streaming refs
-  const streamingBufferRef = useRef<{ fullResponse: string; displayedResponse: string }>({
-    fullResponse: '',
-    displayedResponse: ''
-  });
-  const characterIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // 🎭 Show intro message with Start/Go Back options
-  useEffect(() => {
-    // Only run once when page loads
-    if (chatHistory.length > 0 || !state?.regionName) return;
-
-    console.log('🎮 Showing trivia game intro message...', { regionName: state.regionName, parkName: state?.parkName });
-
-    // Create intro message
-    const introMessage: ChatMessage = {
-      id: `intro-${Date.now()}`,
+  // Handle time out
+  const handleTimeOut = () => {
+    const timeoutMessage: ChatMessage = {
+      id: `timeout-${Date.now()}`,
       role: 'assistant',
-      content: `Would you like to begin the **${state.regionName}** trivia game${state?.parkName ? ` at **${state.parkName}**` : ''}?`,
+      content: '⏰ **Time\'s up!** Returning to learning mode...',
       timestamp: new Date(),
       status: 'sent'
     };
+    setChatHistory(prev => [...prev, timeoutMessage]);
 
-    setChatHistory([introMessage]);
+    toast({
+      title: "⏰ Time's Up!",
+      description: "Returning to learning mode",
+      variant: "destructive"
+    });
 
-    // Show Start and Go Back buttons
-    setQuickReplies([
-      {
-        id: 'start-trivia',
-        label: 'Start',
-        emoji: '🎮',
-        action: 'start-trivia' as const
-      },
-      {
-        id: 'go-back-to-park',
-        label: 'Go Back',
-        emoji: '🔙',
-        action: 'go-back-to-park' as const
-      }
-    ]);
-  }, [state?.regionName, chatHistory.length]);
-
-  // 🎮 Handle return from Pixel Game
-  useEffect(() => {
-    const pixelGameWon = searchParams.get('pixelGameWon');
-    const pixelGameLost = searchParams.get('pixelGameLost');
-    const returnedEcoRegionId = searchParams.get('ecoRegionId');
-
-    if (pixelGameWon === 'true' && returnedEcoRegionId) {
-      setSearchParams({});
-
-      // Add success message to chat
-      const successMessage: ChatMessage = {
-        id: `pixel-success-${Date.now()}`,
-        role: 'assistant',
-        content: '🎉 Amazing work! You escaped the toxic wasteland! Now for the final challenge...',
-        timestamp: new Date(),
-        status: 'sent'
-      };
-      setChatHistory(prev => [...prev, successMessage]);
-
-      // Show "Battle Poopy Pants" button
-      setQuickReplies([
-        {
-          id: 'battle-poopy-pants',
-          label: 'Battle Poopy Pants',
-          emoji: '💩',
-          action: 'battle-poopy-pants' as const
-        }
-      ]);
-
-      toast({
-        title: "🎯 Final Boss!",
-        description: "Ready to face Poopy Pants?",
-      });
-    } else if (pixelGameLost === 'true') {
-      setSearchParams({});
-
-      const lostMessage: ChatMessage = {
-        id: `pixel-lost-${Date.now()}`,
-        role: 'assistant',
-        content: '😔 The toxic waste got you! Let\'s start fresh from the beginning.',
-        timestamp: new Date(),
-        status: 'sent'
-      };
-      setChatHistory(prev => [...prev, lostMessage]);
-
-      // Navigate back to globe after 2 seconds
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 2000);
-
-      toast({
-        title: "🔄 Starting Over",
-        description: "Return to the globe to try again",
-        variant: "destructive"
-      });
-    }
-  }, [searchParams, setSearchParams, toast, navigate]);
-
-  // 🎮 Handle return from Whack-A-Mole
-  useEffect(() => {
-    const whackAMoleWon = searchParams.get('whackAMoleWon');
-    const returnedEcoRegionId = searchParams.get('ecoRegionId');
-
-    if (whackAMoleWon === 'true' && returnedEcoRegionId) {
-      setSearchParams({});
-
-      // Mark as complete
-      markWhackAMoleComplete(returnedEcoRegionId);
-
-      // Add victory message
-      const victoryMessage: ChatMessage = {
-        id: `whackamole-victory-${Date.now()}`,
-        role: 'assistant',
-        content: '🎊 INCREDIBLE! You defeated Poopy Pants and saved the eco-region! Let me wrap things up...',
-        timestamp: new Date(),
-        status: 'sent'
-      };
-      setChatHistory(prev => [...prev, victoryMessage]);
-
-      // Trigger confetti
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-
-      // Show AI wrap-up after 2 seconds
-      setTimeout(() => {
-        addAIWrapUp(returnedEcoRegionId);
-      }, 2000);
-    }
-  }, [searchParams, setSearchParams]);
-
-  // 🤖 AI Wrap-up after completing all 3 games
-  const addAIWrapUp = async (ecoRegionId: string) => {
-    const wrapUpMessageId = `wrapup-${Date.now()}`;
-    const wrapUpMessage: ChatMessage = {
-      id: wrapUpMessageId,
-      role: 'assistant',
-      content: '',
-      timestamp: new Date(),
-      status: 'sent'
-    };
-    setChatHistory(prev => [...prev, wrapUpMessage]);
-
-    // Stream wrap-up message
-    const wrapUpText = `🌍 Congratulations, Guardian! You've completed all three challenges in ${state?.regionName}:
-
-✅ Food Web Mastery - You identified the delicate balance of predator and prey
-✅ Toxic Waste Escape - You navigated the dangers threatening this habitat
-✅ Final Battle Victory - You defeated the forces of pollution
-
-Your journey has made a real difference. The eco-region is now protected, and its species can thrive! 🌿
-
-Return to the globe to see your completed region marked with a red pin 📍`;
-
-    let charIndex = 0;
-    const interval = setInterval(() => {
-      if (charIndex < wrapUpText.length) {
-        const nextChar = wrapUpText[charIndex];
-        setChatHistory(prev =>
-          prev.map(msg =>
-            msg.id === wrapUpMessageId
-              ? { ...msg, content: msg.content + nextChar }
-              : msg
-          )
-        );
-        charIndex++;
-      } else {
-        clearInterval(interval);
-
-        // Show "Return to Globe" button
-        setQuickReplies([
-          {
-            id: 'return-to-globe',
-            label: 'Return to Globe',
-            emoji: '🌍',
-            action: 'return-to-globe' as const
-          }
-        ]);
-      }
-    }, 30);
+    setTimeout(() => {
+      setCurrentPhase('learning');
+      setIsGameActive(false);
+    }, 2000);
   };
 
-  // Handle chat input
-  const handleSearch = async (query: string) => {
-    if (!query.trim() || isLoading) return;
+  // Start learning mode
+  const startLearningMode = () => {
+    setQuickReplies([]);
+    learningSession.resetSession();
+    taughtSpeciesRef.current = [];
+    shownSpeciesRef.current = [];
+    currentPhaseRef.current = 'plants';
+    setLearningSessionCount(0);
 
-    // Add user message
-    const userMessageId = Date.now().toString();
-    const userMessage: ChatMessage = {
-      id: userMessageId,
-      role: 'user',
-      content: query,
+    const phaseFilters = getFiltersForPhase('plants');
+    setLearningFilters(phaseFilters);
+
+    const startMessage: ChatMessage = {
+      id: `learning-start-${Date.now()}`,
+      role: 'assistant',
+      content: `🎓 **3-Phase Learning Mode Activated!**\n\n🌿 Starting with Plants...\n\nLet me find some species for you to learn about!`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, startMessage]);
+
+    setTimeout(() => selectRandomSpecies(phaseFilters, 0, []), 1500);
+  };
+
+  // Select random species for learning
+  const selectRandomSpecies = (filtersToUse?: string[], sessionCount?: number, alreadyShown?: string[]) => {
+    if (isSpeciesStreamingInProgress) {
+      console.log('⏳ Species streaming in progress');
+      return;
+    }
+
+    const activeFilters = filtersToUse !== undefined ? filtersToUse : learningFilters;
+    const shownSpecies = alreadyShown !== undefined ? alreadyShown : shownSpeciesRef.current;
+
+    const filteredSpecies = getFilteredSpeciesWithFilters(activeFilters);
+    const availableSpecies = filteredSpecies.filter(s => !shownSpecies.includes(s.scientificName));
+
+    if (availableSpecies.length === 0) {
+      console.log('⚠️ No more species available');
+      return;
+    }
+
+    const previousCount = sessionCount !== undefined ? sessionCount : learningSessionCount;
+    const currentSessionNumber = previousCount + 1;
+    setLearningSessionCount(currentSessionNumber);
+
+    if (currentSessionNumber > 5) {
+      if (learningSession.isAllPhasesComplete()) {
+        showTriviaReadyMessage();
+        return;
+      }
+
+      showPhaseCompleteMessage();
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * availableSpecies.length);
+    const species = availableSpecies[randomIndex];
+
+    setIsSpeciesStreamingInProgress(true);
+    learningSession.addTaughtSpecies(species);
+    taughtSpeciesRef.current.push({
+      id: species.id,
+      scientificName: species.scientificName,
+      commonName: species.commonName,
+      imageUrl: species.imageUrl,
+      phase: learningSession.currentPhase
+    });
+
+    shownSpeciesRef.current = [...shownSpecies, species.scientificName];
+    setSelectedCarouselSpecies(species);
+
+    streamSpeciesEducation(species, currentSessionNumber, activeFilters);
+  };
+
+  // Stream species education
+  const streamSpeciesEducation = async (species: RegionSpecies, sessionNumber: number, activeFilters: string[]) => {
+    const messageId = `learn-${Date.now()}`;
+    const imageContent = species.imageUrl ? `![${species.commonName}](${species.imageUrl})` : '';
+
+    const initialMessage: ChatMessage = {
+      id: messageId,
+      role: 'assistant',
+      content: imageContent,
       timestamp: new Date(),
       status: 'sending'
     };
-    setChatHistory(prev => [...prev, userMessage]);
+    setChatHistory(prev => [...prev, initialMessage]);
 
-    // Create placeholder assistant message
-    const assistantMessageId = (Date.now() + 1).toString();
-    const assistantMessage: ChatMessage = {
-      id: assistantMessageId,
-      role: 'assistant',
-      content: '',
-      timestamp: new Date()
-    };
-    setChatHistory(prev => [...prev, assistantMessage]);
+    setTimeout(async () => {
+      const speciesSubtype = getSpeciesSubtype(species);
+      const conservationStatus = getConservationStatusFullName(species.conservationStatus);
 
-    // Character-by-character streaming
-    streamingBufferRef.current = { fullResponse: '', displayedResponse: '' };
-    characterIntervalRef.current = setInterval(() => {
-      const { fullResponse, displayedResponse } = streamingBufferRef.current;
+      const infoLines = [
+        `**${species.commonName} - Species ${sessionNumber}/5**`,
+        '',
+        `**Type:** ${speciesSubtype}`,
+        `**Conservation Status:** ${conservationStatus}`
+      ];
 
-      if (displayedResponse.length < fullResponse.length) {
-        streamingBufferRef.current.displayedResponse = fullResponse.substring(0, displayedResponse.length + 1);
-        setChatHistory(prev =>
-          prev.map(msg =>
-            msg.id === assistantMessageId
-              ? { ...msg, content: streamingBufferRef.current.displayedResponse }
-              : msg
-          )
-        );
-      }
-    }, 30);
+      if (species.habitatInfo) infoLines.push(`**Habitat:** ${species.habitatInfo}`);
+      if (species.isInvasive) infoLines.push('**⚠️ Invasive Species**');
+      if (species.isVenomous) infoLines.push('**☠️ Venomous**');
 
-    // Build education context for food web
-    const foodWebSpecies = Object.values(state?.selectedFoodWebSpecies || {}).filter(Boolean);
-    const educationContext = foodWebSpecies.length === 5 ? {
-      type: 'foodweb' as const,
-      species: foodWebSpecies.map(s => ({
-        commonName: s.common_name,
-        scientificName: s.scientific_name,
-        trophicLevel: s.trophicLevel,
-        diet: s.diet,
-        habitat: s.habitat,
-      })),
-      regionName: state?.regionName
-    } : null;
+      infoLines.push('', '**Visual Description:** ');
 
-    // Call education agent
-    sendEducationMessage(
-      query,
-      educationContext,
-      chatHistory.map(msg => ({ role: msg.role, content: msg.content })),
-      (chunk: string) => {
-        streamingBufferRef.current.fullResponse += chunk;
-      },
-      () => {
-        // Success - clear interval and update status
-        if (characterIntervalRef.current) clearInterval(characterIntervalRef.current);
-        setChatHistory(prev =>
-          prev.map(msg =>
-            msg.id === userMessageId
-              ? { ...msg, status: 'sent' as const }
-              : msg
-          )
-        );
-      },
-      (error: Error) => {
-        // Error
-        if (characterIntervalRef.current) clearInterval(characterIntervalRef.current);
-        console.error('Education agent error:', error);
-        setChatHistory(prev =>
-          prev.map(msg => {
-            if (msg.id === userMessageId) {
-              return { ...msg, status: 'error' as const, errorMessage: 'Failed to send message' };
-            }
-            return msg;
-          })
-        );
-      }
-    );
-  };
+      const baseInfo = '\n\n' + infoLines.join('\n');
 
-  // Handle play trivia - AI selects species and starts spin wheel
-  const handlePlayTrivia = async () => {
-    console.log('🎰 Starting trivia question', currentQuestionIndex + 1);
-
-    // Prevent double-clicking
-    if (isAISelecting || isSpinningWheel) {
-      console.log('🎰 Already in progress - ignoring click');
-      return;
-    }
-
-    setIsAISelecting(true);
-    // Quick replies already cleared by button click handler
-
-    // Show loading message
-    const loadingMessage: ChatMessage = {
-      id: `loading-${Date.now()}`,
-      role: 'assistant',
-      content: 'Loading species game...',
-      timestamp: new Date(),
-      status: 'loading' as const
-    };
-    setChatHistory([loadingMessage]);
-
-    // Reset food web species and game state
-    setSelectedFoodWebSpecies({
-      carnivore: null,
-      herbivore: null,
-      omnivore: null,
-      bird: null,
-      plantCoral: null
-    });
-    setCurrentChallengeSpecies(null);
-    setCorrectAnswerFeedback(null);
-    setWrongAnswerFeedback(null);
-
-    // Get current question config and taught species
-    const questionConfig = QUESTION_CONFIGS[currentQuestionIndex];
-    const taughtSpecies = state?.taughtSpecies || [];
-
-    console.log('🎰 Question config:', questionConfig);
-    console.log('🎰 State taughtSpecies:', state?.taughtSpecies);
-    console.log('🎰 Taught species count:', taughtSpecies.length);
-    console.log('🎰 Taught species data:', taughtSpecies);
-
-    // Call trivia AI to select species (1 correct + 3 wrong = 4)
-    console.log('🤖 Calling trivia AI to select species...');
-    try {
-      const triviaSelection = await selectTriviaSpeciesWithAI(
-        regionSpecies,
-        taughtSpecies,
-        questionConfig.phase,
-        state.regionName
-      );
-
-      console.log('🤖 Trivia AI selected:', {
-        correctAnswer: triviaSelection.correctAnswer?.commonName || triviaSelection.correctAnswer?.common_name,
-        wrongAnswers: triviaSelection.wrongAnswers.map(s => s.commonName || s.common_name),
-        strategy: triviaSelection.strategy
-      });
-
-      // Store trivia selections in ref
-      triviaSelectionRef.current = triviaSelection;
-
-      // Need to add 1 more species of same type to get 5 total
-      // Filter species by question phase type
-      let filteredPool: any[] = [];
-      if (questionConfig.phase === 'plants') {
-        filteredPool = regionSpecies.filter(sp =>
-          sp.dietaryCategory?.toLowerCase() === 'producer' ||
-          sp.speciesType?.toLowerCase() === 'plant'
-        );
-      } else if (questionConfig.phase === 'birds') {
-        filteredPool = regionSpecies.filter(sp =>
-          sp.speciesType?.toLowerCase() === 'bird'
-        );
-      } else if (questionConfig.phase === 'predators') {
-        filteredPool = regionSpecies.filter(sp =>
-          sp.dietaryCategory?.toLowerCase() === 'carnivore'
-        );
-      }
-
-      console.log(`🔍 Q${questionConfig.number} Filtered pool for '${questionConfig.phase}':`, {
-        total: filteredPool.length,
-        species: filteredPool.slice(0, 5).map(s => ({
-          name: s.commonName || s.common_name,
-          type: s.speciesType,
-          animalType: s.animalType,
-          dietaryCategory: s.dietaryCategory
-        }))
-      });
-
-      // Get the 5th species (exclude the 4 already selected)
-      const alreadySelected = triviaSelection.allOptions.map(s => s.scientificName || s.scientific_name);
-      const remainingSpecies = filteredPool.filter(sp =>
-        !alreadySelected.includes(sp.scientificName || sp.scientific_name)
-      );
-      const fifthSpecies = remainingSpecies[Math.floor(Math.random() * remainingSpecies.length)];
-
-      // Store all 5 options in spinSelectedSpeciesRef for carousel (in shuffled order)
-      const all5Options = [...triviaSelection.allOptions, fifthSpecies].sort(() => Math.random() - 0.5);
-      spinSelectedSpeciesRef.current = {
-        carnivore: all5Options[0],
-        herbivore: all5Options[1],
-        omnivore: all5Options[2],
-        bird: all5Options[3],
-        plantCoral: all5Options[4]
-      };
-
-      // DEBUG: Log all 5 species being placed on screen
-      console.log('🎰 All 5 species for Question', questionConfig.number, ':', all5Options.map(s => ({
-        name: s.commonName || s.common_name,
-        type: s.speciesType,
-        animalType: s.animalType,
-        dietaryCategory: s.dietaryCategory
-      })));
-
-      // Start spin wheel animation (5 phases)
-      console.log('🎰 Starting spin wheel animation with 5 options...');
-      setIsAISelecting(false);
-      setSpinPhase(1); // Start with option 1
-      setIsSpinningWheel(true);
-    } catch (error) {
-      console.error('🤖 Trivia AI selection failed:', error);
-      setIsAISelecting(false);
-      toast({
-        title: "Error",
-        description: "Failed to select species. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Handle spin wheel phase completion
-  const handleSpinComplete = (selectedSpecies: RegionSpecies, phase: 1|2|3|4|5) => {
-    console.log(`🎰 Phase ${phase} complete:`, selectedSpecies.commonName);
-
-    // Update food web selection based on phase (using generic option slots)
-    if (phase === 1) {
-      setSelectedFoodWebSpecies(prev => ({ ...prev, carnivore: selectedSpecies }));
-    } else if (phase === 2) {
-      setSelectedFoodWebSpecies(prev => ({ ...prev, herbivore: selectedSpecies }));
-    } else if (phase === 3) {
-      setSelectedFoodWebSpecies(prev => ({ ...prev, omnivore: selectedSpecies }));
-    } else if (phase === 4) {
-      setSelectedFoodWebSpecies(prev => ({ ...prev, bird: selectedSpecies }));
-    } else if (phase === 5) {
-      setSelectedFoodWebSpecies(prev => ({ ...prev, plantCoral: selectedSpecies }));
-    }
-
-    // Move to next phase or finish
-    if (phase < 5) {
-      console.log(`🎰 Moving to phase ${phase + 1}`);
-      setSpinPhase((phase + 1) as 1|2|3|4|5);
-    } else {
-      // All 5 phases complete - set correct answer from trivia selection
-      console.log('🎰 All 5 species selected! Setting correct answer...');
-      setIsSpinningWheel(false);
-
-      // Get correct answer from trivia selection
-      let correctSpecies = triviaSelectionRef.current?.correctAnswer || spinSelectedSpeciesRef.current.carnivore;
-
-      console.log(`✅ Correct answer for Q${QUESTION_CONFIGS[currentQuestionIndex].number}:`, correctSpecies?.commonName || correctSpecies?.common_name);
-      setCorrectSpeciesForCurrentQuestion(correctSpecies);
-
-      // NOW show the question with the correct answer's name
-      const questionConfig = QUESTION_CONFIGS[currentQuestionIndex];
-      const speciesName = correctSpecies?.commonName || correctSpecies?.common_name || 'this species';
-      const questionText = `🎮 **Question ${questionConfig.number} (${questionConfig.difficulty.toUpperCase()}):** Which one is the **${speciesName}**?`;
-
-      // Replace loading message with the question (filter out loading/temp messages)
-      setChatHistory(prev => {
-        const questionAlreadyExists = prev.some(msg => msg.content === questionText);
-        if (questionAlreadyExists) {
-          console.log('⚠️ Question already in chat history, skipping duplicate');
-          return prev;
+      let currentText = '';
+      let charIndex = 0;
+      const streamInterval = setInterval(() => {
+        if (charIndex >= baseInfo.length) {
+          clearInterval(streamInterval);
+          fetchAndStreamDescription();
+          return;
         }
 
-        const questionMessage: ChatMessage = {
-          id: `question-display-${Date.now()}`,
-          role: 'assistant',
-          content: questionText,
-          timestamp: new Date(),
-          status: 'sent'
-        };
-        // Filter out loading messages and add the question
-        return [...prev.filter(msg => msg.status !== 'loading'), questionMessage];
-      });
+        currentText += baseInfo[charIndex];
+        charIndex++;
 
-      // Start timer!
-      console.log('⏱️ Starting timer - 30 seconds!');
-      setTimerActive(true);
+        setChatHistory(prev => {
+          const updated = [...prev];
+          const lastIndex = updated.findIndex(m => m.id === messageId);
+          if (lastIndex !== -1) {
+            updated[lastIndex] = {
+              ...updated[lastIndex],
+              content: imageContent + currentText,
+              status: 'sent'
+            };
+          }
+          return updated;
+        });
+      }, 30);
+      streamingIntervalsRef.current.push(streamInterval);
+
+      const fetchAndStreamDescription = async () => {
+        try {
+          const descResult = await generateFastVisualDescription({
+            scientificName: species.scientificName,
+            commonName: species.commonName,
+            animalType: species.animalType,
+            imageUrl: species.imageUrl,
+            ecoregion: state.regionName
+          });
+
+          const finalText = descResult.success ? descResult.description || 'Description not available.' : 'Description not available.';
+
+          let descText = '';
+          let descIndex = 0;
+          const descInterval = setInterval(() => {
+            if (descIndex >= finalText.length) {
+              clearInterval(descInterval);
+
+              const nextSpeciesTimeout = setTimeout(() => {
+                setIsSpeciesStreamingInProgress(false);
+                selectRandomSpecies(activeFilters, sessionNumber, shownSpeciesRef.current);
+              }, 1500);
+              streamingTimeoutsRef.current.push(nextSpeciesTimeout);
+
+              return;
+            }
+
+            descText += finalText[descIndex];
+            descIndex++;
+
+            setChatHistory(prev => {
+              const updated = [...prev];
+              const lastIndex = updated.findIndex(m => m.id === messageId);
+              if (lastIndex !== -1) {
+                updated[lastIndex] = {
+                  ...updated[lastIndex],
+                  content: imageContent + baseInfo + descText,
+                  status: 'sent'
+                };
+              }
+              return updated;
+            });
+          }, 30);
+          streamingIntervalsRef.current.push(descInterval);
+        } catch (error) {
+          console.error('Description fetch failed:', error);
+          setIsSpeciesStreamingInProgress(false);
+          setTimeout(() => selectRandomSpecies(activeFilters, sessionNumber, shownSpeciesRef.current), 1500);
+        }
+      };
+    }, 1000);
+  };
+
+  // Show phase complete message
+  const showPhaseCompleteMessage = () => {
+    const currentPhaseDisplay = getPhaseDisplayName(currentPhaseRef.current);
+    const completionMessage: ChatMessage = {
+      id: `phase-complete-${Date.now()}`,
+      role: 'assistant',
+      content: `🎉 **Phase Complete!**\n\nYou've learned about 5 ${currentPhaseDisplay.toLowerCase()} species. Ready for the next phase?`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, completionMessage]);
+
+    setQuickReplies([
+      {
+        id: 'continue-next-phase',
+        label: 'Continue',
+        emoji: '▶️',
+        action: 'continue-next-phase' as const
+      }
+    ]);
+  };
+
+  // Show trivia ready message
+  const showTriviaReadyMessage = () => {
+    const congratsMessage: ChatMessage = {
+      id: `all-complete-${Date.now()}`,
+      role: 'assistant',
+      content: `🎉 **Congratulations!**\n\nYou've completed all 3 learning phases!\n\n✅ Plants (5 species)\n✅ Birds (5 species)\n✅ Predators (5 species)\n\nReady to test your knowledge?`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory(prev => [...prev, congratsMessage]);
+
+    setQuickReplies([
+      {
+        id: 'start-trivia-game',
+        label: 'Play Trivia',
+        emoji: '🎮',
+        action: 'start-trivia-game' as const
+      }
+    ]);
+  };
+
+  // Handle continue to next phase
+  const handleContinueNextPhase = () => {
+    setQuickReplies([]);
+
+    const currentPhase = currentPhaseRef.current;
+    const nextPhase = getNextPhase(currentPhase);
+
+    if (nextPhase) {
+      currentPhaseRef.current = nextPhase;
+      const newFilters = getFiltersForPhase(nextPhase);
+      setLearningFilters(newFilters);
+      learningSession.advanceToNextPhase();
+      setLearningSessionCount(0);
+      shownSpeciesRef.current = [];
+
+      const phaseEmoji = getPhaseEmoji(nextPhase);
+      const phaseName = getPhaseDisplayName(nextPhase);
+
+      const transitionMessage: ChatMessage = {
+        id: `phase-transition-${Date.now()}`,
+        role: 'assistant',
+        content: `${phaseEmoji} **Starting ${phaseName} Phase!**\n\nLet's explore 5 ${phaseName.toLowerCase()} species...`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, transitionMessage]);
+
+      setTimeout(() => selectRandomSpecies(newFilters, 0, []), 1000);
     }
   };
 
-  // 🎮 Start/Restart the trivia game
-  const handleStartGame = () => {
-    console.log('🎮 Starting trivia game!');
+  // Filter species with filters
+  const getFilteredSpeciesWithFilters = (filters: string[]) => {
+    if (filters.length === 0) return parkSpecies;
+    if (filters.includes('all')) return parkSpecies;
 
-    // Reset game state
+    return parkSpecies.filter(species => {
+      return filters.every(filter => {
+        const filterLower = filter.toLowerCase();
+        const animalType = (species.animalType || '').toLowerCase();
+        const dietaryCategory = (species.dietaryCategory || '').toLowerCase();
+
+        if (filterLower === 'bird') return species.speciesType?.toLowerCase() === 'bird' || animalType.includes('bird');
+        if (filterLower === 'plant') return animalType.includes('plant') || species.speciesType?.toLowerCase() === 'plant';
+        if (filterLower === 'carnivore-diet') return dietaryCategory.includes('carnivore');
+        if (filterLower === 'herbivore-diet') return dietaryCategory.includes('herbivore');
+        if (filterLower === 'producer-diet') return dietaryCategory.includes('producer');
+
+        return true;
+      });
+    });
+  };
+
+  // Start trivia game
+  const startTriviaGame = () => {
+    setCurrentPhase('trivia');
     setIsGameActive(true);
     setCurrentQuestionIndex(0);
     setGameResults([]);
-    setCorrectSpeciesForCurrentQuestion(null);
-    setIsWaitingForNextQuestion(false);
-    setTimerActive(false);
-    setTimeRemaining(30);
-
-    // Clear chat history
     setChatHistory([]);
     setQuickReplies([]);
 
-    // Load Question 1
-    loadQuestion(0);
+    loadTriviaQuestion(0);
   };
 
-  // 🎯 Load a question - stream question text + trigger AI species selection
-  const loadQuestion = async (questionIndex: number) => {
-    // Note: Game finish is now handled directly in handleScatteredSpeciesClick
-    // when it detects the last question has been answered
-
+  // Load trivia question
+  const loadTriviaQuestion = (questionIndex: number) => {
     const questionConfig = QUESTION_CONFIGS[questionIndex];
-    console.log(`🎯 Loading Question ${questionConfig.number}...`);
+    const phaseSpecies = taughtSpeciesRef.current.filter(s => s.phase === questionConfig.phase);
 
-    // Reset correct answer for new question (prevents clicks during wheel spin)
-    setCorrectSpeciesForCurrentQuestion(null);
-
-    // Clear chat history for questions 2 and 3 (so only one question shows at a time)
-    if (questionIndex > 0) {
-      setChatHistory([]);
-    }
-
-    // Don't show generic question - we'll show specific species name after spin completes
-    // Trigger AI species selection (this will call handlePlayTrivia which starts the wheel)
-    handlePlayTrivia();
-  };
-
-  // ✅❌ Handle scattered species click
-  const handleScatteredSpeciesClick = (species: RegionSpecies) => {
-    if (!isGameActive || isWaitingForNextQuestion || !correctSpeciesForCurrentQuestion) {
-      console.log('🚫 Not accepting clicks right now');
+    if (phaseSpecies.length === 0) {
+      console.error('No species for phase:', questionConfig.phase);
       return;
     }
+
+    // Pick correct answer from taught species
+    const correctSpecies = phaseSpecies[Math.floor(Math.random() * phaseSpecies.length)];
+    setCorrectSpeciesForCurrentQuestion(correctSpecies);
+
+    // Pick 4 wrong answers from same phase
+    const allPhaseSpecies = getFilteredSpeciesWithFilters(getFiltersForPhase(questionConfig.phase));
+    const wrongSpecies = allPhaseSpecies
+      .filter(s => s.scientificName !== correctSpecies.scientificName)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 4);
+
+    // Set scattered species
+    setSelectedFoodWebSpecies({
+      carnivore: correctSpecies,
+      herbivore: wrongSpecies[0] || correctSpecies,
+      omnivore: wrongSpecies[1] || correctSpecies,
+      bird: wrongSpecies[2] || correctSpecies,
+      plantCoral: wrongSpecies[3] || correctSpecies
+    });
+
+    const questionMessage: ChatMessage = {
+      id: `question-${Date.now()}`,
+      role: 'assistant',
+      content: `🎮 **Question ${questionConfig.number}** (${questionConfig.difficulty}):\n\n${questionConfig.question}`,
+      timestamp: new Date(),
+      status: 'sent'
+    };
+    setChatHistory([questionMessage]);
+
+    setTimeRemaining(30);
+    setTimerActive(true);
+  };
+
+  // Handle scattered species click
+  const handleScatteredSpeciesClick = (species: RegionSpecies) => {
+    if (!isGameActive || isWaitingForNextQuestion || !correctSpeciesForCurrentQuestion) return;
 
     const isCorrect = species.scientificName === correctSpeciesForCurrentQuestion.scientificName;
     const questionConfig = QUESTION_CONFIGS[currentQuestionIndex];
 
-    console.log(`🎮 User clicked: ${species.commonName}, Correct: ${isCorrect}`);
-
-    // Set visual feedback for borders
     if (isCorrect) {
       setCorrectAnswerFeedback(species.scientificName);
+      addStar(state.parkId, state.parkName);
+
+      const correctMessage: ChatMessage = {
+        id: `correct-${Date.now()}`,
+        role: 'assistant',
+        content: `✅ **Correct!** That's ${species.commonName}! ⭐ +1 Star`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, correctMessage]);
     } else {
       setWrongAnswerFeedback(species.scientificName);
+
+      const wrongMessage: ChatMessage = {
+        id: `wrong-${Date.now()}`,
+        role: 'assistant',
+        content: `❌ **Wrong!** The correct answer was **${correctSpeciesForCurrentQuestion.commonName}**.`,
+        timestamp: new Date(),
+        status: 'sent'
+      };
+      setChatHistory(prev => [...prev, wrongMessage]);
     }
 
-    // Record result and store newResults for potential use
     const newResult = {
       questionNumber: questionConfig.number,
       question: questionConfig.question,
@@ -728,242 +701,105 @@ Return to the globe to see your completed region marked with a red pin 📍`;
       isCorrect
     };
 
-    let updatedResults: typeof gameResults = [];
-    setGameResults(prev => {
-      updatedResults = [...prev, newResult];
-      return updatedResults;
-    });
-
+    setGameResults(prev => [...prev, newResult]);
     setIsWaitingForNextQuestion(true);
-    setTimerActive(false); // Pause timer during feedback
+    setTimerActive(false);
 
-    if (isCorrect) {
-      // ✅ Correct answer - add a star!
-      addStar(state.parkId, state.parkName);
+    setTimeout(() => {
+      setCorrectAnswerFeedback(null);
+      setWrongAnswerFeedback(null);
+      setIsWaitingForNextQuestion(false);
 
-      const correctMessage: ChatMessage = {
-        id: `correct-${Date.now()}`,
-        role: 'assistant',
-        content: `✅ **Correct!** That's the ${species.commonName}! ⭐ +1 Star`,
-        timestamp: new Date(),
-        status: 'sent'
-      };
-      setChatHistory(prev => [...prev, correctMessage]);
+      const nextIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(nextIndex);
 
-      // Move to next question after 1 second
-      setTimeout(() => {
-        // Clear feedback states
-        setCorrectAnswerFeedback(null);
-        setWrongAnswerFeedback(null);
-
-        const nextIndex = currentQuestionIndex + 1;
-        setCurrentQuestionIndex(nextIndex);
-        setIsWaitingForNextQuestion(false);
-        setTimeRemaining(30); // Reset timer
-
-        // Check if this was the last question
-        if (nextIndex >= QUESTION_CONFIGS.length) {
-          // Use the updatedResults we captured
-          finishGameWithResults(updatedResults);
-        } else {
-          loadQuestion(nextIndex);
-        }
-      }, 1000);
-    } else {
-      // ❌ Wrong answer
-      const wrongMessage: ChatMessage = {
-        id: `wrong-${Date.now()}`,
-        role: 'assistant',
-        content: `❌ **Wrong!** The correct answer was **${correctSpeciesForCurrentQuestion.commonName}**, not ${species.commonName}.`,
-        timestamp: new Date(),
-        status: 'sent'
-      };
-      setChatHistory(prev => [...prev, wrongMessage]);
-
-      // Move to next question after 2 seconds
-      setTimeout(() => {
-        // Clear feedback states
-        setCorrectAnswerFeedback(null);
-        setWrongAnswerFeedback(null);
-
-        const nextIndex = currentQuestionIndex + 1;
-        setCurrentQuestionIndex(nextIndex);
-        setIsWaitingForNextQuestion(false);
-        setTimeRemaining(30); // Reset timer
-
-        // Check if this was the last question
-        if (nextIndex >= QUESTION_CONFIGS.length) {
-          // Use the updatedResults we captured
-          finishGameWithResults(updatedResults);
-        } else {
-          loadQuestion(nextIndex);
-        }
-      }, 2000);
-    }
+      if (nextIndex >= QUESTION_CONFIGS.length) {
+        finishTriviaGame();
+      } else {
+        loadTriviaQuestion(nextIndex);
+      }
+    }, isCorrect ? 1000 : 2000);
   };
 
-  // 🏁 Finish game - return to park with results (accepts results parameter)
-  const finishGameWithResults = (results: typeof gameResults) => {
+  // Finish trivia game
+  const finishTriviaGame = () => {
     setIsGameActive(false);
     setTimerActive(false);
+
+    const correctCount = gameResults.filter(r => r.isCorrect).length;
+
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
 
     const completionMessage: ChatMessage = {
       id: `complete-${Date.now()}`,
       role: 'assistant',
-      content: `🎉 **Game Complete!** You answered ${results.filter(r => r.isCorrect).length} out of ${results.length} questions correctly!`,
+      content: `🎉 **Game Complete!**\n\nYou answered ${correctCount} out of ${gameResults.length} questions correctly!\n\nReturning to park discovery...`,
       timestamp: new Date(),
       status: 'sent'
     };
     setChatHistory(prev => [...prev, completionMessage]);
 
-    // Return to park with results after 3 seconds
     setTimeout(() => {
       const params = new URLSearchParams({
         ecoRegionId: state.ecoRegionId,
         regionName: state.regionName,
         lat: state.lat?.toString() || '0',
         lng: state.lng?.toString() || '0',
-        triviaResults: JSON.stringify(results),
-        triviaCompleted: 'true'
       });
       navigate(`/park-select?${params.toString()}`);
     }, 3000);
   };
 
-  // Handle quick reply clicks
+  // Handle quick reply
   const handleQuickReplyClick = (reply: QuickReply) => {
-    if (reply.action === 'start-trivia') {
-      setQuickReplies([]);
-      handleStartGame();
-    } else if (reply.action === 'go-back-to-park') {
-      // Navigate back to park selection page
-      setQuickReplies([]);
-      handleBackToPark();
-    } else if (reply.action === 'help-find-species') {
-      // Clear button and collapse chat for smooth transition
-      setQuickReplies([]);
-      setIsChatHistoryExpanded(false);
-
-      // Start the spin wheel game after collapse animation
-      setTimeout(() => {
-        handlePlayTrivia();
-      }, 400);
-    } else if (reply.action === 'play-poopy-minion') {
-      // Navigate to pixel game
-      setQuickReplies([]);
-
-      const lastFoundSpecies = Object.values(state.selectedFoodWebSpecies).filter(Boolean).pop();
-      if (lastFoundSpecies) {
-        const params = new URLSearchParams({
-          ecoRegionId: state.ecoRegionId,
-          animalType: lastFoundSpecies.trophicLevel || 'guardian',
-          animalName: lastFoundSpecies.common_name || state.regionName,
-          biomeType: 'toxic-waste',
-        });
-        navigate(`/pixel-game?${params.toString()}`);
-      }
-    } else if (reply.action === 'battle-poopy-pants') {
-      // Launch Whack-A-Mole game
-      setQuickReplies([]);
-
-      const config = {
+    if (reply.action === 'start-learning') {
+      startLearningMode();
+    } else if (reply.action === 'go-back') {
+      const params = new URLSearchParams({
         ecoRegionId: state.ecoRegionId,
-        animalType: 'guardian',
-        animalName: state.regionName,
-        biomeType: 'bathroom'
-      };
-
-      setWhackAMoleConfig(config);
-      setShowWhackAMole(true);
-    } else if (reply.action === 'return-to-globe') {
-      // Navigate back to globe with completion flag
-      navigate(`/?completed=${state.ecoRegionId}`, { replace: true });
-    } else {
-      // Regular chat message
-      handleSearch(reply.label);
+        regionName: state.regionName,
+        lat: state.lat?.toString() || '0',
+        lng: state.lng?.toString() || '0',
+      });
+      navigate(`/park-select?${params.toString()}`);
+    } else if (reply.action === 'continue-next-phase') {
+      handleContinueNextPhase();
+    } else if (reply.action === 'start-trivia-game') {
+      startTriviaGame();
     }
   };
 
-  // Handle Whack-A-Mole completion
-  const handleWhackAMoleComplete = (ecoRegionId: string) => {
-    setShowWhackAMole(false);
-
-    // Navigate back to this page with success flag
-    navigate(`/trivia?whackAMoleWon=true&ecoRegionId=${ecoRegionId}`, {
-      state,
-      replace: true
-    });
-  };
-
-  // Handle Whack-A-Mole loss
-  const handleWhackAMoleLose = (ecoRegionId: string) => {
-    setShowWhackAMole(false);
-
-    // Add loss message
-    const lossMessage: ChatMessage = {
-      id: `whackamole-loss-${Date.now()}`,
-      role: 'assistant',
-      content: '💔 Poopy Pants got away! But don\'t worry, you can try again!',
+  // Handle chat submit
+  const handleChatSubmit = async (query: string) => {
+    // Simple response for now
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: query,
       timestamp: new Date(),
       status: 'sent'
     };
-    setChatHistory(prev => [...prev, lossMessage]);
-
-    // Show retry button
-    setQuickReplies([
-      {
-        id: 'battle-poopy-pants-retry',
-        label: 'Try Again',
-        emoji: '🔄',
-        action: 'battle-poopy-pants' as const
-      }
-    ]);
-  };
-
-  const handleRetryMessage = (messageId: string) => {
-    const message = chatHistory.find(msg => msg.id === messageId);
-    if (!message || message.role !== 'user') return;
-
-    setChatHistory(prev => prev.filter(msg => msg.id !== messageId));
-    handleSearch(message.content);
+    setChatHistory(prev => [...prev, userMessage]);
   };
 
   const handleCarouselSpeciesSelect = (species: RegionSpecies) => {
     setSelectedCarouselSpecies(species);
   };
 
-  const handlePreviousSpecies = () => {
-    setCurrentSpeciesIndex(prev => Math.max(0, prev - 1));
-  };
-
-  const handleNextSpecies = () => {
-    setCurrentSpeciesIndex(prev => Math.min(regionSpecies.length - 1, prev + 1));
-  };
-
-  const handleBackToPark = () => {
-    const params = new URLSearchParams({
-      ecoRegionId: state.ecoRegionId,
-      regionName: state.regionName,
-      lat: state.lat?.toString() || '0',
-      lng: state.lng?.toString() || '0',
-    });
-    navigate(`/park-select?${params.toString()}`);
-  };
-
-  const chatContext = useMemo((): ChatContext => ({
-    type: 'foodweb',
-    regionName: state?.regionName || 'Unknown Region',
-    speciesName: undefined,
-    habitatName: undefined
-  }), [state?.regionName]);
-
   if (!state) {
-    return null; // Will redirect in useEffect
+    console.log('⚠️ No state, returning null');
+    return null;
   }
+
+  console.log('🎨 Rendering TriviaPage', { currentPhase, parkSpeciesCount: parkSpecies.length });
 
   // Select background image based on region
   const getBackgroundImage = () => {
-    const regionLower = state.regionName?.toLowerCase() || '';
+    const regionLower = state?.regionName?.toLowerCase() || '';
 
     if (regionLower.includes('arctic')) {
       return '/images/arctic-trivia-bg.jpg';
@@ -993,74 +829,71 @@ Return to the globe to see your completed region marked with a red pin 📍`;
         }}
       />
 
-      {/* Header Bar - Top */}
+      {/* Header Bar */}
       <div className="absolute top-0 left-0 right-0 z-50 pointer-events-auto">
         <div className="flex justify-between items-center px-4 py-2 gap-4">
-          {/* Back to Park - Far Left */}
           <Button
-            onClick={handleBackToPark}
+            onClick={() => {
+              const params = new URLSearchParams({
+                ecoRegionId: state.ecoRegionId,
+                regionName: state.regionName,
+                lat: state.lat?.toString() || '0',
+                lng: state.lng?.toString() || '0',
+              });
+              navigate(`/park-select?${params.toString()}`);
+            }}
             variant="outline"
             className="glass-panel hover:bg-accent rounded-xl h-12"
           >
             ← Back to Park
           </Button>
 
-          {/* Timer - Center (replacing Global Health Bar) */}
-          <div className="flex-1 flex justify-center">
-            <div className="glass-panel rounded-xl h-12 px-6 flex items-center gap-2">
-              <span className="text-2xl">⏱️</span>
-              <span className={`text-xl font-bold ${timeRemaining <= 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
-                {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
-              </span>
+          {currentPhase === 'trivia' && (
+            <div className="flex-1 flex justify-center">
+              <div className="glass-panel rounded-xl h-12 px-6 flex items-center gap-2">
+                <span className="text-2xl">⏱️</span>
+                <span className={`text-xl font-bold ${timeRemaining <= 10 ? 'text-red-500 animate-pulse' : 'text-white'}`}>
+                  {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                </span>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Sign In - Far Right */}
-          <Button
-            variant="outline"
-            className="glass-panel hover:bg-accent rounded-xl h-12"
-          >
+          <Button variant="outline" className="glass-panel hover:bg-accent rounded-xl h-12">
             Sign In
           </Button>
         </div>
       </div>
 
-      {/* Scattered Species Images - Randomly positioned across page */}
-      <ScatteredSpeciesImages
-        species={selectedFoodWebSpecies}
-        onSpeciesClick={(species) => handleScatteredSpeciesClick(species)}
-        isClickable={isGameActive && !isWaitingForNextQuestion}
-        correctAnswer={correctAnswerFeedback || undefined}
-        wrongAnswer={wrongAnswerFeedback || undefined}
-        questionKey={currentQuestionIndex}
-      />
-
-      {/* Left Side - Species Carousel */}
-      {regionSpecies && regionSpecies.length > 0 && (
+      {/* Learning Phase: Species Carousel */}
+      {currentPhase === 'learning' && parkSpecies.length > 0 && (
         <div className="absolute left-4 top-32 bottom-24 w-64 z-30 pointer-events-auto">
           <RegionSpeciesCarousel
-            species={regionSpecies}
-            regionName={state.regionName}
-            currentSpecies={selectedCarouselSpecies?.scientificName || regionSpecies[currentSpeciesIndex]?.scientificName}
+            species={parkSpecies}
+            regionName={state.parkName}
+            currentSpecies={selectedCarouselSpecies?.scientificName}
             onSpeciesSelect={handleCarouselSpeciesSelect}
-            selectedForGameSpecies={Object.values(selectedFoodWebSpecies)
-              .filter(s => s !== null)
-              .map(s => s!.scientificName)}
-            disableAutoScroll={isSpinningWheel}
-            isSpinning={isSpinningWheel}
-            spinPhase={spinPhase}
-            onSpinComplete={handleSpinComplete}
-            preSelectedSpecies={spinSelectedSpeciesRef.current}
+            disableAutoScroll={false}
           />
         </div>
       )}
 
+      {/* Trivia Phase: Scattered Species Images */}
+      {currentPhase === 'trivia' && (
+        <ScatteredSpeciesImages
+          species={selectedFoodWebSpecies}
+          onSpeciesClick={handleScatteredSpeciesClick}
+          isClickable={isGameActive && !isWaitingForNextQuestion}
+          correctAnswer={correctAnswerFeedback || undefined}
+          wrongAnswer={wrongAnswerFeedback || undefined}
+          questionKey={currentQuestionIndex}
+        />
+      )}
 
-      {/* Bottom - Chat (always visible) */}
+      {/* Bottom Chat */}
       <div className="fixed bottom-0 left-1/2 -translate-x-1/2 z-30 w-full max-w-[1250px] flex flex-col items-center gap-3 pointer-events-none pb-2">
         <div className="flex justify-center items-end gap-3 w-full pointer-events-auto">
           <div className="w-full max-w-[650px] flex flex-col">
-            {/* Chat History - shows above input when expanded */}
             {chatHistory.length > 0 && (
               <ChatHistory
                 messages={chatHistory}
@@ -1068,34 +901,26 @@ Return to the globe to see your completed region marked with a red pin 📍`;
                 onQuickReply={handleQuickReplyClick}
                 isExpanded={isChatHistoryExpanded}
                 onMinimize={() => setIsChatHistoryExpanded(false)}
-                onRetry={handleRetryMessage}
+                theme={chatTheme}
               />
             )}
 
-            {/* Chat Input */}
             <ChatInput
-              onSubmit={handleSearch}
-              isLoading={isLoading}
-              context={chatContext}
-              placeholder="Ask about the food web or species..."
+              onSubmit={handleChatSubmit}
+              isLoading={false}
+              context={{
+                type: 'default',
+                name: state?.parkName || 'Park'
+              }}
+              placeholder={currentPhase === 'learning' ? "Ask about species..." : ""}
               hasMessages={chatHistory.length > 0}
               onExpandHistory={() => setIsChatHistoryExpanded(!isChatHistoryExpanded)}
               isChatHistoryExpanded={isChatHistoryExpanded}
+              theme={chatTheme}
             />
           </div>
         </div>
       </div>
-
-      {/* Whack-A-Mole Modal */}
-      {showWhackAMole && whackAMoleConfig && (
-        <WhackAMoleGameModal
-          isOpen={showWhackAMole}
-          onClose={() => setShowWhackAMole(false)}
-          config={whackAMoleConfig}
-          onComplete={handleWhackAMoleComplete}
-          onLose={handleWhackAMoleLose}
-        />
-      )}
     </div>
   );
 };

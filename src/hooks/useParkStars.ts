@@ -1,35 +1,95 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { ParkStars } from '../types/learning';
+import { AuthContext } from '../components/AuthProvider';
+import {
+  getUserParkProgress,
+  updateParkStars as dbUpdateParkStars,
+  addParkStar as dbAddParkStar,
+  resetParkProgress as dbResetParkProgress,
+  resetAllParkProgress as dbResetAllParkProgress,
+  migrateLocalStorageToDb,
+} from '../lib/parkProgress';
 
 const STORAGE_KEY = 'globe-critter-park-stars';
 
 /**
  * Hook for tracking park stars (0-3 per park)
- * Persists to localStorage
+ * Syncs with Supabase database when user is authenticated
+ * Falls back to localStorage for guest users
  */
 export function useParkStars() {
   const [parkStars, setParkStars] = useState<Record<string, ParkStars>>({});
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const auth = useContext(AuthContext);
 
-  // Load from localStorage on mount
+  // Load progress on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        setParkStars(parsed);
+    let mounted = true;
+
+    async function loadProgress() {
+      try {
+        if (auth?.user?.id) {
+          // User is authenticated - load from database
+          console.log('[useParkStars] Loading progress from database...');
+          const dbProgress = await getUserParkProgress(auth.user.id);
+
+          if (mounted) {
+            setParkStars(dbProgress);
+            setHasLoaded(true);
+
+            // Migrate any localStorage data to database (one-time migration)
+            const localStored = localStorage.getItem(STORAGE_KEY);
+            if (localStored) {
+              try {
+                const localProgress = JSON.parse(localStored);
+                if (Object.keys(localProgress).length > 0) {
+                  console.log('[useParkStars] Found localStorage data, migrating to database...');
+                  await migrateLocalStorageToDb(auth.user.id, localProgress);
+                  // Reload from DB after migration
+                  const updatedProgress = await getUserParkProgress(auth.user.id);
+                  if (mounted) {
+                    setParkStars(updatedProgress);
+                  }
+                  // Clear localStorage after successful migration
+                  localStorage.removeItem(STORAGE_KEY);
+                }
+              } catch (e) {
+                console.error('[useParkStars] Error during migration:', e);
+              }
+            }
+          }
+        } else {
+          // Guest user - load from localStorage
+          console.log('[useParkStars] Loading progress from localStorage (guest mode)...');
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored && mounted) {
+            const parsed = JSON.parse(stored);
+            setParkStars(parsed);
+          }
+          if (mounted) {
+            setHasLoaded(true);
+          }
+        }
+      } catch (error) {
+        console.error('[useParkStars] Error loading progress:', error);
+        if (mounted) {
+          setHasLoaded(true);
+        }
       }
-      setHasLoaded(true); // Mark as loaded even if empty
-    } catch (error) {
-      console.error('[useParkStars] Error loading from localStorage:', error);
-      setHasLoaded(true);
     }
-  }, []);
 
-  // Save to localStorage when parkStars changes (but only after initial load)
+    loadProgress();
+
+    return () => {
+      mounted = false;
+    };
+  }, [auth?.user?.id]);
+
+  // Save to localStorage when in guest mode (fallback)
   useEffect(() => {
-    if (!hasLoaded) {
-      return; // Don't save on initial render before loading
+    if (!hasLoaded || auth?.user?.id) {
+      return; // Don't save to localStorage if authenticated or not loaded yet
     }
 
     try {
@@ -37,7 +97,7 @@ export function useParkStars() {
     } catch (error) {
       console.error('[useParkStars] Error saving to localStorage:', error);
     }
-  }, [parkStars, hasLoaded]);
+  }, [parkStars, hasLoaded, auth?.user?.id]);
 
   /**
    * Get stars for a specific park
@@ -49,56 +109,128 @@ export function useParkStars() {
   /**
    * Add one star to a park (max 3)
    */
-  const addStar = (parkId: string, parkName: string) => {
-    setParkStars((prev) => {
-      const current = prev[parkId]?.stars || 0;
-      const newStars = Math.min(current + 1, 3);
+  const addStar = async (parkId: string, parkName: string) => {
+    if (isSyncing) return;
+    setIsSyncing(true);
 
-      return {
-        ...prev,
-        [parkId]: {
-          parkId,
-          parkName,
-          stars: newStars,
-          completedAt: newStars === 3 ? new Date().toISOString() : prev[parkId]?.completedAt
+    try {
+      if (auth?.user?.id) {
+        // Authenticated - update database
+        const result = await dbAddParkStar(auth.user.id, parkId, parkName);
+        if (result) {
+          setParkStars((prev) => ({
+            ...prev,
+            [parkId]: result,
+          }));
         }
-      };
-    });
+      } else {
+        // Guest - update localStorage
+        setParkStars((prev) => {
+          const current = prev[parkId]?.stars || 0;
+          const newStars = Math.min(current + 1, 3);
+
+          return {
+            ...prev,
+            [parkId]: {
+              parkId,
+              parkName,
+              stars: newStars,
+              completedAt: newStars === 3 ? new Date().toISOString() : prev[parkId]?.completedAt,
+            },
+          };
+        });
+      }
+    } catch (error) {
+      console.error('[useParkStars] Error adding star:', error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   /**
    * Set exact star count for a park
    */
-  const setStars = (parkId: string, parkName: string, stars: number) => {
-    const clampedStars = Math.max(0, Math.min(3, stars));
+  const setStars = async (parkId: string, parkName: string, stars: number) => {
+    if (isSyncing) return;
+    setIsSyncing(true);
 
-    setParkStars((prev) => ({
-      ...prev,
-      [parkId]: {
-        parkId,
-        parkName,
-        stars: clampedStars,
-        completedAt: clampedStars === 3 ? new Date().toISOString() : undefined
+    try {
+      const clampedStars = Math.max(0, Math.min(3, stars));
+
+      if (auth?.user?.id) {
+        // Authenticated - update database
+        const result = await dbUpdateParkStars(auth.user.id, parkId, parkName, clampedStars);
+        if (result) {
+          setParkStars((prev) => ({
+            ...prev,
+            [parkId]: result,
+          }));
+        }
+      } else {
+        // Guest - update localStorage
+        setParkStars((prev) => ({
+          ...prev,
+          [parkId]: {
+            parkId,
+            parkName,
+            stars: clampedStars,
+            completedAt: clampedStars === 3 ? new Date().toISOString() : undefined,
+          },
+        }));
       }
-    }));
+    } catch (error) {
+      console.error('[useParkStars] Error setting stars:', error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   /**
    * Reset stars for a park
    */
-  const resetPark = (parkId: string) => {
-    setParkStars((prev) => {
-      const { [parkId]: _, ...rest } = prev;
-      return rest;
-    });
+  const resetPark = async (parkId: string) => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+
+    try {
+      if (auth?.user?.id) {
+        // Authenticated - delete from database
+        await dbResetParkProgress(auth.user.id, parkId);
+      }
+
+      // Update local state
+      setParkStars((prev) => {
+        const { [parkId]: _, ...rest } = prev;
+        return rest;
+      });
+    } catch (error) {
+      console.error('[useParkStars] Error resetting park:', error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   /**
    * Reset all stars
    */
-  const resetAll = () => {
-    setParkStars({});
-    localStorage.removeItem(STORAGE_KEY);
+  const resetAll = async () => {
+    if (isSyncing) return;
+    setIsSyncing(true);
+
+    try {
+      if (auth?.user?.id) {
+        // Authenticated - delete all from database
+        await dbResetAllParkProgress(auth.user.id);
+      }
+
+      // Update local state
+      setParkStars({});
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('[useParkStars] Error resetting all:', error);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   /**
@@ -115,6 +247,8 @@ export function useParkStars() {
     resetPark,
     resetAll,
     getAllParks,
-    parkStars
+    parkStars,
+    hasLoaded,
+    isSyncing,
   };
 }
