@@ -343,14 +343,6 @@ const ParkSelectionPage = () => {
           <div className="flex-1 flex justify-center">
             <GlobalHealthBar variant="compact" />
           </div>
-
-          {/* Sign In - Far Right */}
-          <Button
-            variant="outline"
-            className="glass-panel hover:bg-accent rounded-xl h-12"
-          >
-            Sign In
-          </Button>
         </div>
       </div>
 

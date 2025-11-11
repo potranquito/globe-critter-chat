@@ -24,14 +24,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route
-            path="/park-select"
-            element={
-              <ProtectedRoute>
-                <ParkSelectionPage />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/park-select" element={<ParkSelectionPage />} />
           <Route
             path="/trivia"
             element={

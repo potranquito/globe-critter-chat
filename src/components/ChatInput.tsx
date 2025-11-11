@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Loader2, ChevronUp, ChevronDown } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { SignInDialog } from '@/components/SignInDialog';
+import { Button } from '@/components/ui/button';
 
 export interface ChatContext {
   type: 'species' | 'habitat' | 'wildlife-park' | 'threat' | 'ecosystem' | 'region-species' | 'default';
@@ -33,13 +36,16 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // 🎯 Auto-focus input on mount (terminal-like behavior)
+  // Check authentication status
+  const { user, loading: authLoading } = useAuth();
+
+  // 🎯 Auto-focus input on mount AND after user signs in
   useEffect(() => {
-    if (inputRef.current) {
+    if (inputRef.current && user) {
       inputRef.current.focus();
       setIsFocused(true); // Show cursor immediately
     }
-  }, []);
+  }, [user]); // Re-run when user changes (signed in)
 
   // Default theme if none provided (emerald theme)
   const currentTheme = theme || {
@@ -83,6 +89,11 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
   // Generate contextual placeholder based on what's showing on the right
   const getContextualPlaceholder = () => {
     if (placeholder) return placeholder; // Allow override
+
+    // If not authenticated, show sign-in prompt
+    if (!user && !authLoading) {
+      return "Sign in to start learning and track your progress";
+    }
 
     if (isDiscoveryMode) {
       return "type command or 'help'";
@@ -193,13 +204,37 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
               color: currentTheme.text,
               caretColor: currentTheme.secondary,
             }}
-            disabled={isLoading}
+            disabled={isLoading || !user}
             autoComplete="off"
             spellCheck="false"
           />
 
-          {/* Cursor Blink Effect (only when focused and empty) */}
-          {isFocused && !message && (
+          {/* Sign In Button - Show when not authenticated */}
+          {!user && !authLoading && (
+            <SignInDialog
+              trigger={
+                <Button
+                  size="sm"
+                  className="shrink-0"
+                  style={{
+                    backgroundColor: currentTheme.primary,
+                    color: currentTheme.background,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = currentTheme.secondary;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = currentTheme.primary;
+                  }}
+                >
+                  Sign In
+                </Button>
+              }
+            />
+          )}
+
+          {/* Cursor Blink Effect (only when focused and empty and authenticated) */}
+          {isFocused && !message && user && (
             <span className="animate-pulse" style={{ color: currentTheme.secondary }}>▊</span>
           )}
         </div>
@@ -213,9 +248,15 @@ const ChatInput = ({ onSubmit, isLoading = false, placeholder, context, onFocus,
           }}
         >
           <div className="flex items-center gap-3" style={{ color: withAlpha(currentTheme.text, 0.6) }}>
-            <span>ESC to clear</span>
-            <span>•</span>
-            <span>ENTER to send</span>
+            {user ? (
+              <>
+                <span>ESC to clear</span>
+                <span>•</span>
+                <span>ENTER to send</span>
+              </>
+            ) : (
+              <span>🔒 Sign in required to chat</span>
+            )}
           </div>
           {isLoading && (
             <div className="flex items-center gap-2 text-cyan-400">

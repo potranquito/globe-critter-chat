@@ -40,14 +40,14 @@ export function SignInDialog({ trigger }: SignInDialogProps) {
         title: 'Signed in!',
         description: 'Welcome back to Globe Critter Chat',
       });
-      setOpen(false);
+      // Small delay to allow auth state to propagate
+      setTimeout(() => setOpen(false), 300);
     } catch (error: any) {
       toast({
         title: 'Sign in failed',
         description: error.message || 'Invalid email or password',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -61,14 +61,14 @@ export function SignInDialog({ trigger }: SignInDialogProps) {
         title: 'Account created!',
         description: 'Welcome to Globe Critter Chat!',
       });
-      setOpen(false);
+      // Small delay to allow auth state to propagate
+      setTimeout(() => setOpen(false), 300);
     } catch (error: any) {
       toast({
         title: 'Sign up failed',
         description: error.message || 'Could not create account',
         variant: 'destructive',
       });
-    } finally {
       setIsLoading(false);
     }
   };

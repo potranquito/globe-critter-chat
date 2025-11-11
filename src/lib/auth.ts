@@ -115,7 +115,7 @@ export async function upsertUserProfile(authUser: {
       .select('id')
       .eq('username', finalUsername)
       .neq('id', authUser.id)
-      .single();
+      .maybeSingle();
 
     if (!existingUser) {
       break; // Username is available

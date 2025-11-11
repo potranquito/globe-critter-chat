@@ -40,10 +40,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Fetch user profile from database
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('🔵 Fetching user profile for:', userId);
       const profile = await getUserProfile(userId);
+      console.log('🔵 User profile fetched:', profile);
       setUser(profile);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('🔴 Error fetching user profile:', error);
       setUser(null);
     }
   };
@@ -54,7 +56,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
     // Set up auth state listener
     const { data: { subscription } } = onAuthStateChange(async (event, currentSession) => {
-      console.log('Auth event:', event);
+      console.log('🟢 Auth state change:', event, 'has session:', !!currentSession);
 
       if (!mounted) return;
 
@@ -63,6 +65,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (currentSession?.user) {
         // User is signed in
         const authUser = currentSession.user;
+        console.log('🟢 User authenticated, creating/updating profile');
 
         // Create or update user profile in database
         const profile = await upsertUserProfile({
@@ -71,8 +74,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           user_metadata: authUser.user_metadata
         });
 
+        console.log('🟢 Profile result:', profile);
+
         if (profile) {
           setUser(profile);
+          console.log('🟢 User state set to:', profile.username);
 
           // Show welcome toast on sign in
           if (event === 'SIGNED_IN') {
@@ -84,10 +90,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
           // Update last active timestamp
           updateLastActive(authUser.id);
+        } else {
+          console.error('🔴 Profile creation/update failed!');
         }
       } else {
         // User is signed out
         setUser(null);
+        console.log('🟢 User signed out');
 
         if (event === 'SIGNED_OUT') {
           toast({
@@ -97,23 +106,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
 
+      console.log('🟢 Setting loading to false');
       setLoading(false);
     });
 
     // Check for existing session on mount
     const checkSession = async () => {
+      console.log('🔵 Checking for existing session...');
       try {
         const { supabase } = await import('@/integrations/supabase/client');
         const { data: { session: existingSession } } = await supabase.auth.getSession();
 
+        console.log('🔵 Existing session:', !!existingSession);
+
         if (existingSession?.user && mounted) {
+          console.log('🔵 Found existing user, fetching profile');
           setSession(existingSession);
           await fetchUserProfile(existingSession.user.id);
+        } else {
+          console.log('🔵 No existing session found');
         }
       } catch (error) {
-        console.error('Error checking session:', error);
+        console.error('🔴 Error checking session:', error);
       } finally {
         if (mounted) {
+          console.log('🔵 Setting loading to false (checkSession)');
           setLoading(false);
         }
       }

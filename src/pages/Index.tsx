@@ -23,6 +23,7 @@ import { SpeciesTypeFilter, type SpeciesTypeFilter as SpeciesTypeFilterType } fr
 import { FoodWebSelectionBar } from '@/components/FoodWebSelectionBar';
 import { useToast } from '@/hooks/use-toast';
 import { useLocationDiscovery } from '@/hooks/useLocationDiscovery';
+import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ChevronLeft, ChevronRight, CheckCircle2, Circle } from 'lucide-react';
 import { ClipLoader, RingLoader, DotLoader, PulseLoader, BeatLoader } from 'react-spinners';
@@ -172,6 +173,7 @@ const Index = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const locationDiscovery = useLocationDiscovery();
+  const { user, loading: authLoading } = useAuth();
   const [habitats, setHabitats] = useState<any[]>([]);
   const [currentSpecies, setCurrentSpecies] = useState<string | null>(null);
   const [speciesInfo, setSpeciesInfo] = useState<any>(null);
@@ -342,6 +344,17 @@ const Index = () => {
   useEffect(() => {
     console.log('[Index] 🎨 chatTheme state updated:', chatTheme);
   }, [chatTheme]);
+
+  // Auto-start terminal after user signs in
+  useEffect(() => {
+    if (!authLoading && user && !hasBooted) {
+      console.log('🚀 Auto-starting terminal for authenticated user');
+      // Small delay to ensure UI is ready
+      setTimeout(() => {
+        handleSearch('/start');
+      }, 500);
+    }
+  }, [user, authLoading, hasBooted]);
 
   // ⏱️ Countdown timer logic
   useEffect(() => {
@@ -5328,7 +5341,7 @@ ${question.choices.join('\n')}`;
                 isLoading={isLoading}
                 context={chatContext}
                 theme={chatTheme}
-                placeholder="Type /start to begin or enter commands..."
+                placeholder={user ? "Type /start to begin or enter commands..." : undefined}
                 hasMessages={chatHistory.length > 0}
                 onExpandHistory={() => setIsChatHistoryExpanded(!isChatHistoryExpanded)}
                 isChatHistoryExpanded={isChatHistoryExpanded}
