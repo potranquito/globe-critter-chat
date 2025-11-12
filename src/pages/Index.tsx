@@ -615,6 +615,27 @@ const Index = () => {
               };
             }
 
+            // Use sprite for Maasai Mara - Elephant (Conservation Project)
+            const isMara = eco.name.toLowerCase().includes('mara') || eco.name.toLowerCase().includes('maasai');
+            if (isMara) {
+              return {
+                lat: eco.center_lat,
+                lng: eco.center_lng,
+                species: eco.name,
+                name: eco.name,
+                size: 1.2,
+                color: eco.realm === 'Marine' ? '#3b82f6' : '#22c55e',
+                type: 'habitat' as const,
+                spriteSheet: '/images/mara/elephant-sprite.png',
+                spriteFrames: 4, // 4 frames per direction (NESW)
+                spriteRows: 1,
+                spriteCols: 4,
+                spriteRow: 0, // Single row sprite
+                walkInCircle: true,
+                ecoRegionId: eco.id,
+              };
+            }
+
             return {
               lat: eco.center_lat,
               lng: eco.center_lng,

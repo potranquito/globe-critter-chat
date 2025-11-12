@@ -124,13 +124,34 @@ const ParkSelectionPage = () => {
             if (validParks.length > 0) {
               const avgLat = validParks.reduce((sum, p) => sum + p.lat, 0) / validParks.length;
               const avgLng = validParks.reduce((sum, p) => sum + p.lng, 0) / validParks.length;
-              const isHighLatitude = Math.abs(avgLat) > 60;
-              const latitudeOffset = isHighLatitude ? 8 : 3;
-              const adjustedLat = avgLat - latitudeOffset;
 
-              console.log(`🎯 Centering map on parks: lat=${adjustedLat.toFixed(2)}, lng=${avgLng.toFixed(2)}`);
-              setMapCenter({ lat: adjustedLat, lng: avgLng });
-              setMapZoom(isHighLatitude ? 3 : 5);
+              // Check if this is the Mara region (conservation locations are clustered)
+              const isMara = regionName?.toLowerCase().includes('mara') || regionName?.toLowerCase().includes('maasai');
+
+              const isHighLatitude = Math.abs(avgLat) > 60;
+
+              let adjustedLat, adjustedLng;
+
+              if (isMara) {
+                // For Mara, adjust center to be more north and east to frame icons properly
+                adjustedLat = avgLat + 0.02; // Move north
+                adjustedLng = avgLng + 0.64; // Move far east
+              } else {
+                // For other regions, use standard offset
+                const latitudeOffset = isHighLatitude ? 8 : 3;
+                adjustedLat = avgLat - latitudeOffset;
+                adjustedLng = avgLng;
+              }
+
+              console.log(`🎯 Centering map on parks: lat=${adjustedLat.toFixed(2)}, lng=${adjustedLng.toFixed(2)}, isMara=${isMara}`);
+              setMapCenter({ lat: adjustedLat, lng: adjustedLng });
+
+              // Use higher zoom for Mara region but not too close
+              if (isMara) {
+                setMapZoom(10);
+              } else {
+                setMapZoom(isHighLatitude ? 3 : 5);
+              }
             }
           }
         }
