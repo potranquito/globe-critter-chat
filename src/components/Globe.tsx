@@ -408,7 +408,7 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
             const frameDuration = 1000 / fps; // ms per frame
 
             // Build frame sequence
-            let frameSequence: Array<{col: number, row: number}> = [];
+            const frameSequence: Array<{col: number, row: number}> = [];
             if (d.walkInCircle) {
               // Cycle through all 4 directions
               const directions = [0, 1, 2, 3]; // down, left, up, right

@@ -20,7 +20,7 @@ serve(async (req) => {
     }
 
     // Build context from location data
-    let contextInfo = `
+    const contextInfo = `
 Location: ${name}
 ${address ? `Address: ${address}` : ''}
 ${rating ? `Rating: ${rating}/5` : ''}

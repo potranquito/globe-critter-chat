@@ -90,7 +90,7 @@ const GoogleEarthMap = ({
     };
     return () => {
       // cleanup
-      try { delete (window as any).gm_authFailure; } catch {}
+      try { delete (window as any).gm_authFailure; } catch { /* ignore */ }
     };
   }, []);
   // Separate regular points from image markers

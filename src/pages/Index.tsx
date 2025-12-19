@@ -670,7 +670,7 @@ const Index = () => {
 
     const generateMascotAndGreeting = async () => {
       // Flag to control loading message cycling
-      let shouldContinueLoading = { value: true };
+      const shouldContinueLoading = { value: true };
 
       try {
         // 🎨 Regenerate color theme for variety (each mascot gets a new theme!)
@@ -1263,7 +1263,7 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
     let message = '';
 
     switch (reply.action) {
-      case 'help-find-species':
+      case 'help-find-species': {
         // Start the species roulette game
         setQuickReplies([]); // Clear the button
 
@@ -1284,6 +1284,7 @@ ${expandedStatus ? `Status: ${expandedStatus}` : ''}`;
           handlePlayTrivia();
         }, 800);
         return; // Don't send a message
+      }
       case 'answer':
         message = reply.value || '';
         setLastTriviaAnswer(reply.value || null);

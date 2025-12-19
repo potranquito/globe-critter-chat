@@ -93,7 +93,7 @@ const PixelGame = ({ onWin, onLose, onExit }: PixelGameProps) => {
     let timerStart = 0;
     let lastTime = 0;
     let eatenCount = 0;
-    let ghosts: any[] = [];
+    const ghosts: any[] = [];
     let user: any = null;
     let map: any = null;
     let timer: any = null;
@@ -229,7 +229,7 @@ const PixelGame = ({ onWin, onLose, onExit }: PixelGameProps) => {
       let eatable: any = null;
       let eaten: any = null;
       let due: any = null;
-      let image = new Image();
+      const image = new Image();
       image.src = `/images/poops/${spriteType}.png`;
       let imageLoaded = false;
       image.onload = () => { imageLoaded = true; };
@@ -447,7 +447,7 @@ const PixelGame = ({ onWin, onLose, onExit }: PixelGameProps) => {
       let lives = 5;
       let score = 0;
 
-      let image = new Image();
+      const image = new Image();
       image.src = '/images/robot.png';
       let imageLoaded = false;
       image.onload = () => { imageLoaded = true; };

@@ -40,10 +40,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Fetch user profile from database
   const fetchUserProfile = async (userId: string) => {
     try {
-      console.log('🔵 Fetching user profile for:', userId);
+      console.log('🔵 Fetching user profile...');
       const profile = await getUserProfile(userId);
-      console.log('🔵 User profile fetched:', profile);
-      setUser(profile);
+      if (profile) {
+        console.log('🔵 User profile loaded');
+        setUser(profile);
+      } else {
+        console.error('🔴 Profile fetch returned null');
+        setUser(null);
+      }
     } catch (error) {
       console.error('🔴 Error fetching user profile:', error);
       setUser(null);
@@ -66,32 +71,38 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // User is signed in
         const authUser = currentSession.user;
         console.log('🟢 User authenticated, creating/updating profile');
+        console.log('🟢 Auth user data:', { id: authUser.id, email: authUser.email, metadata: authUser.user_metadata });
 
-        // Create or update user profile in database
-        const profile = await upsertUserProfile({
-          id: authUser.id,
-          email: authUser.email,
-          user_metadata: authUser.user_metadata
-        });
+        try {
+          // Create or update user profile in database
+          const profile = await upsertUserProfile({
+            id: authUser.id,
+            email: authUser.email,
+            user_metadata: authUser.user_metadata
+          });
 
-        console.log('🟢 Profile result:', profile);
+          console.log('🟢 Profile result:', profile);
 
-        if (profile) {
-          setUser(profile);
-          console.log('🟢 User state set to:', profile.username);
+          if (profile) {
+            setUser(profile);
+            console.log('🟢 User state set to:', profile.username);
 
-          // Show welcome toast on sign in
-          if (event === 'SIGNED_IN') {
-            toast({
-              title: 'Welcome back!',
-              description: `Signed in as ${profile.username}`,
-            });
+            // Show welcome toast on sign in
+            if (event === 'SIGNED_IN') {
+              toast({
+                title: 'Welcome back!',
+                description: `Signed in as ${profile.username}`,
+              });
+            }
+
+            // Update last active timestamp
+            updateLastActive(authUser.id);
+          } else {
+            console.error('🔴 Profile creation/update returned null!');
+            console.error('🔴 Check database permissions and user table structure');
           }
-
-          // Update last active timestamp
-          updateLastActive(authUser.id);
-        } else {
-          console.error('🔴 Profile creation/update failed!');
+        } catch (profileError) {
+          console.error('🔴 Exception during profile creation:', profileError);
         }
       } else {
         // User is signed out
@@ -111,6 +122,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     });
 
     // Check for existing session on mount
+    // Note: We don't fetch the profile here because the auth state listener will handle it
     const checkSession = async () => {
       console.log('🔵 Checking for existing session...');
       try {
@@ -120,17 +132,23 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.log('🔵 Existing session:', !!existingSession);
 
         if (existingSession?.user && mounted) {
-          console.log('🔵 Found existing user, fetching profile');
+          console.log('🔵 Found existing session - auth listener will handle profile fetch');
           setSession(existingSession);
-          await fetchUserProfile(existingSession.user.id);
+          // Don't fetch profile here - let the auth state listener handle it
+          // This avoids timing issues with the Supabase client initialization
         } else {
           console.log('🔵 No existing session found');
+          // Only set loading to false if no session exists
+          if (mounted) {
+            console.log('🔵 No session, setting loading to false');
+            setLoading(false);
+          }
         }
       } catch (error) {
         console.error('🔴 Error checking session:', error);
-      } finally {
+        // Set loading to false on error
         if (mounted) {
-          console.log('🔵 Setting loading to false (checkSession)');
+          console.log('🔵 Error occurred, setting loading to false');
           setLoading(false);
         }
       }
