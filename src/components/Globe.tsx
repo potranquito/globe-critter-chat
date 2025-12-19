@@ -339,8 +339,13 @@ const GlobeComponent = ({ habitats, onPointClick: onPointClickProp, onDoubleGlob
         htmlTransitionDuration={0}
         htmlElement={(d: any) => {
           const el = document.createElement('div');
-          el.className = 'cursor-pointer hover:scale-125 transition-transform';
+          // Increased hit area: added min-w/min-h and flex centering
+          el.className = 'cursor-pointer hover:scale-125 transition-transform flex items-center justify-center';
           el.style.pointerEvents = 'auto';
+          el.style.minWidth = '80px';  // Larger hit box width
+          el.style.minHeight = '80px'; // Larger hit box height
+          el.style.marginTop = '-40px'; // Offset to center on coordinate (half height)
+          el.style.marginLeft = '-40px'; // Offset to center on coordinate (half width)
 
           // Debug: Log ALL properties of the marker
           if (d.name && d.name.toLowerCase().includes('coral')) {

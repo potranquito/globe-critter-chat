@@ -12,6 +12,7 @@ import PacmanDemo from "./pages/PacmanDemo";
 import WhackAMoleDemo from "./pages/WhackAMoleDemo";
 import PixelGamePage from "./pages/PixelGamePage";
 import TriviaPage from "./pages/TriviaPage";
+import InteractiveVideoLesson from "./pages/InteractiveVideoLesson/InteractiveVideoLesson";
 import ParkSelectionPage from "./pages/ParkSelectionPage";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/park-select" element={<ParkSelectionPage />} />
+          <Route path="/education/mara" element={<InteractiveVideoLesson />} />
           <Route
             path="/trivia"
             element={

@@ -109,17 +109,35 @@ const ParkSelectionPage = () => {
           console.error('❌ Park query error:', parksError);
         }
 
-        if (!parksError && parksData) {
-          console.log(`✅ Found ${parksData.length} parks`);
-          const parks = parksData.map(park => ({
-            ...park,
-            lat: park.center_lat,
-            lng: park.center_lng,
-          }));
-          setWildlifePlaces(parks);
-
-          // Calculate optimal map center based on park locations
-          if (parks.length > 0) {
+                  if (!parksError && parksData) {
+                    console.log(`✅ Found ${parksData.length} parks`);
+                    const parks = parksData.map(park => ({
+                      ...park,
+                      lat: park.center_lat,
+                      lng: park.center_lng,
+                    }));
+        
+                    // 🧪 DEMO: Inject a "Drone Unit" Conservancy marker for Mara region testing
+                    if (regionName?.toLowerCase().includes('mara') || regionName?.toLowerCase().includes('maasai')) {
+                      console.log('🧪 Injecting Demo Conservancy for Drone Lesson');
+                      parks.push({
+                        id: 'demo-conservancy-drone',
+                        name: 'Mara North Conservancy (Drone Unit)',
+                        lat: lat + 0.1, // Slight offset north
+                        lng: lng + 0.1, // Slight offset east
+                        park_type: 'Conservancy',
+                        size_km2: 300,
+                        // Placeholder tech/drone image
+                        image_url: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?q=80&w=2070&auto=format&fit=crop', 
+                        image_attribution: 'Unsplash',
+                        protection_status: 'Community Conservancy'
+                      });
+                    }
+        
+                    setWildlifePlaces(parks);
+        
+                    // Calculate optimal map center based on park locations
+            if (parks.length > 0) {
             const validParks = parks.filter(p => p.lat && p.lng);
             if (validParks.length > 0) {
               const avgLat = validParks.reduce((sum, p) => sum + p.lat, 0) / validParks.length;
@@ -229,6 +247,22 @@ const ParkSelectionPage = () => {
 
   const handleParkClick = (point: any) => {
     console.log('🏞️ Park clicked:', point);
+    
+    // 🐘 SPECIAL: Mara Elephant Project Education Experience
+    // If we are in the Mara region, launch the interactive video lesson instead of trivia
+    const isMaraRegion = regionName?.toLowerCase().includes('mara') || regionName?.toLowerCase().includes('maasai');
+    if (isMaraRegion) {
+      console.log('🐘 Launching Mara Elephant Project Education Experience');
+      
+      // Determine which lesson to show based on park name
+      // Conservancies often use high-tech monitoring like drones
+      const isConservancy = point.name?.toLowerCase().includes('conservancy');
+      const lessonId = isConservancy ? 'mara-drone-1' : 'mara-fence-1';
+      
+      navigate(`/education/mara?lessonId=${lessonId}`);
+      return;
+    }
+
     console.log('📊 Passing species to trivia page:', {
       count: regionSpecies.length,
       sample: regionSpecies.slice(0, 3).map(s => s.commonName)
