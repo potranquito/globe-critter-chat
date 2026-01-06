@@ -12,6 +12,7 @@ import { useLearningSession } from '@/hooks/useLearningSession';
 import { useParkStars } from '@/hooks/useParkStars';
 import { getPhaseDisplayName, getPhaseEmoji, getNextPhase, type LearningPhase } from '@/types/learning';
 import { generateColorTheme, generateFastVisualDescription } from '@/services/mcpClient';
+import { UserProfile } from '@/components/UserProfile';
 import confetti from 'canvas-confetti';
 
 interface TriviaPageLocationState {
@@ -72,7 +73,7 @@ function getConservationStatusFullName(code: string | undefined): string {
   if (!code) return 'Not Evaluated';
   const statusMap: Record<string, string> = {
     'LC': 'Least Concern',
-    'NT': 'Near Threatened',
+    'NT': 'Near threatened',
     'VU': 'Vulnerable',
     'EN': 'Endangered',
     'CR': 'Critically Endangered',
@@ -155,7 +156,7 @@ const TriviaPage = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [correctSpeciesForCurrentQuestion, setCorrectSpeciesForCurrentQuestion] = useState<RegionSpecies | null>(null);
   const [isWaitingForNextQuestion, setIsWaitingForNextQuestion] = useState(false);
-  const [gameResults, setGameResults] = useState<Array<{
+  const [gameResults, setGameResults] = useState<Array<{ 
     questionNumber: number;
     question: string;
     userAnswer: string;
@@ -182,6 +183,12 @@ const TriviaPage = () => {
     console.log('🏞️ TriviaPage state:', state);
     if (!state?.parkId || !state?.regionName) {
       console.error('❌ Missing required state for TriviaPage');
+      toast({
+        title: "Session Error",
+        description: "Missing park data. Please select a park again.",
+        variant: "destructive"
+      });
+      // Redirect to park selection or home
       navigate('/');
     } else {
       console.log('✅ TriviaPage loaded with:', {
@@ -190,30 +197,30 @@ const TriviaPage = () => {
         speciesCount: state.regionSpecies?.length
       });
     }
-  }, [state, navigate]);
+  }, [state, navigate, toast]);
 
   // Load park-specific species
   useEffect(() => {
-    console.log('🔍 Species loading check:', {
-      hasRegionSpecies: !!state?.regionSpecies,
-      regionSpeciesCount: state?.regionSpecies?.length || 0,
-      parkName: state?.parkName,
-      stateKeys: state ? Object.keys(state) : []
-    });
-
     if (!state?.parkName) {
-      console.log('❌ No park name, skipping species load');
+      console.log('❌ No parkName in state');
       return;
     }
 
     if (!state?.regionSpecies || state.regionSpecies.length === 0) {
       console.log('❌ No region species available');
+      console.log('  - state:', state);
+      console.log('  - regionSpecies:', state?.regionSpecies);
       return;
     }
 
-    // TODO: In future, query species by park from database
-    // For now, use all region species (will be filtered during learning)
     console.log('✅ Loading species for park:', state.parkName, '- Count:', state.regionSpecies.length);
+    console.log('  - regionName:', state.regionName);
+    console.log('  - Species sample:', state.regionSpecies.slice(0, 3).map(s => ({
+      name: s.commonName,
+      type: s.speciesType,
+      dietary: s.dietaryCategory,
+      animalType: s.animalType
+    })));
     setParkSpecies(state.regionSpecies);
   }, [state?.regionSpecies, state?.parkName]);
 
@@ -237,24 +244,11 @@ const TriviaPage = () => {
 
   // Show welcome message when learning starts
   useEffect(() => {
-    // Don't show welcome until species are loaded
     if (parkSpecies.length === 0 && state?.regionSpecies?.length > 0) {
-      console.log('⏳ Waiting for species to load...');
       return;
     }
 
-    console.log('👋 Welcome message check:', {
-      currentPhase,
-      chatHistoryLength: chatHistory.length,
-      parkSpeciesLength: parkSpecies.length,
-      parkName: state?.parkName,
-      regionSpecies: state?.regionSpecies?.length,
-      shouldShow: currentPhase === 'learning' && parkSpecies.length > 0
-    });
-
     if (currentPhase === 'learning' && parkSpecies.length > 0 && chatHistory.length === 0) {
-      console.log('✅ Showing welcome message with Start Learning button');
-
       const welcomeMessage: ChatMessage = {
         id: `welcome-${Date.now()}`,
         role: 'assistant',
@@ -304,7 +298,7 @@ const TriviaPage = () => {
     const timeoutMessage: ChatMessage = {
       id: `timeout-${Date.now()}`,
       role: 'assistant',
-      content: '⏰ **Time\'s up!** Returning to learning mode...',
+      content: '⏰ **Time\'s up!** Returning to learning mode...', 
       timestamp: new Date(),
       status: 'sent'
     };
@@ -348,19 +342,34 @@ const TriviaPage = () => {
 
   // Select random species for learning
   const selectRandomSpecies = (filtersToUse?: string[], sessionCount?: number, alreadyShown?: string[]) => {
+    console.log('🎲 selectRandomSpecies called');
+    console.log('  - parkSpecies.length:', parkSpecies.length);
+
     if (isSpeciesStreamingInProgress) {
-      console.log('⏳ Species streaming in progress');
+      console.log('  - ⏸️ Species streaming in progress, skipping');
       return;
     }
 
     const activeFilters = filtersToUse !== undefined ? filtersToUse : learningFilters;
     const shownSpecies = alreadyShown !== undefined ? alreadyShown : shownSpeciesRef.current;
 
+    console.log('  - activeFilters:', activeFilters);
+    console.log('  - shownSpecies:', shownSpecies);
+
     const filteredSpecies = getFilteredSpeciesWithFilters(activeFilters);
+    console.log('  - filteredSpecies.length:', filteredSpecies.length);
+
     const availableSpecies = filteredSpecies.filter(s => !shownSpecies.includes(s.scientificName));
+    console.log('  - availableSpecies.length:', availableSpecies.length);
 
     if (availableSpecies.length === 0) {
-      console.log('⚠️ No more species available');
+      console.log('⚠️ No more species available for filters:', activeFilters);
+      console.log('⚠️ parkSpecies sample:', parkSpecies.slice(0, 3).map(s => ({
+        name: s.commonName,
+        type: s.speciesType,
+        dietary: s.dietaryCategory,
+        animalType: s.animalType
+      })));
       return;
     }
 
@@ -586,14 +595,19 @@ const TriviaPage = () => {
 
   // Filter species with filters
   const getFilteredSpeciesWithFilters = (filters: string[]) => {
+    console.log('🔍 getFilteredSpeciesWithFilters called with filters:', filters);
+    console.log('🔍 Total parkSpecies:', parkSpecies.length);
+
     if (filters.length === 0) return parkSpecies;
     if (filters.includes('all')) return parkSpecies;
 
-    return parkSpecies.filter(species => {
-      return filters.every(filter => {
+    const filtered = parkSpecies.filter(species => {
+      const result = filters.every(filter => {
         const filterLower = filter.toLowerCase();
         const animalType = (species.animalType || '').toLowerCase();
         const dietaryCategory = (species.dietaryCategory || '').toLowerCase();
+
+        console.log(`  Checking ${species.commonName}: filter=${filterLower}, animalType=${animalType}, dietaryCategory=${dietaryCategory}, speciesType=${species.speciesType}`);
 
         if (filterLower === 'bird') return species.speciesType?.toLowerCase() === 'bird' || animalType.includes('bird');
         if (filterLower === 'plant') return animalType.includes('plant') || species.speciesType?.toLowerCase() === 'plant';
@@ -603,7 +617,13 @@ const TriviaPage = () => {
 
         return true;
       });
+      console.log(`  → Species ${species.commonName} ${result ? 'INCLUDED' : 'EXCLUDED'}`);
+      return result;
     });
+
+    console.log('🔍 Filtered species count:', filtered.length);
+    console.log('🔍 Filtered species:', filtered.map(s => s.commonName));
+    return filtered;
   };
 
   // Start trivia game
@@ -791,11 +811,9 @@ const TriviaPage = () => {
   };
 
   if (!state) {
-    console.log('⚠️ No state, returning null');
+    // We already redirected in useEffect, but render nothing here
     return null;
   }
-
-  console.log('🎨 Rendering TriviaPage', { currentPhase, parkSpeciesCount: parkSpecies.length });
 
   // Select background image based on region
   const getBackgroundImage = () => {
@@ -859,9 +877,10 @@ const TriviaPage = () => {
             </div>
           )}
 
-          <Button variant="outline" className="glass-panel hover:bg-accent rounded-xl h-12">
-            Sign In
-          </Button>
+          {/* User Profile - Replaces hardcoded Sign In button */}
+          <div className="glass-panel rounded-xl h-12 flex items-center">
+            <UserProfile />
+          </div>
         </div>
       </div>
 

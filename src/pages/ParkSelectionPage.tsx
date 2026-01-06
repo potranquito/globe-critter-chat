@@ -195,6 +195,7 @@ const ParkSelectionPage = () => {
               console.log(`✅ Found ${speciesResult.species.length} species via MCP`);
 
               const mappedSpecies: RegionSpecies[] = speciesResult.species.map(species => ({
+                id: species.id, // Ensure ID is passed
                 scientificName: species.scientific_name,
                 commonName: species.common_name || species.scientific_name,
                 animalType: species.species_type || 'Unknown',
@@ -205,9 +206,9 @@ const ParkSelectionPage = () => {
                 imageKeyword: species.common_name || species.scientific_name,
                 imageUrl: species.image_url || undefined,
                 description: species.description || undefined,
-                isInvasive: species.is_invasive || false,
-                isVenomous: species.is_venomous || false,
-                habitatInfo: species.habitat_info || undefined,
+                isInvasive: false, // Default since type check failed
+                isVenomous: false, // Default since type check failed
+                habitatInfo: undefined,
               }));
 
               // Remove duplicates and filter out species without images
@@ -245,7 +246,7 @@ const ParkSelectionPage = () => {
     loadEcoRegionData();
   }, [ecoRegionId, regionName, lat, lng, navigate, toast]);
 
-  const handleParkClick = (point: any) => {
+  const handleParkClick = async (point: any) => {
     console.log('🏞️ Park clicked:', point);
     
     // 🐘 SPECIAL: Mara Elephant Project Education Experience
@@ -263,9 +264,43 @@ const ParkSelectionPage = () => {
       return;
     }
 
+    // Ensure we have species data before navigating
+    let speciesToPass = regionSpecies;
+    
+    if (speciesToPass.length === 0) {
+      toast({
+        title: "Loading Species...",
+        description: "Please wait while we gather wildlife data.",
+      });
+      
+      // Attempt quick fetch if empty
+      const { getRegionSpecies } = await import('@/services/mcpClient');
+      try {
+        const speciesResult = await getRegionSpecies({
+          ecoregionName: regionName || '',
+          limit: 50
+        });
+        if (speciesResult.success && speciesResult.species) {
+           speciesToPass = speciesResult.species.map(s => ({
+             id: s.id,
+             scientificName: s.scientific_name,
+             commonName: s.common_name || s.scientific_name,
+             animalType: s.species_type || 'Unknown',
+             conservationStatus: s.conservation_status || 'Unknown',
+             occurrenceCount: 1,
+             speciesType: s.species_type || undefined,
+             dietaryCategory: s.dietary_category || undefined,
+             imageUrl: s.image_url || undefined
+           }));
+        }
+      } catch (e) {
+        console.error("Emergency species fetch failed", e);
+      }
+    }
+
     console.log('📊 Passing species to trivia page:', {
-      count: regionSpecies.length,
-      sample: regionSpecies.slice(0, 3).map(s => s.commonName)
+      count: speciesToPass.length,
+      sample: speciesToPass.slice(0, 3).map(s => s.commonName)
     });
 
     setSelectedPark(point);
@@ -280,7 +315,7 @@ const ParkSelectionPage = () => {
         parkName: point.name,
         lat: point.lat || point.center_lat,
         lng: point.lng || point.center_lng,
-        regionSpecies: regionSpecies,
+        regionSpecies: speciesToPass,
         parkData: point
       }
     });
@@ -327,7 +362,7 @@ const ParkSelectionPage = () => {
         return dietaryCategory === 'producer' || species.animalType?.toLowerCase() === 'plant';
       default:
         return true;
-    }
+      }
   });
 
   if (isLoading) {

@@ -229,12 +229,14 @@ const CesiumGlobe = ({
         {imageMarkers.map((marker, idx) => (
           <Entity
             key={`image-${idx}`}
-            position={Cesium.Cartesian3.fromDegrees(marker.lng, marker.lat)}
+            position={Cesium.Cartesian3.fromDegrees(marker.lng, marker.lat, 0)}
             billboard={{
               image: marker.imageUrl,
               width: 48,
               height: 48,
               scaleByDistance: new Cesium.NearFarScalar(1.5e2, 1.0, 1.5e7, 0.5),
+              heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+              verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
             }}
             onClick={() => onImageMarkerClick?.(marker)}
           />
