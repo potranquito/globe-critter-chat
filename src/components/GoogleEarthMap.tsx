@@ -246,7 +246,7 @@ const GoogleEarthMap = ({
 
           {/* Wildlife location markers with thumbnails */}
           {wildlifePlaces.map((place, idx) => {
-            const apiKey = 'AIzaSyC4205XHgzRi8VswW7zqdFVanY-HoEDTIg';
+            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
             const photoUrl = place.photoReference
               ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=100&photoreference=${place.photoReference}&key=${apiKey}`
               : null;
